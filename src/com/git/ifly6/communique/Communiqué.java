@@ -120,7 +120,7 @@ public class Communiqué {
 	 * Initialise the contents of the frame.
 	 */
 	private void initialise() {
-		frame = new JFrame("Communiqu" + "\u00e9");
+		frame = new JFrame("Communiqué");
 		frame.setBounds(100, 100, 550, 405);
 		frame.setMinimumSize(new Dimension(550, 400));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -231,13 +231,16 @@ public class Communiqué {
 		JMenuItem mntmLoadConfiguration = new JMenuItem("Load Configuration");
 		mntmLoadConfiguration.addActionListener(ae -> {
 			FileDialog fileDialog = new FileDialog(frame, "Load Configuration");
+
 			fileDialog.setVisible(true);
 			File configFile = new File(fileDialog.getDirectory() + fileDialog.getFile());
 
 			try {
 				loadConfiguration(configFile);
-			} catch (JTelegramException e) {
-				util.log("The version of the file provided is incompatible with this version.");
+			} catch (FileNotFoundException e1) {
+				util.log("Cannot find the file provided.");
+			} catch (JTelegramException e2) {
+				util.log("Version of file provided mismatches with version here.");
 			}
 		});
 		mnFile.add(mntmLoadConfiguration);
@@ -343,22 +346,19 @@ public class Communiqué {
 	 * Load a configuration file.
 	 *
 	 * @param file
+	 * @throws FileNotFoundException
 	 * @throws JTelegramException
 	 */
-	private void loadConfiguration(File file) throws JTelegramException {
+	private void loadConfiguration(File file) throws FileNotFoundException, JTelegramException {
 		ArrayList<String> fileContents = new ArrayList<String>(0);
 
 		// Load the file
-		try {
-			FileReader configRead = new FileReader(file);
-			Scanner scan = new Scanner(configRead);
-			while (scan.hasNextLine()) {
-				fileContents.add(scan.nextLine());
-			}
-			scan.close();
-		} catch (FileNotFoundException e) {
-			util.log("File not found.");
+		FileReader configRead = new FileReader(file);
+		Scanner scan = new Scanner(configRead);
+		while (scan.hasNextLine()) {
+			fileContents.add(scan.nextLine());
 		}
+		scan.close();
 
 		// Check file version.
 		boolean correctVersion = false;
@@ -368,27 +368,26 @@ public class Communiqué {
 			}
 		}
 
-		// Throw exception if file version is incorrect.
-		if (!correctVersion) {
-			throw new JTelegramException();
-		}
-
-		// Parse for data
-		for (int x = 0; x < fileContents.size(); x++) {
-			String element = fileContents.get(x);
-			if (element.startsWith("client_key=")) {
-				txtClientKey.setText(element.replace("client_key=", ""));
-				util.log("Found Client Key.");
-			} else if (element.startsWith("secret_key=")) {
-				txtSecretKey.setText(element.replace("secret_key=", ""));
-				util.log("Found Secret Key.");
-			} else if (element.startsWith("telegram_id=")) {
-				txtTelegramId.setText(element.replace("telegram_id=", ""));
-				util.log("Found Telegram ID.");
-			} else if (!(element.startsWith("#")) && !(element.isEmpty())) {
-				recipientsPane.append(element.toLowerCase().replace(" ", "_") + "\n");
-				util.log("Loaded: " + element);
+		// Only do if correctVersion is true
+		if (correctVersion) {
+			for (int x = 0; x < fileContents.size(); x++) {
+				String element = fileContents.get(x);
+				if (element.startsWith("client_key=")) {
+					txtClientKey.setText(element.replace("client_key=", ""));
+					util.log("Found Client Key.");
+				} else if (element.startsWith("secret_key=")) {
+					txtSecretKey.setText(element.replace("secret_key=", ""));
+					util.log("Found Secret Key.");
+				} else if (element.startsWith("telegram_id=")) {
+					txtTelegramId.setText(element.replace("telegram_id=", ""));
+					util.log("Found Telegram ID.");
+				} else if (!(element.startsWith("#")) && !(element.isEmpty())) {
+					recipientsPane.append(element.toLowerCase().replace(" ", "_") + "\n");
+					util.log("Loaded: " + element);
+				}
 			}
+		} else {
+			throw new JTelegramException();
 		}
 	}
 
