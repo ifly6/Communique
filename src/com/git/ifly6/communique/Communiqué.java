@@ -41,7 +41,9 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -53,6 +55,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -63,6 +66,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -88,8 +92,10 @@ public class Communiqué {
 	private JTextField txtClientKey;
 	private JTextField txtSecretKey;
 	private JTextField txtTelegramId;
-	static JTextArea logPane = new JTextArea();
-	static JTextArea recipientsPane = new JTextArea();
+	static JTextArea logPane = new JTextArea("== Communiqué " + version + " ==\n"
+			+ "Enter information or load file to proceed.");
+	static JTextArea recipientsPane = new JTextArea(
+			"# == Communiqué Recipients ==\n# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.");
 	private JCheckBoxMenuItem chckbxmntmShowRecipients = new JCheckBoxMenuItem("Show All Recipients");
 	private JCheckBoxMenuItem chckbxmntmDisableSending = new JCheckBoxMenuItem("Disable Sending");
 	static Font textStandard = new Font("Monospaced", Font.PLAIN, 11);
@@ -127,7 +133,7 @@ public class Communiqué {
 	 * Initialise the contents of the frame.
 	 */
 	private void initialise() {
-		frame = new JFrame("Communiqué");
+		frame = new JFrame("Communiqué " + version);
 		frame.setBounds(0, 0, 550, 405);
 		frame.setMinimumSize(new Dimension(550, 400));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -138,7 +144,11 @@ public class Communiqué {
 
 		txtClientKey = new JTextField();
 		txtClientKey.setFont(textStandard);
-		txtClientKey.setText("Client Key");
+		try {
+			txtClientKey.setText(readProperties());	// Attempt to fetch client key.
+		} catch (IOException e3) {
+			txtClientKey.setText("Client Key");
+		}
 		panel.add(txtClientKey);
 		txtClientKey.setColumns(10);
 
@@ -185,6 +195,12 @@ public class Communiqué {
 					// Set Recruitment Status
 					client.setRecruitment(chckbxRecruitment.isSelected());
 
+					// Save client key
+					try {
+						writeProperties();
+					} catch (IOException e) {
+					}
+
 					// In case you need a dry run, it will do everything but send.
 					if (!chckbxmntmDisableSending.isSelected()) {
 						client.connect();
@@ -225,22 +241,28 @@ public class Communiqué {
 		mntmSaveConfiguration.addActionListener(ae -> {
 			FileDialog fileDialog = new FileDialog(frame, "Load Configuration", FileDialog.SAVE);
 			fileDialog.setVisible(true);
-			File saveFile = new File(fileDialog.getDirectory() + fileDialog.getFile());
-			saveConfiguration(saveFile);
+
+			String returnFile = fileDialog.getFile();
+			File saveFile = new File(fileDialog.getDirectory() + returnFile);
+
+			if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
+				saveConfiguration(saveFile);
+			}
 		});
 		mnFile.add(mntmSaveConfiguration);
 
 		JMenuItem mntmLoadConfiguration = new JMenuItem("Load Configuration");
 		mntmLoadConfiguration.addActionListener(ae -> {
 			FileDialog fileDialog = new FileDialog(frame, "Load Configuration");
-
 			fileDialog.setVisible(true);
-			File configFile = new File(fileDialog.getDirectory() + fileDialog.getFile());
+
+			String returnFile = fileDialog.getFile();
+			File configFile = new File(fileDialog.getDirectory() + returnFile);
 
 			try {
-				loadConfiguration(configFile);
-			} catch (FileNotFoundException e1) {
-				util.log("Cannot find the file provided.");
+				if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
+					loadConfiguration(configFile);
+				}
 			} catch (JTelegramException e2) {
 				util.log("Version of file provided mismatches with version here.");
 			}
@@ -283,6 +305,56 @@ public class Communiqué {
 
 		JMenu mnCommands = new JMenu("Commands");
 		menuBar.add(mnCommands);
+
+		JMenuItem mntmImportKeysFrom = new JMenuItem("Import Keys from URL");
+		mntmImportKeysFrom.addActionListener(al -> {
+			String rawURL = JOptionPane.showInputDialog(frame,
+					"Paste in the URL provided by NationStates after sending your telegram to tag:api.\n",
+					"Import keys from URL", JOptionPane.PLAIN_MESSAGE);
+
+			rawURL = rawURL.replace("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&",
+					"");
+			rawURL = rawURL.replace("&to=NATION_NAME", "");
+
+			String[] tags = rawURL.split("&");
+			txtTelegramId.setText(tags[0].replace("tgid=", ""));
+			txtSecretKey.setText(tags[1].replace("key=", ""));
+		});
+		mnCommands.add(mntmImportKeysFrom);
+
+		JSeparator separator_4 = new JSeparator();
+		mnCommands.add(separator_4);
+
+		JMenuItem mntmImportVoting = new JMenuItem("Import Voting Delegates");
+		mntmImportVoting
+		.addActionListener(al -> {
+			String input = JOptionPane
+					.showInputDialog(
+							frame,
+							"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
+							"Import Delegates from At Vote Resolution", JOptionPane.PLAIN_MESSAGE);
+			String[] list = input.split(",");
+			for (String element : list) {
+				recipientsPane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
+			}
+		});
+		mnCommands.add(mntmImportVoting);
+
+		JMenuItem mntmImportApprovingDelegates = new JMenuItem("Import Approving Delegates");
+		mntmImportApprovingDelegates.addActionListener(al -> {
+			String input = JOptionPane.showInputDialog(frame,
+					"Paste in the list of delegates approving. Ex: 'Blah, Bleh, Ecksl'. Include only commas.",
+					"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
+			input = input.replaceAll("\\(.+?\\)", "");
+			String[] list = input.split(",");
+			for (String element : list) {
+				recipientsPane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
+			}
+		});
+		mnCommands.add(mntmImportApprovingDelegates);
+
+		JSeparator separator_3 = new JSeparator();
+		mnCommands.add(separator_3);
 
 		mnCommands.add(chckbxmntmShowRecipients);
 		mnCommands.add(chckbxmntmDisableSending);
@@ -351,16 +423,21 @@ public class Communiqué {
 	 * @throws FileNotFoundException
 	 * @throws JTelegramException
 	 */
-	private void loadConfiguration(File file) throws FileNotFoundException, JTelegramException {
+	private void loadConfiguration(File file) throws JTelegramException {
 		ArrayList<String> fileContents = new ArrayList<String>(0);
 
 		// Load the file
-		FileReader configRead = new FileReader(file);
-		Scanner scan = new Scanner(configRead);
-		while (scan.hasNextLine()) {
-			fileContents.add(scan.nextLine());
+		try {
+			FileReader configRead = new FileReader(file);
+			Scanner scan = new Scanner(configRead);
+			while (scan.hasNextLine()) {
+				fileContents.add(scan.nextLine());
+			}
+			scan.close();
+		} catch (IOException e) {
+			util.log("Cannot find the specified file.");
+			return;
 		}
-		scan.close();
 
 		// Check file version.
 		boolean correctVersion = false;
@@ -403,12 +480,23 @@ public class Communiqué {
 		JTelegramFetcher fetcher = new JTelegramFetcher();
 		ArrayList<String> finalRecipients = new ArrayList<String>(0);
 		String[] rawRecipients = input.split("\n");
-		String escapeChar = "/";
+
+		// Remove commented lines.
+		ArrayList<String> unComments = new ArrayList<String>(0);
+		for (String element : rawRecipients) {
+			if (!element.startsWith("#")) {
+				unComments.add(element);
+			}
+		}
+		rawRecipients = unComments.toArray(new String[unComments.size()]);
+
+		// Process based on notChar
+		String notChar = "/";
 
 		// Form of all the nation we want in this bloody list.
 		ArrayList<String> whitelist = new ArrayList<String>(0);
 		for (String element : rawRecipients) {
-			if (!(element.startsWith(escapeChar))) {
+			if (!(element.startsWith(notChar))) {
 				whitelist.add(element.toLowerCase().replace(" ", "_"));
 			}
 		}
@@ -416,8 +504,8 @@ public class Communiqué {
 		// Form a list of all nations we can't have in this bloody list.
 		ArrayList<String> blacklist = new ArrayList<String>(0);
 		for (String element : rawRecipients) {
-			if (element.startsWith(escapeChar)) {
-				blacklist.add(element.replaceFirst(escapeChar, "").toLowerCase().replace(" ", "_"));
+			if (element.startsWith(notChar)) {
+				blacklist.add(element.replaceFirst(notChar, "").toLowerCase().replace(" ", "_"));
 			}
 		}
 
@@ -425,6 +513,7 @@ public class Communiqué {
 		String[] whitelistExpanded = expandList(fetcher, whitelist);
 		String[] blacklistExpanded = expandList(fetcher, blacklist);
 
+		// Only add from white-list if it does not appear on blacklist.
 		for (String wList : whitelistExpanded) {
 			boolean toAdd = true;
 
@@ -500,5 +589,21 @@ public class Communiqué {
 
 		// Return!
 		return tagsList.toArray(new String[tagsList.size()]);
+	}
+
+	private String readProperties() throws IOException {
+		Properties prop = new Properties();
+		FileInputStream stream = new FileInputStream(new File(System.getProperty("user.dir") + "/config.properties"));
+		util.log(System.getProperty("user.dir") + "/config.properties");
+		prop.load(stream);
+		return prop.getProperty("client_key");
+	}
+
+	private void writeProperties() throws IOException {
+		Properties prop = new Properties();
+		FileOutputStream output = new FileOutputStream(System.getProperty("user.dir") + "/config.properties");
+		prop.setProperty("client_key", txtClientKey.getText());
+		prop.store(output, "");
+		output.close();
 	}
 }
