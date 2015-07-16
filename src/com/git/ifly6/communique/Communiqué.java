@@ -83,6 +83,7 @@ public class Communiqué {
 	// TODO Import from URL
 	// TODO Live updating recipients list
 	// TODO Interface with NS Happenings
+	// TODO Save the recuitment flag!
 
 	CommuniquéLogger util = new CommuniquéLogger();
 	JavaTelegram client = new JavaTelegram(util);
@@ -392,115 +393,6 @@ public class Communiqué {
 		}
 	}
 
-	private void saveConfiguration(File file) {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Date date = new Date();
-
-		String header = "# Communiqué Configuration File. Do not edit by hand.";
-		String headerDate = "# Produced at: " + dateFormat.format(date);
-		String headerVers = "# Produced by version " + version;
-
-		try {
-			PrintWriter writer = new PrintWriter(file, "UTF-8");
-
-			writer.println(header);
-			writer.println(headerDate);
-			writer.println(headerVers + "\n");
-			writer.println("client_key=" + txtClientKey.getText());
-			writer.println("secret_key=" + txtSecretKey.getText());
-			writer.println("telegram_id=" + txtTelegramId.getText() + "\n");
-
-			// Sort out the comments.
-			String rawInput = recipientsPane.getText();
-			String[] rawArr = rawInput.split("\n");
-			ArrayList<String> contentList = new ArrayList<String>(0);
-			for (String element : rawArr) {
-				if (!element.startsWith("#") || !element.isEmpty()) {
-					contentList.add(element);
-				}
-			}
-
-			// Sort out the recipients from the sent and get rid of dupliates.
-			LinkedHashSet<String> recipList = new LinkedHashSet<String>(0);
-			LinkedHashSet<String> nopeList = new LinkedHashSet<String>(0);
-			for (String element : contentList) {
-				if (element.startsWith("/")) {
-					nopeList.add(element);
-				} else {
-					recipList.add(element);
-				}
-			}
-
-			// Print in the recipients
-			for (String element : recipList) {
-				writer.println(element);
-			}
-
-			// Print in the nopeList
-			for (String element : nopeList) {
-				writer.println(element);
-			}
-
-			writer.close();
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			util.log("Internal Error. Could not save this configuration.");
-		}
-	}
-
-	/**
-	 * Load a configuration file.
-	 *
-	 * @param file
-	 * @throws FileNotFoundException
-	 * @throws JTelegramException
-	 */
-	private void loadConfiguration(File file) throws JTelegramException {
-		ArrayList<String> fileContents = new ArrayList<String>(0);
-
-		// Load the file
-		try {
-			FileReader configRead = new FileReader(file);
-			Scanner scan = new Scanner(configRead);
-			while (scan.hasNextLine()) {
-				fileContents.add(scan.nextLine());
-			}
-			scan.close();
-		} catch (IOException e) {
-			util.log("Cannot find the specified file.");
-			return;
-		}
-
-		// Check file version.
-		boolean correctVersion = false;
-		for (String element : fileContents) {
-			if (element.equals("# Produced by version 1") || element.equals("# Produced by version 0.1.0")) {
-				correctVersion = true;
-			}
-		}
-
-		// Only do if correctVersion is true
-		if (correctVersion) {
-			for (int x = 0; x < fileContents.size(); x++) {
-				String element = fileContents.get(x);
-				if (element.startsWith("client_key=")) {
-					txtClientKey.setText(element.replace("client_key=", ""));
-					util.log("Found Client Key.");
-				} else if (element.startsWith("secret_key=")) {
-					txtSecretKey.setText(element.replace("secret_key=", ""));
-					util.log("Found Secret Key.");
-				} else if (element.startsWith("telegram_id=")) {
-					txtTelegramId.setText(element.replace("telegram_id=", ""));
-					util.log("Found Telegram ID.");
-				} else if (!(element.startsWith("#")) && !(element.isEmpty())) {
-					recipientsPane.append(element.toLowerCase().replace(" ", "_") + "\n");
-					util.log("Loaded: " + element);
-				}
-			}
-		} else {
-			throw new JTelegramException();
-		}
-	}
-
 	/**
 	 * This parses the contents of the recipients
 	 *
@@ -622,12 +514,120 @@ public class Communiqué {
 		return tagsList.toArray(new String[tagsList.size()]);
 	}
 
+	/**
+	 * Load a configuration file.
+	 *
+	 * @param file
+	 * @throws FileNotFoundException
+	 * @throws JTelegramException
+	 */
+	private void loadConfiguration(File file) throws JTelegramException {
+		ArrayList<String> fileContents = new ArrayList<String>(0);
+
+		// Load the file
+		try {
+			FileReader configRead = new FileReader(file);
+			Scanner scan = new Scanner(configRead);
+			while (scan.hasNextLine()) {
+				fileContents.add(scan.nextLine());
+			}
+			scan.close();
+		} catch (IOException e) {
+			util.log("Cannot find the specified file.");
+			return;
+		}
+
+		// Check file version.
+		boolean correctVersion = false;
+		for (String element : fileContents) {
+			if (element.equals("# Produced by version 1") || element.equals("# Produced by version 0.1.0")) {
+				correctVersion = true;
+			}
+		}
+
+		// Only do if correctVersion is true
+		if (correctVersion) {
+			for (int x = 0; x < fileContents.size(); x++) {
+				String element = fileContents.get(x);
+				if (element.startsWith("client_key=")) {
+					txtClientKey.setText(element.replace("client_key=", ""));
+					util.log("Found Client Key.");
+				} else if (element.startsWith("secret_key=")) {
+					txtSecretKey.setText(element.replace("secret_key=", ""));
+					util.log("Found Secret Key.");
+				} else if (element.startsWith("telegram_id=")) {
+					txtTelegramId.setText(element.replace("telegram_id=", ""));
+					util.log("Found Telegram ID.");
+				} else if (!(element.startsWith("#")) && !(element.isEmpty())) {
+					recipientsPane.append(element.toLowerCase().replace(" ", "_") + "\n");
+					util.log("Loaded: " + element);
+				}
+			}
+		} else {
+			throw new JTelegramException();
+		}
+	}
+
 	private String readProperties() throws IOException {
 		Properties prop = new Properties();
 		FileInputStream stream = new FileInputStream(new File(System.getProperty("user.dir") + "/config.properties"));
-		util.log(System.getProperty("user.dir") + "/config.properties");
 		prop.load(stream);
 		return prop.getProperty("client_key");
+	}
+
+	private void saveConfiguration(File file) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+
+		String header = "# Communiqué Configuration File. Do not edit by hand.";
+		String headerDate = "# Produced at: " + dateFormat.format(date);
+		String headerVers = "# Produced by version " + version;
+
+		try {
+			PrintWriter writer = new PrintWriter(file, "UTF-8");
+
+			writer.println(header);
+			writer.println(headerDate);
+			writer.println(headerVers + "\n");
+			writer.println("client_key=" + txtClientKey.getText());
+			writer.println("secret_key=" + txtSecretKey.getText());
+			writer.println("telegram_id=" + txtTelegramId.getText() + "\n");
+
+			// Sort out the comments.
+			String rawInput = recipientsPane.getText();
+			String[] rawArr = rawInput.split("\n");
+			ArrayList<String> contentList = new ArrayList<String>(0);
+			for (String element : rawArr) {
+				if (!element.startsWith("#") || !element.isEmpty()) {
+					contentList.add(element);
+				}
+			}
+
+			// Sort out the recipients from the sent and get rid of dupliates.
+			LinkedHashSet<String> recipList = new LinkedHashSet<String>(0);
+			LinkedHashSet<String> nopeList = new LinkedHashSet<String>(0);
+			for (String element : contentList) {
+				if (element.startsWith("/")) {
+					nopeList.add(element);
+				} else {
+					recipList.add(element);
+				}
+			}
+
+			// Print in the recipients
+			for (String element : recipList) {
+				writer.println(element);
+			}
+
+			// Print in the nopeList
+			for (String element : nopeList) {
+				writer.println(element);
+			}
+
+			writer.close();
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			util.log("Internal Error. Could not save this configuration.");
+		}
 	}
 
 	private void writeProperties() throws IOException {

@@ -1,7 +1,7 @@
 # Communiqué #
 
 ## Summary ##
-Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. It was originally inspired by Auralia's work on the matter and thus, recognised the limitations of writing on a Windows-only platform when most headless servers are Linux boxes.
+Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. It was originally inspired by Auralia's work on the matter and thus, recognised the limitations of writing on a Windows-only platform when most headless servers are Linux boxes. It is directly based on top of [JavaTelegram](https://github.com/iFlyCode/NationStates-JavaTelegram) a iFlyCode Java library designed to interface with NationStates itself.
 
 Since the general gist of this program is the same goal as Auralia's AutoTelegram, it will naturally be following many of the same protocols and functions.
 
