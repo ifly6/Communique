@@ -78,4 +78,10 @@ public class Marconi {
 		}
 	}
 
+	/**
+	 *
+	 */
+	private static void verify() {
+
+	}
 }

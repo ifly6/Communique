@@ -32,18 +32,18 @@ public class DelegateVotingListParse {
 
 		System.out.println("Input your data.");
 
-		String inputData = scan.nextLine();
+		String input = scan.nextLine();
 
-		inputData = inputData.replaceAll("\\(.+?\\)", "");
-		System.out.println(inputData);
+		input = input.replaceAll("\\(.+?\\)", "");
+		System.out.println(input);
 
-		String[] recipients = inputData.split(",");
+		String[] list = input.split(",");
 
-		for (int x = 0; x < recipients.length; x++) {
-			recipients[x] = recipients[x].trim();
+		for (int x = 0; x < list.length; x++) {
+			list[x] = list[x].trim();
 		}
 
-		for (String element : recipients) {
+		for (String element : list) {
 			element = element.toLowerCase().replace(" ", "_");
 			System.out.println(element);
 		}
