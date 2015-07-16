@@ -2,34 +2,73 @@ package com.git.ifly6.marconi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
+import com.git.ifly6.communique.CommuniquéFileReader;
+import com.git.ifly6.communique.CommuniquéFileWriter;
+import com.git.ifly6.communique.CommuniquéParser;
 import com.git.ifly6.javatelegram.JTelegramException;
+import com.git.ifly6.javatelegram.JavaTelegram;
 
 public class Marconi {
 
 	static MarconiLogger util = new MarconiLogger();
+	static JavaTelegram client = new JavaTelegram(util);
 	static String[] keys = { "", "", "" };
 	static String[] recipients = {};
+	public static final int version = 1;
 
 	public static void main(String[] args) {
-		if (args.length > 0) {
-			// TODO File loader
+		if (args.length > 0) {		// If there is not a provided file, do nothing.
 			try {
-				loadConfig(null);
+				loadConfig(new File(args[0]));		// Load the keys and recipients from the configuration file in.
 			} catch (FileNotFoundException e) {
-				util.log("Internal Error. File not found.");
+				util.log("Cannot find your file. Provide a real file and try again.");
 			} catch (JTelegramException e) {
-				util.log("Internal Error. Version not compatible.");
+				util.log("Incorrect file version. This is a version " + version + " client.");
 			}
-			
-			String response = util.prompt("Are these keys correct? " + keys[0] + " " + keys[1]+ " " + keys[2]+ " ", new String[] {"yes", "no", "y", "n"});
-			if (response.startsWith("y")) {
-				// Parse recipients. Display those recipients
-				// Ask whether you're fine with those recipients
-				// Send.
+
+			// Give a chance to check the keys.
+			String keysResponse = util.prompt("Are these keys correct? " + keys[0] + " " + keys[1] + " " + keys[2]
+					+ " ", new String[] { "yes", "no", "y", "n" });
+			if (keysResponse.startsWith("y")) {
+
+				// Process the Recipients list into a string with two columns.
+				String recipientOutput = "";
+				for (int x = 0; x < recipients.length; x = x + 2) {
+					try {
+						recipientOutput = recipientOutput + "\n" + recipients[x] + "\t\t" + recipients[x + 1];
+					} catch (IndexOutOfBoundsException e) {
+						recipientOutput = recipientOutput + "\n" + recipients[x];
+					}
+				}
+
+				// Give a chance to check the recipients.
+				String recipientsReponse = util.prompt(recipientOutput
+						+ "\nAre you sure you want to send to these recipients? [Yes] or [No]?", new String[] { "yes",
+						"no", "y", "n" });
+				if (recipientsReponse.startsWith("y")) {
+
+					// Parse the recipients list using the standard Communiqué parser.
+					CommuniquéParser parser = new CommuniquéParser(util);
+
+					// Set the client up and go.
+					client.setKeys(keys);
+					client.setRecipients(parser.recipientsParse(recipients));
+					client.connect();
+
+					// Update the configuration file to reflect the changed reality.
+					try {
+						appendSent(new File(args[0]));
+					} catch (FileNotFoundException | UnsupportedEncodingException e) {
+						util.log("Internal Error. File either does not exist or is in the incorrect encoding.");
+					}
+
+				} else {
+					util.log("Please make any alterations needed and then restart this program.");
+				}
 			} else {
 				util.log("Please make any alterations needed and then restart this program.");
 			}
@@ -40,48 +79,36 @@ public class Marconi {
 
 	/**
 	 *
-	 * @param input
-	 * @return
-	 * @throws JTelegramException
+	 * @param file
+	 *            The place to where this program will write.
 	 * @throws FileNotFoundException
+	 * @throws UnsupportedEncodingException
 	 */
-	private static void loadConfig(File file) throws JTelegramException, FileNotFoundException {
-		ArrayList<String> fileContents = new ArrayList<String>(0);
-
-		// Load the file
-		FileReader configRead = new FileReader(file);
-		Scanner scan = new Scanner(configRead);
-		while (scan.hasNextLine()) {
-			fileContents.add(scan.nextLine());
+	private static void appendSent(File file) throws FileNotFoundException, UnsupportedEncodingException {
+		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file);
+		fileWriter.setKeys(keys);
+		String[] body = Stream.concat(Arrays.stream(recipients), Arrays.stream(client.getSentList())).toArray(
+				String[]::new);
+		String bodyText = "";
+		for (String element : body) {
+			bodyText = bodyText + element + "\n";
 		}
-		scan.close();
+		fileWriter.setBody(bodyText);
+		fileWriter.write();
+	}
 
-		// Check file version.
-		boolean correctVersion = false;
-		for (String element : fileContents) {
-			if (element.equals("# Produced by version 1") || element.equals("# Produced by version 0.1.0")) {
-				correctVersion = true;
-			}
-		}
-
-		// Only do if correctVersion is true
-		if (correctVersion) {
-			for (int x = 0; x < fileContents.size(); x++) {
-				String element = fileContents.get(x);
-				if (element.startsWith("client_key=")) {
-					keys[0] = (element.replace("client_key=", ""));
-					util.log("Found Client Key.");
-				} else if (element.startsWith("secret_key=")) {
-					keys[1] = (element.replace("secret_key=", ""));
-					util.log("Found Secret Key.");
-				} else if (element.startsWith("telegram_id=")) {
-					keys[3] = (element.replace("telegram_id=", ""));
-					util.log("Found Telegram ID.");
-				} else if (!(element.startsWith("#")) && !(element.isEmpty())) {
-					keys[4] = (element.toLowerCase().replace(" ", "_") + "\n");
-					util.log("Loaded: " + element);
-				}
-			}
+	/**
+	 *
+	 * @param file
+	 *            The place at which this program will look.
+	 * @throws FileNotFoundException
+	 * @throws JTelegramException
+	 */
+	private static void loadConfig(File file) throws FileNotFoundException, JTelegramException {
+		CommuniquéFileReader fileReader = new CommuniquéFileReader(file);
+		if (fileReader.isCompatible(version)) {
+			keys = fileReader.getKeys();
+			recipients = fileReader.getRecipients();
 		} else {
 			throw new JTelegramException();
 		}
