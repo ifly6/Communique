@@ -11,3 +11,4 @@
 
 *.properties
 NS*.txt
+/bin/
