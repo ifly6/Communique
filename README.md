@@ -40,4 +40,9 @@ Note that it is *your* responsibility to know how the telegram API works. Use of
 
 ## Changelog ##
 While there will be a version number, currently, there is no such number, since, for obvious reasons, we are still in alpha. Version numbers will start after the program is released.
-1. Initial pre-release in two flavours, CLI and GUI. GUI has support for the keys, variable flags, and the saving and loading of the program configuration. CLI does all this on a lower level. It only has support for a simple list of recipients without support for loading or saving of anything more than the client key.
+
+1. Version 1 comes in three flavours, Communiqué (GUI), Morse (old CLI), and Marconi (new CLI).
+  - Communiqué has support for the keys, variable flags, and the saving and loading of the program configuration. 
+  - Morse does not do any of this. It only has support for a simple list of recipients without support for loading or saving of anything more than the client key. 
+  - Marconi is a headless client. It will only accept valid files from Communiqué and then read those files and use all the data in them. It does not write these files (other than updating their sent lists). 
+  - Note that Morse will likely be phased out in favour of just Communiqué and Marconi.
