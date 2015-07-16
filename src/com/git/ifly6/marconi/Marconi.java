@@ -24,6 +24,15 @@ public class Marconi {
 			} catch (JTelegramException e) {
 				util.log("Internal Error. Version not compatible.");
 			}
+			
+			String response = util.prompt("Are these keys correct? " + keys[0] + " " + keys[1]+ " " + keys[2]+ " ", new String[] {"yes", "no", "y", "n"});
+			if (response.startsWith("y")) {
+				// Parse recipients. Display those recipients
+				// Ask whether you're fine with those recipients
+				// Send.
+			} else {
+				util.log("Please make any alterations needed and then restart this program.");
+			}
 		} else {
 			util.log("Please provide a configuration file in the same type produced by Communiqué.");
 		}
@@ -76,12 +85,5 @@ public class Marconi {
 		} else {
 			throw new JTelegramException();
 		}
-	}
-
-	/**
-	 *
-	 */
-	private static void verify() {
-
 	}
 }
