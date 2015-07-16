@@ -208,6 +208,11 @@ public class Communiqué {
 					} else {
 						util.log("Sending is disabled. Enable sending to send telegrams.");
 					}
+
+					// Update recipients pane.
+					for (String element : client.getSentList()) {
+						recipientsPane.append("\n" + element);
+					}
 				}
 			};
 
@@ -246,9 +251,9 @@ public class Communiqué {
 			File saveFile = new File(fileDialog.getDirectory() + returnFile);
 
 			if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
-				saveConfiguration(saveFile);
-			}
-		});
+					saveConfiguration(saveFile);
+				}
+			});
 		mnFile.add(mntmSaveConfiguration);
 
 		JMenuItem mntmLoadConfiguration = new JMenuItem("Load Configuration");
@@ -327,17 +332,17 @@ public class Communiqué {
 
 		JMenuItem mntmImportVoting = new JMenuItem("Import Voting Delegates");
 		mntmImportVoting
-		.addActionListener(al -> {
-			String input = JOptionPane
-					.showInputDialog(
-							frame,
-							"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
-							"Import Delegates from At Vote Resolution", JOptionPane.PLAIN_MESSAGE);
-			String[] list = input.split(",");
-			for (String element : list) {
-				recipientsPane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
-			}
-		});
+				.addActionListener(al -> {
+					String input = JOptionPane
+							.showInputDialog(
+									frame,
+									"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
+									"Import Delegates from At Vote Resolution", JOptionPane.PLAIN_MESSAGE);
+					String[] list = input.split(",");
+					for (String element : list) {
+						recipientsPane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
+					}
+				});
 		mnCommands.add(mntmImportVoting);
 
 		JMenuItem mntmImportApprovingDelegates = new JMenuItem("Import Approving Delegates");
@@ -404,10 +409,36 @@ public class Communiqué {
 			writer.println("client_key=" + txtClientKey.getText());
 			writer.println("secret_key=" + txtSecretKey.getText());
 			writer.println("telegram_id=" + txtTelegramId.getText() + "\n");
-			writer.println(recipientsPane.getText());
 
-			for (String element : client.getSentList()) {
-				writer.println("/" + element);
+			// Sort out the comments.
+			String rawInput = recipientsPane.getText();
+			String[] rawArr = rawInput.split("\n");
+			ArrayList<String> contentList = new ArrayList<String>(0);
+			for (String element : rawArr) {
+				if (!element.startsWith("#") || !element.isEmpty()) {
+					contentList.add(element);
+				}
+			}
+
+			// Sort out the recipients from the sent and get rid of dupliates.
+			LinkedHashSet<String> recipList = new LinkedHashSet<String>(0);
+			LinkedHashSet<String> nopeList = new LinkedHashSet<String>(0);
+			for (String element : contentList) {
+				if (element.startsWith("/")) {
+					nopeList.add(element);
+				} else {
+					recipList.add(element);
+				}
+			}
+
+			// Print in the recipients
+			for (String element : recipList) {
+				writer.println(element);
+			}
+
+			// Print in the nopeList
+			for (String element : nopeList) {
+				writer.println(element);
 			}
 
 			writer.close();
