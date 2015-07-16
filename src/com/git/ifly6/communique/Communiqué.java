@@ -77,7 +77,8 @@ import com.git.ifly6.javatelegram.JavaTelegram;
 public class Communiqué {
 
 	// TODO Import from URL
-	// TODO
+	// TODO Live updating recipients list
+	// TODO Interface with NS Happenings
 
 	CommuniquéLogger util = new CommuniquéLogger();
 	JavaTelegram client = new JavaTelegram(util);
@@ -91,11 +92,17 @@ public class Communiqué {
 	static JTextArea recipientsPane = new JTextArea();
 	private JCheckBoxMenuItem chckbxmntmShowRecipients = new JCheckBoxMenuItem("Show All Recipients");
 	private JCheckBoxMenuItem chckbxmntmDisableSending = new JCheckBoxMenuItem("Disable Sending");
+	static Font textStandard = new Font("Monospaced", Font.PLAIN, 11);
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+
+		// Apple Stuff
+		System.setProperty("apple.laf.useScreenMenuBar", "true");
+		System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Communiqué");
+
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -121,7 +128,7 @@ public class Communiqué {
 	 */
 	private void initialise() {
 		frame = new JFrame("Communiqué");
-		frame.setBounds(100, 100, 550, 405);
+		frame.setBounds(0, 0, 550, 405);
 		frame.setMinimumSize(new Dimension(550, 400));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -130,19 +137,19 @@ public class Communiqué {
 		panel.setLayout(new GridLayout(1, 0, 0, 0));
 
 		txtClientKey = new JTextField();
-		txtClientKey.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		txtClientKey.setFont(textStandard);
 		txtClientKey.setText("Client Key");
 		panel.add(txtClientKey);
 		txtClientKey.setColumns(10);
 
 		txtSecretKey = new JTextField();
-		txtSecretKey.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		txtSecretKey.setFont(textStandard);
 		txtSecretKey.setText("Secret Key");
 		panel.add(txtSecretKey);
 		txtSecretKey.setColumns(10);
 
 		txtTelegramId = new JTextField();
-		txtTelegramId.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		txtTelegramId.setFont(textStandard);
 		txtTelegramId.setText("Telegram ID");
 		panel.add(txtTelegramId);
 		txtTelegramId.setColumns(10);
@@ -172,24 +179,19 @@ public class Communiqué {
 
 					util.log("Recipients set.");
 
-					// In case you need a dry run. Screws up the secretKey to make that happen.
-					if (chckbxmntmDisableSending.isSelected()) {
-						client.setKeys(new String[] { txtClientKey.getText(), "", txtTelegramId.getText() });
-						util.log("Sending is disabled. Cancel this thread, wait, and start a new thread without sending disabled to send.");
-					} else {
-						client.setKeys(new String[] { txtClientKey.getText(), txtSecretKey.getText(),
-								txtTelegramId.getText() });
-					}
+					client.setKeys(new String[] { txtClientKey.getText(), txtSecretKey.getText(),
+							txtTelegramId.getText() });
 
 					// Set Recruitment Status
-					if (chckbxRecruitment.isSelected()) {
-						client.setRecruitment(true);
-					} else {
-						client.setRecruitment(false);
-					}
+					client.setRecruitment(chckbxRecruitment.isSelected());
 
-					client.connect();
-					util.log("Queries Complete.");
+					// In case you need a dry run, it will do everything but send.
+					if (!chckbxmntmDisableSending.isSelected()) {
+						client.connect();
+						util.log("Queries Complete.");
+					} else {
+						util.log("Sending is disabled. Enable sending to send telegrams.");
+					}
 				}
 			};
 
@@ -203,14 +205,14 @@ public class Communiqué {
 		JScrollPane logScrollPane = new JScrollPane();
 		tabbedPane.addTab("Log", null, logScrollPane, null);
 
-		logPane.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		logPane.setFont(textStandard);
 		logPane.setEditable(false);
 		logScrollPane.setViewportView(logPane);
 
 		JScrollPane recipientsScrollPane = new JScrollPane();
 		tabbedPane.addTab("Recipients", null, recipientsScrollPane, null);
 
-		recipientsPane.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		recipientsPane.setFont(textStandard);
 		recipientsScrollPane.setViewportView(recipientsPane);
 
 		JMenuBar menuBar = new JMenuBar();
@@ -291,7 +293,7 @@ public class Communiqué {
 		JMenuItem mntmKillConnectionThread = new JMenuItem("Kill All Connection Threads");
 		mntmKillConnectionThread.addActionListener(ae -> {
 			client.setKillThread(true);
-			util.log("Killing Thread using KillThread boolean.");
+			util.log("Kill signal sent. By next sending loop, it should be dead.");
 		});
 		mnCommands.add(mntmKillConnectionThread);
 	}
