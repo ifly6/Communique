@@ -21,7 +21,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.autotelegram;
+package com.git.ifly6.morse;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
