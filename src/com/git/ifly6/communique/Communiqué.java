@@ -83,9 +83,10 @@ public class Communiqué {
 	private JTextField txtSecretKey;
 	private JTextField txtTelegramId;
 	static JTextArea logPane = new JTextArea("== Communiqué " + version + " ==\n"
-			+ "Enter information or load file to proceed.");
+			+ "Enter information or load file to proceed.\n");
 	static JTextArea recipientsPane = new JTextArea(
-			"# == Communiqué Recipients ==\n# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.");
+			"# == Communiqué Recipients ==\n# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
+					+ "# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n");
 	private JCheckBoxMenuItem chckbxmntmShowRecipients = new JCheckBoxMenuItem("Show All Recipients");
 	private JCheckBoxMenuItem chckbxmntmDisableSending = new JCheckBoxMenuItem("Disable Sending");
 	static Font textStandard = new Font("Monospaced", Font.PLAIN, 11);
@@ -242,16 +243,16 @@ public class Communiqué {
 			File saveFile = new File(fileDialog.getDirectory() + returnFile);
 
 			if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
-				try {
-					saveConfiguration(saveFile);
-				} catch (FileNotFoundException e1) {
-					util.log("Cannot find the location of the selected document.");
-				} catch (UnsupportedEncodingException e) {
-					util.log("Encoding of selected document is not supported. Create a new savefile.");
+					try {
+						saveConfiguration(saveFile);
+					} catch (FileNotFoundException e1) {
+						util.log("Cannot find the location of the selected document.");
+					} catch (UnsupportedEncodingException e) {
+						util.log("Encoding of selected document is not supported. Create a new savefile.");
+					}
 				}
-			}
-			util.log("Configuration saved.");
-		});
+				util.log("Configuration saved.");
+			});
 		mnFile.add(mntmSaveConfiguration);
 
 		JMenuItem mntmLoadConfiguration = new JMenuItem("Load Configuration");
@@ -333,25 +334,25 @@ public class Communiqué {
 
 		JMenuItem mntmImportVoting = new JMenuItem("Import Voting Delegates");
 		mntmImportVoting
-		.addActionListener(al -> {
-			String input = JOptionPane
-					.showInputDialog(
-							frame,
-							"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
-							"Import Delegates from At Vote Resolution", JOptionPane.PLAIN_MESSAGE);
-			String[] list = input.split(",");
-			for (String element : list) {
-				recipientsPane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
-			}
-		});
+				.addActionListener(al -> {
+					String input = JOptionPane
+							.showInputDialog(
+									frame,
+									"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
+									"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
+					input = input.replaceAll("\\(.+?\\)", "");
+					String[] list = input.split(",");
+					for (String element : list) {
+						recipientsPane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
+					}
+				});
 		mnCommands.add(mntmImportVoting);
 
 		JMenuItem mntmImportApprovingDelegates = new JMenuItem("Import Approving Delegates");
 		mntmImportApprovingDelegates.addActionListener(al -> {
 			String input = JOptionPane.showInputDialog(frame,
 					"Paste in the list of delegates approving. Ex: 'Blah, Bleh, Ecksl'. Include only commas.",
-					"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
-			input = input.replaceAll("\\(.+?\\)", "");
+					"Import Delegates from At Vote Resolution", JOptionPane.PLAIN_MESSAGE);
 			String[] list = input.split(",");
 			for (String element : list) {
 				recipientsPane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));

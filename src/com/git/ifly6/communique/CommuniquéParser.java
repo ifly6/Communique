@@ -94,7 +94,7 @@ public class CommuniquéParser {
 		// Remove commented lines.
 		ArrayList<String> unComments = new ArrayList<String>(0);
 		for (String element : rawRecipients) {
-			if (!element.startsWith("#")) {
+			if (!element.startsWith("#") || !element.isEmpty()) {
 				unComments.add(element);
 			}
 		}
