@@ -85,12 +85,14 @@ public class Communiqué {
 	private JTextField txtTelegramId;
 	static JTextArea logPane = new JTextArea("== Communiqué " + version + " ==\n"
 			+ "Enter information or load file to proceed.\n");
-	static JTextArea recipientsPane = new JTextArea(
-			"# == Communiqué Recipients ==\n# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
-					+ "# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n");
+	static JTextArea codePane = new JTextArea("# == Communiqué Recipients Code ==\n"
+			+ "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
+			+ "# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n");
 	private JCheckBoxMenuItem chckbxmntmShowRecipients = new JCheckBoxMenuItem("Show All Recipients");
 	private JCheckBoxMenuItem chckbxmntmDisableSending = new JCheckBoxMenuItem("Disable Sending");
 	static Font textStandard = new Font("Monospaced", Font.PLAIN, 11);
+	private JTextArea recipientsPane = new JTextArea();
+	private JCheckBox chckbxRecruitment = new JCheckBox("Recruitment");
 
 	/**
 	 * Launch the application.
@@ -126,8 +128,8 @@ public class Communiqué {
 	 */
 	private void initialise() {
 		frame = new JFrame("Communiqué " + version);
-		frame.setBounds(0, 0, 550, 405);
-		frame.setMinimumSize(new Dimension(550, 400));
+		frame.setBounds(0, 0, 600, 425);
+		frame.setMinimumSize(new Dimension(600, 425));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JPanel panel = new JPanel();
@@ -156,7 +158,6 @@ public class Communiqué {
 		panel.add(txtTelegramId);
 		txtTelegramId.setColumns(10);
 
-		JCheckBox chckbxRecruitment = new JCheckBox("Recruitment");
 		chckbxRecruitment.setSelected(true);
 		panel.add(chckbxRecruitment);
 
@@ -170,15 +171,16 @@ public class Communiqué {
 				@Override
 				public void run() {
 					CommuniquéParser parser = new CommuniquéParser(util);
-					String[] recipients = parser.recipientsParse(recipientsPane.getText());	// Get recipients
-					client.setRecipients(recipients);										// Set recipients
+					String[] recipients = parser.recipientsParse(codePane.getText());	// Get recipients
+					client.setRecipients(recipients);									// Set recipients
 
 					// Review Recipients
-					if (chckbxmntmShowRecipients.isSelected()) {
-						for (String element : recipients) {
-							util.log("Recipient: " + element);
-						}
+					String recipient = "# == Communiqué Recipients ==\n"
+							+ "# This tab shows all recipients after parsing of the Code tab.\n\n";
+					for (String element : recipients) {
+						recipient = recipient + element + "\n";
 					}
+					recipientsPane.setText(recipient);
 
 					util.log("Recipients set.");
 
@@ -203,14 +205,33 @@ public class Communiqué {
 					}
 
 					// Update recipients pane.
-					for (String element : client.getSentList()) {
-						recipientsPane.append("\n" + element);
+					String[] sentList = client.getSentList();
+					for (String element : sentList) {
+						codePane.append("\n/" + element);
 					}
 				}
 			};
 
 			new Thread(runner).start();
 		});
+
+		JButton btnParse = new JButton("PARSE");
+		btnParse.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				CommuniquéParser parser = new CommuniquéParser(util);
+				String[] recipients = parser.recipientsParse(codePane.getText());	// Get recipients
+
+				// Show Recipients
+				String recipient = "# == Communiqué Recipients ==\n"
+						+ "# This tab shows all recipients after parsing of the Code tab.\n\n";
+				for (String element : recipients) {
+					recipient = recipient + element + "\n";
+				}
+				recipientsPane.setText(recipient);
+			}
+		});
+		panel.add(btnParse);
 		panel.add(btnSend);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -223,10 +244,19 @@ public class Communiqué {
 		logPane.setEditable(false);
 		logScrollPane.setViewportView(logPane);
 
+		JScrollPane codeScrollPane = new JScrollPane();
+		tabbedPane.addTab("Code", null, codeScrollPane, null);
+
+		codePane.setFont(textStandard);
+		codeScrollPane.setViewportView(codePane);
+
 		JScrollPane recipientsScrollPane = new JScrollPane();
 		tabbedPane.addTab("Recipients", null, recipientsScrollPane, null);
+		recipientsPane.setFont(new Font("Monospaced", Font.PLAIN, 11));
+		recipientsPane.setEditable(false);
 
-		recipientsPane.setFont(textStandard);
+		recipientsPane.setText("# == Communiqué Recipients ==\n"
+				+ "# This tab shows all recipients after parsing of the Code tab.\n");
 		recipientsScrollPane.setViewportView(recipientsPane);
 
 		JMenuBar menuBar = new JMenuBar();
@@ -388,7 +418,7 @@ public class Communiqué {
 			writer.println("client_key=" + txtClientKey.getText());
 			writer.println("secret_key=" + txtSecretKey.getText());
 			writer.println("telegram_id=" + txtTelegramId.getText() + "\n");
-			writer.println(recipientsPane.getText());
+			writer.println(codePane.getText());
 
 			writer.close();
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
@@ -414,9 +444,12 @@ public class Communiqué {
 			txtSecretKey.setText(keys[1]);
 			txtTelegramId.setText(keys[2]);
 
+			// Set Recruitment Flag
+			chckbxRecruitment.setSelected(fileReader.getRecruitmentFlag());
+
 			// Set Recipients
 			for (String element : fileReader.getRecipients()) {
-				recipientsPane.append(element);
+				codePane.append(element);
 			}
 		} else {
 			throw new JTelegramException();
@@ -438,7 +471,8 @@ public class Communiqué {
 	private void saveConfiguration(File file) throws FileNotFoundException, UnsupportedEncodingException {
 		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file);
 		fileWriter.setKeys(new String[] { txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId.getText() });
-		fileWriter.setBody(recipientsPane.getText());
+		fileWriter.setBody(codePane.getText());
+		fileWriter.setRecuitment(chckbxRecruitment.isSelected());
 		fileWriter.write();
 	}
 

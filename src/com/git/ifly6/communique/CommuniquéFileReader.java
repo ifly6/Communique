@@ -10,6 +10,8 @@ public class CommuniquéFileReader {
 
 	ArrayList<String> fileContents = new ArrayList<String>(0);
 	static final int version = Communiqué.version;
+	String[][] information = { {}, {} };
+	private boolean isRecruitment;
 
 	/**
 	 * @return the version
@@ -33,6 +35,7 @@ public class CommuniquéFileReader {
 		}
 
 		scan.close();
+		information = parseConfig();
 	}
 
 	/**
@@ -41,11 +44,15 @@ public class CommuniquéFileReader {
 	 * @return String[] containing the keys in the order { clientKey, secretKey, telegramId }.
 	 */
 	public String[] getKeys() {
-		return parseConfig()[0];
+		return information[0];
 	}
 
 	public String[] getRecipients() {
-		return parseConfig()[1];
+		return information[1];
+	}
+
+	public boolean getRecruitmentFlag() {
+		return isRecruitment;
 	}
 
 	private String[][] parseConfig() {
@@ -61,6 +68,9 @@ public class CommuniquéFileReader {
 
 			} else if (element.startsWith("telegram_id=")) {
 				keys[2] = element.replace("telegram_id=", "");
+
+			} else if (element.startsWith("isRecruitment=")) {
+				isRecruitment = Boolean.getBoolean(element.replace("isRecruitment=", ""));
 
 			} else if (!(element.startsWith("#")) && !(element.isEmpty())) {
 				recipientsList.add(element.toLowerCase().replace(" ", "_") + "\n");
