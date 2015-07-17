@@ -16,6 +16,7 @@ public class CommuniquéFileWriter {
 	PrintWriter writer;
 	String[] keys = { "", "", "" };
 	String recipients = "";
+	boolean isRecruitment = true;
 
 	public CommuniquéFileWriter(File file) throws FileNotFoundException, UnsupportedEncodingException {
 		writer = new PrintWriter(file, "UTF-8");
@@ -33,8 +34,27 @@ public class CommuniquéFileWriter {
 		}
 	}
 
-	public void setBody(String recipiContents) {
-		recipients = recipiContents;
+	public void setBody(String codeContents) {
+		recipients = codeContents;
+	}
+
+	/**
+	 * Convenience method if you don't want to turn your String array into a string just to fit the original setBody
+	 * method.
+	 *
+	 * @param codeContents
+	 */
+	public void setBody(String[] codeContents) {
+		String recipients = "";
+		for (String element : codeContents) {
+			recipients = recipients + element + "\n";
+		}
+
+		setBody(recipients);
+	}
+
+	public void setRecuitment(boolean recuitment) {
+		isRecruitment = recuitment;
 	}
 
 	public void write() {
@@ -50,14 +70,16 @@ public class CommuniquéFileWriter {
 		writer.println(headerVers + "\n");
 		writer.println("client_key=" + keys[0]);
 		writer.println("secret_key=" + keys[1]);
-		writer.println("telegram_id=" + keys[2] + "\n");
+		writer.println("telegram_id=" + keys[2]);
+		writer.println("isRecruitment=" + isRecruitment);
+		writer.println("\n");
 
 		// Sort out the comments.
 		String rawInput = recipients;
 		String[] rawArr = rawInput.split("\n");
 		ArrayList<String> contentList = new ArrayList<String>(0);
 		for (String element : rawArr) {
-			if (!element.startsWith("#") || !element.isEmpty()) {
+			if (!element.startsWith("#") && !element.isEmpty()) {
 				contentList.add(element);
 			}
 		}
