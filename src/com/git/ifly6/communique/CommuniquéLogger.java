@@ -47,13 +47,7 @@ public class CommuniquéLogger implements JTelegramLogger {
 	public void log(String input) {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
-
-		if (!Communiqué.recipientsPane.getText().endsWith("\n")) {
-			Communiqué.logPane.append("\n[" + dateFormat.format(date) + "] " + input + "\n");
-		} else {
-			Communiqué.logPane.append("[" + dateFormat.format(date) + "] " + input + "\n");
-		}
-
+		Communiqué.logPane.append("[" + dateFormat.format(date) + "] " + input + "\n");
 		Communiqué.logPane.setCaretPosition(Communiqué.logPane.getDocument().getLength());
 	}
 }
