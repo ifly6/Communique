@@ -91,10 +91,10 @@ public class CommuniquéParser {
 		ArrayList<String> finalRecipients = new ArrayList<String>(0);
 		String[] rawRecipients = input.split("\n");
 
-		// Remove commented lines.
+		// Remove commented or empty lines.
 		ArrayList<String> unComments = new ArrayList<String>(0);
 		for (String element : rawRecipients) {
-			if (!element.startsWith("#") || !element.isEmpty()) {
+			if (!element.startsWith("#") && !element.isEmpty()) {
 				unComments.add(element);
 			}
 		}
