@@ -206,10 +206,7 @@ public class Communiqué {
 					}
 
 					// Update recipients pane.
-					String[] sentList = client.getSentList();
-					for (String element : sentList) {
-						codePane.append("\n/" + element);
-					}
+					updateCode();
 				}
 			};
 
@@ -276,16 +273,16 @@ public class Communiqué {
 			File saveFile = new File(fileDialog.getDirectory() + returnFile);
 
 			if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
-					try {
-						saveConfiguration(saveFile);
-					} catch (FileNotFoundException e1) {
-						util.log("Cannot find the location of the selected document.");
-					} catch (UnsupportedEncodingException e) {
-						util.log("Encoding of selected document is not supported. Create a new savefile.");
-					}
+				try {
+					saveConfiguration(saveFile);
+				} catch (FileNotFoundException e1) {
+					util.log("Cannot find the location of the selected document.");
+				} catch (UnsupportedEncodingException e) {
+					util.log("Encoding of selected document is not supported. Create a new savefile.");
 				}
-				util.log("Configuration saved.");
-			});
+			}
+			util.log("Configuration saved.");
+		});
 		mnFile.add(mntmSaveConfiguration);
 
 		JMenuItem mntmLoadConfiguration = new JMenuItem("Load Configuration");
@@ -367,18 +364,18 @@ public class Communiqué {
 
 		JMenuItem mntmImportVoting = new JMenuItem("Import Voting Delegates");
 		mntmImportVoting
-				.addActionListener(al -> {
-					String input = JOptionPane
-							.showInputDialog(
-									frame,
-									"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
-									"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
-					input = input.replaceAll("\\(.+?\\)", "");
-					String[] list = input.split(",");
-					for (String element : list) {
-						codePane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
-					}
-				});
+		.addActionListener(al -> {
+			String input = JOptionPane
+					.showInputDialog(
+							frame,
+							"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
+							"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
+			input = input.replaceAll("\\(.+?\\)", "");
+			String[] list = input.split(",");
+			for (String element : list) {
+				codePane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
+			}
+		});
 		mnCommands.add(mntmImportVoting);
 
 		JMenuItem mntmImportApprovingDelegates = new JMenuItem("Import Approving Delegates");
@@ -472,6 +469,8 @@ public class Communiqué {
 
 	private void saveConfiguration(File file) throws FileNotFoundException, UnsupportedEncodingException {
 		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file);
+		updateCode();
+
 		fileWriter.setKeys(new String[] { txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId.getText() });
 		fileWriter.setBody(codePane.getText());
 		fileWriter.setRecuitment(chckbxRecruitment.isSelected());
@@ -484,5 +483,13 @@ public class Communiqué {
 		prop.setProperty("client_key", txtClientKey.getText());
 		prop.store(output, "");
 		output.close();
+	}
+
+	private void updateCode() {
+		String[] sentList = client.getSentList();
+
+		for (String element : sentList) {
+			codePane.append("\n/" + element);
+		}
 	}
 }
