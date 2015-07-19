@@ -18,6 +18,7 @@ public class Marconi {
 	static JavaTelegram client = new JavaTelegram(util);
 	static String[] keys = { "", "", "" };
 	static String[] recipients = {};
+	static boolean isRecruitment = true;
 	public static final int version = 1;
 
 	public static void main(String[] args) {
@@ -31,32 +32,38 @@ public class Marconi {
 			}
 
 			// Give a chance to check the keys.
-			String keysResponse = util.prompt("Are these keys correct? " + keys[0] + " " + keys[1] + " " + keys[2]
-					+ " ", new String[] { "yes", "no", "y", "n" });
+			String keysResponse = util.prompt("Are these keys correct? " + keys[0] + ", " + keys[1] + ", " + keys[2]
+					+ " [Yes] or [No]?", new String[] { "yes", "no", "y", "n" });
 			if (keysResponse.startsWith("y")) {
 
+				String recruitmentResponse = util.prompt("Is the current recruitment flag (" + isRecruitment
+						+ ") set correctly? [Yes] or [No]?", new String[] { "yes", "no", "y", "n" });
+				if (recruitmentResponse.startsWith("n")) {
+					isRecruitment = !isRecruitment;
+				}
+
 				// Process the Recipients list into a string with two columns.
-				String recipientOutput = "";
-				for (int x = 0; x < recipients.length; x = x + 2) {
+				CommuniquéParser parser = new CommuniquéParser(util);
+				String[] expandedRecipients = parser.recipientsParse(recipients);
+
+				for (int x = 0; x < expandedRecipients.length; x = x + 2) {
 					try {
-						recipientOutput = recipientOutput + "\n" + recipients[x] + "\t\t" + recipients[x + 1];
+						System.out.printf("%-30.30s  %-30.30s%n", expandedRecipients[x], expandedRecipients[x + 1]);
 					} catch (IndexOutOfBoundsException e) {
-						recipientOutput = recipientOutput + "\n" + recipients[x];
+						System.out.println("\n" + expandedRecipients[x]);
 					}
 				}
 
 				// Give a chance to check the recipients.
-				String recipientsReponse = util.prompt(recipientOutput
-						+ "\nAre you sure you want to send to these recipients? [Yes] or [No]?", new String[] { "yes",
-						"no", "y", "n" });
+				String recipientsReponse = util.prompt(
+						"Are you sure you want to send to these recipients? [Yes] or [No]?", new String[] { "yes",
+								"no", "y", "n" });
 				if (recipientsReponse.startsWith("y")) {
-
-					// Parse the recipients list using the standard Communiqué parser.
-					CommuniquéParser parser = new CommuniquéParser(util);
 
 					// Set the client up and go.
 					client.setKeys(keys);
-					client.setRecipients(parser.recipientsParse(recipients));
+
+					client.setRecruitment(isRecruitment);
 					client.connect();
 
 					// Update the configuration file to reflect the changed reality.
@@ -67,13 +74,13 @@ public class Marconi {
 					}
 
 				} else {
-					util.log("Please make any alterations needed and then restart this program.");
+					util.log("Please make any alterations needed and restart this program.");
 				}
 			} else {
-				util.log("Please make any alterations needed and then restart this program.");
+				util.log("Please make any alterations needed and restart this program.");
 			}
 		} else {
-			util.log("Please provide a configuration file in the same type produced by Communiqué.");
+			util.log("Please provide a configuration file in the same type produced by Communiqué in the arguments.");
 		}
 	}
 
@@ -109,6 +116,7 @@ public class Marconi {
 		if (fileReader.isCompatible(version)) {
 			keys = fileReader.getKeys();
 			recipients = fileReader.getRecipients();
+			isRecruitment = fileReader.getRecruitmentFlag();
 		} else {
 			throw new JTelegramException();
 		}
