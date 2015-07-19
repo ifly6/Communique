@@ -98,7 +98,7 @@ public class Marconi {
 				String[]::new);
 		String bodyText = "";
 		for (String element : body) {
-			bodyText = bodyText + element + "\n";
+			bodyText = bodyText + "/" + element + "\n";
 		}
 		fileWriter.setBody(bodyText);
 		fileWriter.write();
