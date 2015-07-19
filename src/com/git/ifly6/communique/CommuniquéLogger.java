@@ -43,11 +43,24 @@ public class CommuniquéLogger implements JTelegramLogger {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * Localises the appropriate output for our Communiqué interface.
+	 */
 	@Override
 	public void log(String input) {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		Communiqué.logPane.append("[" + dateFormat.format(date) + "] " + input + "\n");
 		Communiqué.logPane.setCaretPosition(Communiqué.logPane.getDocument().getLength());
+	}
+
+	/**
+	 * Convenience method so that the Communiqué interface can easily (and without errors) print to its codePane.
+	 *
+	 * @param input
+	 *            the string to be appended to codePane.
+	 */
+	public void codePrintln(String input) {
+		Communiqué.codePane.append(input + "\n");
 	}
 }

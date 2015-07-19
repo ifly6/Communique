@@ -73,7 +73,8 @@ public class CommuniquéFileReader {
 				isRecruitment = Boolean.getBoolean(element.replace("isRecruitment=", ""));
 
 			} else if (!(element.startsWith("#")) && !(element.isEmpty())) {
-				recipientsList.add(element.toLowerCase().replace(" ", "_") + "\n");
+				// TODO fix this bloody error for Marconi
+				recipientsList.add(element.toLowerCase().replace(" ", "_"));
 			}
 		}
 
