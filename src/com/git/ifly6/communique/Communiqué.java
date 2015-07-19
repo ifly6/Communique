@@ -266,23 +266,23 @@ public class Communiqué {
 
 		JMenuItem mntmSaveConfiguration = new JMenuItem("Save Configuration");
 		mntmSaveConfiguration.addActionListener(ae -> {
-			FileDialog fileDialog = new FileDialog(frame, "Load Configuration", FileDialog.SAVE);
+			FileDialog fileDialog = new FileDialog(frame, "Save Configuration", FileDialog.SAVE);
 			fileDialog.setVisible(true);
 
 			String returnFile = fileDialog.getFile();
-			File saveFile = new File(fileDialog.getDirectory() + returnFile);
+			File saveFile = new File(fileDialog.getDirectory() + returnFile + ".txt");
 
 			if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
-				try {
-					saveConfiguration(saveFile);
-				} catch (FileNotFoundException e1) {
-					util.log("Cannot find the location of the selected document.");
-				} catch (UnsupportedEncodingException e) {
-					util.log("Encoding of selected document is not supported. Create a new savefile.");
+					try {
+						saveConfiguration(saveFile);
+					} catch (FileNotFoundException e1) {
+						util.log("Cannot find the location of the selected document.");
+					} catch (UnsupportedEncodingException e) {
+						util.log("Encoding of selected document is not supported. Create a new savefile.");
+					}
 				}
-			}
-			util.log("Configuration saved.");
-		});
+				util.log("Configuration saved.");
+			});
 		mnFile.add(mntmSaveConfiguration);
 
 		JMenuItem mntmLoadConfiguration = new JMenuItem("Load Configuration");
@@ -302,7 +302,7 @@ public class Communiqué {
 			} catch (FileNotFoundException e) {
 				util.log("Cannot find file provided.");
 			}
-			util.log("Configuration Loaded.");
+			util.log("Configuration loaded.");
 		});
 		mnFile.add(mntmLoadConfiguration);
 
@@ -364,18 +364,18 @@ public class Communiqué {
 
 		JMenuItem mntmImportVoting = new JMenuItem("Import Voting Delegates");
 		mntmImportVoting
-		.addActionListener(al -> {
-			String input = JOptionPane
-					.showInputDialog(
-							frame,
-							"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
-							"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
-			input = input.replaceAll("\\(.+?\\)", "");
-			String[] list = input.split(",");
-			for (String element : list) {
-				codePane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
-			}
-		});
+				.addActionListener(al -> {
+					String input = JOptionPane
+							.showInputDialog(
+									frame,
+									"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
+									"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
+					input = input.replaceAll("\\(.+?\\)", "");
+					String[] list = input.split(",");
+					for (String element : list) {
+						util.codePrintln(element.toLowerCase().replace(" ", "_"));
+					}
+				});
 		mnCommands.add(mntmImportVoting);
 
 		JMenuItem mntmImportApprovingDelegates = new JMenuItem("Import Approving Delegates");
@@ -385,7 +385,7 @@ public class Communiqué {
 					"Import Delegates from At Vote Resolution", JOptionPane.PLAIN_MESSAGE);
 			String[] list = input.split(",");
 			for (String element : list) {
-				codePane.append("\n" + element.trim().toLowerCase().replace(" ", "_"));
+				util.codePrintln(element.trim().toLowerCase().replace(" ", "_"));
 			}
 		});
 		mnCommands.add(mntmImportApprovingDelegates);
@@ -416,8 +416,13 @@ public class Communiqué {
 			writer.println(header + "\n");
 			writer.println("client_key=" + txtClientKey.getText());
 			writer.println("secret_key=" + txtSecretKey.getText());
-			writer.println("telegram_id=" + txtTelegramId.getText() + "\n");
+
+			writer.println("telegram_id=" + txtTelegramId.getText());
+			writer.println("isRecruitment=" + chckbxRecruitment.isSelected() + "\n");
+
+			writer.println(logPane.getText());
 			writer.println(codePane.getText());
+			writer.println(recipientsPane.getText());
 
 			writer.close();
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
@@ -426,7 +431,8 @@ public class Communiqué {
 	}
 
 	/**
-	 * Load a configuration file.
+	 * Load a configuration file. Method here has been localised for this setup from the more general version in
+	 * CommuniquéFileReader.
 	 *
 	 * @param file
 	 * @throws FileNotFoundException
@@ -447,8 +453,9 @@ public class Communiqué {
 			chckbxRecruitment.setSelected(fileReader.getRecruitmentFlag());
 
 			// Set Recipients
-			for (String element : fileReader.getRecipients()) {
-				codePane.append(element);
+			String[] recipients = fileReader.getRecipients();
+			for (String element : recipients) {
+				util.codePrintln(element);
 			}
 		} else {
 			throw new JTelegramException();
@@ -467,6 +474,14 @@ public class Communiqué {
 		}
 	}
 
+	/**
+	 * Configuration saving here has been localised for this setup using this method.
+	 *
+	 * @param file
+	 *            The place at which the file will be saved
+	 * @throws FileNotFoundException
+	 * @throws UnsupportedEncodingException
+	 */
 	private void saveConfiguration(File file) throws FileNotFoundException, UnsupportedEncodingException {
 		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file);
 		updateCode();
@@ -477,6 +492,11 @@ public class Communiqué {
 		fileWriter.write();
 	}
 
+	/**
+	 * Properties writing here has been localised for this setup using this method.
+	 *
+	 * @throws IOException
+	 */
 	private void writeProperties() throws IOException {
 		Properties prop = new Properties();
 		FileOutputStream output = new FileOutputStream(System.getProperty("user.dir") + "/config.properties");
@@ -485,11 +505,14 @@ public class Communiqué {
 		output.close();
 	}
 
+	/**
+	 * Convenience method so that we can easily update the sentList without rewriting the same code over and over again.
+	 */
 	private void updateCode() {
 		String[] sentList = client.getSentList();
 
 		for (String element : sentList) {
-			codePane.append("\n/" + element);
+			util.codePrintln("/" + element);
 		}
 	}
 }
