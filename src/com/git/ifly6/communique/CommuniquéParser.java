@@ -38,7 +38,7 @@ public class CommuniquéParser {
 				} catch (IOException e) {
 					util.log("Internal Error. Cannot fetch members of region " + element.replace("region:", "") + ".");
 				}
-			} else if (element.startsWith("wa:delegates")) {
+			} else if (element.equals("wa:delegates")) {
 				try {
 					String[] delegatesArr = fetcher.getDelegates();
 					List<String> delegates = Arrays.asList(delegatesArr);
@@ -47,7 +47,7 @@ public class CommuniquéParser {
 				} catch (IOException e) {
 					util.log("Internal Error. Cannot fetch WA delegates");
 				}
-			} else if (element.toLowerCase().startsWith("wa:nations") || element.startsWith("wa:members")) {
+			} else if (element.equals("wa:nations") || element.equals("wa:members")) {
 				try {
 					String[] waNationsArr = fetcher.getWAMembers();
 					List<String> waNations = Arrays.asList(waNationsArr);
@@ -56,7 +56,7 @@ public class CommuniquéParser {
 				} catch (IOException e) {
 					util.log("Internal Error. Cannot fetch WA members.");
 				}
-			} else if (element.startsWith("world:newnations")) {
+			} else if (element.equals("world:new")) {
 				try {
 					String[] newNationsArr = fetcher.getNew();
 					List<String> newNations = Arrays.asList(newNationsArr);

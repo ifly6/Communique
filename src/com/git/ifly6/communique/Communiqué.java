@@ -69,11 +69,8 @@ import com.git.ifly6.javatelegram.JavaTelegram;
 
 public class Communiqué {
 
-	// TODO Import from URL
 	// TODO Live updating recipients list
 	// TODO Interface with NS Happenings
-	// TODO Save the recuitment flag!
-	// TODO Find some way to show all recipients
 
 	CommuniquéLogger util = new CommuniquéLogger();
 	JavaTelegram client = new JavaTelegram(util);
@@ -349,13 +346,17 @@ public class Communiqué {
 					"Paste in the URL provided by NationStates after sending your telegram to tag:api.\n",
 					"Import keys from URL", JOptionPane.PLAIN_MESSAGE);
 
-			rawURL = rawURL.replace("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&",
-					"");
-			rawURL = rawURL.replace("&to=NATION_NAME", "");
+			if (rawURL.startsWith("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&")) {
+				rawURL = rawURL.replace(
+						"http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&", "");
+				rawURL = rawURL.replace("&to=NATION_NAME", "");
 
-			String[] tags = rawURL.split("&");
-			txtTelegramId.setText(tags[0].replace("tgid=", ""));
-			txtSecretKey.setText(tags[1].replace("key=", ""));
+				String[] tags = rawURL.split("&");
+				txtTelegramId.setText(tags[0].replace("tgid=", ""));
+				txtSecretKey.setText(tags[1].replace("key=", ""));
+			} else {
+				JOptionPane.showMessageDialog(frame, "Please give a valid NationStates telegram URL.");
+			}
 		});
 		mnCommands.add(mntmImportKeysFrom);
 
