@@ -65,6 +65,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import com.git.ifly6.javatelegram.JTelegramException;
+import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
 
 public class Communiqué {
@@ -182,8 +183,8 @@ public class Communiqué {
 
 					util.log("Recipients set.");
 
-					client.setKeys(new String[] { txtClientKey.getText(), txtSecretKey.getText(),
-							txtTelegramId.getText() });
+					client.setKeys(new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId
+							.getText()));
 
 					// Set Recruitment Status
 					client.setRecruitment(chckbxRecruitment.isSelected());
@@ -270,16 +271,16 @@ public class Communiqué {
 			File saveFile = new File(fileDialog.getDirectory() + returnFile + ".txt");
 
 			if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
-					try {
-						saveConfiguration(saveFile);
-					} catch (FileNotFoundException e1) {
-						util.log("Cannot find the location of the selected document.");
-					} catch (UnsupportedEncodingException e) {
-						util.log("Encoding of selected document is not supported. Create a new savefile.");
-					}
+				try {
+					saveConfiguration(saveFile);
+				} catch (FileNotFoundException e1) {
+					util.log("Cannot find the location of the selected document.");
+				} catch (UnsupportedEncodingException e) {
+					util.log("Encoding of selected document is not supported. Create a new savefile.");
 				}
-				util.log("Configuration saved.");
-			});
+			}
+			util.log("Configuration saved.");
+		});
 		mnFile.add(mntmSaveConfiguration);
 
 		JMenuItem mntmLoadConfiguration = new JMenuItem("Load Configuration");
@@ -365,18 +366,18 @@ public class Communiqué {
 
 		JMenuItem mntmImportVoting = new JMenuItem("Import Voting Delegates");
 		mntmImportVoting
-				.addActionListener(al -> {
-					String input = JOptionPane
-							.showInputDialog(
-									frame,
-									"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
-									"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
-					input = input.replaceAll("\\(.+?\\)", "");
-					String[] list = input.split(",");
-					for (String element : list) {
-						util.codePrintln(element.toLowerCase().replace(" ", "_"));
-					}
-				});
+		.addActionListener(al -> {
+			String input = JOptionPane
+					.showInputDialog(
+							frame,
+							"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
+							"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
+			input = input.replaceAll("\\(.+?\\)", "");
+			String[] list = input.split(",");
+			for (String element : list) {
+				util.codePrintln(element.toLowerCase().replace(" ", "_"));
+			}
+		});
 		mnCommands.add(mntmImportVoting);
 
 		JMenuItem mntmImportApprovingDelegates = new JMenuItem("Import Approving Delegates");
@@ -445,10 +446,10 @@ public class Communiqué {
 		// Check file version.
 		if (fileReader.isCompatible(version)) {
 			// Set Keys
-			String[] keys = fileReader.getKeys();
-			txtClientKey.setText(keys[0]);
-			txtSecretKey.setText(keys[1]);
-			txtTelegramId.setText(keys[2]);
+			JTelegramKeys keys = fileReader.getKeys();
+			txtClientKey.setText(keys.getClientKey());
+			txtSecretKey.setText(keys.getSecretKey());
+			txtTelegramId.setText(keys.getTelegramId());
 
 			// Set Recruitment Flag
 			chckbxRecruitment.setSelected(fileReader.getRecruitmentFlag());
@@ -487,7 +488,7 @@ public class Communiqué {
 		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file);
 		updateCode();
 
-		fileWriter.setKeys(new String[] { txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId.getText() });
+		fileWriter.setKeys(txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId.getText());
 		fileWriter.setBody(codePane.getText());
 		fileWriter.setRecuitment(chckbxRecruitment.isSelected());
 		fileWriter.write();

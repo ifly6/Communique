@@ -10,13 +10,14 @@ import com.git.ifly6.communique.CommuniquéFileReader;
 import com.git.ifly6.communique.CommuniquéFileWriter;
 import com.git.ifly6.communique.CommuniquéParser;
 import com.git.ifly6.javatelegram.JTelegramException;
+import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
 
 public class Marconi {
 
 	static MarconiLogger util = new MarconiLogger();
 	static JavaTelegram client = new JavaTelegram(util);
-	static String[] keys = { "", "", "" };
+	static JTelegramKeys keys = new JTelegramKeys();
 	static String[] recipients = {};
 	static boolean isRecruitment = true;
 	public static final int version = 1;
@@ -32,8 +33,9 @@ public class Marconi {
 			}
 
 			// Give a chance to check the keys.
-			String keysResponse = util.prompt("Are these keys correct? " + keys[0] + ", " + keys[1] + ", " + keys[2]
-					+ " [Yes] or [No]?", new String[] { "yes", "no", "y", "n" });
+			String keysResponse = util.prompt(
+					"Are these keys correct? " + keys.getClientKey() + ", " + keys.getSecretKey() + ", "
+							+ keys.getTelegramId() + " [Yes] or [No]?", new String[] { "yes", "no", "y", "n" });
 			if (keysResponse.startsWith("y")) {
 
 				String recruitmentResponse = util.prompt("Is the current recruitment flag (" + isRecruitment

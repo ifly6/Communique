@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
 
+import com.git.ifly6.javatelegram.JTelegramKeys;
+
 public class CommuniquéFileWriter {
 
 	static final int version = Communiqué.version;
 	PrintWriter writer;
-	String[] keys = { "", "", "" };
+	JTelegramKeys keys = new JTelegramKeys();
 	String recipients = "";
 	boolean isRecruitment = true;
 
@@ -23,15 +25,18 @@ public class CommuniquéFileWriter {
 	}
 
 	public void setKeys(String clientKey, String secretKey, String telegramId) {
-		keys[0] = clientKey;
-		keys[1] = secretKey;
-		keys[2] = telegramId;
+		keys.setClientKey(clientKey);
+		keys.setSecretKey(secretKey);
+		keys.setTelegramId(telegramId);
 	}
 
+	@Deprecated
 	public void setKeys(String[] inputKeys) {
-		if (keys.length == inputKeys.length) {
-			keys = inputKeys;
-		}
+		keys.setKeys(inputKeys);
+	}
+
+	public void setKeys(JTelegramKeys inputKeys) {
+		keys = inputKeys;
 	}
 
 	public void setBody(String codeContents) {
@@ -68,9 +73,9 @@ public class CommuniquéFileWriter {
 		writer.println(header);
 		writer.println(headerDate);
 		writer.println(headerVers + "\n");
-		writer.println("client_key=" + keys[0]);
-		writer.println("secret_key=" + keys[1]);
-		writer.println("telegram_id=" + keys[2]);
+		writer.println("client_key=" + keys.getClientKey());
+		writer.println("secret_key=" + keys.getSecretKey());
+		writer.println("telegram_id=" + keys.getTelegramId());
 		writer.println("isRecruitment=" + isRecruitment);
 		writer.println("\n");
 

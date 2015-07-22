@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.Scanner;
 
 import com.git.ifly6.javatelegram.JTelegramException;
+import com.git.ifly6.javatelegram.JTelegramKeys;
 
 public class MorseLauncher {
 
@@ -78,7 +79,7 @@ public class MorseLauncher {
 
 		// Create the client instance
 		Morse client = new Morse(util);
-		client.setKeys(keys);
+		client.setKeys(new JTelegramKeys(keys[0], keys[1], keys[2]));
 
 		if (args.length > 0) {
 			util.log("Assuming that the file in the arguments is a recipients list (one recipient per line)");
