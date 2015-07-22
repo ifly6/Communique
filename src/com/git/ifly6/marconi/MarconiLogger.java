@@ -73,4 +73,18 @@ public class MarconiLogger implements JTelegramLogger {
 		return response;
 	}
 
+	/**
+	 * Prompts for a yes or no question.
+	 * 
+	 * @param prompt
+	 *            The question posed to the user.
+	 * @param trueFalse
+	 *            The existence of this boolean leads to the setting of valid responses to ones appropriate for a yes or
+	 *            no answer.
+	 * @return
+	 */
+	public String prompt(String prompt, boolean trueFalse) {
+		return prompt(prompt, new String[] { "yes", "no", "y", "n" });
+	}
+
 }

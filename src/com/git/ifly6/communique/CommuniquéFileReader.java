@@ -12,7 +12,7 @@ public class CommuniquéFileReader {
 
 	ArrayList<String> fileContents = new ArrayList<String>(0);
 	static final int version = Communiqué.version;
-	String[][] information = { {}, {} };
+	Object[] information = {};
 	private boolean isRecruitment;
 
 	/**
@@ -46,31 +46,30 @@ public class CommuniquéFileReader {
 	 * @return String[] containing the keys in the order { clientKey, secretKey, telegramId }.
 	 */
 	public JTelegramKeys getKeys() {
-		JTelegramKeys keys = new JTelegramKeys(information[0][0], information[0][1], information[0][2]);
-		return keys;
+		return (JTelegramKeys) information[0];
 	}
 
 	public String[] getRecipients() {
-		return information[1];
+		return (String[]) information[1];
 	}
 
 	public boolean getRecruitmentFlag() {
 		return isRecruitment;
 	}
 
-	private String[][] parseConfig() {
-		String[] keys = { "", "", "" };
+	private Object[] parseConfig() {
+		JTelegramKeys keys = new JTelegramKeys();
 		ArrayList<String> recipientsList = new ArrayList<String>(0);
 
 		for (String element : fileContents) {
 			if (element.startsWith("client_key=")) {
-				keys[0] = element.replace("client_key=", "");
+				keys.setClientKey(element.replace("client_key=", ""));
 
 			} else if (element.startsWith("secret_key=")) {
-				keys[1] = element.replace("secret_key=", "");
+				keys.setSecretKey(element.replace("secret_key=", ""));
 
 			} else if (element.startsWith("telegram_id=")) {
-				keys[2] = element.replace("telegram_id=", "");
+				keys.setTelegramId(element.replace("telegram_id=", ""));
 
 			} else if (element.startsWith("isRecruitment=")) {
 				isRecruitment = Boolean.getBoolean(element.replace("isRecruitment=", ""));
@@ -81,7 +80,7 @@ public class CommuniquéFileReader {
 			}
 		}
 
-		return new String[][] { keys, recipientsList.toArray(new String[recipientsList.size()]) };
+		return new Object[] { keys, recipientsList.toArray(new String[recipientsList.size()]) };
 	}
 
 	/**
