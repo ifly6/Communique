@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.git.ifly6.javatelegram.JTelegramKeys;
+
 public class CommuniquéFileReader {
 
 	ArrayList<String> fileContents = new ArrayList<String>(0);
@@ -43,8 +45,9 @@ public class CommuniquéFileReader {
 	 *
 	 * @return String[] containing the keys in the order { clientKey, secretKey, telegramId }.
 	 */
-	public String[] getKeys() {
-		return information[0];
+	public JTelegramKeys getKeys() {
+		JTelegramKeys keys = new JTelegramKeys(information[0][0], information[0][1], information[0][2]);
+		return keys;
 	}
 
 	public String[] getRecipients() {
