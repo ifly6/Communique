@@ -37,6 +37,17 @@ import java.util.Date;
 
 import com.git.ifly6.javatelegram.JTelegramLogger;
 
+/**
+ * This class interfaces with {@link com.git.ifly6.javatelegram.JTelegramLogger JTelegramLogger} to provide a way of
+ * reporting on the output of the <code>JavaTelegram</code> client.
+ *
+ * <p>
+ * Note that this class doubles as a easy way for <code>Communiqué</code> to log to itself important information. The
+ * methods inside it are effectively just text manipulation methods on the part of both Communiqué and JavaTelegram.
+ * </p>
+ *
+ * @see Communiqué
+ */
 public class CommuniquéLogger implements JTelegramLogger {
 
 	public CommuniquéLogger() {
@@ -45,6 +56,9 @@ public class CommuniquéLogger implements JTelegramLogger {
 
 	/**
 	 * Localises the appropriate output for our Communiqué interface.
+	 *
+	 * @param input
+	 *            is the <code>String</code> to be input into <code>logPane</code>
 	 */
 	@Override
 	public void log(String input) {
@@ -55,10 +69,11 @@ public class CommuniquéLogger implements JTelegramLogger {
 	}
 
 	/**
-	 * Convenience method so that the Communiqué interface can easily (and without errors) print to its codePane.
+	 * Convenience method so that the <code>Communiqué</code> interface can easily (and without errors) print to its
+	 * <code>codePane</code>.
 	 *
 	 * @param input
-	 *            the string to be appended to codePane.
+	 *            is the string to be appended to <code>codePane</code>
 	 */
 	public void codePrintln(String input) {
 		Communiqué.codePane.append(input + "\n");
