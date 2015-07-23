@@ -32,17 +32,71 @@ import java.util.Set;
 import com.git.ifly6.javatelegram.JTelegramFetcher;
 import com.git.ifly6.javatelegram.JTelegramLogger;
 
+/**
+ * This class is the central hub of the Communiqué system. It parses the <code>String</code> given to it with all the
+ * recipients (and tags which stand in for multiple recipients) into a <code>String[]</code> which has every single
+ * recipient, expanded, on each index. It also handles the removal of certain recipients from the list and filtering of
+ * recipients as well.
+ *
+ * <h2>Tags</h2> There are a number of tags which stand for large defined lists of recipients.
+ * <table>
+ * <tr>
+ * <td><code>region:[regionName]</code></td>
+ * <td>this tag inserts every occupant of a region given in <code>[regionName]</code> into the recipients list.</td>
+ * </tr>
+ * <tr>
+ * <td><code>wa:delegates</code></td>
+ * <td>this tag inserts every World Assembly delegate into the recipients list.</td>
+ * </tr>
+ * <tr>
+ * <td><code>wa:members</code></td>
+ * <td>this tag inserts every World Assembly member into the recipients list. It is best to use this on a regional basis
+ * with the <code>-></code> operator to filter out the World Assembly members inside a certain region.</td>
+ * </tr>
+ * <tr>
+ * <td><code>world:new</code></td>
+ * <td>this tag inserts 50 new nations into the recipients list.</td>
+ * </tr>
+ * </table>
+ *
+ * <h2>Grammar</h2> There are a few logical operators for this program to help you refine your list more efficiently.
+ * <table>
+ * <tr>
+ * <td><code>/&emsp;</code></td>
+ * <td>tells the parser to exclude all instances of the following nation from the final list, for example,
+ * <code>/imperium_anglorum</code> would exclude the nation of Imperium Anglorum from the final list. It is a
+ * <code>NOT</code> operator. All lines are invertable.</td>
+ * </tr>
+ * <tr>
+ * <td><code>-></code></td>
+ * <td>tells the parser to only add nations which are in both lists (the one before and after the arrow), for example,
+ * <code>region:europe -> wa:members</code> would yield the list of European nations in WA members. It is a
+ * <code>IN</code> operator.</td>
+ * </tr>
+ * </table>
+ */
 public class CommuniquéParser {
 
+	/**
+	 * This string determines what version of the parser is currently being used. The entire program is build around
+	 * this string for extended compatibility purposes.
+	 */
 	static int version = 2;
 	JTelegramLogger util;
 
+	/**
+	 * Method constructs the object. A JTelegramLogger must be provided to effectively provide an outlet for
+	 * information.
+	 *
+	 * @param logger
+	 */
 	public CommuniquéParser(JTelegramLogger logger) {
 		util = logger;
 	}
 
 	/**
-	 * Determine whether a String is a special tag or not.
+	 * Determine whether a String is a special tag or not. What strings are tags is determined in the documentation on
+	 * the grammar of the markdown language.
 	 *
 	 * @param element
 	 * @return

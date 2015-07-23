@@ -35,6 +35,19 @@ import java.util.LinkedHashSet;
 
 import com.git.ifly6.javatelegram.JTelegramKeys;
 
+/**
+ * Convenience class for correctly writing Communiqué configuration files. It is directly based on
+ * <code>PrintWriter</code>. It utilises the encoding <code>UTF-8</code>.
+ *
+ * <p>
+ * Note that this class will not automatically load and process any documents you give it when it is created. If you
+ * want that behaviour to change, extend the class and write a new constructor to directly call the <code>write()</code>
+ * method.
+ * </p>
+ *
+ * @see CommuniquéFileWriter
+ * @see CommuniquéParser
+ */
 public class CommuniquéFileWriter {
 
 	static final int version = CommuniquéParser.getVersion();
@@ -43,48 +56,152 @@ public class CommuniquéFileWriter {
 	String recipients = "";
 	boolean isRecruitment = true;
 
-	public CommuniquéFileWriter(File file) throws FileNotFoundException, UnsupportedEncodingException {
-		writer = new PrintWriter(file, "UTF-8");
+	/**
+	 * Joins up a <code>String[]</code> into a <code>String</code> to make it compatible with the parsing system.
+	 *
+	 * @param codeContents
+	 *            a <code>String[]</code> containing all of the recipients on each index
+	 * @return a <code>String</code> containing all of the recipients delimited by <code>\n</code>
+	 */
+	public static String arrayToString(String[] codeContents) {
+		String recipients = "";
+		for (String element : codeContents) {
+			recipients = recipients + element + "\n";
+		}
+
+		return recipients;
 	}
 
+	/**
+	 * This is the basic constructor, which initialises an empty CommuniquéFileWriter.
+	 *
+	 * @param file
+	 *            to which a Communiqué configuration file will be written
+	 * @throws FileNotFoundException
+	 *             if there is no file there or the file cannot be written to
+	 * @throws UnsupportedEncodingException
+	 *             if your computer does not support UTF-8 as a valid encoding
+	 */
+	public CommuniquéFileWriter(File file) throws FileNotFoundException, UnsupportedEncodingException {
+		this(file, (JTelegramKeys) null, true, (String) null);
+	}
+
+	/**
+	 * This is a more advanced constructor which initialises the keys, recruitment flag, and recipients list directly.
+	 *
+	 * @param file
+	 *            to which a Communiqué configuration file will be written
+	 * @param providedKeys
+	 *            given for writing directly to configuration
+	 * @param isRecruitment
+	 *            flag which will be written to the configuration
+	 * @param bodyString
+	 *            the list of recipients in a <code>String</code> delimited by <code>\n</code>
+	 * @throws FileNotFoundException
+	 *             if the FileWriter cannot write to the file
+	 * @throws UnsupportedEncodingException
+	 *             if the FileWriter cannot write in UTF-8
+	 */
+	public CommuniquéFileWriter(File file, JTelegramKeys providedKeys, boolean isRecruitment, String bodyString)
+			throws FileNotFoundException, UnsupportedEncodingException {
+		writer = new PrintWriter(file, "UTF-8");
+		this.setKeys(providedKeys);
+		this.setRecuitment(isRecruitment);
+		this.setBody(bodyString);
+	}
+
+	/**
+	 * This is a more advanced constructor which initialises the keys, recruitment flag, and recipients list directly.
+	 *
+	 * @param file
+	 *            to which a Communiqué configuration file will be written
+	 * @param providedKeys
+	 *            given for writing directly to configuration
+	 * @param isRecruitment
+	 *            flag which will be written to the configuration
+	 * @param bodyString
+	 *            the list of recipients in a <code>String[]</code>
+	 * @throws FileNotFoundException
+	 *             if the FileWriter cannot write to the file
+	 * @throws UnsupportedEncodingException
+	 *             if the FileWriter cannot write in UTF-8
+	 */
+	public CommuniquéFileWriter(File file, JTelegramKeys providedKeys, boolean isRecruitment, String[] bodyArray)
+			throws FileNotFoundException, UnsupportedEncodingException {
+		this(file, providedKeys, isRecruitment, arrayToString(bodyArray));
+	}
+
+	/**
+	 * Sets the keys inside a <code>JTelegramKeys</code> object which will then be written to disc.
+	 *
+	 * @param clientKey
+	 *            is the client key used when sending telegrams
+	 * @param secretKey
+	 *            is the secret key used when sending telegrams
+	 * @param telegramId
+	 *            is the key of the telegram sent to recipients
+	 */
 	public void setKeys(String clientKey, String secretKey, String telegramId) {
 		keys.setClientKey(clientKey);
 		keys.setSecretKey(secretKey);
 		keys.setTelegramId(telegramId);
 	}
 
+	/**
+	 * This is an old method to set the keys inside the new <code>JTelegramKeys</code> object which will then be written
+	 * to disc. It was written to keep compatibility with API version 1.
+	 *
+	 * @param inputKeys
+	 *            a String array containing the keys in this order: <code>{ clientKey, secretKey, telegramId }</code>
+	 */
 	@Deprecated
 	public void setKeys(String[] inputKeys) {
 		keys.setKeys(inputKeys);
 	}
 
+	/**
+	 * Sets the keys inside a <code>JTelegramKeys</code> object which will then be written to disc.
+	 *
+	 * @param inputKeys
+	 *            is a <code>JTelegramKeys</code> object
+	 */
 	public void setKeys(JTelegramKeys inputKeys) {
 		keys = inputKeys;
 	}
 
+	/**
+	 * Sets the contents of the recipients.
+	 *
+	 * @param codeContents
+	 *            a <code>String</code> containing all of the recipients delimited by <code>\n</code>
+	 */
 	public void setBody(String codeContents) {
 		recipients = codeContents;
 	}
 
 	/**
-	 * Convenience method if you don't want to turn your String array into a string just to fit the original setBody
-	 * method.
+	 * Sets the contents of the recipients.
 	 *
 	 * @param codeContents
+	 *            a <code>String[]</code> containing all of the recipients delimited by <code>\n</code>
 	 */
 	public void setBody(String[] codeContents) {
-		String recipients = "";
-		for (String element : codeContents) {
-			recipients = recipients + element + "\n";
-		}
-
-		setBody(recipients);
+		setBody(arrayToString(codeContents));
 	}
 
+	/**
+	 * Sets the <code>isRecruitment</code> flag inside the object.
+	 *
+	 * @param recuitment
+	 *            is the flag sent to the writer
+	 */
 	public void setRecuitment(boolean recuitment) {
 		isRecruitment = recuitment;
 	}
 
+	/**
+	 * Instructs the instance of the <code>CommuniquéFileWriter</code> to write the given information to file.
+	 */
 	public void write() {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();

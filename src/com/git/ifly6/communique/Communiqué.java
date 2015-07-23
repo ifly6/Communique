@@ -68,6 +68,29 @@ import com.git.ifly6.javatelegram.JTelegramException;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
 
+/**
+ * <code>Communiqué</code> is the main class of this entire GUI. It handles all the construction of the GUI and the
+ * effects of its actions. Unlike {@link com.git.ifly6.marconi.Marconi Marconi}, it does not like any arguments and
+ * hence, will not load files before start. It does, however, support the loading and saving of configuration files
+ * designed for Communiqué.
+ *
+ * <p>
+ * Communiqué is designed around the easy processing of recipients. The actual process of sending and authentication is
+ * kept at the bottom of the frame in the fields <code>txtClientKey</code>, <code>txtSecretKey</code>, and
+ * <code>txtTelegramId</code>. The button <code>btnParse</code> calls a parsing call which displays sample information
+ * onto the screen. The button <code>btnSend</code> is self-explanatory.
+ * </p>
+ *
+ * <p>
+ * There is no system for determining the length time in between telegrams due to there being no need for such a thing.
+ * The developers believe that nobody will bother to put a number in a hypothetical box which is greater than the
+ * allowed for any reason, and since smaller numbers are prohibited, it is therefore screen clutter to include such a
+ * box in the first place.
+ * </p>
+ *
+ * @since v1
+ * @see com.git.ifly6.marconi.Marconi
+ */
 public class Communiqué {
 
 	// TODO Live updating recipients list
@@ -94,7 +117,9 @@ public class Communiqué {
 	private JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
 	/**
-	 * Launch the application.
+	 * This method is the starting point of the application. It does not process any arguments given. It only contains
+	 * some GUI fancy-work to be done before its initialisation, but otherwise, it only calls a new version of this
+	 * class which then calls the initialisation function.
 	 */
 	public static void main(String[] args) {
 
@@ -116,14 +141,14 @@ public class Communiqué {
 	}
 
 	/**
-	 * Create the application.
+	 * Using a constructor, create the application. This takes no arguments.
 	 */
 	public Communiqué() {
 		initialise();
 	}
 
 	/**
-	 * Initialise the contents of the frame.
+	 * Initialise the contents of the frame and build the GUI.
 	 */
 	private void initialise() {
 		frame = new JFrame("Communiqué " + version);
@@ -433,12 +458,13 @@ public class Communiqué {
 	}
 
 	/**
-	 * Load a configuration file. Method here has been localised for this setup from the more general version in
-	 * CommuniquéFileReader.
+	 * A method called to load configuration files from disc. Method here has been localised for this setup from the
+	 * more general version in <code>CommuniquéFileReader</code>.
 	 *
 	 * @param file
 	 * @throws FileNotFoundException
 	 * @throws JTelegramException
+	 * @see CommuniquéFileReader
 	 */
 	private void loadConfiguration(File file) throws JTelegramException, FileNotFoundException {
 		CommuniquéFileReader fileReader = new CommuniquéFileReader(file);
@@ -464,6 +490,14 @@ public class Communiqué {
 		}
 	}
 
+	/**
+	 * Reads the standard configuration file for the last used client key. The method returns the client key from the
+	 * configuration file.
+	 *
+	 * @return the client key from file
+	 * @throws IOException
+	 *             if there was a problem in reading or finding the configuration file
+	 */
 	private String readProperties() throws IOException {
 		Properties prop = new Properties();
 		FileInputStream stream = new FileInputStream(new File(System.getProperty("user.dir") + "/config.properties"));
@@ -477,12 +511,15 @@ public class Communiqué {
 	}
 
 	/**
-	 * Configuration saving here has been localised for this setup using this method.
+	 * A method called to save configuration files to disc. Method here has been localised for this setup from the more
+	 * general version in <code>CommuniquéFileWriter</code>.
 	 *
 	 * @param file
-	 *            The place at which the file will be saved
+	 *            the location at which the configuration will be saved
 	 * @throws FileNotFoundException
+	 *             if there cannot be a file made in the location specified
 	 * @throws UnsupportedEncodingException
+	 *             if there is already a file there which cannot be written upon
 	 */
 	private void saveConfiguration(File file) throws FileNotFoundException, UnsupportedEncodingException {
 		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file);
@@ -495,7 +532,8 @@ public class Communiqué {
 	}
 
 	/**
-	 * Properties writing here has been localised for this setup using this method.
+	 * Writes the standard configuration file for the currently used client key. Properties writing here has been
+	 * localised for this setup using this method.
 	 *
 	 * @throws IOException
 	 */
