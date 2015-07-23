@@ -34,7 +34,7 @@ import com.git.ifly6.javatelegram.JTelegramKeys;
 public class CommuniquéFileReader {
 
 	ArrayList<String> fileContents = new ArrayList<String>(0);
-	static final int version = Communiqué.version;
+	static final int version = CommuniquéParser.getVersion();
 	Object[] information = {};
 	private boolean isRecruitment;
 

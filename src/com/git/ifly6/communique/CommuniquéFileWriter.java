@@ -37,7 +37,7 @@ import com.git.ifly6.javatelegram.JTelegramKeys;
 
 public class CommuniquéFileWriter {
 
-	static final int version = Communiqué.version;
+	static final int version = CommuniquéParser.getVersion();
 	PrintWriter writer;
 	JTelegramKeys keys = new JTelegramKeys();
 	String recipients = "";
