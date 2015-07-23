@@ -42,7 +42,7 @@ public class CommuniquéParser {
 
 	/**
 	 * Determine whether a String is a special tag or not.
-	 * 
+	 *
 	 * @param element
 	 * @return
 	 */
@@ -152,7 +152,10 @@ public class CommuniquéParser {
 				expandedList.addAll(both);
 
 			} else if (isTag(element)) {
-				tagsList.addAll(Arrays.asList(expandTag(element)));
+				expandedList.addAll(Arrays.asList(expandTag(element)));
+
+			} else {
+				expandedList.add(element);
 			}
 		}
 
