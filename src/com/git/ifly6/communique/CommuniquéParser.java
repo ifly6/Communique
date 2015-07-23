@@ -34,6 +34,7 @@ import com.git.ifly6.javatelegram.JTelegramLogger;
 
 public class CommuniquéParser {
 
+	static int version = 2;
 	JTelegramLogger util;
 
 	public CommuniquéParser(JTelegramLogger logger) {
@@ -245,6 +246,10 @@ public class CommuniquéParser {
 		}
 
 		return recipientsParse(output);
+	}
+
+	public static int getVersion() {
+		return version;
 	}
 
 }

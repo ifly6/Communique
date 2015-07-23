@@ -75,7 +75,7 @@ public class Communiqué {
 
 	CommuniquéLogger util = new CommuniquéLogger();
 	JavaTelegram client = new JavaTelegram(util);
-	static int version = 2;
+	static int version = CommuniquéParser.getVersion();
 
 	private JFrame frame;
 	private JTextField txtClientKey;
@@ -271,16 +271,16 @@ public class Communiqué {
 			File saveFile = new File(fileDialog.getDirectory() + returnFile + ".txt");
 
 			if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
-				try {
-					saveConfiguration(saveFile);
-				} catch (FileNotFoundException e1) {
-					util.log("Cannot find the location of the selected document.");
-				} catch (UnsupportedEncodingException e) {
-					util.log("Encoding of selected document is not supported. Create a new savefile.");
+					try {
+						saveConfiguration(saveFile);
+					} catch (FileNotFoundException e1) {
+						util.log("Cannot find the location of the selected document.");
+					} catch (UnsupportedEncodingException e) {
+						util.log("Encoding of selected document is not supported. Create a new savefile.");
+					}
 				}
-			}
-			util.log("Configuration saved.");
-		});
+				util.log("Configuration saved.");
+			});
 		mnFile.add(mntmSaveConfiguration);
 
 		JMenuItem mntmLoadConfiguration = new JMenuItem("Load Configuration");
@@ -366,18 +366,18 @@ public class Communiqué {
 
 		JMenuItem mntmImportVoting = new JMenuItem("Import Voting Delegates");
 		mntmImportVoting
-		.addActionListener(al -> {
-			String input = JOptionPane
-					.showInputDialog(
-							frame,
-							"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
-							"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
-			input = input.replaceAll("\\(.+?\\)", "");
-			String[] list = input.split(",");
-			for (String element : list) {
-				util.codePrintln(element.toLowerCase().replace(" ", "_"));
-			}
-		});
+				.addActionListener(al -> {
+					String input = JOptionPane
+							.showInputDialog(
+									frame,
+									"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
+									"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
+					input = input.replaceAll("\\(.+?\\)", "");
+					String[] list = input.split(",");
+					for (String element : list) {
+						util.codePrintln(element.toLowerCase().replace(" ", "_"));
+					}
+				});
 		mnCommands.add(mntmImportVoting);
 
 		JMenuItem mntmImportApprovingDelegates = new JMenuItem("Import Approving Delegates");

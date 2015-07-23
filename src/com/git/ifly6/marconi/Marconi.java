@@ -20,7 +20,7 @@ public class Marconi {
 	static JTelegramKeys keys = new JTelegramKeys();
 	static String[] recipients = {};
 	static boolean isRecruitment = true;
-	public static final int version = 2;
+	public static final int version = CommuniquéParser.getVersion();
 
 	public static void main(String[] args) {
 		if (args.length > 0) {		// If there is not a provided file, do nothing.
@@ -82,7 +82,8 @@ public class Marconi {
 				util.log("Please make any alterations needed and restart this program.");
 			}
 		} else {
-			util.log("Please provide a configuration file in the same type produced by Communiqué in the arguments.");
+			util.log("Please provide a configuration file in the same type produced by Communiqué " + version
+					+ " in the arguments.");
 		}
 	}
 
