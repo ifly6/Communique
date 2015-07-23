@@ -20,7 +20,7 @@ public class Marconi {
 	static JTelegramKeys keys = new JTelegramKeys();
 	static String[] recipients = {};
 	static boolean isRecruitment = true;
-	public static final int version = 1;
+	public static final int version = 2;
 
 	public static void main(String[] args) {
 		if (args.length > 0) {		// If there is not a provided file, do nothing.
