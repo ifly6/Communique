@@ -75,7 +75,7 @@ public class Communiqué {
 
 	CommuniquéLogger util = new CommuniquéLogger();
 	JavaTelegram client = new JavaTelegram(util);
-	static int version = 1;
+	static int version = 2;
 
 	private JFrame frame;
 	private JTextField txtClientKey;
@@ -294,13 +294,13 @@ public class Communiqué {
 			try {
 				if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
 					loadConfiguration(configFile);
+					util.log("Configuration loaded.");
 				}
 			} catch (JTelegramException e2) {
 				util.log("Version of file provided mismatches with version here.");
 			} catch (FileNotFoundException e) {
 				util.log("Cannot find file provided.");
 			}
-			util.log("Configuration loaded.");
 		});
 		mnFile.add(mntmLoadConfiguration);
 
