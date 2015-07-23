@@ -3,7 +3,7 @@
 ## Summary ##
 Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. It was originally inspired by Auralia's work on the matter and thus, recognised the limitations of writing on a Windows-only platform when most headless servers are Linux boxes. It is directly based on top of [JavaTelegram](https://github.com/iFlyCode/NationStates-JavaTelegram) a iFlyCode Java library designed to interface with NationStates itself.
 
-Since the general gist of this program is the same goal as Auralia's AutoTelegram, it will naturally be following many of the same protocols and functions.
+Since the general gist of this program is the same goal as Auralia's AutoTelegram, it will naturally be following many of the same protocols and functions. Currently, we are on version `2`.
 
 Note that it is *your* responsibility to know how the telegram API works. Use of this program is agreement that you understand those limitations and requirements. It also agrees that you cannot claim losses, damages, or other negative effects from the author if action is taken against your NationStates account.
 
@@ -24,11 +24,12 @@ Note that it is *your* responsibility to know how the telegram API works. Use of
 
 4. Go to the recipients tab and add in your nations. There are a number of tags supported in the program as well as a NOT tag.
   - Nations go individually on each line.
-  - Regions go individually on each line with the following syntax 'region:[name]'
-  - WA delegates and nations receive their own syntax as well: 'WA:delegates' and 'WA:members'
-  - To say 'not', put in a '/' before the tag
-  - For example, I can say: 'region:europe' and '/imperium_anglorum', which will send telegrams to everyone in Europe except Imperium Anglorum. Or, I could say 'region:europe' and '/WA:members', which would send telegrams to all residents of Europe who are not WA members. 
-  - You cannot invert the tag and say 'region:europe' and 'not the nations who are not in the World Assembly', since there is no method for querying 'nations not in the WA'.
+  - Regions go individually on each line with the following syntax `region:[name]`
+  - WA delegates and nations receive their own syntax as well: `WA:delegates` and `WA:members`
+  - To say 'not', put in a `/` before the tag
+  - For example, I can say: `region:europe` and `/imperium_anglorum`, which will send telegrams to everyone in Europe except Imperium Anglorum. Or, I could say `region:europe` and `/WA:members`, which would send telegrams to all residents of Europe who are not WA members.
+  - In version `2`, you can use an arrow operator, `->` to specify persons who are only in both groups. For example, the line `region:europe -> wa:members` would mean 'nations in Europe in (or, who are also) WA members'.
+  - You cannot invert the tags if their resulting sample space would be something which cannot be easily queried (like 'remove members who are not in the World Assembly', as 'not in the World Assembly' is not defined).
 
 5. Click the 'SEND' button to send the telegrams. This program supports the use of multiple API keys by creating multiple threads. However, for that, you would need multiple API keys.
 
@@ -46,3 +47,6 @@ While there will be a version number, currently, there is no such number, since,
   - Morse does not do any of this. It only has support for a simple list of recipients without support for loading or saving of anything more than the client key. 
   - Marconi is a headless client. It will only accept valid files from Communiqué and then read those files and use all the data in them. It does not write these files (other than updating their sent lists). 
   - Note that Morse will likely be phased out in favour of just Communiqué and Marconi.
+
+2. Version 2 is a change due to the introduction of a new operator which is written to file. The `->` operator, signifying 'in', cannot be parsed by version 1 parsers, and hence, necessitated a change in the version number.
+  - Added `->` modifier, signifying 'in', e.g. `region:europe -> wa:members` would return 'nations of Europe in WA:members' and `region:europe -> wa:delegates` would return the Delegate of Europe. Due to the way the 'both' function works, it is commutative.
