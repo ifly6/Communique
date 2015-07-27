@@ -96,10 +96,13 @@ public class Communiqué {
 	// TODO Live updating recipients list
 	// TODO Interface with NS Happenings
 
+	// Communiqué Requirements
+	static int version = CommuniquéParser.getVersion();
 	CommuniquéLogger util = new CommuniquéLogger();
 	JavaTelegram client = new JavaTelegram(util);
-	static int version = CommuniquéParser.getVersion();
+	Thread sendingThread = new Thread();
 
+	// GUI Stuff
 	private JFrame frame;
 	private JTextField txtClientKey;
 	private JTextField txtSecretKey;
@@ -187,54 +190,58 @@ public class Communiqué {
 
 		JButton btnSend = new JButton("SEND");
 		btnSend.addActionListener(al -> {
+			if (!sendingThread.isAlive()) {
+				client.setKillThread(false);
 
-			client.setKillThread(false);
+				// Create another thread so we do not freeze up the GUI
+				Runnable runner = new Runnable() {
+					@Override
+					public void run() {
+						CommuniquéParser parser = new CommuniquéParser(util);
+						String[] recipients = parser.recipientsParse(codePane.getText());	// Get recipients
+						client.setRecipients(recipients);									// Set recipients
 
-			// Create another thread so we do not freeze up the GUI
-			Runnable runner = new Runnable() {
-				@Override
-				public void run() {
-					CommuniquéParser parser = new CommuniquéParser(util);
-					String[] recipients = parser.recipientsParse(codePane.getText());	// Get recipients
-					client.setRecipients(recipients);									// Set recipients
+						// Review Recipients
+						String recipient = "# == Communiqué Recipients ==\n"
+								+ "# This tab shows all recipients after parsing of the Code tab.\n\n";
+						for (String element : recipients) {
+							recipient = recipient + element + "\n";
+						}
+						recipientsPane.setText(recipient);
 
-					// Review Recipients
-					String recipient = "# == Communiqué Recipients ==\n"
-							+ "# This tab shows all recipients after parsing of the Code tab.\n\n";
-					for (String element : recipients) {
-						recipient = recipient + element + "\n";
+						util.log("Recipients set.");
+
+						client.setKeys(new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId
+								.getText()));
+
+						// Set Recruitment Status
+						client.setRecruitment(chckbxRecruitment.isSelected());
+
+						// Save client key
+						try {
+							writeProperties();
+						} catch (IOException e) {
+						}
+
+						// In case you need a dry run, it will do everything but send.
+						if (!chckbxmntmDisableSending.isSelected()) {
+							client.connect();
+							util.log("Queries Complete.");
+						} else {
+							util.log("Sending is disabled. Enable sending to send telegrams.");
+						}
+
+						// Update recipients pane.
+						updateCode();
 					}
-					recipientsPane.setText(recipient);
+				};
 
-					util.log("Recipients set.");
-
-					client.setKeys(new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId
-							.getText()));
-
-					// Set Recruitment Status
-					client.setRecruitment(chckbxRecruitment.isSelected());
-
-					// Save client key
-					try {
-						writeProperties();
-					} catch (IOException e) {
-					}
-
-					// In case you need a dry run, it will do everything but send.
-					if (!chckbxmntmDisableSending.isSelected()) {
-						client.connect();
-						util.log("Queries Complete.");
-					} else {
-						util.log("Sending is disabled. Enable sending to send telegrams.");
-					}
-
-					// Update recipients pane.
-					updateCode();
-				}
-			};
-
-			new Thread(runner).start();
-			tabbedPane.setSelectedIndex(0);
+				sendingThread = new Thread(runner);
+				sendingThread.start();
+				tabbedPane.setSelectedIndex(0);
+			} else {
+				util.log("There is already a campaign running. Terminate that campaign and then retry.");
+			}
 		});
 
 		JButton btnParse = new JButton("PARSE");
@@ -296,18 +303,18 @@ public class Communiqué {
 			File saveFile = new File(fileDialog.getDirectory() + returnFile + ".txt");
 
 			if (returnFile != null && !returnFile.equals("")) {		// In case they pressed cancel.
-				try {
-					saveConfiguration(saveFile);
-					util.log("Configuration saved.");
-				} catch (FileNotFoundException e1) {
-					util.log("Cannot find the location of the selected document.");
-				} catch (UnsupportedEncodingException e) {
-					util.log("Encoding of selected document is not supported. Create a new savefile.");
-				} catch (RuntimeException e) {
-					util.log("Runtime exception occurred. Likely a null pointer. Cannot save configuration file.");
+					try {
+						saveConfiguration(saveFile);
+						util.log("Configuration saved.");
+					} catch (FileNotFoundException e1) {
+						util.log("Cannot find the location of the selected document.");
+					} catch (UnsupportedEncodingException e) {
+						util.log("Encoding of selected document is not supported. Create a new savefile.");
+					} catch (RuntimeException e) {
+						util.log("Runtime exception occurred. Likely a null pointer. Cannot save configuration file.");
+					}
 				}
-			}
-		});
+			});
 		mnFile.add(mntmSaveConfiguration);
 
 		JMenuItem mntmLoadConfiguration = new JMenuItem("Load Configuration");
@@ -393,18 +400,18 @@ public class Communiqué {
 
 		JMenuItem mntmImportVoting = new JMenuItem("Import Voting Delegates");
 		mntmImportVoting
-		.addActionListener(al -> {
-			String input = JOptionPane
-					.showInputDialog(
-							frame,
-							"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
-							"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
-			input = input.replaceAll("\\(.+?\\)", "");
-			String[] list = input.split(",");
-			for (String element : list) {
-				util.codePrintln(element.toLowerCase().replace(" ", "_"));
-			}
-		});
+				.addActionListener(al -> {
+					String input = JOptionPane
+							.showInputDialog(
+									frame,
+									"Paste in the list of delegates at vote. Ex: 'Blah (150), Bleh (125), Ecksl (104)'. Include only brackets and commas.",
+									"Import Delegates from Proposal Approval", JOptionPane.PLAIN_MESSAGE);
+					input = input.replaceAll("\\(.+?\\)", "");
+					String[] list = input.split(",");
+					for (String element : list) {
+						util.codePrintln(element.toLowerCase().replace(" ", "_"));
+					}
+				});
 		mnCommands.add(mntmImportVoting);
 
 		JMenuItem mntmImportApprovingDelegates = new JMenuItem("Import Approving Delegates");
