@@ -52,7 +52,7 @@ public class Marconi {
 					try {
 						System.out.printf("%-30.30s  %-30.30s%n", expandedRecipients[x], expandedRecipients[x + 1]);
 					} catch (IndexOutOfBoundsException e) {
-						System.out.println("\n" + expandedRecipients[x]);
+						System.out.println(expandedRecipients[x] + "\n");
 					}
 				}
 
@@ -64,8 +64,9 @@ public class Marconi {
 
 					// Set the client up and go.
 					client.setKeys(keys);
-
 					client.setRecruitment(isRecruitment);
+					client.setRecipients(expandedRecipients);
+
 					client.connect();
 
 					// Update the configuration file to reflect the changed reality.
@@ -116,7 +117,7 @@ public class Marconi {
 	 */
 	private static void loadConfig(File file) throws FileNotFoundException, JTelegramException {
 		CommuniquéFileReader fileReader = new CommuniquéFileReader(file);
-		if (fileReader.isCompatible(version)) {
+		if (fileReader.isCompatible()) {
 			keys = fileReader.getKeys();
 			recipients = fileReader.getRecipients();
 			isRecruitment = fileReader.getRecruitmentFlag();

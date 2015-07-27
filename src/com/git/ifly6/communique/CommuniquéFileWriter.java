@@ -83,7 +83,7 @@ public class CommuniquéFileWriter {
 	 *             if your computer does not support UTF-8 as a valid encoding
 	 */
 	public CommuniquéFileWriter(File file) throws FileNotFoundException, UnsupportedEncodingException {
-		this(file, (JTelegramKeys) null, true, (String) null);
+		writer = new PrintWriter(file, "UTF-8");
 	}
 
 	/**

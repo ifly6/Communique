@@ -155,10 +155,10 @@ public class CommuniquéFileReader {
 	 *            <code>boolean</code> containing true or false on whether the configuration file is compatible.
 	 * @return
 	 */
-	public boolean isCompatible(int version) {
+	public boolean isCompatible() {
 		int fileVersion = Integer.parseInt(getFileVersion());
 
-		if (fileVersion < version) {
+		if (fileVersion <= version) {
 			return true;
 		}
 
