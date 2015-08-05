@@ -206,12 +206,7 @@ public class CommuniquéController {
 
 		// Estimate Time Needed
 		double numRecipients = recipients.length;
-		int seconds;
-		if (recruitmentCheckBox.isSelected()) {
-			seconds = (int) Math.round(numRecipients * 180.05);
-		} else {
-			seconds = (int) Math.round(numRecipients * 30.05);
-		}
+		int seconds = (int) Math.round(numRecipients * ((recruitmentCheckBox.isSelected()) ? 180.05 : 30.05));
 
 		int minutes = seconds / 60;
 		seconds -= minutes * 60;
@@ -219,11 +214,12 @@ public class CommuniquéController {
 		minutes -= hours * 60;
 		int days = hours / 24;
 		hours -= days * 24;
+
 		String timeNeeded = days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
 
 		// Show Recipients
 		String recipient = "# == Communiqué Recipients ==\n" + "# This tab shows all " + recipients.length
-				+ " recipients after parsing of the Code tab.\nEstimated time needed is " + timeNeeded + "\n\n";
+				+ " recipients after parsing of the Code tab.\n# Estimated time needed is " + timeNeeded + "\n\n";
 		for (String element : recipients) {
 			recipient = recipient + element + "\n";
 		}

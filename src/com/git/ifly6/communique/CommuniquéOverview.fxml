@@ -94,7 +94,7 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
                <font>
-                  <Font name="Monospaced Regular" size="13.0" />
+                  <Font name="System Font Regular" size="13.0" />
                </font>
             </CheckBox>
             <Button alignment="CENTER" mnemonicParsing="false" onAction="#parse" text="Parse">
