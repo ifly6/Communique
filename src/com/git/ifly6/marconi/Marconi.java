@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 import com.git.ifly6.communique.CommuniquéFileReader;
 import com.git.ifly6.communique.CommuniquéFileWriter;
 import com.git.ifly6.communique.CommuniquéParser;
-import com.git.ifly6.javatelegram.JTelegramException;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.javatelegram.util.JTelegramException;
 
 public class Marconi {
 

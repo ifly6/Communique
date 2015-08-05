@@ -15,9 +15,10 @@ public class Communiqué extends Application {
 	private Stage primaryStage;
 	private BorderPane rootLayout;
 
-	@Override public void start(Stage primaryStage) {
+	@Override
+	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
-		this.primaryStage.setTitle("Communiqué" + version);
+		this.primaryStage.setTitle("Communiqué " + version);
 		initLayout();
 	}
 

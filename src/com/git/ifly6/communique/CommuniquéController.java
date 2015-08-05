@@ -11,9 +11,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 import java.util.Properties;
 
-import com.git.ifly6.javatelegram.JTelegramException;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.javatelegram.util.JTelegramException;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -66,7 +66,9 @@ public class CommuniquéController {
 
 		alert.setTitle("About");
 		alert.setHeaderText("Communique");
-		alert.setContentText("Version " + version + "\n\n" + "Developed by ifly6 of the nation Imperium Anglorum.");
+		alert.setContentText("Version " + version + "\n\n"
+				+ "IC: Developed by His Grace, Cyril Parsons, the Duke of Geneva and the staff of the Democratic "
+				+ "Empire of Imperium Anglorum's Delegation to the World Assembly.\n\n" + "OOC: Created by ifly6.");
 
 		alert.showAndWait();
 	}
@@ -203,11 +205,13 @@ public class CommuniquéController {
 		String[] recipients = parser.recipientsParse(codePane.getText());	// Get recipients
 
 		// Show Recipients
-		String recipient = "# == Communiqué Recipients ==\n"
-				+ "# This tab shows all recipients after parsing of the Code tab.\n\n";
+		String recipient = "# == Communiqué Recipients ==\n" + "# This tab shows all " + recipients.length
+				+ " recipients after parsing of the Code tab.\n\n";
 		for (String element : recipients) {
 			recipient = recipient + element + "\n";
 		}
+
+		util.log("Recipients Parsed.");
 
 		recipientsPane.setText(recipient);
 		tabPane.getSelectionModel().select(2);
@@ -258,8 +262,8 @@ public class CommuniquéController {
 					client.setRecipients(recipients);									// Set recipients
 
 					// Review Recipients
-					String recipient = "# == Communiqué Recipients ==\n"
-							+ "# This tab shows all recipients after parsing of the Code tab.\n\n";
+					String recipient = "# == Communiqué Recipients ==\n" + "# This tab shows all " + recipients.length
+							+ " recipients after parsing of the Code tab.\n\n";
 					for (String element : recipients) {
 						recipient = recipient + element + "\n";
 					}
