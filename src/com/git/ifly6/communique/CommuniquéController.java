@@ -21,6 +21,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -31,6 +32,7 @@ public class CommuniquéController {
 
 	private int version = CommuniquéParser.version;
 
+	@FXML private MenuBar menuBar;
 	@FXML private TabPane tabPane;
 	@FXML private TextArea logPane;
 	@FXML private TextArea codePane;
@@ -40,12 +42,18 @@ public class CommuniquéController {
 	@FXML private TextField telegramField;
 	@FXML private CheckBox recruitmentCheckBox;
 	@FXML private CheckMenuItem disableSendingCheckBox;
+
 	private JavaTelegram client;
 	private CommuniquéLogger util;
+	private CommuniquéParser parser;
 
 	private Thread sendingThread = new Thread();
 
 	@FXML private void initialize() {
+
+		// If relevant, set to true.
+		menuBar.setUseSystemMenuBar(true);
+
 		logPane.setText("== Communiqué " + version + " ==\nEnter information or load file to proceed.\n");
 		codePane.setText("# == Communiqué Recipients Code ==\n"
 				+ "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
@@ -59,6 +67,7 @@ public class CommuniquéController {
 
 		util = new CommuniquéLogger(logPane, codePane);
 		client = new JavaTelegram(util);
+		parser = new CommuniquéParser(util);
 	}
 
 	@FXML protected void about(ActionEvent event) {
@@ -201,7 +210,6 @@ public class CommuniquéController {
 	}
 
 	@FXML protected String[] parse(ActionEvent event) {
-		CommuniquéParser parser = new CommuniquéParser(util);
 		String[] recipients = parser.recipientsParse(codePane.getText());	// Get recipients
 
 		// Estimate Time Needed
