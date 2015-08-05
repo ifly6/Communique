@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Scanner;
 
-import com.git.ifly6.javatelegram.JTelegramException;
 import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.javatelegram.util.JTelegramException;
 
 public class MorseLauncher {
 

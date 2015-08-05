@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.git.ifly6.javatelegram.JTelegramFetcher;
 import com.git.ifly6.javatelegram.JTelegramLogger;
+import com.git.ifly6.javatelegram.util.JTelegramFetcher;
 
 /**
  * This class is the central hub of the Communiqué system. It parses the <code>String</code> given to it with all the
@@ -81,7 +81,7 @@ public class CommuniquéParser {
 	 * This string determines what version of the parser is currently being used. The entire program is build around
 	 * this string for extended compatibility purposes.
 	 */
-	public static final int version = 2;
+	public static final int version = 3;
 	JTelegramLogger util;
 
 	/**
