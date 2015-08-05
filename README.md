@@ -50,3 +50,5 @@ While there will be a version number, currently, there is no such number, since,
 
 2. Version 2 is a change due to the introduction of a new operator which is written to file. The `->` operator, signifying 'in', cannot be parsed by version 1 parsers, and hence, necessitated a change in the version number.
   - Added `->` modifier, signifying 'in', e.g. `region:europe -> wa:members` would return 'nations of Europe in WA:members' and `region:europe -> wa:delegates` would return the Delegate of Europe. Due to the way the 'both' function works, it is commutative.
+
+3. Version 3 is a cosmetic upgrade. Communiqué switched from Java's Swing to JavaFX. Version 3 uses the same file format for Version 2. It also has a massive number of bug fixes and optimisations which were developed in the time between Versions 2 and 3.

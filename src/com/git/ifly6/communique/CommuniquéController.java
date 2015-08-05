@@ -200,13 +200,30 @@ public class CommuniquéController {
 		}
 	}
 
-	@FXML protected void parse(ActionEvent event) {
+	@FXML protected String[] parse(ActionEvent event) {
 		CommuniquéParser parser = new CommuniquéParser(util);
 		String[] recipients = parser.recipientsParse(codePane.getText());	// Get recipients
 
+		// Estimate Time Needed
+		double numRecipients = recipients.length;
+		int seconds;
+		if (recruitmentCheckBox.isSelected()) {
+			seconds = (int) Math.round(numRecipients * 180.05);
+		} else {
+			seconds = (int) Math.round(numRecipients * 30.05);
+		}
+
+		int minutes = seconds / 60;
+		seconds -= minutes * 60;
+		int hours = minutes / 60;
+		minutes -= hours * 60;
+		int days = hours / 24;
+		hours -= days * 24;
+		String timeNeeded = days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
+
 		// Show Recipients
 		String recipient = "# == Communiqué Recipients ==\n" + "# This tab shows all " + recipients.length
-				+ " recipients after parsing of the Code tab.\n\n";
+				+ " recipients after parsing of the Code tab.\nEstimated time needed is " + timeNeeded + "\n\n";
 		for (String element : recipients) {
 			recipient = recipient + element + "\n";
 		}
@@ -215,6 +232,8 @@ public class CommuniquéController {
 
 		recipientsPane.setText(recipient);
 		tabPane.getSelectionModel().select(2);
+
+		return recipients;
 	}
 
 	@FXML protected void quit(ActionEvent event) {
@@ -227,7 +246,12 @@ public class CommuniquéController {
 		fileChooser.setTitle("Open Resource File");
 		File saveFile = fileChooser.showSaveDialog(null);
 
-		if (saveFile != null) {		// In case they pressed cancel.
+		// Make sure it ends in .txt
+		if (!saveFile.toPath().endsWith(".txt")) {
+			saveFile = new File(saveFile.toString() + ".txt");
+		}
+
+		if (saveFile != null) {	// In case they pressed cancel.
 			try {
 
 				CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(saveFile);
@@ -257,19 +281,8 @@ public class CommuniquéController {
 			// Create another thread so we do not freeze up the GUI
 			Runnable runner = new Runnable() {
 				@Override public void run() {
-					CommuniquéParser parser = new CommuniquéParser(util);
-					String[] recipients = parser.recipientsParse(codePane.getText());	// Get recipients
+					String[] recipients = parse(event);	// Get recipients
 					client.setRecipients(recipients);									// Set recipients
-
-					// Review Recipients
-					String recipient = "# == Communiqué Recipients ==\n" + "# This tab shows all " + recipients.length
-							+ " recipients after parsing of the Code tab.\n\n";
-					for (String element : recipients) {
-						recipient = recipient + element + "\n";
-					}
-					recipientsPane.setText(recipient);
-
-					util.log("Recipients set.");
 
 					client.setKeys(
 							new JTelegramKeys(clientField.getText(), secretField.getText(), telegramField.getText()));
@@ -344,5 +357,4 @@ public class CommuniquéController {
 			return "Client Key";
 		}
 	}
-
 }
