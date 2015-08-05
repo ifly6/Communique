@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import com.git.ifly6.javatelegram.JTelegramException;
-import com.git.ifly6.javatelegram.JTelegramFetcher;
 import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.javatelegram.util.JTelegramException;
+import com.git.ifly6.javatelegram.util.JTelegramFetcher;
 
 /**
  * This class was created to extend JavaTelegram's functionalities. Instead of calling methods inside JavaTelegram which

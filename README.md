@@ -3,7 +3,7 @@
 ## Summary ##
 Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. It was originally inspired by Auralia's work on the matter and thus, recognised the limitations of writing on a Windows-only platform when most headless servers are Linux boxes. It is directly based on top of [JavaTelegram](https://github.com/iFlyCode/NationStates-JavaTelegram) a iFlyCode Java library designed to interface with NationStates itself.
 
-Since the general gist of this program is the same goal as Auralia's AutoTelegram, it will naturally be following many of the same protocols and functions. Currently, we are on version `2`.
+Since the general gist of this program is the same goal as Auralia's AutoTelegram, it will naturally be following many of the same protocols and functions. Currently, we are on version `3`.
 
 Note that it is *your* responsibility to know how the telegram API works. Use of this program is agreement that you understand those limitations and requirements. It also agrees that you cannot claim losses, damages, or other negative effects from the author if action is taken against your NationStates account.
 
@@ -31,7 +31,7 @@ Note that it is *your* responsibility to know how the telegram API works. Use of
   - In version `2`, you can use an arrow operator, `->` to specify persons who are only in both groups. For example, the line `region:europe -> wa:members` would mean 'nations in Europe in (or, who are also) WA members'.
   - You cannot invert the tags if their resulting sample space would be something which cannot be easily queried (like 'remove members who are not in the World Assembly', as 'not in the World Assembly' is not defined).
 
-5. Click the 'SEND' button to send the telegrams. This program supports the use of multiple API keys by creating multiple threads. However, for that, you would need multiple API keys.
+5. Click the 'Parse' button to see a list of all your recipients. When ready, click the 'Send' button to send the telegrams.
 
 6. You can save all the keys and all your recipients to a file. The file (if your calls completed without any errors) will include your client, secret, and telegram keys; as well as the recipients of the file, and the people to which the file was already sent. Do not share this file. You can load these files from disc to restore a previous configuration (or, create them by hand and skip manual configuration).
 
