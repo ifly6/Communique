@@ -21,7 +21,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.autotelegram;
+package com.git.ifly6.morse;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +33,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Scanner;
 
-import com.git.ifly6.javatelegram.JTelegramException;
+import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.javatelegram.util.JTelegramException;
 
 public class MorseLauncher {
 
@@ -78,7 +79,7 @@ public class MorseLauncher {
 
 		// Create the client instance
 		Morse client = new Morse(util);
-		client.setKeys(keys);
+		client.setKeys(new JTelegramKeys(keys[0], keys[1], keys[2]));
 
 		if (args.length > 0) {
 			util.log("Assuming that the file in the arguments is a recipients list (one recipient per line)");

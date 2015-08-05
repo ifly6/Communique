@@ -21,7 +21,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.autotelegram;
+package com.git.ifly6.marconi;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -30,20 +30,10 @@ import java.util.Scanner;
 
 import com.git.ifly6.javatelegram.JTelegramLogger;
 
-public class MorseUtilities implements JTelegramLogger {
-
-	public MorseUtilities() {
-
-	}
+public class MarconiLogger implements JTelegramLogger {
 
 	Scanner scan = new Scanner(System.in);
 
-	/**
-	 * Logs information directly to System.out. Prefaces everything with the date and time.
-	 *
-	 * @param output
-	 *            The string to be formatted and printed.
-	 */
 	@Override
 	public void log(String output) {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -51,14 +41,24 @@ public class MorseUtilities implements JTelegramLogger {
 		System.out.println("[" + dateFormat.format(date) + "] " + output);
 	}
 
-	/**
-	 * Shorthand for System.out.println. Sometimes, I hate how verbose Java is.
-	 *
-	 * @param output
-	 *            The string to be printed.
-	 */
 	public void output(String output) {
 		System.out.println(output);
+	}
+
+	/**
+	 * Shorthand for the scanner creation, the posing of the question, and the getting of the response. This version of
+	 * the prompt method will not return all responses in lower case.
+	 *
+	 * @param prompt
+	 *            The question posed to the user.
+	 * @return
+	 */
+	public String prompt(String prompt) {
+
+		this.output(prompt);
+		String response = scan.nextLine();
+
+		return response;
 	}
 
 	/**
@@ -97,18 +97,17 @@ public class MorseUtilities implements JTelegramLogger {
 	}
 
 	/**
-	 * Shorthand for the scanner creation, the posing of the question, and the getting of the response. This version of
-	 * the prompt method will not return all responses in lower case.
+	 * Prompts for a yes or no question.
 	 *
 	 * @param prompt
 	 *            The question posed to the user.
+	 * @param trueFalse
+	 *            The existence of this boolean leads to the setting of valid responses to ones appropriate for a yes or
+	 *            no answer.
 	 * @return
 	 */
-	public String prompt(String prompt) {
-
-		this.output(prompt);
-		String response = scan.nextLine();
-
-		return response;
+	public String prompt(String prompt, boolean trueFalse) {
+		return prompt(prompt, new String[] { "yes", "no", "y", "n" });
 	}
+
 }

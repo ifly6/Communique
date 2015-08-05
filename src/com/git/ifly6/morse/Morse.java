@@ -1,4 +1,4 @@
-package com.git.ifly6.autotelegram;
+package com.git.ifly6.morse;
 
 import java.io.File;
 import java.io.FileReader;
@@ -6,16 +6,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import com.git.ifly6.javatelegram.JTelegramException;
-import com.git.ifly6.javatelegram.JTelegramFetcher;
 import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.javatelegram.util.JTelegramException;
+import com.git.ifly6.javatelegram.util.JTelegramFetcher;
 
 /**
  * This class was created to extend JavaTelegram's functionalities. Instead of calling methods inside JavaTelegram which
  * would have violated the design philosophy of 'fundamental and non-excludable elements only', this extension was made
  * so the class would be called with some extra methods which would not affect some other programmer's attempts to call
- * JavaTelegram directly. By moving the implementation code out of JavaTelegram, the Morse implementation is no
- * longer tied into JavaTelegram itself.
+ * JavaTelegram directly. By moving the implementation code out of JavaTelegram, the Morse implementation is no longer
+ * tied into JavaTelegram itself.
  *
  * @author ifly6
  */
@@ -53,7 +53,7 @@ public class Morse extends JavaTelegram {
 			}
 			scan.close();
 		} catch (IOException e) {
-			getLog().log("Error. Cannot find file. Double check the file name.");
+			util.log("Error. Cannot find file. Double check the file name.");
 			return getManual();
 		}
 
