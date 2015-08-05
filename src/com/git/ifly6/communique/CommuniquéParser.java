@@ -81,7 +81,7 @@ public class CommuniquéParser {
 	 * This string determines what version of the parser is currently being used. The entire program is build around
 	 * this string for extended compatibility purposes.
 	 */
-	static int version = 2;
+	public static final int version = 2;
 	JTelegramLogger util;
 
 	/**
@@ -119,8 +119,7 @@ public class CommuniquéParser {
 	/**
 	 * Tag expansion system for Communiqué.
 	 *
-	 * @param element
-	 *            The tag you want expanded
+	 * @param element The tag you want expanded
 	 * @return
 	 */
 	private String[] expandTag(String element) {
@@ -287,8 +286,7 @@ public class CommuniquéParser {
 	 * Convenience method for recipientsParse(String input) if you don't feel like rewriting the code to make it an
 	 * actual String.
 	 *
-	 * @param input
-	 *            A String array, with each line on each index. Basically, it undoes the .split("\n") so commonly used
+	 * @param input A String array, with each line on each index. Basically, it undoes the .split("\n") so commonly used
 	 *            to make String[]'s.
 	 * @return
 	 */
