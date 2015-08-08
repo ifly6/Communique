@@ -167,37 +167,32 @@ public class CommuniquéController {
 		fileChooser.setTitle("Open Resource File");
 		File file = fileChooser.showOpenDialog(null);
 
-		try {
-			if (file != null) {		// In case they pressed cancel.
+		if (file != null) {
+			try {
 				CommuniquéFileReader fileReader = new CommuniquéFileReader(file);
 
-				// Check file version.
-				if (fileReader.isCompatible()) {
-					// Set Keys
-					JTelegramKeys keys = fileReader.getKeys();
-					clientField.setText(keys.getClientKey());
-					secretField.setText(keys.getSecretKey());
-					telegramField.setText(keys.getTelegramId());
+				// Set Keys
+				JTelegramKeys keys = fileReader.getKeys();
+				clientField.setText(keys.getClientKey());
+				secretField.setText(keys.getSecretKey());
+				telegramField.setText(keys.getTelegramId());
 
-					// Set Recruitment Flag
-					recruitmentCheckBox.setSelected(fileReader.getRecruitmentFlag());
+				// Set Recruitment Flag
+				recruitmentCheckBox.setSelected(fileReader.getRecruitmentFlag());
 
-					// Set Recipients
-					String[] recipients = fileReader.getRecipients();
-					for (String element : recipients) {
-						util.codePrintln(element);
-					}
-
-				} else {
-					throw new JTelegramException();
+				// Set Recipients
+				String[] recipients = fileReader.getRecipients();
+				for (String element : recipients) {
+					util.codePrintln(element);
 				}
 
 				util.log("Configuration loaded.");
+
+			} catch (JTelegramException e) {
+				util.log("Version of the provided file is not compatible.");
+			} catch (FileNotFoundException e) {
+				util.log("Cannot find file provided.");
 			}
-		} catch (JTelegramException e2) {
-			util.log("Version of file provided mismatches with version here.");
-		} catch (FileNotFoundException e) {
-			util.log("Cannot find file provided.");
 		}
 	}
 

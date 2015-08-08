@@ -23,7 +23,8 @@ public class Marconi {
 	public static final int version = CommuniquéParser.getVersion();
 
 	public static void main(String[] args) {
-		if (args.length > 0) {		// If there is not a provided file, do nothing.
+		if (args.length > 0) {	// If there is not a provided file, do nothing.
+
 			try {
 				loadConfig(new File(args[0]));		// Load the keys and recipients from the configuration file in.
 			} catch (FileNotFoundException e) {
@@ -33,13 +34,15 @@ public class Marconi {
 			}
 
 			// Give a chance to check the keys.
-			String keysResponse = util.prompt(
-					"Are these keys correct? " + keys.getClientKey() + ", " + keys.getSecretKey() + ", "
-							+ keys.getTelegramId() + " [Yes] or [No]?", new String[] { "yes", "no", "y", "n" });
-			if (keysResponse.startsWith("y")) {
+			String keysResponse = util.prompt("Are these keys correct? " + keys.getClientKey() + ", "
+					+ keys.getSecretKey() + ", " + keys.getTelegramId() + " [Yes] or [No]?",
+					new String[] { "yes", "no", "y", "n" });
 
-				String recruitmentResponse = util.prompt("Is the current recruitment flag (" + isRecruitment
-						+ ") set correctly? [Yes] or [No]?", new String[] { "yes", "no", "y", "n" });
+			if (keysResponse.startsWith("y")) {
+				String recruitmentResponse = util.prompt(
+						"Is the current recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
+						new String[] { "yes", "no", "y", "n" });
+
 				if (recruitmentResponse.startsWith("n")) {
 					isRecruitment = !isRecruitment;
 				}
@@ -58,8 +61,8 @@ public class Marconi {
 
 				// Give a chance to check the recipients.
 				String recipientsReponse = util.prompt(
-						"Are you sure you want to send to these recipients? [Yes] or [No]?", new String[] { "yes",
-								"no", "y", "n" });
+						"Are you sure you want to send to these recipients? [Yes] or [No]?",
+						new String[] { "yes", "no", "y", "n" });
 				if (recipientsReponse.startsWith("y")) {
 
 					// Set the client up and go.
@@ -83,23 +86,21 @@ public class Marconi {
 				util.log("Please make any alterations needed and restart this program.");
 			}
 		} else {
-			util.log("Please provide a configuration file in the same type produced by Communiqué " + version
+			util.log("Please provide a configuration file of the same type compatible with Communiqué " + version
 					+ " in the arguments.");
 		}
 	}
 
 	/**
-	 *
-	 * @param file
-	 *            The place to where this program will write.
-	 * @throws FileNotFoundException
-	 * @throws UnsupportedEncodingException
+	 * @param file to where this program will write.
+	 * @throws FileNotFoundException if the file cannot be found
+	 * @throws UnsupportedEncodingException if the file's encoding is unsupported
 	 */
 	private static void appendSent(File file) throws FileNotFoundException, UnsupportedEncodingException {
 		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file);
 		fileWriter.setKeys(keys);
-		String[] body = Stream.concat(Arrays.stream(recipients), Arrays.stream(client.getSentList())).toArray(
-				String[]::new);
+		String[] body = Stream.concat(Arrays.stream(recipients), Arrays.stream(client.getSentList()))
+				.toArray(String[]::new);
 		String bodyText = "";
 		for (String element : body) {
 			bodyText = bodyText + "/" + element + "\n";
@@ -109,20 +110,14 @@ public class Marconi {
 	}
 
 	/**
-	 *
-	 * @param file
-	 *            The place at which this program will look.
+	 * @param file at which this program will look.
 	 * @throws FileNotFoundException
-	 * @throws JTelegramException
+	 * @throws JTelegramException if the fileReader is not compatible
 	 */
 	private static void loadConfig(File file) throws FileNotFoundException, JTelegramException {
 		CommuniquéFileReader fileReader = new CommuniquéFileReader(file);
-		if (fileReader.isCompatible()) {
-			keys = fileReader.getKeys();
-			recipients = fileReader.getRecipients();
-			isRecruitment = fileReader.getRecruitmentFlag();
-		} else {
-			throw new JTelegramException();
-		}
+		keys = fileReader.getKeys();
+		recipients = fileReader.getRecipients();
+		isRecruitment = fileReader.getRecruitmentFlag();
 	}
 }
