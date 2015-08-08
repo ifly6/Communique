@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.javatelegram.util.JTelegramException;
 
 /**
  * Convenience class for correctly loading, deciphering, and verifying Communiqué configuration files. It is directly
@@ -59,12 +60,13 @@ public class CommuniquéFileReader {
 	 * Constructs a FileReader tailored to the correct file and loads the entire file into an ArrayList. From there, it
 	 * calls <code>parseConfig()</code> to load all the processed information into an accessible Object.
 	 *
-	 * @param file
-	 *            the location of the Communiqué configuration file
-	 * @throws FileNotFoundException
-	 *             if the location of the Communiqué configuration file is false
+	 * @param file of the Communiqué configuration file
+	 * @throws FileNotFoundException if the Communiqué configuration file is non-existent or unwritable
+	 * @throws JTelegramException if the version is incorrect
 	 */
-	public CommuniquéFileReader(File file) throws FileNotFoundException {
+	public CommuniquéFileReader(File file) throws FileNotFoundException, JTelegramException {
+		if (!isCompatible()) { throw new JTelegramException(); }
+
 		FileReader configRead = new FileReader(file);
 		Scanner scan = new Scanner(configRead);
 
@@ -151,16 +153,13 @@ public class CommuniquéFileReader {
 	 * Queries the file for an integer version to determine whether it is compatible with this parser. If so, it returns
 	 * true. Otherwise, it will return false.
 	 *
-	 * @param version
-	 *            <code>boolean</code> containing true or false on whether the configuration file is compatible.
+	 * @param version <code>boolean</code> containing true or false on whether the configuration file is compatible.
 	 * @return
 	 */
-	public boolean isCompatible() {
+	@Deprecated public boolean isCompatible() {
 		int fileVersion = Integer.parseInt(getFileVersion());
 
-		if (fileVersion <= version) {
-			return true;
-		}
+		if (fileVersion <= version) { return true; }
 
 		return false;
 	}
@@ -173,11 +172,8 @@ public class CommuniquéFileReader {
 	 */
 	public String getFileVersion() {
 		for (String element : fileContents) {
-			if (element.startsWith("# Produced by version ")) {
-				return element.replace("# Produced by version ", "");
-			}
+			if (element.startsWith("# Produced by version ")) { return element.replace("# Produced by version ", ""); }
 		}
 		return null;
 	}
-
 }
