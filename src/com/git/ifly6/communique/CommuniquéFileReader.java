@@ -65,17 +65,21 @@ public class CommuniquéFileReader {
 	 * @throws JTelegramException if the version is incorrect
 	 */
 	public CommuniquéFileReader(File file) throws FileNotFoundException, JTelegramException {
-		if (!isCompatible()) { throw new JTelegramException(); }
+		if (!isCompatible()) {
+			throw new JTelegramException();
 
-		FileReader configRead = new FileReader(file);
-		Scanner scan = new Scanner(configRead);
+		} else {
 
-		while (scan.hasNextLine()) {
-			fileContents.add(scan.nextLine());
+			FileReader configRead = new FileReader(file);
+			Scanner scan = new Scanner(configRead);
+
+			while (scan.hasNextLine()) {
+				fileContents.add(scan.nextLine());
+			}
+
+			scan.close();
+			information = parseConfig();
 		}
-
-		scan.close();
-		information = parseConfig();
 	}
 
 	/**
@@ -156,12 +160,9 @@ public class CommuniquéFileReader {
 	 * @param version <code>boolean</code> containing true or false on whether the configuration file is compatible.
 	 * @return
 	 */
-	@Deprecated public boolean isCompatible() {
+	public boolean isCompatible() {
 		int fileVersion = Integer.parseInt(getFileVersion());
-
-		if (fileVersion <= version) { return true; }
-
-		return false;
+		return (fileVersion <= version) ? true : false;
 	}
 
 	/**

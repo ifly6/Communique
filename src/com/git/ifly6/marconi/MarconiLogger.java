@@ -52,13 +52,6 @@ public class MarconiLogger implements JTelegramLogger {
 	}
 
 	/**
-	 * @param output is the <code>String</code> to be output
-	 */
-	public void output(String output) {
-		System.out.println(output);
-	}
-
-	/**
 	 * Shorthand for the scanner creation, the posing of the question, and the getting of the response. This version of
 	 * the prompt method will not return all responses in lower case.
 	 *
@@ -67,7 +60,7 @@ public class MarconiLogger implements JTelegramLogger {
 	 */
 	public String prompt(String prompt) {
 
-		this.output(prompt);
+		System.out.print(prompt + "\t");
 		String response = scan.nextLine();
 
 		return response;
@@ -86,8 +79,7 @@ public class MarconiLogger implements JTelegramLogger {
 		boolean fine = false;
 
 		while (!fine) {
-			System.out.println(prompt);
-			response = scan.nextLine().toLowerCase();
+			response = this.prompt(prompt).toLowerCase();
 
 			for (String element : conditions) {
 				if (element.equals(response)) {
