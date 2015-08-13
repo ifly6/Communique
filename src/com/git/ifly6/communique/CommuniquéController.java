@@ -53,6 +53,9 @@ import javafx.stage.FileChooser;
 
 public class CommuniquéController {
 
+	// TODO Live updating recipients list
+	// TODO Interface with NS Happenings
+
 	private int version = CommuniquéParser.version;
 
 	@FXML private MenuBar menuBar;
@@ -78,9 +81,9 @@ public class CommuniquéController {
 		menuBar.setUseSystemMenuBar(true);
 
 		logPane.setText("== Communiqué " + version + " ==\nEnter information or load file to proceed.\n");
-		codePane.setText("# == Communiqué Recipients Code ==\n"
-				+ "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
+		codePane.setText("# == Communiqué Recipients Code ==\n" + "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
 				+ "# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n");
+		recipientsPane.setText("# == Communiqué Recipients ==\n" + "# This tab shows all recipients after parsing of the Code tab.\n\n");
 
 		try {
 			clientField.setText(readProperties()); // Attempt to fetch client key.
@@ -98,9 +101,9 @@ public class CommuniquéController {
 
 		alert.setTitle("About");
 		alert.setHeaderText("Communique");
-		alert.setContentText("Version " + version + "\n\n"
-				+ "IC: Developed by His Grace, Cyril Parsons, the Duke of Geneva and the staff of the Democratic "
-				+ "Empire of Imperium Anglorum's Delegation to the World Assembly.\n\n" + "OOC: Created by ifly6.");
+		alert.setContentText(
+				"Version " + version + "\n\n" + "IC: Developed by His Grace, Cyril Parsons, the Duke of Geneva and the staff of the Democratic "
+						+ "Empire of Imperium Anglorum's Delegation to the World Assembly.\n\n" + "OOC: Created by ifly6.");
 
 		alert.showAndWait();
 	}
@@ -162,8 +165,7 @@ public class CommuniquéController {
 			// Verify that it is a valid NationStates URL
 			if (rawURL.contains("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&")) {
 
-				rawURL = rawURL.replace(
-						"http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&", "");
+				rawURL = rawURL.replace("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&", "");
 				rawURL = rawURL.replace("&to=NATION_NAME", "");
 
 				String[] tags = rawURL.split("&");
@@ -300,14 +302,12 @@ public class CommuniquéController {
 		if (!sendingThread.isAlive()) {
 			client.setKillThread(false);
 
-			// Create another thread so we do not freeze up the GUI
 			Runnable runner = new Runnable() {
 				@Override public void run() {
 					String[] recipients = parse(event);	// Get recipients
 					client.setRecipients(recipients);									// Set recipients
 
-					client.setKeys(
-							new JTelegramKeys(clientField.getText(), secretField.getText(), telegramField.getText()));
+					client.setKeys(new JTelegramKeys(clientField.getText(), secretField.getText(), telegramField.getText()));
 
 					// Set Recruitment Status
 					client.setRecruitment(recruitmentCheckBox.isSelected());
