@@ -45,11 +45,11 @@ public class Communiqué extends Application {
 	}
 
 	/**
-	 * Initializes the root layout.
+	 * Initialises the root layout.
 	 */
 	private void initLayout() {
 		try {
-			// Load root layout from fxml file.
+			// Load root layout from FXML file.
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(Communiqué.class.getResource("CommuniquéOverview.fxml"));
 			rootLayout = (BorderPane) loader.load();
