@@ -144,8 +144,7 @@ public class CommuniquéFileReader {
 			} else if (element.startsWith("isRecruitment=")) {
 				isRecruitment = Boolean.getBoolean(element.replace("isRecruitment=", ""));
 
-			} else if (!(element.startsWith("#")) && !(element.isEmpty())) {
-				// TODO fix this bloody error for Marconi
+			} else if (!element.startsWith("#") && !element.isEmpty()) {
 				recipientsList.add(element.toLowerCase().replace(" ", "_"));
 			}
 		}
