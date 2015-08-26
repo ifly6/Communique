@@ -51,19 +51,18 @@ public class Marconi {
 			try {
 				loadConfig(new File(args[0]));		// Load the keys and recipients from the configuration file in.
 			} catch (FileNotFoundException e) {
-				util.log("Cannot find your file. Provide a real file and try again.");
+				util.err("Cannot find your file. Provide a real file and try again.");
 			} catch (JTelegramException e) {
-				util.log("Incorrect file version. This is a version " + version + " client.");
+				util.err("Incorrect file version. This is a version " + version + " client.");
 			}
 
 			// Give a chance to check the keys.
-			String keysResponse = util.prompt("Are these keys correct? " + keys.getClientKey() + ", "
-					+ keys.getSecretKey() + ", " + keys.getTelegramId() + " [Yes] or [No]?",
+			String keysResponse = util.prompt(
+					"Are these keys correct? " + keys.getClientKey() + ", " + keys.getSecretKey() + ", " + keys.getTelegramId() + " [Yes] or [No]?",
 					new String[] { "yes", "no", "y", "n" });
 
 			if (keysResponse.startsWith("y")) {
-				String recruitmentResponse = util.prompt(
-						"Is the current recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
+				String recruitmentResponse = util.prompt("Is the current recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
 						new String[] { "yes", "no", "y", "n" });
 
 				if (recruitmentResponse.startsWith("n")) {
@@ -73,6 +72,7 @@ public class Marconi {
 				// Process the Recipients list into a string with two columns.
 				CommuniquéParser parser = new CommuniquéParser(util);
 				String[] expandedRecipients = parser.recipientsParse(recipients);
+				System.out.println("");
 
 				for (int x = 0; x < expandedRecipients.length; x = x + 2) {
 					try {
@@ -83,8 +83,7 @@ public class Marconi {
 				}
 
 				// Give a chance to check the recipients.
-				String recipientsReponse = util.prompt(
-						"Are you sure you want to send to these recipients? [Yes] or [No]?",
+				String recipientsReponse = util.prompt("Are you sure you want to send to these recipients? [Yes] or [No]?",
 						new String[] { "yes", "no", "y", "n" });
 				if (recipientsReponse.startsWith("y")) {
 
@@ -99,18 +98,17 @@ public class Marconi {
 					try {
 						appendSent(new File(args[0]));
 					} catch (FileNotFoundException | UnsupportedEncodingException e) {
-						util.log("Internal Error. File either does not exist or is in the incorrect encoding.");
+						util.err("Internal Error. File either does not exist or is in the incorrect encoding.");
 					}
 
 				} else {
-					util.log("Please make any alterations needed and restart this program.");
+					util.err("Please make any alterations needed and restart this program.");
 				}
 			} else {
-				util.log("Please make any alterations needed and restart this program.");
+				util.err("Please make any alterations needed and restart this program.");
 			}
 		} else {
-			util.log("Please provide a configuration file of the same type compatible with Communiqué " + version
-					+ " in the arguments.");
+			util.err("Please provide a configuration file of the same type compatible with Communiqué " + version + " in the arguments.");
 		}
 	}
 
@@ -122,8 +120,7 @@ public class Marconi {
 	private static void appendSent(File file) throws FileNotFoundException, UnsupportedEncodingException {
 		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file);
 		fileWriter.setKeys(keys);
-		String[] body = Stream.concat(Arrays.stream(recipients), Arrays.stream(client.getSentList()))
-				.toArray(String[]::new);
+		String[] body = Stream.concat(Arrays.stream(recipients), Arrays.stream(client.getSentList())).toArray(String[]::new);
 		String bodyText = "";
 		for (String element : body) {
 			bodyText = bodyText + "/" + element + "\n";
