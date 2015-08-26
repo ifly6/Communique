@@ -78,7 +78,7 @@ public class Marconi {
 					try {
 						System.out.printf("%-30.30s  %-30.30s%n", expandedRecipients[x], expandedRecipients[x + 1]);
 					} catch (IndexOutOfBoundsException e) {
-						System.out.println(expandedRecipients[x] + "\n");
+						System.out.printf(expandedRecipients[x] + "\n");
 					}
 				}
 				System.out.println("");
