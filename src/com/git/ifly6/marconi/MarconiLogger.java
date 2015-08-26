@@ -44,7 +44,7 @@ public class MarconiLogger implements JTelegramLogger {
 	public void err(String output) {
 		log(output);
 		try {
-			Thread.sleep(3000);
+			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 		}
 	}
