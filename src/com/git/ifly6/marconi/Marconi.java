@@ -81,6 +81,7 @@ public class Marconi {
 						System.out.println(expandedRecipients[x] + "\n");
 					}
 				}
+				System.out.println("");
 
 				// Give a chance to check the recipients.
 				String recipientsReponse = util.prompt("Are you sure you want to send to these recipients? [Yes] or [No]?",
