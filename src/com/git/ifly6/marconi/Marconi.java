@@ -121,11 +121,19 @@ public class Marconi {
 	private static void appendSent(File file) throws FileNotFoundException, UnsupportedEncodingException {
 		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file);
 		fileWriter.setKeys(keys);
-		String[] body = Stream.concat(Arrays.stream(recipients), Arrays.stream(client.getSentList())).toArray(String[]::new);
-		String bodyText = "";
-		for (String element : body) {
-			bodyText = bodyText + "/" + element + "\n";
+
+		String[] sentList = client.getSentList();
+		for (int x = 0; x < sentList.length; x++) {
+			sentList[x] = "/" + sentList[x];
 		}
+
+		String[] body = Stream.concat(Arrays.stream(recipients), Arrays.stream(sentList)).toArray(String[]::new);
+		String bodyText = "";
+
+		for (String element : body) {
+			bodyText = bodyText + element + "\n";
+		}
+
 		fileWriter.setBody(bodyText);
 		fileWriter.write();
 	}
