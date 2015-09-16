@@ -96,23 +96,21 @@ public class CommuniquéParser {
 	}
 
 	/**
-	 * Determine whether a String is a special tag or not. What strings are tags is determined in the documentation on
-	 * the grammar of the markdown language.
+	 * Determine whether a <code>String</code> is a special tag or not. What strings are tags is determined in the
+	 * documentation on the grammar of the Communiqué syntax.
 	 *
-	 * @param element
+	 * @param input
 	 * @return
 	 */
-	private boolean isTag(String element) {
+	private boolean isTag(String input) {
 
-		if (element.startsWith("region:")) {
+		if (input.startsWith("region:")) {
 			return true;
-		} else if (element.equals("wa:delegates")) {
+		} else if (input.equals("wa:delegates")) {
 			return true;
-		} else if (element.equals("wa:nations") || element.equals("wa:members")) {
+		} else if (input.equals("wa:nations") || input.equals("wa:members")) {
 			return true;
-		} else if (element.equals("world:new")) {
-			return true;
-		}
+		} else if (input.equals("world:new")) { return true; }
 
 		return false;
 	}
@@ -226,35 +224,34 @@ public class CommuniquéParser {
 	 * This parses the contents of the recipients and allows us to actually make the tag system work through interfacing
 	 * with the expansion system above.
 	 *
-	 * @param input
-	 * @return
+	 * @param input an array of the recipients, each one on an individual index
+	 * @return a final array of the recipients, compatible with JavaTelegram
 	 */
-	public String[] recipientsParse(String input) {
+	public String[] recipientsParse(String[] input) {
 		ArrayList<String> finalRecipients = new ArrayList<String>(0);
-		String[] rawRecipients = input.split("\n");
 
 		// Remove commented or empty lines.
 		ArrayList<String> unComments = new ArrayList<String>(0);
-		for (String element : rawRecipients) {
+		for (String element : input) {
 			if (!element.startsWith("#") && !element.isEmpty()) {
 				unComments.add(element);
 			}
 		}
-		rawRecipients = unComments.toArray(new String[unComments.size()]);
+		input = unComments.toArray(new String[unComments.size()]);
 
-		// Form of all the nation we want in this bloody list.
+		// Form a list of all the nation we want in this list.
 		ArrayList<String> whitelist = new ArrayList<String>(0);
-		for (String element : rawRecipients) {
+		for (String element : input) {
 			if (!element.startsWith("/")) {
-				whitelist.add(element.toLowerCase().replace(" ", "_"));
+				whitelist.add(element.toLowerCase().trim().replace(" ", "_"));
 			}
 		}
 
-		// Form a list of all nations we can't have in this bloody list.
+		// Form a list of all nations we can't have in this list.
 		ArrayList<String> blacklist = new ArrayList<String>(0);
-		for (String element : rawRecipients) {
+		for (String element : input) {
 			if (element.startsWith("/")) {
-				blacklist.add(element.replaceFirst("/", "").toLowerCase().replace(" ", "_"));
+				blacklist.add(element.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_"));
 			}
 		}
 
@@ -282,21 +279,14 @@ public class CommuniquéParser {
 	}
 
 	/**
-	 * Convenience method for recipientsParse(String input) if you don't feel like rewriting the code to make it an
-	 * actual String.
+	 * Convenience method for <code>recipientsParse(String[] input)</code> if you don't feel like rewriting the code to
+	 * make it an actual <code>String</code>.
 	 *
-	 * @param input A String array, with each line on each index. Basically, it undoes the .split("\n") so commonly used
-	 *            to make String[]'s.
+	 * @param input A <code>String</code>, with each line separated by new line.
 	 * @return
 	 */
-	public String[] recipientsParse(String[] input) {
-		String output = "";
-
-		for (String element : input) {
-			output = output + element + "\n";
-		}
-
-		return recipientsParse(output);
+	public String[] recipientsParse(String input) {
+		return recipientsParse(input.split("\n"));
 	}
 
 	public static int getVersion() {
