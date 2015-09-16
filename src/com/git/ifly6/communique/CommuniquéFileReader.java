@@ -66,6 +66,7 @@ public class CommuniquéFileReader {
 	 */
 	public CommuniquéFileReader(File file) throws FileNotFoundException, JTelegramException {
 
+		// Immediately load the file into memory.
 		FileReader configRead = new FileReader(file);
 		Scanner scan = new Scanner(configRead);
 
@@ -77,7 +78,7 @@ public class CommuniquéFileReader {
 		if (isCompatible()) {
 			information = parseConfig();
 		} else {
-			throw new JTelegramException();
+			throw new JTelegramException("Communiqué file version mismatch");
 		}
 	}
 
@@ -143,8 +144,8 @@ public class CommuniquéFileReader {
 			} else if (element.startsWith("isRecruitment=")) {
 				isRecruitment = Boolean.getBoolean(element.replace("isRecruitment=", ""));
 
-			} else if (!element.startsWith("#") && !element.isEmpty()) {
-				recipientsList.add(element.toLowerCase().replace(" ", "_"));
+			} else if (!element.startsWith("#") && !element.isEmpty() && !element.contains("=")) {
+				recipientsList.add(element.toLowerCase().trim().replace(" ", "_"));
 			}
 		}
 
@@ -164,15 +165,24 @@ public class CommuniquéFileReader {
 	}
 
 	/**
-	 * Finds the file version declarer by finding the line which states "# Produced by version". The following is an
-	 * integer which determines which version of the program this file was made by. Returns its contents.
+	 * Finds the file version declarer by finding the line which states "# Produced by version" or the version tag. The
+	 * following is an integer which determines which version of the program this file was made by. Returns its
+	 * contents.
 	 *
 	 * @return <code>String</code> containing the ending of the commented version line
 	 */
 	public String getFileVersion() {
+
+		// Look for version tag first
+		for (String element : fileContents) {
+			if (element.startsWith("version")) { return element.replace("version=", ""); }
+		}
+
+		// Look for header version tag
 		for (String element : fileContents) {
 			if (element.startsWith("# Produced by version ")) { return element.replace("# Produced by version ", ""); }
 		}
+
 		return null;
 	}
 }

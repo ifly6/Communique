@@ -49,6 +49,7 @@ public class Communiqué extends Application {
 	 */
 	private void initLayout() {
 		try {
+
 			// Load root layout from FXML file.
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(Communiqué.class.getResource("CommuniquéOverview.fxml"));
