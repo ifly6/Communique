@@ -30,7 +30,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
 
@@ -137,10 +136,6 @@ public class CommuniquéFileWriter {
 	 */
 	public void setBody(String codeContents) {
 		String[] contents = codeContents.split("\n");
-
-		// Filter out nulls
-		contents = Arrays.stream(contents).filter(s -> (s != null && s.length() > 0)).toArray(String[]::new);
-
 		setBody(contents);
 	}
 
@@ -168,21 +163,21 @@ public class CommuniquéFileWriter {
 		writer.println(header);
 		writer.println(headerDate);
 		writer.println(headerVers + "\n");
+		writer.println("version=" + version);
 		writer.println("client_key=" + keys.getClientKey());
 		writer.println("secret_key=" + keys.getSecretKey());
 		writer.println("telegram_id=" + keys.getTelegramId());
 		writer.println("isRecruitment=" + isRecruitment);
-		writer.println("\n");
 
-		// Sort out the comments.
+		// Ignore commented and empty lines.
 		ArrayList<String> contentList = new ArrayList<String>(0);
 		for (String element : recipients) {
-			if (!element.startsWith("#") && !element.isEmpty()) {
+			if (!element.startsWith("#") && !element.isEmpty() && !element.contains("=")) {
 				contentList.add(element);
 			}
 		}
 
-		// Sort out the recipients from the sent and get rid of duplicates.
+		// Sort out recipients from the sent and get rid of duplicates.
 		LinkedHashSet<String> recpList = new LinkedHashSet<String>(0);
 		LinkedHashSet<String> nopeList = new LinkedHashSet<String>(0);
 		for (String element : contentList) {
@@ -197,6 +192,8 @@ public class CommuniquéFileWriter {
 		for (String element : recpList) {
 			writer.println(element);
 		}
+
+		writer.println("");
 
 		// Print in the nopeList
 		for (String element : nopeList) {

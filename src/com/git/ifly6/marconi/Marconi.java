@@ -46,7 +46,7 @@ public class Marconi {
 	public static final int version = CommuniquéParser.getVersion();
 
 	public static void main(String[] args) {
-		if (args.length > 0) {	// If there is not a provided file, do nothing.
+		if (args.length == 1) {	// If there is not a provided file, do nothing.
 
 			try {
 				loadConfig(new File(args[0]));		// Load the keys and recipients from the configuration file in.
@@ -109,7 +109,7 @@ public class Marconi {
 				util.err("Please make any alterations needed and restart this program.");
 			}
 		} else {
-			util.err("Please provide a configuration file of the same type compatible with Communiqué " + version + " in the arguments.");
+			util.err("Please provide a single configuration file of the same type compatible with Communiqué " + version + " in the arguments.");
 		}
 	}
 

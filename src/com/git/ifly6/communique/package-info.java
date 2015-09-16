@@ -20,7 +20,7 @@
  * <p>
  * The package contains six classes: <code>Communiqué</code>, which launches the GUI; {@link CommuniquéController},
  * which processes the data and the user input from the GUI; {@link CommuniquéFileReader CommuniquéFileReader}, which
- * checks version, comments, and loads the relevant data into RAM; {@link CommuniquéFileWriter CommuniquéFileWriter},
+ * checks version, comments, and loads the relevant data into memory; {@link CommuniquéFileWriter CommuniquéFileWriter},
  * which writes the files which <code>CommuniquéFileReader</code> will have to read; {@link CommuniquéParser
  * CommuniquéParser}, whose parsing system defines the grammar (and thus, the version) of the Communiqué recipients
  * language (and processes that information); and finally, {@link CommuniquéLogger CommuniquéLogger}, which interfaces
