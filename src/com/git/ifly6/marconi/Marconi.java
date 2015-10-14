@@ -62,11 +62,16 @@ public class Marconi {
 					new String[] { "yes", "no", "y", "n" });
 
 			if (keysResponse.startsWith("y")) {
-				String recruitmentResponse = util.prompt("Is the current recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
-						new String[] { "yes", "no", "y", "n" });
 
-				if (recruitmentResponse.startsWith("n")) {
-					isRecruitment = !isRecruitment;
+				while (true) {
+					String recruitmentResponse = util.prompt("Is the current recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
+							new String[] { "yes", "no", "y", "n" });
+
+					if (recruitmentResponse.startsWith("n")) {
+						isRecruitment = !isRecruitment;
+					} else if (recruitmentResponse.startsWith("y")) {
+						break;
+					}
 				}
 
 				// Process the Recipients list into a string with two columns.
@@ -81,6 +86,8 @@ public class Marconi {
 						System.out.printf(expandedRecipients[x] + "\n");
 					}
 				}
+				System.out.println("");
+				System.out.println("This will take " + time((int) Math.round(expandedRecipients.length * ((isRecruitment) ? 180.05 : 30.05))));
 				System.out.println("");
 
 				// Give a chance to check the recipients.
@@ -140,5 +147,15 @@ public class Marconi {
 		keys = fileReader.getKeys();
 		recipients = fileReader.getRecipients();
 		isRecruitment = fileReader.getRecruitmentFlag();
+	}
+
+	private static String time(int seconds) {
+		int minutes = seconds / 60;
+		seconds -= minutes * 60;
+		int hours = minutes / 60;
+		minutes -= hours * 60;
+		int days = hours / 24;
+		hours -= days * 24;
+		return days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
 	}
 }
