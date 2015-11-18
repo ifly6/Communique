@@ -79,9 +79,10 @@ public class CommuniquéParser {
 
 	/**
 	 * This string determines what version of the parser is currently being used. The entire program is build around
-	 * this string for extended compatibility purposes.
+	 * this string for extended compatibility purposes. However, due to the separation between the Parser itself and the
+	 * IO system, either of them can trigger a change in the version number.
 	 */
-	public static final int version = 3;
+	public static final int version = 4;
 	JTelegramLogger util;
 	private JTelegramFetcher fetcher = new JTelegramFetcher();
 
@@ -292,5 +293,4 @@ public class CommuniquéParser {
 	public static int getVersion() {
 		return version;
 	}
-
 }
