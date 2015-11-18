@@ -31,8 +31,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -239,19 +237,11 @@ public class CommuniquéController {
 		// Estimate Time Needed
 		double numRecipients = recipients.length;
 		int seconds = (int) Math.round(numRecipients * ((recruitmentCheckBox.isSelected()) ? 180.05 : 30.05));
-
-		int minutes = seconds / 60;
-		seconds -= minutes * 60;
-		int hours = minutes / 60;
-		minutes -= hours * 60;
-		int days = hours / 24;
-		hours -= days * 24;
-
-		String timeNeeded = days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
+		String timeNeeded = CommuniqueUtilities.time(seconds);
 
 		// If it needs to be randomised, do so.
 		if (randomiseMenuItem.isSelected()) {
-			recipients = randomiseArray(recipients);
+			recipients = CommuniqueUtilities.randomiseArray(recipients);
 		}
 
 		// Show Recipients
@@ -388,21 +378,5 @@ public class CommuniquéController {
 		} else {
 			return "Client Key";
 		}
-	}
-
-	/**
-	 * Randomises an array. Probably best to do it more efficiently, but right now, it uses a Collection to shuffle it
-	 * in basically for simplicity of coding...
-	 *
-	 * @param inputArray which is to be shuffled
-	 * @return a copy of the inputArray which is shuffled randomly
-	 */
-	private String[] randomiseArray(String[] inputArray) {
-		ArrayList<String> tempList = new ArrayList<String>();
-		for (String element : inputArray) {
-			tempList.add(element);
-		}
-		Collections.shuffle(tempList);
-		return tempList.toArray(new String[tempList.size()]);
 	}
 }

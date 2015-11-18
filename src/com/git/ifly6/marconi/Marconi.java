@@ -26,11 +26,10 @@ package com.git.ifly6.marconi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.Stream;
 
+import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.CommuniquéFileReader;
 import com.git.ifly6.communique.CommuniquéFileWriter;
 import com.git.ifly6.communique.CommuniquéParser;
@@ -93,7 +92,7 @@ public class Marconi {
 				String[] expandedRecipients = parser.recipientsParse(recipients);
 
 				if (randomSort) {
-					expandedRecipients = randomiseArray(expandedRecipients);
+					expandedRecipients = CommuniqueUtilities.randomiseArray(expandedRecipients);
 				}
 
 				for (int x = 0; x < expandedRecipients.length; x = x + 2) {
@@ -105,8 +104,9 @@ public class Marconi {
 				}
 
 				System.out.println();
-				System.out.println("This will take " + time((int) Math.round(expandedRecipients.length * ((isRecruitment) ? 180.05 : 30.05)))
-						+ " to send " + expandedRecipients.length + " telegrams.");
+				System.out.println(
+						"This will take " + CommuniqueUtilities.time((int) Math.round(expandedRecipients.length * ((isRecruitment) ? 180.05 : 30.05)))
+								+ " to send " + expandedRecipients.length + " telegrams.");
 
 				// Give a chance to check the recipients.
 				String recipientsReponse = util.prompt("Are you sure you want to send to these recipients? [Yes] or [No]?",
@@ -166,31 +166,5 @@ public class Marconi {
 		recipients = fileReader.getRecipients();
 		isRecruitment = fileReader.getRecruitmentFlag();
 		randomSort = fileReader.getRandomSortFlag();
-	}
-
-	private static String time(int seconds) {
-		int minutes = seconds / 60;
-		seconds -= minutes * 60;
-		int hours = minutes / 60;
-		minutes -= hours * 60;
-		int days = hours / 24;
-		hours -= days * 24;
-		return days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
-	}
-
-	/**
-	 * Randomises an array. Probably best to do it more efficiently, but right now, it uses a Collection to shuffle it
-	 * in basically for simplicity of coding...
-	 *
-	 * @param inputArray which is to be shuffled
-	 * @return a copy of the inputArray which is shuffled randomly
-	 */
-	private static String[] randomiseArray(String[] inputArray) {
-		ArrayList<String> tempList = new ArrayList<String>();
-		for (String element : inputArray) {
-			tempList.add(element);
-		}
-		Collections.shuffle(tempList);
-		return tempList.toArray(new String[tempList.size()]);
 	}
 }
