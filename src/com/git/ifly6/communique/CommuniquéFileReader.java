@@ -48,6 +48,7 @@ public class CommuniquéFileReader {
 
 	ArrayList<String> fileContents = new ArrayList<String>(0);
 	static final int version = CommuniquéParser.getVersion();
+
 	private boolean isRecruitment;
 	private boolean randomSort;
 
@@ -123,7 +124,7 @@ public class CommuniquéFileReader {
 
 	/**
 	 * Gets the flag <code>randomSort</code> which was loaded off the provided configuration file.
-	 * 
+	 *
 	 * @return <code>boolean</code> containing the contents of <code>randomSort</code>
 	 */
 	public boolean getRandomSortFlag() {
