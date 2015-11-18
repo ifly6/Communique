@@ -40,6 +40,7 @@
                   <MenuItem fx:id="importKeysMenuItem" mnemonicParsing="false" onAction="#importURLKeys" text="Import Keys from URL" />
                   <MenuItem fx:id="importDelegatesMenuItem" mnemonicParsing="false" onAction="#importDelegates" text="Import Delegates" />
                   <SeparatorMenuItem mnemonicParsing="false" />
+                  <CheckMenuItem fx:id="randomiseMenuItem" mnemonicParsing="false" text="Randomise Recipients List" />
                   <CheckMenuItem fx:id="disableSendingCheckBox" mnemonicParsing="false" text="Disable Sending" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem mnemonicParsing="false" onAction="#killSendingThread" text="Kill Sending Thread" />

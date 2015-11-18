@@ -26,7 +26,9 @@ package com.git.ifly6.marconi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.stream.Stream;
 
 import com.git.ifly6.communique.CommuniquéFileReader;
@@ -43,6 +45,7 @@ public class Marconi {
 	static JTelegramKeys keys = new JTelegramKeys();
 	static String[] recipients = {};
 	static boolean isRecruitment = true;
+	static boolean randomSort = false;
 	public static final int version = CommuniquéParser.getVersion();
 
 	public static void main(String[] args) {
@@ -74,10 +77,24 @@ public class Marconi {
 					}
 				}
 
+				while (true) {
+					String recruitmentResponse = util.prompt("Is the current randomisation flag (" + randomSort + ") set correctly? [Yes] or [No]?",
+							new String[] { "yes", "no", "y", "n" });
+
+					if (recruitmentResponse.startsWith("n")) {
+						randomSort = !randomSort;
+					} else if (recruitmentResponse.startsWith("y")) {
+						break;
+					}
+				}
+
 				// Process the Recipients list into a string with two columns.
 				CommuniquéParser parser = new CommuniquéParser(util);
 				String[] expandedRecipients = parser.recipientsParse(recipients);
-				System.out.println("");
+
+				if (randomSort) {
+					expandedRecipients = randomiseArray(expandedRecipients);
+				}
 
 				for (int x = 0; x < expandedRecipients.length; x = x + 2) {
 					try {
@@ -86,9 +103,10 @@ public class Marconi {
 						System.out.printf(expandedRecipients[x] + "\n");
 					}
 				}
-				System.out.println("");
-				System.out.println("This will take " + time((int) Math.round(expandedRecipients.length * ((isRecruitment) ? 180.05 : 30.05))));
-				System.out.println("");
+
+				System.out.println();
+				System.out.println("This will take " + time((int) Math.round(expandedRecipients.length * ((isRecruitment) ? 180.05 : 30.05)))
+						+ " to send " + expandedRecipients.length + " telegrams.");
 
 				// Give a chance to check the recipients.
 				String recipientsReponse = util.prompt("Are you sure you want to send to these recipients? [Yes] or [No]?",
@@ -147,6 +165,7 @@ public class Marconi {
 		keys = fileReader.getKeys();
 		recipients = fileReader.getRecipients();
 		isRecruitment = fileReader.getRecruitmentFlag();
+		randomSort = fileReader.getRandomSortFlag();
 	}
 
 	private static String time(int seconds) {
@@ -157,5 +176,21 @@ public class Marconi {
 		int days = hours / 24;
 		hours -= days * 24;
 		return days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
+	}
+
+	/**
+	 * Randomises an array. Probably best to do it more efficiently, but right now, it uses a Collection to shuffle it
+	 * in basically for simplicity of coding...
+	 *
+	 * @param inputArray which is to be shuffled
+	 * @return a copy of the inputArray which is shuffled randomly
+	 */
+	private static String[] randomiseArray(String[] inputArray) {
+		ArrayList<String> tempList = new ArrayList<String>();
+		for (String element : inputArray) {
+			tempList.add(element);
+		}
+		Collections.shuffle(tempList);
+		return tempList.toArray(new String[tempList.size()]);
 	}
 }

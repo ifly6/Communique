@@ -55,6 +55,7 @@ public class CommuniquéFileWriter {
 	JTelegramKeys keys = new JTelegramKeys();
 	String[] recipients = {};
 	boolean isRecruitment = true;
+	boolean randomSort = false;
 
 	/**
 	 * This is the basic constructor, which initialises an empty CommuniquéFileWriter. After creating a
@@ -140,12 +141,23 @@ public class CommuniquéFileWriter {
 	}
 
 	/**
-	 * Sets the <code>isRecruitment</code> flag inside the object.
+	 * Sets the <code>isRecruitment</code> flag inside the object. This determines what delay timer the program is to
+	 * use.
 	 *
 	 * @param recuitment is the flag sent to the writer
 	 */
 	public void setRecuitment(boolean recuitment) {
 		isRecruitment = recuitment;
+	}
+
+	/**
+	 * Sets the <code>randomSort</code> flag inside the object. This determines whether the program is to sort the list
+	 * of recipients randomly.
+	 *
+	 * @param random is the flag sent to the writer
+	 */
+	public void setRandom(boolean random) {
+		randomSort = random;
 	}
 
 	/**
@@ -168,6 +180,7 @@ public class CommuniquéFileWriter {
 		writer.println("secret_key=" + keys.getSecretKey());
 		writer.println("telegram_id=" + keys.getTelegramId());
 		writer.println("isRecruitment=" + isRecruitment);
+		writer.println("randomSort=" + randomSort);
 
 		// Ignore commented and empty lines.
 		ArrayList<String> contentList = new ArrayList<String>(0);
