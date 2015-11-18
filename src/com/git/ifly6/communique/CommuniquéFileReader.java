@@ -49,6 +49,7 @@ public class CommuniquéFileReader {
 	ArrayList<String> fileContents = new ArrayList<String>(0);
 	static final int version = CommuniquéParser.getVersion();
 	private boolean isRecruitment;
+	private boolean randomSort;
 
 	/**
 	 * <code>information</code> is an encapsulator which contains the returning information of the JTelegramKeys and the
@@ -114,10 +115,19 @@ public class CommuniquéFileReader {
 	/**
 	 * Gets the flag <code>isRecruitment</code> which was loaded off the provided configuration file.
 	 *
-	 * @return <code>boolean</code> containing the contents of isRecruitment
+	 * @return <code>boolean</code> containing the contents of <code>isRecruitment</code>
 	 */
 	public boolean getRecruitmentFlag() {
 		return isRecruitment;
+	}
+
+	/**
+	 * Gets the flag <code>randomSort</code> which was loaded off the provided configuration file.
+	 * 
+	 * @return <code>boolean</code> containing the contents of <code>randomSort</code>
+	 */
+	public boolean getRandomSortFlag() {
+		return randomSort;
 	}
 
 	/**
@@ -143,6 +153,9 @@ public class CommuniquéFileReader {
 
 			} else if (element.startsWith("isRecruitment=")) {
 				isRecruitment = Boolean.getBoolean(element.replace("isRecruitment=", ""));
+
+			} else if (element.startsWith("randomSort=")) {
+				randomSort = Boolean.getBoolean(element.replace("randomSort=", ""));
 
 			} else if (!element.startsWith("#") && !element.isEmpty() && !element.contains("=")) {
 				recipientsList.add(element.toLowerCase().trim().replace(" ", "_"));

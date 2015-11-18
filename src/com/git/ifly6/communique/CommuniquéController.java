@@ -31,6 +31,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -66,8 +68,10 @@ public class CommuniquéController {
 	@FXML private TextField clientField;
 	@FXML private TextField secretField;
 	@FXML private TextField telegramField;
+
 	@FXML private CheckBox recruitmentCheckBox;
 	@FXML private CheckMenuItem disableSendingCheckBox;
+	@FXML private CheckMenuItem randomiseMenuItem;
 
 	private JavaTelegram client;
 	private CommuniquéLogger util;
@@ -245,6 +249,11 @@ public class CommuniquéController {
 
 		String timeNeeded = days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
 
+		// If it needs to be randomised, do so.
+		if (randomiseMenuItem.isSelected()) {
+			recipients = randomiseArray(recipients);
+		}
+
 		// Show Recipients
 		String recipient = "# == Communiqué Recipients ==\n" + "# This tab shows all " + recipients.length
 				+ " recipients after parsing of the Code tab.\n# Estimated time needed is " + timeNeeded + "\n\n";
@@ -284,6 +293,7 @@ public class CommuniquéController {
 				fileWriter.setKeys(clientField.getText(), secretField.getText(), telegramField.getText());
 				fileWriter.setBody(codePane.getText());
 				fileWriter.setRecuitment(recruitmentCheckBox.isSelected());
+				fileWriter.setRandom(randomiseMenuItem.isSelected());
 				fileWriter.write();
 
 				util.log("Configuration saved.");
@@ -315,6 +325,7 @@ public class CommuniquéController {
 					try {
 						writeProperties();
 					} catch (IOException e) {
+						System.err.println("Exception in writing properties.");
 					}
 
 					// In case you need a dry run, it will do everything but send.
@@ -377,5 +388,21 @@ public class CommuniquéController {
 		} else {
 			return "Client Key";
 		}
+	}
+
+	/**
+	 * Randomises an array. Probably best to do it more efficiently, but right now, it uses a Collection to shuffle it
+	 * in basically for simplicity of coding...
+	 *
+	 * @param inputArray which is to be shuffled
+	 * @return a copy of the inputArray which is shuffled randomly
+	 */
+	private String[] randomiseArray(String[] inputArray) {
+		ArrayList<String> tempList = new ArrayList<String>();
+		for (String element : inputArray) {
+			tempList.add(element);
+		}
+		Collections.shuffle(tempList);
+		return tempList.toArray(new String[tempList.size()]);
 	}
 }
