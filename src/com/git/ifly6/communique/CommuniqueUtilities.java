@@ -1,7 +1,7 @@
 package com.git.ifly6.communique;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * This class is nothing more than a container for utility methods used inside Communique programmes.
@@ -18,18 +18,21 @@ public class CommuniqueUtilities {
 	 * @return a copy of the inputArray which is shuffled randomly
 	 */
 	public static String[] randomiseArray(String[] inputArray) {
-		ArrayList<String> tempList = new ArrayList<String>();
-		for (String element : inputArray) {
-			tempList.add(element);
+		Random rnd = ThreadLocalRandom.current();
+		for (int i = inputArray.length - 1; i > 0; i--) {
+			int index = rnd.nextInt(i + 1);
+
+			String a = inputArray[index];
+			inputArray[index] = inputArray[i];
+			inputArray[i] = a;
 		}
-		Collections.shuffle(tempList);
-		return tempList.toArray(new String[tempList.size()]);
+		return inputArray;
 	}
 
 	/**
 	 * This changes raw seconds directly into days, hours, minutes, and seconds. Very helpful for creating a system of
 	 * information which humans can use and are not just machine constructs.
-	 * 
+	 *
 	 * @param seconds elapsed
 	 * @return a string in days, hours, minutes, and seconds
 	 */
