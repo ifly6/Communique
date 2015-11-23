@@ -153,10 +153,10 @@ public class CommuniquéFileReader {
 				keys.setTelegramId(element.replace("telegram_id=", ""));
 
 			} else if (element.startsWith("isRecruitment=")) {
-				isRecruitment = Boolean.getBoolean(element.replace("isRecruitment=", ""));
+				isRecruitment = Boolean.parseBoolean(element.replace("isRecruitment=", ""));
 
 			} else if (element.startsWith("randomSort=")) {
-				randomSort = Boolean.getBoolean(element.replace("randomSort=", ""));
+				randomSort = Boolean.parseBoolean(element.replace("randomSort=", ""));
 
 			} else if (!element.startsWith("#") && !element.isEmpty() && !element.contains("=")) {
 				recipientsList.add(element.toLowerCase().trim().replace(" ", "_"));

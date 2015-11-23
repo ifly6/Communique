@@ -35,12 +35,20 @@ public class MarconiLogger implements JTelegramLogger {
 	Scanner scan = new Scanner(System.in);
 
 	/**
+	 * This logs a <code>String</code> to the standard system out.
+	 *
 	 * @param output is the <code>String</code> to be logged
 	 */
 	@Override public void log(String output) {
 		System.out.println("[" + currentTime() + "] " + output);
 	}
 
+	/**
+	 * This logs a <code>String</code> to the standard system out. However, it is important to note that this also
+	 * forces the thread to suspend for two seconds after sending the error message.
+	 *
+	 * @param output is the <code>String</code> to be logged
+	 */
 	public void err(String output) {
 		log(output);
 		try {
