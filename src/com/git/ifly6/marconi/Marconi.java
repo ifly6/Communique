@@ -48,6 +48,17 @@ public class Marconi {
 	public static final int version = CommuniquéParser.getVersion();
 
 	public static void main(String[] args) {
+
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override public void run() {
+				try {
+					appendSent(new File(args[0]));
+				} catch (FileNotFoundException | UnsupportedEncodingException e) {
+					util.err("Internal Error. File either does not exist or is in the incorrect encoding.");
+				}
+			}
+		});
+
 		if (args.length == 1) {	// If there is not a provided file, do nothing.
 
 			try {

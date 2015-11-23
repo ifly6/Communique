@@ -52,3 +52,5 @@ While there will be a version number, currently, there is no such number, since,
   - Added `->` modifier, signifying 'in', e.g. `region:europe -> wa:members` would return 'nations of Europe in WA:members' and `region:europe -> wa:delegates` would return the Delegate of Europe. Due to the way the 'both' function works, it is commutative.
 
 3. Version 3 is a cosmetic upgrade. Communiqué switched from Java's Swing to JavaFX. Version 3 uses the same file format for Version 2. It also has a massive number of bug fixes and optimisations which were developed in the time between Versions 2 and 3.
+
+4. Version 4 introduces a flag into the file system to randomise the list of recipients. This flag is defined by the `randomSort` flag inside the file system and a system for generating that flag has been added to Communiqué. 
