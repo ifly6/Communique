@@ -53,14 +53,13 @@ public class CommuniquéFileReader {
 	private boolean randomSort;
 
 	/**
-	 * <code>information</code> is an encapsulator which contains the returning information of the JTelegramKeys and the
-	 * recipients.
+	 * <code>information</code> encapsulates the returning information of the JTelegramKeys and the recipients.
 	 */
 	Object[] information = { new JTelegramKeys(), new String[] {} };
 
 	/**
 	 * Constructs a FileReader tailored to the correct file and loads the entire file into an ArrayList. From there, it
-	 * calls <code>parseConfig()</code> to load all the processed information into an accessible Object.
+	 * calls <code>parseConfig()</code> to load all the processed information into an accessible object.
 	 *
 	 * @param file of the Communiqué configuration file
 	 * @throws FileNotFoundException if the Communiqué configuration file is non-existent or unwritable
@@ -174,8 +173,7 @@ public class CommuniquéFileReader {
 	 * @return
 	 */
 	public boolean isCompatible() {
-		int fileVersion = Integer.parseInt(getFileVersion());
-		return (fileVersion <= version) ? true : false;
+		return (getFileVersion() <= version) ? true : false;
 	}
 
 	/**
@@ -185,18 +183,18 @@ public class CommuniquéFileReader {
 	 *
 	 * @return <code>String</code> containing the ending of the commented version line
 	 */
-	public String getFileVersion() {
+	public int getFileVersion() {
 
 		// Look for version tag first
 		for (String element : fileContents) {
-			if (element.startsWith("version")) { return element.replace("version=", ""); }
+			if (element.startsWith("version")) { return Integer.parseInt(element.replace("version=", "")); }
 		}
 
-		// Look for header version tag
+		// If the version tag does not yet exist, look for header version tag
 		for (String element : fileContents) {
-			if (element.startsWith("# Produced by version ")) { return element.replace("# Produced by version ", ""); }
+			if (element.startsWith("# Produced by version ")) { return Integer.parseInt(element.replace("# Produced by version ", "")); }
 		}
 
-		return null;
+		return 0;
 	}
 }
