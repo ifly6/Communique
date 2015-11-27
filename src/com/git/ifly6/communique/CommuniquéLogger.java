@@ -67,7 +67,9 @@ public class CommuniquéLogger implements JTelegramLogger {
 	 * @param input is the <code>String</code> to be input into <code>logPane</code>
 	 */
 	@Override public void log(String input) {
-		logPane.appendText("[" + currentTime() + "] " + input + "\n");
+		String output = "[" + currentTime() + "] " + input + "\n";
+		logPane.appendText(output);
+		System.err.print(output);
 		logPane.positionCaret(logPane.getLength());
 	}
 
