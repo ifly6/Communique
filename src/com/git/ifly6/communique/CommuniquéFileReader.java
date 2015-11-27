@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 import com.git.ifly6.javatelegram.JTelegramKeys;
@@ -46,7 +47,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
  */
 public class CommuniquéFileReader {
 
-	ArrayList<String> fileContents = new ArrayList<String>(0);
+	ArrayList<String> fileContents = new ArrayList<String>();
 	static final int version = CommuniquéParser.getVersion();
 
 	private boolean isRecruitment;
@@ -72,7 +73,7 @@ public class CommuniquéFileReader {
 		Scanner scan = new Scanner(configRead);
 
 		while (scan.hasNextLine()) {
-			fileContents.add(scan.nextLine());
+			fileContents.add(scan.nextLine().trim());
 		}
 		scan.close();
 
@@ -196,5 +197,54 @@ public class CommuniquéFileReader {
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Gets the header of the entire file (that is, all comments before the first real entry) and returns it in a String
+	 * array.
+	 *
+	 * @return the header of the file in <code>String[]</code> format
+	 */
+	public String[] getHeader() {
+		ArrayList<String> header = new ArrayList<String>();
+		String[] filteredContents = CommuniqueUtilities.filterNewLines(fileContents.toArray(new String[fileContents.size()]));
+
+		for (int i = 0; i < filteredContents.length; i++) {
+			if (!filteredContents[i].startsWith("#")) {
+				// When comments end, break.
+				break;
+			} else {
+				header.add(filteredContents[i]);
+			}
+		}
+
+		return header.toArray(new String[header.size()]);
+	}
+
+	/**
+	 * Gets the footer sections of the file (that is, all comments after the last real entry) and returns it in a String
+	 * array.
+	 *
+	 * @return the footer of the file in <code>String[]</code> format
+	 */
+	public String[] getFooter() {
+		ArrayList<String> header = new ArrayList<String>();
+		String[] tempContents = fileContents.toArray(new String[fileContents.size()]);
+		String[] filteredContents = CommuniqueUtilities.filterNewLines(tempContents);
+
+		for (int i = filteredContents.length - 1; i >= 0; i--) {
+			// Start from the bottom and read commented lines.
+
+			if (!filteredContents[i].startsWith("#")) {
+				// When those commented lines terminate, break.
+				break;
+			} else {
+				header.add(filteredContents[i]);
+			}
+		}
+
+		Collections.reverse(header);
+
+		return header.toArray(new String[header.size()]);
 	}
 }
