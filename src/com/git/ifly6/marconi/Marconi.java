@@ -26,11 +26,13 @@ package com.git.ifly6.marconi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.Stream;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.CommuniquéFileReader;
@@ -43,101 +45,117 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 public class Marconi {
 
 	public static final int version = CommuniquéParser.getVersion();
+	private static String jarLocation = "Marconi_" + version + ".jar";
+	private static File execConfiguration;
 
-	static MarconiLogger util = new MarconiLogger();
-	static JavaTelegram client = new JavaTelegram(util);
-	static JTelegramKeys keys = new JTelegramKeys();
-	static String[] recipients = {};
+	private static MarconiLogger util = new MarconiLogger();
+	private static JavaTelegram client = new JavaTelegram(util);
+	private static JTelegramKeys keys = new JTelegramKeys();
+	private static String[] recipients = {};
 
-	static boolean isRecruitment = true;
-	static boolean randomSort = false;
-	static boolean skipChecks = false;
+	private static Options options = new Options();
+	private static HelpFormatter helpFormatter = new HelpFormatter();
 
-	static boolean recruitSet = false;
-	static boolean sortSet = false;
+	private static boolean isRecruitment = true;
+	private static boolean randomSort = false;
+	private static boolean skipChecks = false;
+
+	private static boolean recruitSet = false;
+	private static boolean sortSet = false;
 
 	public static void main(String[] args) {
 
-		// Define Options
-		Options options = new Options();
-		options.addOption("h", "Provides assistance");
-		options.addOption("s", "Skips all checks for confirmation such that the command immediately executes");
-		options.addOption("R", "Forces recruitment time (180 seconds) for the sending list");
-		options.addOption("C", "Forces campaign time (30 seconds) for the sending list");
-		options.addOption("r", "Forces randomisation of the sending list");
-		options.addOption("a", "Forces campaign time (30 seconds) for the sending list");
+		CommandLineParser cliParse = new DefaultParser();
+
+		// Define execution options
+		options.addOption("h", "help", false, "Displays this message");
+		options.addOption("S", "skip", false, "Skips all checks for confirmation such that the command immediately executes");
+		options.addOption("I", false, "Forces an opporitunity to double-check all keys");
+		options.addOption("R", false, "Forces recruitment time (180 seconds) for the sending list");
+		options.addOption("C", false, "Forces campaign time (30 seconds) for the sending list");
+		options.addOption("r", false, "Forces randomisation of the sending list");
+		options.addOption("s", "seq", false, "Forces sequential sending of the sending list");
+		options.addOption("a", "auto", false, "Allows program to autonomously update the sending list");
+		options.addOption("v", "version", false, "Prints version");
 
 		if (args.length == 0) {
 			util.err("Runtime Error. Please provide a single valid Communiqué configuration file of version " + version + ".");
-			quitFailed();
+			quit();
 		}
 
-		ArrayList<String> rawFlags = new ArrayList<String>();
-		ArrayList<String> fileList = new ArrayList<String>();
+		try {
+			CommandLine commandLine = cliParse.parse(options, args);
 
-		// Sort out flags.
-		for (String element : args) {
-			if (element.startsWith("-")) {
-				rawFlags.add(element);
-			} else {
-				fileList.add(element);
+			// Deal with options
+			if (commandLine.hasOption("h")) {
+				quit();
 			}
-		}
-		String[] flags = rawFlags.toArray(new String[rawFlags.size()]);
-		String[] files = fileList.toArray(new String[rawFlags.size()]);
+			if (commandLine.hasOption("S")) {
+				// This option is overridden by the interactivity flag
+				skipChecks = true;
+			}
+			if (commandLine.hasOption("I")) {
+				// This option overrides the attempt to skip checks
+				skipChecks = false;
+			}
+			if (commandLine.hasOption("C")) {
+				// This option is overridden by the recruitment-delay setting
+				isRecruitment = false;
+				recruitSet = true;
+			}
+			if (commandLine.hasOption("R")) {
+				// This option overrides the campaign-delay setting
+				isRecruitment = true;
+				recruitSet = true;
+			}
+			if (commandLine.hasOption("r")) {
+				randomSort = true;
+				sortSet = true;
+			}
+			if (commandLine.hasOption("s")) {
+				randomSort = false;
+				sortSet = true;
+			}
+			if (commandLine.hasOption("a")) {
+				// IMPLEMENT.
+			}
+			if (commandLine.hasOption("v")) {
+				System.out.println("Marconi version " + version + "\n" + "Please visit https://github.com/iFlyCode/Communique/releases.");
+				System.exit(0);
+			}
 
-		// Process flags
-		for (String element : flags) {
-			if (element.equals("--help") || element.equals("-h")) {
-				System.out.println("Usage: screen -S [name] java -jar Marconi_" + version + ".jar [-options] file\n" + "Options:\n"
-						+ "  -s \t\t\tSkips all checks for confirmation such that the command immediately executes\n"
-						+ "  -R \t\t\tForces recruitment time (180 seconds) for the sending list. Only works with -s\n"
-						+ "  -C \t\t\tForces campaign time (30 seconds) for the sending list. Only works with -s\n"
-						+ "  -r \t\t\tForces randomisation of the sending list. Only works with -s\n"
-						+ "  -a=[delegates,new] \tEnables the program to execute commands autonomously");
-				quitFailed();
+			// Deal with the argument
+			String[] fileList = commandLine.getArgs();
+			if (fileList.length != 1) {
+				quitMessage("Please only provide ONE file argument to the program.");
 			} else {
-				if (element.equals("-s")) {
-					skipChecks = true;
-				}
-				if (element.equals("-r")) {
-					randomSort = true;
-				}
-				if (element.equals("-R")) {
-					isRecruitment = true;
-				}
-				if (element.equals("-C")) {
-					isRecruitment = false;
-				}
+				execConfiguration = new File(fileList[0]);
 			}
+		} catch (ParseException e1) {
+			util.err("Error. Failed to parse options and commands.");
 		}
 
 		// Load in information and keys from configuration file
 		try {
-			loadConfig(new File(files[0]));
+			loadConfig(execConfiguration);
 		} catch (FileNotFoundException e) {
 			util.err("Internal Error. File either does not exist or is in the incorrect encoding.");
 		} catch (JTelegramException e) {
 			util.err("Incorrect file version. This is a version " + version + " client.");
 		}
 
-		// Make sure there is only one configuration file to speak of
-		if (fileList.size() > 1) {
-			util.err("Runtime Error. Please provide a single valid Communiqué configuration file of version " + version + ".");
-			quitFailed();
-		}
-
+		// When asked to shut down, write the sentList to disc
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override public void run() {
 				try {
-					appendSent(new File(files[0]));
+					appendSent(execConfiguration);
 				} catch (FileNotFoundException | UnsupportedEncodingException e) {
-					util.err("Internal Error. File either does not exist or is in the incorrect encoding.");
+					util.err("Internal Error. File either does not exist or is in the incorrect encoding. File not saved in shutdown.");
 				}
 			}
 		});
 
-		// If we are not to check the keys, check.
+		// If we are to check the keys, check.
 		if (!skipChecks) {
 			manualFlagCheck();
 		}
@@ -168,7 +186,7 @@ public class Marconi {
 			String recipientsReponse = util.prompt("Are you sure you want to send to these recipients? [Yes] or [No]?",
 					new String[] { "yes", "no", "y", "n" });
 			if (recipientsReponse.startsWith("n")) {
-				quitFailed();
+				quit();
 			}
 		}
 
@@ -181,14 +199,15 @@ public class Marconi {
 
 		// Update the configuration file to reflect the changed reality.
 		try {
-			appendSent(new File(files[0]));
+			appendSent(execConfiguration);
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			util.err("Internal Error. File either does not exist or is in the incorrect encoding.");
 		}
 	}
 
 	/**
-	 * Should the problem be prompted to manually check all flags,
+	 * Should the problem be prompted to manually check all flags, this method does so, retrieving the flags and asking
+	 * for the user to reconfirm them.
 	 */
 	private static void manualFlagCheck() {
 		// Give a chance to check the keys.
@@ -196,7 +215,7 @@ public class Marconi {
 				"Are these keys correct? " + keys.getClientKey() + ", " + keys.getSecretKey() + ", " + keys.getTelegramId() + " [Yes] or [No]?",
 				new String[] { "yes", "no", "y", "n" });
 		if (!keysResponse.startsWith("y")) {
-			quitFailed();
+			quit();
 		}
 
 		// Confirm the recruitment flag.
@@ -225,6 +244,9 @@ public class Marconi {
 	}
 
 	/**
+	 * Gets the list of recipients to which the client has already sent telegrams, appends that to the sent list, then
+	 * creates a <code>CommuniquéFileWriter</code> to write that new payload to disc.
+	 *
 	 * @param file to where this program will write.
 	 * @throws FileNotFoundException if the file cannot be found
 	 * @throws UnsupportedEncodingException if the file's encoding is unsupported
@@ -235,13 +257,18 @@ public class Marconi {
 			sentList[x] = "/" + sentList[x];
 		}
 
-		String[] body = Stream.concat(Arrays.stream(recipients), Arrays.stream(sentList)).toArray(String[]::new);
+		String[] body = new String[recipients.length + sentList.length];
+		System.arraycopy(recipients, 0, body, 0, recipients.length);
+		System.arraycopy(sentList, 0, body, recipients.length, sentList.length);
 
 		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file, keys, isRecruitment, body);
 		fileWriter.write();
 	}
 
 	/**
+	 * Loads configuration and sets all flags based off that configuration. Only sets flags given that the
+	 * <code>-s</code> option is not already set.
+	 *
 	 * @param file at which this program will look.
 	 * @throws FileNotFoundException
 	 * @throws JTelegramException if the fileReader is not compatible
@@ -250,16 +277,33 @@ public class Marconi {
 		CommuniquéFileReader fileReader = new CommuniquéFileReader(file);
 		keys = fileReader.getKeys();
 		recipients = fileReader.getRecipients();
-		isRecruitment = fileReader.getRecruitmentFlag();
-		randomSort = fileReader.getRandomSortFlag();
+
+		if (!sortSet) {
+			randomSort = fileReader.getRandomSortFlag();
+		}
+
+		if (!recruitSet) {
+			isRecruitment = fileReader.getRecruitmentFlag();
+		}
 	}
 
-	private static void quitFailed() {
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			System.exit(0);
-		}
+	/**
+	 * Prints out help information to <code>System.out</code> using the Apache Commons CLI library, then quits the
+	 * application.
+	 */
+	private static void quit() {
+		helpFormatter.printHelp("screen -S marconi java -jar " + jarLocation + " [options] <FILE>", options);
 		System.exit(0);
+	}
+
+	/**
+	 * Prints out help information to <code>System.out</code> using the Apache Commons CLI library, preceded by a
+	 * message, then quits the application.
+	 *
+	 * @param message which prefaces the help text
+	 */
+	private static void quitMessage(String message) {
+		util.err(message);
+		quit();
 	}
 }
