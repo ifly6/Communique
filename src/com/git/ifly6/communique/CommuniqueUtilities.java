@@ -1,5 +1,6 @@
 package com.git.ifly6.communique;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -11,8 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CommuniqueUtilities {
 
 	/**
-	 * Randomises an array. Probably best to do it more efficiently, but right now, it uses a Collection to shuffle it
-	 * in basically for simplicity of coding...
+	 * Randomises an array's sequence of contents.
 	 *
 	 * @param inputArray which is to be shuffled
 	 * @return a copy of the inputArray which is shuffled randomly
@@ -44,5 +44,23 @@ public class CommuniqueUtilities {
 		int days = hours / 24;
 		hours -= days * 24;
 		return days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
+	}
+
+	/**
+	 * This filters out all new lines from an array.
+	 *
+	 * @param array which contains new lines
+	 * @return the array without new lines
+	 */
+	public static String[] filterNewLines(String[] array) {
+		ArrayList<String> temp = new ArrayList<String>();
+
+		for (String element : array) {
+			if (!element.equals("\n")) {
+				temp.add(element);
+			}
+		}
+
+		return temp.toArray(new String[temp.size()]);
 	}
 }

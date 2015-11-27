@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 
 import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.javatelegram.util.JTelegramException;
 
 /**
  * Convenience class for correctly writing Communiqué configuration files. It is directly based on
@@ -51,11 +52,20 @@ import com.git.ifly6.javatelegram.JTelegramKeys;
 public class CommuniquéFileWriter {
 
 	static final int version = CommuniquéParser.getVersion();
+
+	// Requirements to Write
 	PrintWriter writer;
 	JTelegramKeys keys = new JTelegramKeys();
 	String[] recipients = {};
+
+	// Flags
 	boolean isRecruitment = true;
 	boolean randomSort = false;
+	boolean preexisting = false;
+
+	// Preservation information
+	private String[] originalHeader = {};
+	private String[] originalFooter = {};
 
 	/**
 	 * This is the basic constructor, which initialises an empty CommuniquéFileWriter. After creating a
@@ -65,8 +75,18 @@ public class CommuniquéFileWriter {
 	 * @param file to which a Communiqué configuration file will be written
 	 * @throws FileNotFoundException if there is no file there or the file cannot be written to
 	 * @throws UnsupportedEncodingException if your computer does not support UTF-8 as a valid encoding
+	 * @throws JTelegramException
 	 */
-	public CommuniquéFileWriter(File file) throws FileNotFoundException, UnsupportedEncodingException {
+	public CommuniquéFileWriter(File file) throws FileNotFoundException, UnsupportedEncodingException, JTelegramException {
+
+		// Get file before destroying it
+		if (file.exists()) {
+			preexisting = true;
+			CommuniquéFileReader reader = new CommuniquéFileReader(file);
+			originalHeader = reader.getHeader();
+			originalFooter = reader.getFooter();
+		}
+
 		writer = new PrintWriter(file, "UTF-8");
 	}
 
@@ -168,19 +188,25 @@ public class CommuniquéFileWriter {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 
-		String header = "# Communiqué Configuration File. Do not edit by hand.";
-		String headerDate = "# Produced at: " + dateFormat.format(date);
-		String headerVers = "# Produced by version " + version;
+		if (preexisting) {
+			for (String element : originalHeader) {
+				writer.println(element);
+			}
+		} else {
+			writer.println("# Communiqué Configuration File. Do not edit by hand.");
+			writer.println("# Produced at: " + dateFormat.format(date));
+			writer.println("# Produced by version " + version);
+		}
 
-		writer.println(header);
-		writer.println(headerDate);
-		writer.println(headerVers + "\n");
+		writer.println("");
 		writer.println("version=" + version);
 		writer.println("client_key=" + keys.getClientKey());
 		writer.println("secret_key=" + keys.getSecretKey());
 		writer.println("telegram_id=" + keys.getTelegramId());
 		writer.println("isRecruitment=" + isRecruitment);
 		writer.println("randomSort=" + randomSort);
+		writer.println("");
+		writer.println("# Recipients");
 
 		// Ignore commented and empty lines.
 		ArrayList<String> contentList = new ArrayList<String>(0);
@@ -211,6 +237,15 @@ public class CommuniquéFileWriter {
 		// Print in the nopeList
 		for (String element : nopeList) {
 			writer.println(element);
+		}
+
+		if (preexisting) {
+			writer.println();
+
+			for (String element : originalFooter) {
+				writer.println(element);
+			}
+			writer.println("# Changed at " + dateFormat.format(date) + " by version " + version);
 		}
 
 		writer.close();

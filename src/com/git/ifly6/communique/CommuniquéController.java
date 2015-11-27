@@ -291,8 +291,8 @@ public class CommuniquéController {
 				util.log("Cannot find the location of the selected document.");
 			} catch (UnsupportedEncodingException e) {
 				util.log("Encoding of selected document is not supported. Create a new savefile.");
-			} catch (RuntimeException e) {
-				util.log("Runtime exception occurred. Cannot save configuration file.");
+			} catch (JTelegramException e) {
+				util.log("There exists a preexisting file which has a version mismatch.");
 			}
 		}
 	}
