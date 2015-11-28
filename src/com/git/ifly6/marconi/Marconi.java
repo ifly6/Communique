@@ -1,25 +1,17 @@
-/*
- * Copyright (c) 2015 ifly6
+/* Copyright (c) 2015 ifly6
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+ * Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 package com.git.ifly6.marconi;
 
@@ -65,6 +57,11 @@ public class Marconi {
 
 	public static void main(String[] args) {
 
+		if (args.length == 0) {
+			util.err("Runtime Error. Please provide a single valid Communiqué configuration file of version " + version + ".");
+			quit();
+		}
+
 		CommandLineParser cliParse = new DefaultParser();
 
 		// Define execution options
@@ -77,11 +74,6 @@ public class Marconi {
 		options.addOption("s", "seq", false, "Forces sequential sending of the sending list");
 		options.addOption("a", "auto", false, "Allows program to autonomously update the sending list");
 		options.addOption("v", "version", false, "Prints version");
-
-		if (args.length == 0) {
-			util.err("Runtime Error. Please provide a single valid Communiqué configuration file of version " + version + ".");
-			quit();
-		}
 
 		try {
 			CommandLine commandLine = cliParse.parse(options, args);
@@ -220,7 +212,7 @@ public class Marconi {
 
 		// Confirm the recruitment flag.
 		while (true) {
-			String recruitmentResponse = util.prompt("Is the current recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
+			String recruitmentResponse = util.prompt("Is the recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
 					new String[] { "yes", "no", "y", "n" });
 
 			if (recruitmentResponse.startsWith("n")) {
@@ -232,7 +224,7 @@ public class Marconi {
 
 		// Confirm the randomisation flag.
 		while (true) {
-			String randomResponse = util.prompt("Is the current randomisation flag (" + randomSort + ") set correctly? [Yes] or [No]?",
+			String randomResponse = util.prompt("Is the randomisation flag (" + randomSort + ") set correctly? [Yes] or [No]?",
 					new String[] { "yes", "no", "y", "n" });
 
 			if (randomResponse.startsWith("n")) {
@@ -273,7 +265,7 @@ public class Marconi {
 	 * @throws FileNotFoundException
 	 * @throws JTelegramException if the fileReader is not compatible
 	 */
-	private static void loadConfig(File file) throws FileNotFoundException, JTelegramException {
+	private static void loadConfig(final File file) throws FileNotFoundException, JTelegramException {
 		CommuniquéFileReader fileReader = new CommuniquéFileReader(file);
 		keys = fileReader.getKeys();
 		recipients = fileReader.getRecipients();
@@ -292,7 +284,7 @@ public class Marconi {
 	 * application.
 	 */
 	private static void quit() {
-		helpFormatter.printHelp("screen -S marconi java -jar " + jarLocation + " [options] <FILE>", options);
+		helpFormatter.printHelp("java -jar " + jarLocation + " [options] <FILE>", options);
 		System.exit(0);
 	}
 
@@ -302,7 +294,7 @@ public class Marconi {
 	 *
 	 * @param message which prefaces the help text
 	 */
-	private static void quitMessage(String message) {
+	private static void quitMessage(final String message) {
 		util.err(message);
 		quit();
 	}
