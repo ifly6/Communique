@@ -39,6 +39,8 @@ public class Communiqué extends Application {
 	@Override public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle("Communiqué " + version);
+		primaryStage.setMinHeight(500);
+		primaryStage.setMinWidth(600);
 		initLayout();
 	}
 
