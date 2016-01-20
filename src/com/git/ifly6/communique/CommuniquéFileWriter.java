@@ -190,14 +190,14 @@ public class CommuniquéFileWriter {
 			writer.println("# Produced by version " + version);
 		}
 
-		writer.println("");
+		writer.println();
 		writer.println("version=" + version);
 		writer.println("client_key=" + keys.getClientKey());
 		writer.println("secret_key=" + keys.getSecretKey());
 		writer.println("telegram_id=" + keys.getTelegramId());
 		writer.println("isRecruitment=" + isRecruitment);
 		writer.println("randomSort=" + randomSort);
-		writer.println("");
+		writer.println();
 		writer.println("# Recipients");
 
 		// Ignore commented and empty lines.

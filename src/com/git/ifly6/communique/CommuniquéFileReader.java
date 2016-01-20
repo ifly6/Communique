@@ -135,6 +135,8 @@ public class CommuniquéFileReader {
 		ArrayList<String> recipientsList = new ArrayList<String>(0);
 
 		for (String element : fileContents) {
+			element = element.trim();
+
 			if (element.startsWith("client_key=")) {
 				keys.setClientKey(element.replace("client_key=", ""));
 
