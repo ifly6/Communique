@@ -160,6 +160,8 @@ public class Marconi {
 			expandedRecipients = CommuniqueUtilities.randomiseArray(expandedRecipients);
 		}
 
+		// Show the recipients in the order we are to send the telegrams.
+		System.out.println();
 		for (int x = 0; x < expandedRecipients.length; x = x + 2) {
 			try {
 				System.out.printf("%-30.30s  %-30.30s%n", expandedRecipients[x], expandedRecipients[x + 1]);
