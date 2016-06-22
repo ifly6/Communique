@@ -18,11 +18,12 @@ package com.git.ifly6.communique;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.git.ifly6.javatelegram.JTelegramLogger;
-import com.git.ifly6.javatelegram.util.JTelegramFetcher;
+import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
 /**
  * This class is the central hub of the Communiqué system. It parses the <code>String</code> given to it with all the
@@ -67,16 +68,17 @@ import com.git.ifly6.javatelegram.util.JTelegramFetcher;
  * </tr>
  * </table>
  */
-public class CommuniquéParser {
+public class CommuniqueParser {
 
 	/**
 	 * This string determines what version of the parser is currently being used. The entire program is build around
 	 * this string for extended compatibility purposes. However, due to the separation between the Parser itself and the
 	 * IO system, either of them can trigger a change in the version number.
 	 */
-	public static final int version = 4;
+	public static final int version = 5;
+	private static JInfoFetcher fetcher = new JInfoFetcher();
+
 	JTelegramLogger util;
-	private JTelegramFetcher fetcher = new JTelegramFetcher();
 
 	/**
 	 * Method constructs the object. A JTelegramLogger must be provided to effectively provide an outlet for
@@ -84,7 +86,7 @@ public class CommuniquéParser {
 	 *
 	 * @param logger
 	 */
-	public CommuniquéParser(JTelegramLogger logger) {
+	public CommuniqueParser(JTelegramLogger logger) {
 		util = logger;
 	}
 
@@ -164,8 +166,15 @@ public class CommuniquéParser {
 			String element = tagsList.get(x).toLowerCase();
 
 			// Operator meaning-- 'region:europe->wa:nations' would be 'those in Europe in (who are) WA nations'
-			if (element.contains("->")) {
-				String[] bothArr = element.split("->");
+			if (element.contains("->") || element.contains("--")) {
+
+				String[] bothArr = new String[2];
+				if (element.contains("->")) {
+					bothArr = element.split("->");
+
+				} else if (element.contains("--")) {
+					bothArr = element.split("--");
+				}
 
 				// Remove leading and trailing underscores.
 				for (int i = 0; i < bothArr.length; i++) {
@@ -178,19 +187,37 @@ public class CommuniquéParser {
 				}
 
 				// Split into the two lists
+				// firsts and seconds refer to the elements on either side of the '->' operator
 				String[] firsts = expandTag(bothArr[0]);
 				String[] seconds = expandTag(bothArr[1]);
 
 				ArrayList<String> both = new ArrayList<String>();
 
-				// If it appears in both lists, add it.
-				for (String first : firsts) {
+				// This section is for
+				if (element.contains("->")) {
+
+					// If it appears in both lists, add it. Use the new 'contains' algorithm instead of the old 'nested
+					// for loops' algorithm. This gives significant speed advantages.
+					HashSet<String> firstsSet = new HashSet<String>();
+					firstsSet.addAll(Arrays.asList(firsts));
 					for (String second : seconds) {
-						if (first.equals(second)) {
-							both.add(first);
-							break;
+						if (firstsSet.contains(second)) {
+							both.add(second);
 						}
 					}
+
+				} else if (element.contains("--")) {
+
+					// If an element in the first list is also contained in the second list, do not add it to the 'both'
+					// list. This basically removes it from the firsts list as output is concerned.
+					HashSet<String> secondsSet = new HashSet<>();
+					secondsSet.addAll(Arrays.asList(seconds));
+					for (String first : firsts) {
+						if (!secondsSet.contains(first)) {
+							both.add(first);
+						}
+					}
+
 				}
 
 				expandedList.addAll(both);
@@ -215,16 +242,18 @@ public class CommuniquéParser {
 
 	/**
 	 * This parses the contents of the recipients and allows us to actually make the tag system work through interfacing
-	 * with the expansion system above.
+	 * with the expansion system above. Note that this method automatically handles the removal of commented lines with
+	 * <code>#</code> as the comment.
 	 *
-	 * @param input an array of the recipients, each one on an individual index
+	 * @param input an array of the recipients, each one on an individual index, which can include commented lines
 	 * @return a final array of the recipients, compatible with JavaTelegram
 	 */
 	public String[] recipientsParse(String[] input) {
-		ArrayList<String> finalRecipients = new ArrayList<String>(0);
+
+		ArrayList<String> finalRecipients = new ArrayList<String>();
 
 		// Remove commented or empty lines.
-		ArrayList<String> unComments = new ArrayList<String>(0);
+		ArrayList<String> unComments = new ArrayList<String>();
 		for (String element : input) {
 			if (!element.startsWith("#") && !element.isEmpty()) {
 				unComments.add(element);
@@ -233,7 +262,7 @@ public class CommuniquéParser {
 		input = unComments.toArray(new String[unComments.size()]);
 
 		// Form a list of all the nation we want in this list.
-		ArrayList<String> whitelist = new ArrayList<String>(0);
+		ArrayList<String> whitelist = new ArrayList<String>();
 		for (String element : input) {
 			if (!element.startsWith("/")) {
 				whitelist.add(element.toLowerCase().trim().replace(" ", "_"));
@@ -241,7 +270,7 @@ public class CommuniquéParser {
 		}
 
 		// Form a list of all nations we can't have in this list.
-		ArrayList<String> blacklist = new ArrayList<String>(0);
+		ArrayList<String> blacklist = new ArrayList<String>();
 		for (String element : input) {
 			if (element.startsWith("/")) {
 				blacklist.add(element.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_"));

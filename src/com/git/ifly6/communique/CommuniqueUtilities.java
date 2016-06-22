@@ -15,7 +15,12 @@
 
 package com.git.ifly6.communique;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -26,6 +31,9 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class CommuniqueUtilities {
 
+	private CommuniqueUtilities() {
+	}
+
 	/**
 	 * Randomises an array's sequence of contents.
 	 *
@@ -33,14 +41,17 @@ public class CommuniqueUtilities {
 	 * @return a copy of the inputArray which is shuffled randomly
 	 */
 	public static String[] randomiseArray(String[] inputArray) {
+
 		Random rnd = ThreadLocalRandom.current();
 		for (int i = inputArray.length - 1; i > 0; i--) {
+
 			int index = rnd.nextInt(i + 1);
 
 			String a = inputArray[index];
 			inputArray[index] = inputArray[i];
 			inputArray[i] = a;
 		}
+
 		return inputArray;
 	}
 
@@ -68,8 +79,8 @@ public class CommuniqueUtilities {
 	 * @return the array without new lines
 	 */
 	public static String[] filterNewLines(String[] array) {
-		ArrayList<String> temp = new ArrayList<String>();
 
+		ArrayList<String> temp = new ArrayList<String>();
 		for (String element : array) {
 			if (!element.equals("\n")) {
 				temp.add(element);
@@ -77,5 +88,28 @@ public class CommuniqueUtilities {
 		}
 
 		return temp.toArray(new String[temp.size()]);
+	}
+
+	public static String getCurrentDate() {
+		DateFormat dateDays = new SimpleDateFormat("yyyy-MM-dd");
+		return dateDays.format(new Date());
+	}
+
+	public static String getCurrentDateAndTime() {
+		DateFormat dateWithTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		return dateWithTime.format(new Date());
+	}
+
+	public static String joinListWith(List<String> input, char joinChar) {
+
+		StringBuilder builder = new StringBuilder();
+
+		Iterator<String> iterator = input.iterator();
+		builder.append(iterator.next());
+		while (iterator.hasNext()) {
+			builder.append(joinChar + iterator.next());
+		}
+
+		return builder.toString();
 	}
 }

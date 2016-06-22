@@ -3,7 +3,7 @@
 ## Summary ##
 Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. It was originally inspired by Auralia's work on the matter and thus, recognised the limitations of writing on a Windows-only platform when most headless servers are Linux boxes. It is directly based on top of [JavaTelegram](https://github.com/iFlyCode/NationStates-JavaTelegram) a iFlyCode Java library designed to interface with NationStates itself.
 
-Since the general gist of this program is the same goal as Auralia's AutoTelegram, it will naturally be following many of the same protocols and functions. Currently, we are on version `3`.
+Since the general gist of this program is the same goal as Auralia's AutoTelegram, it will naturally be following many of the same protocols and functions. Currently, we are on version `5`.
 
 Note that it is *your* responsibility to know how the telegram API works. Use of this program is agreement that you understand those limitations and requirements. It also agrees that you cannot claim losses, damages, or other negative effects from the author if action is taken against your NationStates account.
 
@@ -54,3 +54,8 @@ While there will be a version number, currently, there is no such number, since,
 3. Version 3 is a cosmetic upgrade. Communiqué switched from Java's Swing to JavaFX. Version 3 uses the same file format for Version 2. It also has a massive number of bug fixes and optimisations which were developed in the time between Versions 2 and 3.
 
 4. Version 4 introduces a flag into the file system to randomise the list of recipients. This flag is defined by the `randomSort` flag inside the file system and a system for generating that flag has been added to Communiqué. 
+
+5. Version 5 introduces a new operator which is written to file along with a new flag. 
+  - The `--` operator, signifying 'not', cannot be parsed by previous versions, necessitating a version change. It allows for local negation instead of a global negation as `/` does. The `--` allows for one to specify `region:europe -- wa:members` followed by `region:europe -> wa:delegates`. Since delegates are a subset of members, this would be impossible with global negation. 
+  - Furthermore, this version introduces a `isDelegatePrioritised` flag, which will place delegates in their own set before all other recipients.
+  - Version 5 also transitions to a new UI and back to Swing instead of JavaFX. It also works to eliminate the use of multiple tabs and put all relevant information at your fingertips.

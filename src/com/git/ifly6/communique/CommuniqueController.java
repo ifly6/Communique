@@ -25,6 +25,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
@@ -43,12 +44,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 
-public class CommuniquéController {
+public class CommuniqueController {
 
 	// TODO Live updating recipients list
 	// TODO Interface with NS Happenings
 
-	private int version = CommuniquéParser.version;
+	private Logger logger = Communique.logger;
+	private int version = CommuniqueParser.version;
 
 	@FXML private MenuBar menuBar;
 	@FXML private TabPane tabPane;
@@ -64,8 +66,8 @@ public class CommuniquéController {
 	@FXML private CheckMenuItem randomiseMenuItem;
 
 	private JavaTelegram client;
-	private CommuniquéLogger util;
-	private CommuniquéParser parser;
+	private CommuniqueLogger util;
+	private CommuniqueParser parser;
 
 	private Thread sendingThread = new Thread();
 
@@ -73,6 +75,8 @@ public class CommuniquéController {
 
 		// If relevant, set to true.
 		menuBar.setUseSystemMenuBar(true);
+		logger.fine("Using the System Menu Bar");
+		;
 
 		logPane.setText("== Communiqué " + version + " ==\nEnter information or load file to proceed.\n");
 		codePane.setText("# == Communiqué Recipients Code ==\n" + "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
@@ -81,28 +85,31 @@ public class CommuniquéController {
 
 		try {
 			clientField.setText(readProperties()); // Attempt to fetch client key.
+			logger.fine("Fetched preexisting client key");
 		} catch (IOException e) {
 			clientField.setText("Client Key");
 		}
 
-		util = new CommuniquéLogger(logPane, codePane);
+		util = new CommuniqueLogger(logPane, codePane);
 		client = new JavaTelegram(util);
-		parser = new CommuniquéParser(util);
+		parser = new CommuniqueParser(util);
 	}
 
 	@FXML protected void about(ActionEvent event) {
-		Alert alert = new Alert(AlertType.INFORMATION);
 
+		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("About");
 		alert.setHeaderText("Communique");
 		alert.setContentText(
 				"Version " + version + "\n\n" + "IC: Developed by His Grace, Cyril Parsons, the Duke of Geneva and the staff of the Democratic "
 						+ "Empire of Imperium Anglorum's Delegation to the World Assembly.\n\n" + "OOC: Created by ifly6.");
+		logger.fine("Displayed 'about' alert.");
 
 		alert.showAndWait();
 	}
 
 	@FXML protected void exportLog(ActionEvent event) {
+
 		try {
 
 			FileChooser fileChooser = new FileChooser();
@@ -125,7 +132,7 @@ public class CommuniquéController {
 
 			writer.close();
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			util.log("Internal Error. Could not exporting the log.");
+			util.log("Internal Error. Could not export the log.");
 		}
 	}
 
@@ -188,7 +195,7 @@ public class CommuniquéController {
 
 		if (file != null) {
 			try {
-				CommuniquéFileReader fileReader = new CommuniquéFileReader(file);
+				CommuniqueFileReader fileReader = new CommuniqueFileReader(file);
 
 				// Set Keys
 				JTelegramKeys keys = fileReader.getKeys();
@@ -197,7 +204,7 @@ public class CommuniquéController {
 				telegramField.setText(keys.getTelegramId());
 
 				// Set Recruitment Flag
-				recruitmentCheckBox.setSelected(fileReader.getRecruitmentFlag());
+				recruitmentCheckBox.setSelected(fileReader.isRecruitment());
 
 				// Set Recipients
 				String[] recipients = fileReader.getRecipients();
@@ -268,7 +275,7 @@ public class CommuniquéController {
 
 		if (saveFile != null) {	// In case they pressed cancel.
 			try {
-				CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(saveFile);
+				CommuniqueFileWriter fileWriter = new CommuniqueFileWriter(saveFile);
 
 				updateCode();
 

@@ -34,16 +34,16 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
  * that behaviour to change, extend the class and write a new constructor.
  * </p>
  *
- * @see CommuniquéFileWriter
- * @see CommuniquéParser
+ * @see CommuniqueFileWriter
+ * @see CommuniqueParser
  */
-public class CommuniquéFileReader {
+public class CommuniqueFileReader {
 
 	ArrayList<String> fileContents = new ArrayList<String>();
-	static final int version = CommuniquéParser.getVersion();
+	static final int version = CommuniqueParser.getVersion();
 
-	private boolean isRecruitment;
-	private boolean randomSort;
+	private boolean recruitment;
+	private boolean randomised;
 
 	/**
 	 * <code>information</code> encapsulates the returning information of the JTelegramKeys and the recipients.
@@ -58,7 +58,7 @@ public class CommuniquéFileReader {
 	 * @throws FileNotFoundException if the Communiqué configuration file is non-existent or unwritable
 	 * @throws JTelegramException if the version is incorrect
 	 */
-	public CommuniquéFileReader(File file) throws FileNotFoundException, JTelegramException {
+	public CommuniqueFileReader(File file) throws FileNotFoundException, JTelegramException {
 
 		// Immediately load the file into memory.
 		FileReader configRead = new FileReader(file);
@@ -110,8 +110,8 @@ public class CommuniquéFileReader {
 	 *
 	 * @return <code>boolean</code> containing the contents of <code>isRecruitment</code>
 	 */
-	public boolean getRecruitmentFlag() {
-		return isRecruitment;
+	public boolean isRecruitment() {
+		return recruitment;
 	}
 
 	/**
@@ -119,8 +119,8 @@ public class CommuniquéFileReader {
 	 *
 	 * @return <code>boolean</code> containing the contents of <code>randomSort</code>
 	 */
-	public boolean getRandomSortFlag() {
-		return randomSort;
+	public boolean isRandomised() {
+		return randomised;
 	}
 
 	/**
@@ -147,10 +147,10 @@ public class CommuniquéFileReader {
 				keys.setTelegramId(element.replace("telegram_id=", ""));
 
 			} else if (element.startsWith("isRecruitment=")) {
-				isRecruitment = Boolean.parseBoolean(element.replace("isRecruitment=", ""));
+				recruitment = Boolean.parseBoolean(element.replace("isRecruitment=", ""));
 
 			} else if (element.startsWith("randomSort=")) {
-				randomSort = Boolean.parseBoolean(element.replace("randomSort=", ""));
+				randomised = Boolean.parseBoolean(element.replace("randomSort=", ""));
 
 			} else if (!element.startsWith("#") && !element.isEmpty() && !element.contains("=")) {
 				recipientsList.add(element.toLowerCase().trim().replace(" ", "_"));

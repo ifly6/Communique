@@ -23,7 +23,7 @@ import java.util.Scanner;
 
 import com.git.ifly6.javatelegram.JavaTelegram;
 import com.git.ifly6.javatelegram.util.JTelegramException;
-import com.git.ifly6.javatelegram.util.JTelegramFetcher;
+import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
 /**
  * This class was created to extend JavaTelegram's functionalities. Instead of calling methods inside JavaTelegram which
@@ -84,7 +84,7 @@ public class Morse extends JavaTelegram {
 	 * @throws IOException Because it has to throw something with all these IO functions it calls.
 	 */
 	public void setRecipients(String type) throws JTelegramException, IOException {
-		JTelegramFetcher fetcher = new JTelegramFetcher();
+		JInfoFetcher fetcher = new JInfoFetcher();
 
 		if (type.equals("delegates")) {
 			setRecipients(fetcher.getDelegates());

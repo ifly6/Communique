@@ -18,6 +18,8 @@ package com.git.ifly6.marconi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -26,21 +28,23 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.git.ifly6.communique.CommuniqueFileReader;
+import com.git.ifly6.communique.CommuniqueFileWriter;
+import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
-import com.git.ifly6.communique.CommuniquéFileReader;
-import com.git.ifly6.communique.CommuniquéFileWriter;
-import com.git.ifly6.communique.CommuniquéParser;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
 import com.git.ifly6.javatelegram.util.JTelegramException;
 
 public class Marconi {
 
-	public static final int version = CommuniquéParser.getVersion();
+	public static final int version = CommuniqueParser.getVersion();
 	private static String jarLocation = "Marconi_" + version + ".jar";
 	private static File execConfiguration;
 
+	private static final Logger log = Logger.getLogger(Marconi.class.getName());
 	private static MarconiLogger util = new MarconiLogger();
+
 	private static JavaTelegram client = new JavaTelegram(util);
 	private static JTelegramKeys keys = new JTelegramKeys();
 	private static String[] recipients = {};
@@ -55,18 +59,14 @@ public class Marconi {
 	private static boolean recruitSet = false;
 	private static boolean sortSet = false;
 
-	public static void main(String[] args) {
+	// Deal with commadn line options
+	public static final Options COMMAND_LINE_OPTIONS;
 
-		if (args.length == 0) {
-			util.err("Runtime Error. Please provide a single valid Communiqué configuration file of version " + version + ".");
-			quit();
-		}
-
-		CommandLineParser cliParse = new DefaultParser();
-
-		// Define execution options
+	static {
+		Options options = new Options();
 		options.addOption("h", "help", false, "Displays this message");
-		options.addOption("S", "skip", false, "Skips all checks for confirmation such that the command immediately executes");
+		options.addOption("S", "skip", false,
+				"Skips all checks for confirmation such that the command immediately executes");
 		options.addOption("I", false, "Forces an opporitunity to double-check all keys");
 		options.addOption("R", false, "Forces recruitment time (180 seconds) for the sending list");
 		options.addOption("C", false, "Forces campaign time (30 seconds) for the sending list");
@@ -75,8 +75,28 @@ public class Marconi {
 		options.addOption("a", "auto", false, "Allows program to autonomously update the sending list");
 		options.addOption("v", "version", false, "Prints version");
 
+		COMMAND_LINE_OPTIONS = options;
+	}
+
+	public static void main(String[] args) {
+
+		if (args.length == 0) {
+			util.err("Runtime Error. Please provide a single valid Communiqué configuration file of version " + version
+					+ ".");
+			quit();
+		}
+
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			@Override public void uncaughtException(Thread t, Throwable e) {
+				e.printStackTrace();
+				log.log(Level.SEVERE, "Exception in " + t + ": " + e.toString(), e);
+			}
+		});
+
+		CommandLineParser cliParse = new DefaultParser();
+
 		try {
-			CommandLine commandLine = cliParse.parse(options, args);
+			CommandLine commandLine = cliParse.parse(COMMAND_LINE_OPTIONS, args);
 
 			// Deal with options
 			if (commandLine.hasOption("h")) {
@@ -112,7 +132,8 @@ public class Marconi {
 				// IMPLEMENT.
 			}
 			if (commandLine.hasOption("v")) {
-				System.out.println("Marconi version " + version + "\n" + "Please visit https://github.com/iFlyCode/Communique/releases.");
+				System.out.println("Marconi version " + version + "\n"
+						+ "Please visit https://github.com/iFlyCode/Communique/releases.");
 				System.exit(0);
 			}
 
@@ -142,7 +163,8 @@ public class Marconi {
 				try {
 					appendSent(execConfiguration);
 				} catch (FileNotFoundException | UnsupportedEncodingException e) {
-					util.err("Internal Error. File either does not exist or is in the incorrect encoding. File not saved in shutdown.");
+					util.err(
+							"Internal Error. File either does not exist or is in the incorrect encoding. File not saved in shutdown.");
 				}
 			}
 		});
@@ -153,7 +175,7 @@ public class Marconi {
 		}
 
 		// Process the Recipients list into a string with two columns.
-		CommuniquéParser parser = new CommuniquéParser(util);
+		CommuniqueParser parser = new CommuniqueParser(util);
 		String[] expandedRecipients = parser.recipientsParse(recipients);
 
 		if (randomSort) {
@@ -171,9 +193,9 @@ public class Marconi {
 		}
 
 		System.out.println();
-		System.out.println(
-				"This will take " + CommuniqueUtilities.time((int) Math.round(expandedRecipients.length * ((isRecruitment) ? 180.05 : 30.05)))
-						+ " to send " + expandedRecipients.length + " telegrams.");
+		System.out.println("This will take "
+				+ CommuniqueUtilities.time((int) Math.round(expandedRecipients.length * ((isRecruitment) ? 180.05 : 30.05)))
+				+ " to send " + expandedRecipients.length + " telegrams.");
 
 		if (!skipChecks) {
 			// Give a chance to check the recipients.
@@ -204,17 +226,18 @@ public class Marconi {
 	 * for the user to reconfirm them.
 	 */
 	private static void manualFlagCheck() {
+
 		// Give a chance to check the keys.
-		String keysResponse = util.prompt(
-				"Are these keys correct? " + keys.getClientKey() + ", " + keys.getSecretKey() + ", " + keys.getTelegramId() + " [Yes] or [No]?",
-				new String[] { "yes", "no", "y", "n" });
+		String keysResponse = util.prompt("Are these keys correct? " + keys.getClientKey() + ", " + keys.getSecretKey()
+				+ ", " + keys.getTelegramId() + " [Yes] or [No]?", new String[] { "yes", "no", "y", "n" });
 		if (!keysResponse.startsWith("y")) {
 			quit();
 		}
 
 		// Confirm the recruitment flag.
 		while (true) {
-			String recruitmentResponse = util.prompt("Is the recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
+			String recruitmentResponse = util.prompt(
+					"Is the recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
 					new String[] { "yes", "no", "y", "n" });
 
 			if (recruitmentResponse.startsWith("n")) {
@@ -226,7 +249,8 @@ public class Marconi {
 
 		// Confirm the randomisation flag.
 		while (true) {
-			String randomResponse = util.prompt("Is the randomisation flag (" + randomSort + ") set correctly? [Yes] or [No]?",
+			String randomResponse = util.prompt(
+					"Is the randomisation flag (" + randomSort + ") set correctly? [Yes] or [No]?",
 					new String[] { "yes", "no", "y", "n" });
 
 			if (randomResponse.startsWith("n")) {
@@ -246,6 +270,7 @@ public class Marconi {
 	 * @throws UnsupportedEncodingException if the file's encoding is unsupported
 	 */
 	private static void appendSent(File file) throws FileNotFoundException, UnsupportedEncodingException {
+
 		String[] sentList = client.getSentList();
 		for (int x = 0; x < sentList.length; x++) {
 			sentList[x] = "/" + sentList[x];
@@ -255,7 +280,7 @@ public class Marconi {
 		System.arraycopy(recipients, 0, body, 0, recipients.length);
 		System.arraycopy(sentList, 0, body, recipients.length, sentList.length);
 
-		CommuniquéFileWriter fileWriter = new CommuniquéFileWriter(file, keys, isRecruitment, body);
+		CommuniqueFileWriter fileWriter = new CommuniqueFileWriter(file, keys, isRecruitment, body);
 		fileWriter.write();
 	}
 
@@ -267,17 +292,18 @@ public class Marconi {
 	 * @throws FileNotFoundException
 	 * @throws JTelegramException if the fileReader is not compatible
 	 */
-	private static void loadConfig(final File file) throws FileNotFoundException, JTelegramException {
-		CommuniquéFileReader fileReader = new CommuniquéFileReader(file);
+	private static void loadConfig(File file) throws FileNotFoundException, JTelegramException {
+
+		CommuniqueFileReader fileReader = new CommuniqueFileReader(file);
 		keys = fileReader.getKeys();
 		recipients = fileReader.getRecipients();
 
 		if (!sortSet) {
-			randomSort = fileReader.getRandomSortFlag();
+			randomSort = fileReader.isRandomised();
 		}
 
 		if (!recruitSet) {
-			isRecruitment = fileReader.getRecruitmentFlag();
+			isRecruitment = fileReader.isRecruitment();
 		}
 	}
 
