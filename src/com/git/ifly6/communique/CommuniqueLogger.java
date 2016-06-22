@@ -26,6 +26,7 @@ package com.git.ifly6.communique;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Logger;
 
 import com.git.ifly6.javatelegram.JTelegramLogger;
 
@@ -40,15 +41,17 @@ import javafx.scene.control.TextArea;
  * methods inside it are effectively just text manipulation methods on the part of both Communiqué and JavaTelegram.
  * </p>
  *
- * @see Communiqué
+ * @see Communique
  */
-public class CommuniquéLogger implements JTelegramLogger {
+public class CommuniqueLogger implements JTelegramLogger {
+
+	private Logger logger = Communique.logger;
 
 	private TextArea logPane;
 	private TextArea codePane;
 	private DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-	public CommuniquéLogger(TextArea inputLog, TextArea inputCode) {
+	public CommuniqueLogger(TextArea inputLog, TextArea inputCode) {
 		logPane = inputLog;
 		codePane = inputCode;
 	}
@@ -61,6 +64,7 @@ public class CommuniquéLogger implements JTelegramLogger {
 	@Override public void log(String input) {
 		String output = "[" + currentTime() + "] " + input + "\n";
 		logPane.appendText(output);
+		logger.info(input);
 		System.err.print(output);
 		logPane.positionCaret(logPane.getLength());
 	}
