@@ -38,12 +38,12 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
  * method.
  * </p>
  *
- * @see CommuniquéFileWriter
- * @see CommuniquéParser
+ * @see CommuniqueFileWriter
+ * @see CommuniqueParser
  */
-public class CommuniquéFileWriter {
+public class CommuniqueFileWriter {
 
-	static final int version = CommuniquéParser.getVersion();
+	static final int version = CommuniqueParser.getVersion();
 
 	// Requirements to Write
 	PrintWriter writer;
@@ -69,12 +69,12 @@ public class CommuniquéFileWriter {
 	 * @throws UnsupportedEncodingException if your computer does not support UTF-8 as a valid encoding
 	 * @throws JTelegramException
 	 */
-	public CommuniquéFileWriter(File file) throws FileNotFoundException, UnsupportedEncodingException, JTelegramException {
+	public CommuniqueFileWriter(File file) throws FileNotFoundException, UnsupportedEncodingException, JTelegramException {
 
 		// Get file before destroying it
 		if (file.exists()) {
 			preexisting = true;
-			CommuniquéFileReader reader = new CommuniquéFileReader(file);
+			CommuniqueFileReader reader = new CommuniqueFileReader(file);
 			originalHeader = reader.getHeader();
 			originalFooter = reader.getFooter();
 		}
@@ -92,7 +92,7 @@ public class CommuniquéFileWriter {
 	 * @throws FileNotFoundException if the FileWriter cannot write to the file
 	 * @throws UnsupportedEncodingException if the FileWriter cannot write in UTF-8
 	 */
-	public CommuniquéFileWriter(File file, JTelegramKeys providedKeys, boolean isRecruitment, String[] bodyString)
+	public CommuniqueFileWriter(File file, JTelegramKeys providedKeys, boolean isRecruitment, String[] bodyString)
 			throws FileNotFoundException, UnsupportedEncodingException {
 		writer = new PrintWriter(file, "UTF-8");
 		this.setKeys(providedKeys);

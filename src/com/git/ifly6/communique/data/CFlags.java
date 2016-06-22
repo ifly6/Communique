@@ -13,7 +13,7 @@
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-package com.git.ifly6.communique;
+package com.git.ifly6.communique.data;
 
 /**
  * <code>CommuniquéFlags</code> creates a unified object for the storage and retrieval of Communiqué flags.
@@ -29,17 +29,16 @@ package com.git.ifly6.communique;
  * </p>
  *
  */
-public class CommuniquéFlags {
+public class CFlags {
 
 	private boolean isRecruitment;
-
 	private boolean randomSort;
 
-	public CommuniquéFlags() {
+	private CFlags() {
 
 	}
 
-	public CommuniquéFlags(boolean isRecruitment, boolean randomSort) {
+	private CFlags(boolean isRecruitment, boolean randomSort) {
 		this();
 		setRecruitment(isRecruitment);
 		setRandomSort(randomSort);
@@ -57,8 +56,15 @@ public class CommuniquéFlags {
 	 * Converts <code>CommuniquéFlags</code> into a <code>boolean[]</code> with <code>isRecruitment</code> first,
 	 * followed by <code>randomSort</code>.
 	 */
-	public boolean[] toBoolean() {
+	public boolean[] toBooleanArray() {
 		return new boolean[] { isRecruitment, randomSort };
+	}
+
+	public void setWithBooleanArray(boolean[] arr) {
+		if (arr.length == 2) {
+			isRecruitment = arr[0];
+			randomSort = arr[1];
+		}
 	}
 
 	/**

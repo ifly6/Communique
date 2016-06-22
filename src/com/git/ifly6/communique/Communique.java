@@ -15,7 +15,12 @@
 
 package com.git.ifly6.communique;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -26,12 +31,12 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 // TODO Write something to interface with the happenings system to dynamically recruit nations.
-/**
- *
- */
-public class Communiqué extends Application {
+// TODO Implement logging.
 
-	public int version = CommuniquéParser.version;
+public class Communique extends Application {
+
+	public int version = CommuniqueParser.version;
+	public static Logger logger = Logger.getLogger("com.git.ifly6.communique");
 
 	private Stage primaryStage;
 	private BorderPane rootLayout;
@@ -52,7 +57,7 @@ public class Communiqué extends Application {
 
 			// Load root layout from FXML file.
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(Communiqué.class.getResource("CommuniquéOverview.fxml"));
+			loader.setLocation(Communique.class.getResource("CommuniquéOverview.fxml"));
 			rootLayout = (BorderPane) loader.load();
 
 			// Show the scene containing the root layout.
@@ -80,6 +85,20 @@ public class Communiqué extends Application {
 	}
 
 	public static void main(String[] args) {
+
+		// Logging Handler
+		try {
+			String fileSep = File.separator;
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
+			String fileLogName = dateFormat.format(new Date()) + "-log.txt";
+			FileHandler logHandler = new FileHandler(System.getProperty("user.dir") + fileSep + fileLogName);
+			logger.addHandler(logHandler);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		launch(args);
 	}
 }
