@@ -339,7 +339,7 @@ public class CommuniqueController {
 	}
 
 	private void updateCode() {
-		String[] sentList = client.getSentList();
+		String[] sentList = client.sentList();
 
 		for (String element : sentList) {
 			util.codePrintln("/" + element);

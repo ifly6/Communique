@@ -18,6 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -59,6 +60,10 @@ import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.CConfig;
 import com.git.ifly6.communique.io.CLoader;
 import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.javatelegram.JavaTelegram;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 /**
  * <code>Communiqué</code> is the main class of the Communiqué system. It handles the GUI aspect of the entire program
@@ -68,14 +73,21 @@ public class Communique {
 
 	private static final Logger log = Logger.getLogger(Communique.class.getName());
 
+	private boolean parsed = false;
+	private JavaTelegram client;
+	private Thread sendingThread;
+
 	private JFrame frame;
+	private JPanel panel;
+
 	private JTextField txtClientKey;
 	private JTextField txtSecretKey;
 	private JTextField txtTelegramId;
-	private JPanel panel;
-	private JProgressBar progressBar;
 
+	private JButton btnSend;
+	private JProgressBar progressBar;
 	private JTextArea txtrCode;
+
 	private JCheckBoxMenuItem chckbxmntmRandomiseRecipients;
 	private JCheckBoxMenuItem chckbxmntmPrioritiseDelegates;
 	private JCheckBox chckbxRecruitment;
@@ -122,6 +134,9 @@ public class Communique {
 	 * Create the application.
 	 */
 	public Communique() {
+
+		client = new JavaTelegram(cLogger);
+
 		initialize();
 	}
 
@@ -169,11 +184,7 @@ public class Communique {
 		controlPanel.add(txtTelegramId);
 		txtTelegramId.setColumns(10);
 
-		JButton btnSend = new JButton("SEND");
-		btnSend.addActionListener(new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) {
-			}
-		});
+		btnSend = new JButton("Parse");
 
 		chckbxRecruitment = new JCheckBox("Recruitment");
 		controlPanel.add(chckbxRecruitment);
@@ -199,29 +210,6 @@ public class Communique {
 		txtrRecipients.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		panel.add(new JScrollPane(txtrRecipients), BorderLayout.CENTER);
 
-		// Document parser for above
-		txtrCode.getDocument().addDocumentListener(new DocumentListener() {
-
-			CommuniqueParser parser = new CommuniqueParser(cLogger);
-
-			@Override public void removeUpdate(DocumentEvent e) {
-				callParser(e);
-			}
-
-			@Override public void insertUpdate(DocumentEvent e) {
-				callParser(e);
-			}
-
-			@Override public void changedUpdate(DocumentEvent e) {
-			}
-
-			private void callParser(DocumentEvent e) {
-				log.info("Called parser");
-				String[] output = parser.recipientsParse(txtrCode.getText().split("\n"));
-				txtrRecipients.setText(CommuniqueUtilities.joinListWith(Arrays.asList(output), '\n'));
-			}
-		});
-
 		progressBar = new JProgressBar();
 		panel.add(progressBar, BorderLayout.SOUTH);
 
@@ -232,14 +220,76 @@ public class Communique {
 		menuBar.add(mnFile);
 
 		JMenuItem mntmSave = new JMenuItem("Save");
+		mntmSave.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+
+				FileDialog fDialog = new FileDialog(frame, "Save file as...", FileDialog.SAVE);
+				fDialog.setDirectory(appSupport.toFile().toString());
+				fDialog.setVisible(true);
+
+				String file = fDialog.getFile();
+				if (file == null) {
+					log.info("User cancelled file save dialog");
+
+				} else {
+
+					Path savePath = appSupport.toAbsolutePath().resolve(file);
+					log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
+
+					CLoader loader = new CLoader(savePath);
+					try {
+						loader.save(exportState());
+
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+
+				}
+			}
+		});
 		mnFile.add(mntmSave);
 
 		JMenuItem mntmOpen = new JMenuItem("Open");
+		mntmOpen.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+
+				FileDialog fDialog = new FileDialog(frame, "Load file...", FileDialog.LOAD);
+				fDialog.setDirectory(appSupport.toFile().toString());
+				fDialog.setVisible(true);
+
+				String file = fDialog.getFile();
+				if (file == null) {
+					log.info("User cancelled file load dialog");
+				} else {
+
+					Path savePath = appSupport.resolve(file);
+					log.info("User elected to load file at " + savePath.toAbsolutePath().toString());
+
+					CLoader loader = new CLoader(savePath);
+					try {
+						importState(loader.load());
+
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+
+				}
+			}
+		});
 		mnFile.add(mntmOpen);
 
 		mnFile.addSeparator();
 
 		JMenuItem mntmShowDirectory = new JMenuItem("Show Directory");
+		mntmShowDirectory.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				try {
+					Desktop.getDesktop().open(appSupport.toFile());
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 		mnFile.add(mntmShowDirectory);
 
 		JMenuItem mntmExportLog = new JMenuItem("Export Log");
@@ -248,12 +298,43 @@ public class Communique {
 		mnFile.addSeparator();
 
 		JMenuItem mntmQuit = new JMenuItem("Quit");
+		mntmQuit.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
 		mnFile.add(mntmQuit);
 
 		JMenu mnData = new JMenu("Data");
 		menuBar.add(mnData);
 
 		JMenuItem mntmImportKeysFrom = new JMenuItem("Import Keys from URL");
+		mntmImportKeysFrom.addActionListener(new ActionListener() {
+
+			@Override public void actionPerformed(ActionEvent e) {
+
+				String rawURL = JOptionPane
+						.showInputDialog("Paste in keys from the URL provided by receipt by the Telegrams API");
+
+				// Verify that it is a valid NationStates URL
+				if (rawURL.contains("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&")) {
+
+					rawURL = rawURL
+							.replace("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&", "");
+					rawURL = rawURL.replace("&to=NATION_NAME", "");
+
+					String[] tags = rawURL.split("&");
+					txtTelegramId.setText(tags[0].substring(tags[0].indexOf("=") + 1, tags[0].length()));
+					txtSecretKey.setText(tags[1].substring(tags[1].indexOf("=") + 1, tags[1].length()));
+
+				} else {
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("Communiqué Error");
+					alert.setHeaderText("Please input a correct URL.");
+					alert.showAndWait();
+				}
+			}
+		});
 		mnData.add(mntmImportKeysFrom);
 
 		JMenu mnImportRecipients = new JMenu("Import Recipients");
@@ -361,6 +442,94 @@ public class Communique {
 			}
 		});
 
+		// Parse action for above
+		btnSend.addActionListener(new ActionListener() {
+
+			@Override public void actionPerformed(ActionEvent e) {
+
+				CommuniqueParser parser = new CommuniqueParser(cLogger);
+
+				if (!parsed) {
+
+					// Call and do the parsing
+					log.info("Called parser");
+					String[] output = parser.recipientsParse(txtrCode.getText().split("\n"));
+					txtrCode.setText(txtrCode.getText().trim());
+					txtrRecipients.setText(CommuniqueUtilities.joinListWith(Arrays.asList(output), '\n'));
+
+					// Set the parse var and change the name
+					triggerParsed(true);
+
+				} else {
+
+					// sending logic
+					if (!sendingThread.isAlive()) {
+						client.setKillThread(false);
+
+						Runnable runner = new Runnable() {
+							@Override public void run() {
+
+								client.setRecipients(txtrRecipients.getText().split("\n"));	// Set recipients
+
+								client.setKeys(new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(),
+										txtTelegramId.getText()));
+
+								// Set Recruitment Status
+								client.setRecruitment(chckbxRecruitment.isSelected());
+
+								// Save client key
+								try {
+									CLoader loader = new CLoader(appSupport.resolve("autosave.txt"));
+									loader.save(exportState());
+								} catch (IOException e) {
+									System.err.println("Exception in writing properties.");
+								}
+
+								client.connect();
+								cLogger.log("Queries Complete.");
+
+								// Update recipients pane.
+								updateCode();
+							}
+
+							private void updateCode() {
+								txtrCode.append(CommuniqueUtilities.joinListWith(Arrays.asList(client.sentList()), '\n'));
+							}
+						};
+
+						sendingThread = new Thread(runner);
+						sendingThread.start();
+
+					} else {
+						cLogger.log("There is already a campaign running. Terminate that campaign and then retry.");
+					}
+
+				}
+			}
+		});
+
+		// Document listener logic
+		txtrCode.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override public void removeUpdate(DocumentEvent e) {
+				executeInTheKingdomOfNouns();
+			}
+
+			@Override public void insertUpdate(DocumentEvent e) {
+				executeInTheKingdomOfNouns();
+			}
+
+			@Override public void changedUpdate(DocumentEvent e) {
+			}
+
+			// It's a joke. Look here: http://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html
+			public void executeInTheKingdomOfNouns() {
+				if (parsed) {	// to avoid constant resetting of the variable :/
+					triggerParsed(false);
+				}
+			}
+		});
+
 		log.info("Shutdown hook added.");
 		log.info("Communiqué loaded.");
 	}
@@ -381,8 +550,27 @@ public class Communique {
 
 		config.defaultVersion();
 
-		log.finer("Communiqué config exported.");
+		log.info("Communiqué config exported.");
 		return config;
+
+	}
+
+	public void importState(CConfig config) {
+
+		chckbxRecruitment.setSelected(config.isRecruitment);
+		chckbxmntmRandomiseRecipients.setSelected(config.isRandomised);
+		chckbxmntmPrioritiseDelegates.setSelected(config.isDelegatePrioritised);
+
+		txtClientKey.setText(config.keys.getClientKey());
+		txtSecretKey.setText(config.keys.getSecretKey());
+		txtTelegramId.setText(config.keys.getTelegramId());
+
+		txtrCode.setText(CommuniqueUtilities.joinListWith(Arrays.asList(config.recipients), '\n'));
+		for (String string : config.sentList) {
+			txtrCode.append("\n" + string);
+		}
+
+		log.info("Communique info imported");
 
 	}
 
@@ -413,5 +601,10 @@ public class Communique {
 		}
 
 		return new String[][] { recipients.toArray(new String[recipients.size()]), sents.toArray(new String[sents.size()]) };
+	}
+
+	private void triggerParsed(boolean parsed) {
+		this.parsed = parsed;
+		btnSend.setText((parsed) ? "Send" : "Parse");
 	}
 }

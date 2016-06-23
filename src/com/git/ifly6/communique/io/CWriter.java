@@ -15,15 +15,15 @@
 package com.git.ifly6.communique.io;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Properties;
+import java.util.Arrays;
 
+import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.CConfig;
-import com.git.ifly6.communique.CommuniqueParser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 class CWriter {
 
@@ -36,20 +36,15 @@ class CWriter {
 	public CWriter(Path path, CConfig config) {
 		this.path = path;
 		this.config = config;
-
 	}
 
 	// Return boolean for errors.
 	public void write() throws IOException {
 
-		Map<String, String> configFields = config.produceMap();
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String response = gson.toJson(config);
 
-		Properties properties = new Properties();
-		for (Map.Entry<String, String> configField : configFields.entrySet()) {
-			properties.setProperty(configField.getKey(), configField.getValue());
-		}
-
-		properties.store(Files.newBufferedWriter(path, StandardCharsets.UTF_8), header);
+		Files.write(path, Arrays.asList(response.split("\n")));
 
 	}
 
