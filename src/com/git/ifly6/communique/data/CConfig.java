@@ -14,11 +14,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 package com.git.ifly6.communique.data;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.git.ifly6.communique.CommuniqueParser;
+import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 
 /**
@@ -42,6 +39,9 @@ public class CConfig {
 	// For reflection in CLoader to work, these MUST be the only fields
 	// For backwards compatibility, these names cannot be changed
 
+	public final String header = "Communiqué Configuration File. Do not edit by hand. Produced at: "
+			+ CommuniqueUtilities.getCurrentDateAndTime() + ". Produced by version " + CommuniqueParser.version;
+
 	public int version;
 
 	public boolean isRecruitment;
@@ -55,78 +55,5 @@ public class CConfig {
 
 	public void defaultVersion() {
 		this.version = CommuniqueParser.version;
-	}
-
-	public Map<String, String> produceMap() {
-
-		Map<String, String> preferenceMap = new HashMap<>();
-
-		Class<? extends CConfig> instanceClass = this.getClass();
-		for (Field theField : instanceClass.getDeclaredFields()) {
-
-			try {
-				if (theField.getType().isArray()) {
-					if (theField.getType().getComponentType() == String.class) {
-
-						StringBuilder arrayString = new StringBuilder();
-						String[] array = (String[]) theField.get(this);
-
-						arrayString.append(array[0]);
-						for (int x = 1; x < array.length; x++) {
-							arrayString.append("," + array[x]);
-						}
-
-						preferenceMap.put(theField.getName(), arrayString.toString());
-
-					}
-
-				} else {
-					preferenceMap.put(theField.getName(), theField.get(this).toString());
-				}
-
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return preferenceMap;
-
-	}
-
-	public void importMap(Map<String, String> info) {
-
-		Class<? extends CConfig> instanceClass = this.getClass();
-		Field[] fields = instanceClass.getDeclaredFields();
-
-		try {
-			for (Field theField : fields) {
-
-				String value = info.get(theField.getName());
-				if (theField.getType().isArray()) {
-
-					if (theField.getType().getComponentType() == String.class) {
-						theField.set(this, value.split(","));
-					}
-
-				} else {
-
-					if (theField.getType() == JTelegramKeys.class) {
-						JTelegramKeys keys = new JTelegramKeys();
-						keys.setKeys(value.split(", "));
-						theField.set(this, keys);
-
-					} else {
-						theField.set(theField.getClass(), value);
-					}
-
-				}
-			}
-
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
 	}
 }

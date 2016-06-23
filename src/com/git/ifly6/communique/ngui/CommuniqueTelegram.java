@@ -14,13 +14,46 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 package com.git.ifly6.communique.ngui;
 
+import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.javatelegram.JTelegramLogger;
+import com.git.ifly6.javatelegram.JavaTelegram;
+
 /**
  * @author Kevin
  *
  */
-public class CommuniqueController {
+public class CommuniqueTelegram extends JavaTelegram {
 
-	public CommuniqueController() {
+	private boolean delegatePriority;
+	private boolean recipientsRand;
 
+	public CommuniqueTelegram(JTelegramLogger util) {
+		super(util);
+	}
+
+	public void setRandomiseRecipients(boolean input) {
+		this.recipientsRand = input;
+	}
+
+	public void setPrioritiseDelegates(boolean input) {
+		this.delegatePriority = input;
+	}
+
+	public void initSend() {
+
+		if (delegatePriority) {
+			// split delegates and non-delegates
+
+			if (recipientsRand) {
+				// blah=CommuniqueUtilities.randomiseArray();
+			}
+
+		} else {
+			if (recipientsRand) {
+				recipients = CommuniqueUtilities.randomiseArray(recipients);
+			}
+		}
+
+		super.send();
 	}
 }

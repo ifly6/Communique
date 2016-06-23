@@ -12,3 +12,4 @@
 *.properties
 NS*.txt
 /bin/
+/target/
