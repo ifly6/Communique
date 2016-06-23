@@ -17,14 +17,9 @@ package com.git.ifly6.communique.io;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import com.git.ifly6.communique.data.CConfig;
-
-import java.util.Properties;
-import java.util.Set;
+import com.google.gson.Gson;
 
 class CReader {
 
@@ -36,19 +31,8 @@ class CReader {
 
 	public CConfig read() throws IOException {
 
-		CConfig config = new CConfig();
-
-		Properties props = new Properties();
-		props.load(Files.newInputStream(path));
-
-		Set<Entry<Object, Object>> rawEntrySet = props.entrySet();
-		Map<String, String> entries = new HashMap<>();
-
-		for (Entry<Object, Object> entry : rawEntrySet) {
-			entries.put((String) entry.getKey(), (String) entry.getValue());
-		}
-
-		config.importMap(entries);
+		Gson gson = new Gson();
+		CConfig config = gson.fromJson(Files.newBufferedReader(path), CConfig.class);
 		return config;
 
 	}

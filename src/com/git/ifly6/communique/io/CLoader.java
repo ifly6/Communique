@@ -42,7 +42,7 @@ public class CLoader {
 		writer.write();
 	}
 
-	public CConfig read() throws IOException {
+	public CConfig load() throws IOException {
 		CReader reader = new CReader(path);
 		return reader.read();
 	}

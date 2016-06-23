@@ -271,7 +271,7 @@ public class Marconi {
 	 */
 	private static void appendSent(File file) throws FileNotFoundException, UnsupportedEncodingException {
 
-		String[] sentList = client.getSentList();
+		String[] sentList = client.sentList();
 		for (int x = 0; x < sentList.length; x++) {
 			sentList[x] = "/" + sentList[x];
 		}
