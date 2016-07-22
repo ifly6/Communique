@@ -20,7 +20,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
@@ -35,8 +34,6 @@ import com.git.ifly6.communique.CommuniqueUtilities;
  *
  */
 public class CNetLoader {
-
-	private static final Logger log = Logger.getLogger(CNetLoader.class.getName());
 
 	public static final String GA = "http://www.nationstates.net/page=UN_delegate_votes/council=1";
 	public static final String SC = "http://www.nationstates.net/page=UN_delegate_votes/council=2";

@@ -26,6 +26,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -64,6 +65,7 @@ import org.apache.commons.lang3.SystemUtils;
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.CConfig;
+import com.git.ifly6.communique.data.CFlags;
 import com.git.ifly6.communique.io.CLoader;
 import com.git.ifly6.communique.io.CNetLoader;
 import com.git.ifly6.javatelegram.JTelegramKeys;
@@ -102,13 +104,11 @@ public class Communique implements JTelegramLogger {
 
 	private String[] parsedRecipients;
 
-	private static Path appSupport;
+	public static Path appSupport;
 
 	private static String codeHeader = "# == Communiqué Recipients Code ==\n"
 			+ "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
 			+ "# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n\n";
-	private static String recipientsHeader = "# == Communiqué Recipients ==\n"
-			+ "# This tab shows all recipients after parsing of the Code tab.\n\n";
 
 	/**
 	 * Launch the application.
@@ -268,6 +268,11 @@ public class Communique implements JTelegramLogger {
 					Path savePath = appSupport.toAbsolutePath().resolve(file);
 					log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
 
+					// If it does not end in txt, make it end in txt
+					if (!savePath.toAbsolutePath().toString().endsWith(".txt")) {
+						savePath = new File(savePath.toAbsolutePath().toString() + ".txt").toPath();
+					}
+
 					CLoader loader = new CLoader(savePath);
 					try {
 						loader.save(exportState());
@@ -321,6 +326,11 @@ public class Communique implements JTelegramLogger {
 		mnFile.addSeparator();
 
 		JMenuItem mntmShowDirectory = new JMenuItem("Show Directory");
+		if (SystemUtils.IS_OS_MAC) {
+			mntmShowDirectory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.META_MASK | Event.SHIFT_MASK));
+		} else {
+			mntmShowDirectory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK | Event.SHIFT_MASK));
+		}
 		mntmShowDirectory.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 				try {
@@ -332,18 +342,34 @@ public class Communique implements JTelegramLogger {
 		});
 		mnFile.add(mntmShowDirectory);
 
-		JMenuItem mntmExportLog = new JMenuItem("Export Log");
-		mnFile.add(mntmExportLog);
+		mnFile.addSeparator();
+
+		JMenuItem mntmRecruiter = new JMenuItem("Recruiter...");
+		if (SystemUtils.IS_OS_MAC) {
+			mntmRecruiter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.META_MASK));
+		} else {
+			mntmRecruiter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.CTRL_MASK));
+		}
+		mntmRecruiter.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				showRecruiter();
+			}
+		});
+		mnFile.add(mntmRecruiter);
 
 		mnFile.addSeparator();
 
-		JMenuItem mntmQuit = new JMenuItem("Quit");
-		mntmQuit.addActionListener(new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
-		});
-		mnFile.add(mntmQuit);
+		// Only add the Quit menu item if the OS is not Mac
+		if (!SystemUtils.IS_OS_MAC) {
+			JMenuItem mntmQuit = new JMenuItem("Quit");
+			mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Event.CTRL_MASK));
+			mntmQuit.addActionListener(new ActionListener() {
+				@Override public void actionPerformed(ActionEvent e) {
+					System.exit(0);
+				}
+			});
+			mnFile.add(mntmQuit);
+		}
 
 		JMenu mnData = new JMenu("Data");
 		menuBar.add(mnData);
@@ -410,12 +436,12 @@ public class Communique implements JTelegramLogger {
 			@Override public void actionPerformed(ActionEvent e) {
 
 				Object[] possibilities = { "GA For", "GA Against", "SC For", "SC Against" };
-				String s = (String) JOptionPane.showInputDialog(frame, "Select which chamber and side you want to address:",
-						"Select Chamber and Side", JOptionPane.PLAIN_MESSAGE, null, possibilities, "GA For");
+				String output = (String) JOptionPane.showInputDialog(frame,
+						"Select which chamber and side you want to address:", "Select Chamber and Side",
+						JOptionPane.PLAIN_MESSAGE, null, possibilities, "GA For");
 
-				// If a string was returned, say so.
-				if ((s != null) && (s.length() > 0)) {
-					String[] elements = s.split(" ");
+				if (!StringUtils.isEmpty(output)) {
+					String[] elements = output.split(" ");
 					if (elements.length > 0) {
 
 						String chamber = (elements[0].equals("GA")) ? CNetLoader.GA : CNetLoader.SC;
@@ -519,9 +545,18 @@ public class Communique implements JTelegramLogger {
 
 			@Override public void actionPerformed(ActionEvent e) {
 
-				CommuniqueParser parser = new CommuniqueParser(Communique.this);
+				CommuniqueParser parser = new CommuniqueParser(Communique.this,
+						new CFlags(chckbxRecruitment.isSelected(), chckbxmntmRandomiseRecipients.isSelected()));
 
 				if (!parsed) {
+
+					// Check if a recruit-flag has been used.
+					String[] lines = txtrCode.getText().split("\n");
+					for (String element : lines) {
+						if (element.startsWith("flag:recruit")) {
+							showRecruiter();
+						}
+					}
 
 					// Call and do the parsing
 					log.info("Called parser");
@@ -531,11 +566,6 @@ public class Communique implements JTelegramLogger {
 					double numRecipients = parsedRecipients.length;
 					int seconds = (int) Math.round(numRecipients * ((chckbxRecruitment.isSelected()) ? 180.05 : 30.05));
 					String timeNeeded = CommuniqueUtilities.time(seconds);
-
-					// If it needs to be randomised, do so.
-					if (chckbxmntmRandomiseRecipients.isSelected()) {
-						parsedRecipients = CommuniqueUtilities.randomiseArray(parsedRecipients);
-					}
 
 					// Show Recipients
 					StringBuilder builder = new StringBuilder();
@@ -725,5 +755,25 @@ public class Communique implements JTelegramLogger {
 
 		txtrCode.append((x == 0) ? "\n\n/" + recipient : "\n/" + recipient);
 		progressBar.setValue(x);
+	}
+
+	/**
+	 * Shows and initialises the Communique Recruiter.
+	 *
+	 * @since 6
+	 * @see com.git.ifly6.communique.ngui.CommuniqueRecruiter
+	 */
+	private void showRecruiter() {
+		CommuniqueRecruiter recruiter = new CommuniqueRecruiter();
+		recruiter.setClientKey(txtClientKey.getText());
+		recruiter.setSecretKey(txtSecretKey.getText());
+		recruiter.setTelegramId(txtTelegramId.getText());
+
+		List<String> contents = Arrays.asList(txtrCode.getText().split("\n"));
+		for (String element : contents) {
+			if (element.startsWith("/")) {
+				recruiter.appendToSentList(element);
+			}
+		}
 	}
 }

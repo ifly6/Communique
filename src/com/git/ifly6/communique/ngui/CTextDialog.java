@@ -41,8 +41,7 @@ public class CTextDialog extends JDialog {
 
 	private static final Logger log = Logger.getLogger(CTextDialog.class.getName());
 
-	private static final long serialVersionUID = -1282575557410059476L;
-	private static final int version = CommuniqueParser.version;
+	private static final long serialVersionUID = CommuniqueParser.version;
 
 	public CTextDialog(JFrame parent, String title, String message) {
 
