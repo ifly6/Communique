@@ -32,6 +32,7 @@ import com.git.ifly6.communique.CommuniqueFileReader;
 import com.git.ifly6.communique.CommuniqueFileWriter;
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.communique.data.CFlags;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
 import com.git.ifly6.javatelegram.util.JTelegramException;
@@ -175,12 +176,8 @@ public class Marconi {
 		}
 
 		// Process the Recipients list into a string with two columns.
-		CommuniqueParser parser = new CommuniqueParser(util);
+		CommuniqueParser parser = new CommuniqueParser(util, new CFlags(isRecruitment, randomSort));
 		String[] expandedRecipients = parser.recipientsParse(recipients);
-
-		if (randomSort) {
-			expandedRecipients = CommuniqueUtilities.randomiseArray(expandedRecipients);
-		}
 
 		// Show the recipients in the order we are to send the telegrams.
 		System.out.println();

@@ -38,7 +38,7 @@ public class CFlags {
 
 	}
 
-	private CFlags(boolean isRecruitment, boolean randomSort) {
+	public CFlags(boolean isRecruitment, boolean randomSort) {
 		this();
 		setRecruitment(isRecruitment);
 		setRandomSort(randomSort);

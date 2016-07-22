@@ -17,9 +17,15 @@ package com.git.ifly6.communique.io;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.git.ifly6.communique.CommuniqueFileReader;
 import com.git.ifly6.communique.data.CConfig;
 import com.google.gson.Gson;
+import com.google.gson.stream.MalformedJsonException;
 
 class CReader {
 
@@ -31,10 +37,49 @@ class CReader {
 
 	public CConfig read() throws IOException {
 
-		Gson gson = new Gson();
-		CConfig config = gson.fromJson(Files.newBufferedReader(path), CConfig.class);
-		return config;
+		try {
 
+			Gson gson = new Gson();
+			CConfig config = gson.fromJson(Files.newBufferedReader(path), CConfig.class);
+			return config;
+
+		} catch (MalformedJsonException e) {
+
+			// If we are reading one of the old files, which would throw a MalformedJsonException,
+			// try the old reader.
+
+			CommuniqueFileReader reader = new CommuniqueFileReader(path.toFile());
+
+			CConfig config = new CConfig();
+			config.isDelegatePrioritised = false;	// this flag did not exist, thus, default to false.
+			config.isRandomised = reader.isRandomised();
+			config.isRecruitment = reader.isRecruitment();
+			config.keys = reader.getKeys();
+
+			List<String> recipients = new ArrayList<>(0);
+			List<String> sentList = new ArrayList<>(0);
+
+			for (String element : reader.getRecipients()) {
+
+				// Make sure it is not empty
+				if (!StringUtils.isEmpty(element)) {
+
+					// Filter it out to recipients and sents
+					if (element.startsWith("/")) {
+						sentList.add(element);
+
+					} else if (!element.startsWith("/") && !element.startsWith("#")) {
+						recipients.add(element);
+					}
+				}
+			}
+
+			config.recipients = recipients.toArray(new String[recipients.size()]);
+			config.sentList = sentList.toArray(new String[sentList.size()]);
+			config.version = reader.getFileVersion();
+
+			return config;
+		}
 	}
 
 }

@@ -19,16 +19,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import com.git.ifly6.communique.CommuniqueParser;
-import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.CConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 class CWriter {
-
-	private static String header = "Communiqué Configuration File. Do not edit by hand. Produced at: "
-			+ CommuniqueUtilities.getCurrentDateAndTime() + ". Produced by version " + CommuniqueParser.version;
 
 	private Path path;
 	private CConfig config;
