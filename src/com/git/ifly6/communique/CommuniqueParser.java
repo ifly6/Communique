@@ -109,10 +109,13 @@ public class CommuniqueParser {
 
 		if (input.startsWith("region:")) {
 			return true;
+
 		} else if (input.equals("wa:delegates")) {
 			return true;
+
 		} else if (input.equals("wa:nations") || input.equals("wa:members")) {
 			return true;
+
 		} else if (input.equals("world:new")) { return true; }
 
 		return false;
