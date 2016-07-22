@@ -15,13 +15,15 @@
 
 package com.git.ifly6.communique;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
+import com.git.ifly6.communique.data.CFlags;
 import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
@@ -83,8 +85,9 @@ public class CommuniqueParser {
 	 * this string for extended compatibility purposes. However, due to the separation between the Parser itself and the
 	 * IO system, either of them can trigger a change in the version number.
 	 */
-	public static final int version = 5;
+	public static final int version = 6;
 	private static JInfoFetcher fetcher = new JInfoFetcher();
+	private CFlags flags;
 
 	JTelegramLogger util;
 
@@ -96,6 +99,11 @@ public class CommuniqueParser {
 	 */
 	public CommuniqueParser(JTelegramLogger logger) {
 		util = logger;
+	}
+
+	public CommuniqueParser(JTelegramLogger logger, CFlags config) {
+		util = logger;
+		this.flags = config;
 	}
 
 	/**
@@ -128,34 +136,22 @@ public class CommuniqueParser {
 	 * @return
 	 */
 	private String[] expandTag(String element) {
+
 		if (element.startsWith("region:")) {
-			try {
-				String[] regionContentsArr = fetcher.getRegion(element.replace("region:", ""));
-				return regionContentsArr;
-			} catch (IOException e) {
-				util.log("Internal Error. Cannot fetch members of region " + element.replace("region:", "") + ".");
-			}
+			String[] regionContentsArr = fetcher.getRegion(element.replace("region:", ""));
+			return regionContentsArr;
+
 		} else if (element.startsWith("wa:delegate")) {
-			try {
-				String[] delegatesArr = fetcher.getDelegates();
-				return delegatesArr;
-			} catch (IOException e) {
-				util.log("Internal Error. Cannot fetch WA delegates");
-			}
+			String[] delegatesArr = fetcher.getDelegates();
+			return delegatesArr;
+
 		} else if (element.equals("wa:nations") || element.equals("wa:members")) {
-			try {
-				String[] waNationsArr = fetcher.getWAMembers();
-				return waNationsArr;
-			} catch (IOException e) {
-				util.log("Internal Error. Cannot fetch WA members.");
-			}
+			String[] waNationsArr = fetcher.getWAMembers();
+			return waNationsArr;
+
 		} else if (element.equals("world:new")) {
-			try {
-				String[] newNationsArr = fetcher.getNew();
-				return newNationsArr;
-			} catch (IOException e) {
-				util.log("Internal Error. Cannot fetch new nations.");
-			}
+			String[] newNationsArr = fetcher.getNew();
+			return newNationsArr;
 		}
 
 		// If all else fails...
@@ -170,7 +166,7 @@ public class CommuniqueParser {
 	 * @param fetcher
 	 * @param tagsList
 	 */
-	private String[] expandList(ArrayList<String> tagsList) {
+	private String[] expandList(List<String> tagsList) {
 		ArrayList<String> expandedList = new ArrayList<String>();
 
 		for (int x = 0; x < tagsList.size(); x++) {
@@ -209,8 +205,7 @@ public class CommuniqueParser {
 
 					// If it appears in both lists, add it. Use the new 'contains' algorithm instead of the old 'nested
 					// for loops' algorithm. This gives significant speed advantages.
-					HashSet<String> firstsSet = new HashSet<String>();
-					firstsSet.addAll(Arrays.asList(firsts));
+					HashSet<String> firstsSet = new HashSet<String>(Arrays.asList(firsts));
 					for (String second : seconds) {
 						if (firstsSet.contains(second)) {
 							both.add(second);
@@ -221,8 +216,7 @@ public class CommuniqueParser {
 
 					// If an element in the first list is also contained in the second list, do not add it to the 'both'
 					// list. This basically removes it from the firsts list as output is concerned.
-					HashSet<String> secondsSet = new HashSet<>();
-					secondsSet.addAll(Arrays.asList(seconds));
+					HashSet<String> secondsSet = new HashSet<>(Arrays.asList(seconds));
 					for (String first : firsts) {
 						if (!secondsSet.contains(first)) {
 							both.add(first);
@@ -261,10 +255,8 @@ public class CommuniqueParser {
 	 */
 	public String[] recipientsParse(String[] input) {
 
-		ArrayList<String> finalRecipients = new ArrayList<String>();
-
 		// Remove commented or empty lines.
-		ArrayList<String> unComments = new ArrayList<String>();
+		List<String> unComments = new ArrayList<String>();
 		for (String element : input) {
 			if (!element.startsWith("#") && !element.isEmpty()) {
 				unComments.add(element);
@@ -273,7 +265,7 @@ public class CommuniqueParser {
 		input = unComments.toArray(new String[unComments.size()]);
 
 		// Form a list of all the nation we want in this list.
-		ArrayList<String> whitelist = new ArrayList<String>();
+		List<String> whitelist = new ArrayList<String>();
 		for (String element : input) {
 			if (!element.startsWith("/")) {
 				whitelist.add(element.toLowerCase().trim().replace(" ", "_"));
@@ -281,30 +273,31 @@ public class CommuniqueParser {
 		}
 
 		// Form a list of all nations we can't have in this list.
-		ArrayList<String> blacklist = new ArrayList<String>();
+		List<String> blacklist = new ArrayList<String>();
 		for (String element : input) {
 			if (element.startsWith("/")) {
 				blacklist.add(element.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_"));
 			}
 		}
 
-		// Expand the blacklist.
+		// Expand the lists.
 		String[] whitelistExpanded = expandList(whitelist);
 		String[] blacklistExpanded = expandList(blacklist);
 
-		// Only add from white-list if it does not appear on blacklist.
-		for (String wList : whitelistExpanded) {
-			boolean toAdd = true;
+		List<String> finalRecipients = new ArrayList<String>();
 
-			for (String bList : blacklistExpanded) {
-				if (wList.equals(bList)) {
-					toAdd = false;
-					break;
-				}
+		// Filter using new algorithm
+		HashSet<String> blackSet = new HashSet<>(Arrays.asList(blacklistExpanded));
+		for (String element : whitelistExpanded) {
+			if (!blackSet.contains(element)) {
+				finalRecipients.add(element);
 			}
+		}
 
-			if (toAdd) {
-				finalRecipients.add(wList);
+		// Old implementations will not have an input configuration
+		if (flags != null) {
+			if (flags.isRandomSort()) {
+				Collections.shuffle(finalRecipients);
 			}
 		}
 

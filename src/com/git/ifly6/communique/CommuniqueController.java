@@ -233,7 +233,7 @@ public class CommuniqueController {
 		}
 	}
 
-	@FXML protected String[] parse(ActionEvent event) {
+	@SuppressWarnings("deprecation") @FXML protected String[] parse(ActionEvent event) {
 		String[] recipients = parser.recipientsParse(codePane.getText());	// Get recipients
 
 		// Estimate Time Needed
