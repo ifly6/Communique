@@ -83,4 +83,11 @@ public class CommuniqueLogger implements JTelegramLogger {
 		Date date = new Date();
 		return dateFormat.format(date);
 	}
+
+	/**
+	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
+	 */
+	@Override public void sentTo(String recipient, int x, int length) {
+
+	}
 }

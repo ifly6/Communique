@@ -81,18 +81,18 @@ public class MarconiLogger implements JTelegramLogger {
 	 */
 	public String prompt(String prompt, String[] conditions) {
 		String response = "";
-		boolean fine = false;
+		boolean kosher = false;
 
-		while (!fine) {
+		while (!kosher) {
 			response = this.prompt(prompt).toLowerCase();
 
 			for (String element : conditions) {
 				if (element.equals(response)) {
-					fine = true;
+					kosher = true;
 				}
 			}
 
-			if (!fine) {
+			if (!kosher) {
 				System.out.println("Please provide an acceptable answer.");
 			}
 		}
@@ -107,5 +107,12 @@ public class MarconiLogger implements JTelegramLogger {
 	 */
 	public String prompt(String prompt, boolean trueFalse) {
 		return prompt(prompt, new String[] { "yes", "no", "y", "n" });
+	}
+
+	/**
+	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
+	 */
+	@Override public void sentTo(String recipient, int x, int length) {
+		// stuff, might do.
 	}
 }
