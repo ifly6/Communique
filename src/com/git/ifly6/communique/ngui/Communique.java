@@ -17,6 +17,7 @@ package com.git.ifly6.communique.ngui;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.EventQueue;
 import java.awt.FileDialog;
 import java.awt.Font;
@@ -24,6 +25,7 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -50,16 +52,22 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.CConfig;
 import com.git.ifly6.communique.io.CLoader;
+import com.git.ifly6.communique.io.CNetLoader;
 import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.JavaTelegram;
 
 import javafx.scene.control.Alert;
@@ -69,13 +77,13 @@ import javafx.scene.control.Alert.AlertType;
  * <code>Communiqué</code> is the main class of the Communiqué system. It handles the GUI aspect of the entire program
  * and other actions.
  */
-public class Communique {
+public class Communique implements JTelegramLogger {
 
 	private static final Logger log = Logger.getLogger(Communique.class.getName());
 
 	private boolean parsed = false;
 	private JavaTelegram client;
-	private Thread sendingThread;
+	private Thread sendingThread = new Thread();
 
 	private JFrame frame;
 	private JPanel panel;
@@ -92,13 +100,27 @@ public class Communique {
 	private JCheckBoxMenuItem chckbxmntmPrioritiseDelegates;
 	private JCheckBox chckbxRecruitment;
 
+	private String[] parsedRecipients;
+
 	private static Path appSupport;
-	private static CGuiLogger cLogger = new CGuiLogger();
+
+	private static String codeHeader = "# == Communiqué Recipients Code ==\n"
+			+ "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
+			+ "# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n\n";
+	private static String recipientsHeader = "# == Communiqué Recipients ==\n"
+			+ "# This tab shows all recipients after parsing of the Code tab.\n\n";
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException lfE) {
+			lfE.printStackTrace();
+		}
 
 		if (SystemUtils.IS_OS_WINDOWS) {
 			appSupport = Paths.get(System.getenv("LOCALAPPDATA"));
@@ -135,9 +157,9 @@ public class Communique {
 	 */
 	public Communique() {
 
-		client = new JavaTelegram(cLogger);
-
+		client = new JavaTelegram(this);
 		initialize();
+
 	}
 
 	/**
@@ -152,8 +174,8 @@ public class Communique {
 		double sHeight = screenDimensions.getHeight();
 
 		frame.setTitle("Communiqué " + CommuniqueParser.version);
-		frame.setBounds(100, 100, (int) sWidth / 2, (int) sHeight / 2);
-		frame.setMinimumSize(new Dimension(400, 500));
+		frame.setBounds(100, 100, (int) Math.round(2 * sWidth / 3), (int) Math.round(2 * sHeight / 3));
+		frame.setMinimumSize(new Dimension(600, 400));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JPanel contentPane = new JPanel();
@@ -168,7 +190,7 @@ public class Communique {
 
 		txtClientKey = new JTextField();
 		txtClientKey.setFont(new Font(Font.MONOSPACED, 0, 11));
-		txtClientKey.setText("Client Key");
+		txtClientKey.setText(CLoader.readProperties());
 		controlPanel.add(txtClientKey);
 		txtClientKey.setColumns(10);
 
@@ -187,6 +209,9 @@ public class Communique {
 		btnSend = new JButton("Parse");
 
 		chckbxRecruitment = new JCheckBox("Recruitment");
+		chckbxRecruitment.addActionListener(l -> {
+			triggerParsed(false);
+		});
 		controlPanel.add(chckbxRecruitment);
 		controlPanel.add(btnSend);
 
@@ -195,7 +220,8 @@ public class Communique {
 		dataPanel.setLayout(new GridLayout(1, 0, 5, 5));
 
 		txtrCode = new JTextArea();
-		txtrCode.setText("Code");
+		txtrCode.setText(
+				"# == Communiqué Recipients Code ==\n# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n\n");
 		txtrCode.setFont(new Font(Font.MONOSPACED, 0, 11));
 		txtrCode.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		dataPanel.add(new JScrollPane(txtrCode));
@@ -205,7 +231,8 @@ public class Communique {
 		panel.setLayout(new BorderLayout(0, 0));
 
 		JTextArea txtrRecipients = new JTextArea();
-		txtrRecipients.setText("Recipients");
+		txtrRecipients.setText(
+				"# == Communiqué Recipients ==\n# This tab shows all recipients after parsing of the Code tab.\n\n");
 		txtrRecipients.setFont(new Font(Font.MONOSPACED, 0, 11));
 		txtrRecipients.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		panel.add(new JScrollPane(txtrRecipients), BorderLayout.CENTER);
@@ -220,6 +247,11 @@ public class Communique {
 		menuBar.add(mnFile);
 
 		JMenuItem mntmSave = new JMenuItem("Save");
+		if (SystemUtils.IS_OS_MAC) {
+			mntmSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.META_MASK));
+		} else {
+			mntmSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK));
+		}
 		mntmSave.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 
@@ -250,6 +282,13 @@ public class Communique {
 		mnFile.add(mntmSave);
 
 		JMenuItem mntmOpen = new JMenuItem("Open");
+
+		if (SystemUtils.IS_OS_MAC) {
+			mntmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.META_MASK));
+		} else {
+			mntmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK));
+		}
+
 		mntmOpen.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 
@@ -260,6 +299,7 @@ public class Communique {
 				String file = fDialog.getFile();
 				if (file == null) {
 					log.info("User cancelled file load dialog");
+
 				} else {
 
 					Path savePath = appSupport.resolve(file);
@@ -308,7 +348,7 @@ public class Communique {
 		JMenu mnData = new JMenu("Data");
 		menuBar.add(mnData);
 
-		JMenuItem mntmImportKeysFrom = new JMenuItem("Import Keys from URL");
+		JMenuItem mntmImportKeysFrom = new JMenuItem("Import Keys from Telegram URL");
 		mntmImportKeysFrom.addActionListener(new ActionListener() {
 
 			@Override public void actionPerformed(ActionEvent e) {
@@ -317,7 +357,7 @@ public class Communique {
 						.showInputDialog("Paste in keys from the URL provided by receipt by the Telegrams API");
 
 				// Verify that it is a valid NationStates URL
-				if (rawURL.contains("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&")) {
+				if (rawURL.startsWith("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&")) {
 
 					rawURL = rawURL
 							.replace("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&", "");
@@ -346,10 +386,9 @@ public class Communique {
 				appendCode("wa:delegates");
 			}
 		});
-		mnImportRecipients.add(mntmFromWaDelegate);
 
-		JMenuItem mntmFromAtVote = new JMenuItem("From At Vote Screen");
-		mntmFromAtVote.addActionListener(new ActionListener() {
+		JMenuItem mntmAsCommaSeparated = new JMenuItem("As Comma Separated List");
+		mntmAsCommaSeparated.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 				String input = JOptionPane.showInputDialog("Input the string of delegates:");
 				if (input != null) {
@@ -361,6 +400,39 @@ public class Communique {
 						appendCode(element.toLowerCase().trim().replace(" ", "_"));
 					}
 				}
+			}
+		});
+		mnImportRecipients.add(mntmAsCommaSeparated);
+		mnImportRecipients.add(mntmFromWaDelegate);
+
+		JMenuItem mntmFromAtVote = new JMenuItem("From At Vote Screen");
+		mntmFromAtVote.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+
+				Object[] possibilities = { "GA For", "GA Against", "SC For", "SC Against" };
+				String s = (String) JOptionPane.showInputDialog(frame, "Select which chamber and side you want to address:",
+						"Select Chamber and Side", JOptionPane.PLAIN_MESSAGE, null, possibilities, "GA For");
+
+				// If a string was returned, say so.
+				if ((s != null) && (s.length() > 0)) {
+					String[] elements = s.split(" ");
+					if (elements.length > 0) {
+
+						String chamber = (elements[0].equals("GA")) ? CNetLoader.GA : CNetLoader.SC;
+						String side = (elements[1].equals("For")) ? CNetLoader.FOR : CNetLoader.AGAINST;
+
+						try {
+							txtrCode.append(CommuniqueUtilities
+									.joinListWith(Arrays.asList(CNetLoader.importAtVoteDelegates(chamber, side)), '\n'));
+						} catch (NullPointerException exc) {
+							JOptionPane.showMessageDialog(Communique.this.frame,
+									"Cannot import data from NationStates website.");
+							log.warning("Cannot import data.");
+						}
+
+					}
+				}
+
 			}
 		});
 		mnImportRecipients.add(mntmFromAtVote);
@@ -447,17 +519,37 @@ public class Communique {
 
 			@Override public void actionPerformed(ActionEvent e) {
 
-				CommuniqueParser parser = new CommuniqueParser(cLogger);
+				CommuniqueParser parser = new CommuniqueParser(Communique.this);
 
 				if (!parsed) {
 
 					// Call and do the parsing
 					log.info("Called parser");
-					String[] output = parser.recipientsParse(txtrCode.getText().split("\n"));
-					txtrCode.setText(txtrCode.getText().trim());
-					txtrRecipients.setText(CommuniqueUtilities.joinListWith(Arrays.asList(output), '\n'));
+					Communique.this.parsedRecipients = parser.recipientsParse(txtrCode.getText().split("\n"));
 
-					// Set the parse var and change the name
+					// Estimate Time Needed
+					double numRecipients = parsedRecipients.length;
+					int seconds = (int) Math.round(numRecipients * ((chckbxRecruitment.isSelected()) ? 180.05 : 30.05));
+					String timeNeeded = CommuniqueUtilities.time(seconds);
+
+					// If it needs to be randomised, do so.
+					if (chckbxmntmRandomiseRecipients.isSelected()) {
+						parsedRecipients = CommuniqueUtilities.randomiseArray(parsedRecipients);
+					}
+
+					// Show Recipients
+					StringBuilder builder = new StringBuilder();
+					builder.append("# == Communiqué Recipients ==\n" + "# This tab shows all " + parsedRecipients.length
+							+ " recipients after parsing of the Code tab.\n# Estimated time needed is " + timeNeeded
+							+ "\n\n");
+					for (String element : parsedRecipients) {
+						builder.append(element + "\n");
+					}
+
+					log.info("Recipients Parsed.");
+
+					// Change GUI elements
+					txtrRecipients.setText(builder.toString());
 					triggerParsed(true);
 
 				} else {
@@ -469,8 +561,7 @@ public class Communique {
 						Runnable runner = new Runnable() {
 							@Override public void run() {
 
-								client.setRecipients(txtrRecipients.getText().split("\n"));	// Set recipients
-
+								client.setRecipients(parsedRecipients);	// Set recipients
 								client.setKeys(new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(),
 										txtTelegramId.getText()));
 
@@ -479,21 +570,25 @@ public class Communique {
 
 								// Save client key
 								try {
+									CLoader.writeProperties(txtClientKey.getText());
 									CLoader loader = new CLoader(appSupport.resolve("autosave.txt"));
 									loader.save(exportState());
+
 								} catch (IOException e) {
-									System.err.println("Exception in writing properties.");
+									System.err.println("Exception in writing autosave or properties file.");
 								}
 
 								client.connect();
-								cLogger.log("Queries Complete.");
+								log.info("Queries Complete.");
+								JOptionPane.showMessageDialog(Communique.this.frame,
+										"Queries to " + (progressBar.getValue() + 1) + " nations complete.");
 
-								// Update recipients pane.
-								updateCode();
-							}
+								// Reset the progress bar
+								progressBar.setValue(0);
+								progressBar.setMaximum(0);
 
-							private void updateCode() {
-								txtrCode.append(CommuniqueUtilities.joinListWith(Arrays.asList(client.sentList()), '\n'));
+								// Update code has been removed because of a change to the JTelegramLogger which allows
+								// for direct event dispatch.
 							}
 						};
 
@@ -501,7 +596,7 @@ public class Communique {
 						sendingThread.start();
 
 					} else {
-						cLogger.log("There is already a campaign running. Terminate that campaign and then retry.");
+						log.info("There is already a campaign running. Terminate that campaign and then retry.");
 					}
 
 				}
@@ -522,9 +617,9 @@ public class Communique {
 			@Override public void changedUpdate(DocumentEvent e) {
 			}
 
-			// It's a joke. Look here: http://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html
+			// It's a joke, look here: http://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html
 			public void executeInTheKingdomOfNouns() {
-				if (parsed) {	// to avoid constant resetting of the variable :/
+				if (parsed) {	// to avoid constant resetting of the variable
 					triggerParsed(false);
 				}
 			}
@@ -565,10 +660,13 @@ public class Communique {
 		txtSecretKey.setText(config.keys.getSecretKey());
 		txtTelegramId.setText(config.keys.getTelegramId());
 
-		txtrCode.setText(CommuniqueUtilities.joinListWith(Arrays.asList(config.recipients), '\n'));
-		for (String string : config.sentList) {
-			txtrCode.append("\n" + string);
+		txtrCode.setText(codeHeader + CommuniqueUtilities.joinListWith(Arrays.asList(config.recipients), '\n'));
+
+		// Format the universal negation.
+		for (int x = 0; x < config.sentList.length; x++) {
+			config.sentList[x] = "/" + config.sentList[x];
 		}
+		txtrCode.append("\n\n" + CommuniqueUtilities.joinListWith(Arrays.asList(config.sentList), '\n'));
 
 		log.info("Communique info imported");
 
@@ -587,13 +685,13 @@ public class Communique {
 
 		for (int x = 0; x < inputList.size(); x++) {
 
-			if (!inputList.get(x).startsWith("#")) {
+			if (StringUtils.isEmpty(inputList.get(x)) && !inputList.get(x).startsWith("#")) {
 
 				if (!inputList.get(x).startsWith("/")) {
 					recipients.add(inputList.get(x));
 
 				} else {
-					sents.add(inputList.get(x));
+					sents.add(inputList.get(x).replaceFirst("/", ""));
 				}
 
 			}
@@ -603,8 +701,29 @@ public class Communique {
 		return new String[][] { recipients.toArray(new String[recipients.size()]), sents.toArray(new String[sents.size()]) };
 	}
 
+	// Changes the state of the button to reflect whether it is ready to send and or parsed
 	private void triggerParsed(boolean parsed) {
 		this.parsed = parsed;
 		btnSend.setText((parsed) ? "Send" : "Parse");
+	}
+
+	/**
+	 * @see com.git.ifly6.javatelegram.JTelegramLogger#log(java.lang.String)
+	 */
+	@Override public void log(String input) {
+		log.info(input);
+	}
+
+	/**
+	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
+	 */
+	@Override public void sentTo(String recipient, int x, int length) {
+
+		if (!(progressBar.getMaximum() == length - 1)) {
+			progressBar.setMaximum(length - 1);
+		}
+
+		txtrCode.append((x == 0) ? "\n\n/" + recipient : "\n/" + recipient);
+		progressBar.setValue(x);
 	}
 }

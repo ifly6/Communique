@@ -19,7 +19,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -101,15 +100,24 @@ public class CommuniqueUtilities {
 	}
 
 	public static String joinListWith(List<String> input, char joinChar) {
+		return joinListWith(input, String.valueOf(joinChar));
+	}
 
+	public static String joinListWith(List<String> input, CharSequence joinChar) {
+
+		// If this is null
+		if (input == null) { return "null"; }
+
+		// If there are no elements
+		int iMax = input.size() - 1;
+		if (iMax == -1) { return ""; }
+
+		// If there are many elements
 		StringBuilder builder = new StringBuilder();
-
-		Iterator<String> iterator = input.iterator();
-		builder.append(iterator.next());
-		while (iterator.hasNext()) {
-			builder.append(joinChar + iterator.next());
+		for (int x = 0;; x++) {
+			builder.append(input.get(x));
+			if (x == iMax) { return builder.toString(); }
+			builder.append(joinChar);
 		}
-
-		return builder.toString();
 	}
 }

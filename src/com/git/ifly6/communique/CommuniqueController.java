@@ -79,9 +79,11 @@ public class CommuniqueController {
 		;
 
 		logPane.setText("== Communiqué " + version + " ==\nEnter information or load file to proceed.\n");
-		codePane.setText("# == Communiqué Recipients Code ==\n" + "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
+		codePane.setText("# == Communiqué Recipients Code ==\n"
+				+ "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
 				+ "# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n");
-		recipientsPane.setText("# == Communiqué Recipients ==\n" + "# This tab shows all recipients after parsing of the Code tab.\n\n");
+		recipientsPane.setText(
+				"# == Communiqué Recipients ==\n" + "# This tab shows all recipients after parsing of the Code tab.\n\n");
 
 		try {
 			clientField.setText(readProperties()); // Attempt to fetch client key.
@@ -100,9 +102,9 @@ public class CommuniqueController {
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("About");
 		alert.setHeaderText("Communique");
-		alert.setContentText(
-				"Version " + version + "\n\n" + "IC: Developed by His Grace, Cyril Parsons, the Duke of Geneva and the staff of the Democratic "
-						+ "Empire of Imperium Anglorum's Delegation to the World Assembly.\n\n" + "OOC: Created by ifly6.");
+		alert.setContentText("Version " + version + "\n\n"
+				+ "IC: Developed by His Grace, Cyril Parsons, the Duke of Geneva and the staff of the Democratic "
+				+ "Empire of Imperium Anglorum's Delegation to the World Assembly.\n\n" + "OOC: Created by ifly6.");
 		logger.fine("Displayed 'about' alert.");
 
 		alert.showAndWait();
@@ -166,7 +168,8 @@ public class CommuniqueController {
 			// Verify that it is a valid NationStates URL
 			if (rawURL.contains("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&")) {
 
-				rawURL = rawURL.replace("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&", "");
+				rawURL = rawURL.replace("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&",
+						"");
 				rawURL = rawURL.replace("&to=NATION_NAME", "");
 
 				String[] tags = rawURL.split("&");
@@ -244,15 +247,16 @@ public class CommuniqueController {
 		}
 
 		// Show Recipients
-		String recipient = "# == Communiqué Recipients ==\n" + "# This tab shows all " + recipients.length
-				+ " recipients after parsing of the Code tab.\n# Estimated time needed is " + timeNeeded + "\n\n";
+		StringBuilder builder = new StringBuilder();
+		builder.append("# == Communiqué Recipients ==\n" + "# This tab shows all " + recipients.length
+				+ " recipients after parsing of the Code tab.\n# Estimated time needed is " + timeNeeded + "\n\n");
 		for (String element : recipients) {
-			recipient = recipient + element + "\n";
+			builder.append(element + "\n");
 		}
 
 		util.log("Recipients Parsed.");
 
-		recipientsPane.setText(recipient);
+		recipientsPane.setText(builder.toString());
 		tabPane.getSelectionModel().select(2);
 
 		return recipients;
