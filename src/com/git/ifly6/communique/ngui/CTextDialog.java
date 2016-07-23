@@ -50,7 +50,7 @@ public class CTextDialog extends JDialog {
 		Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize();
 
 		int width = 300;
-		int height = (message.length() / 40) * 25;
+		int height = 350;
 		setSize(width, height);
 
 		setLocation(Math.round((sSize.width / 2) - (width / 2)), Math.round((sSize.height / 2) - (height / 2)));
