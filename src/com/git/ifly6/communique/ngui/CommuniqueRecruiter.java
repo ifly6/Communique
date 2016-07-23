@@ -35,7 +35,6 @@ import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -46,6 +45,8 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+
+import org.apache.commons.lang.SystemUtils;
 
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.data.CConfig;
@@ -64,7 +65,7 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 
 	private static final Logger log = Logger.getLogger(CommuniqueRecruiter.class.getName());
 
-	private JDialog dialogFrame;
+	private JFrame frame;
 	private JTextField clientKeyField;
 	private JTextField secretKeyField;
 	private JTextField telegramIdField;
@@ -86,7 +87,7 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 	 */
 	public CommuniqueRecruiter() {
 		initialize();
-		dialogFrame.setVisible(true);
+		frame.setVisible(true);
 	}
 
 	/**
@@ -94,26 +95,26 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 	 */
 	private void initialize() {
 
-		dialogFrame = new JDialog();
-		dialogFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenDimensions.getWidth();
 		double sHeight = screenDimensions.getHeight();
 
-		dialogFrame.setTitle("Communiqué Recruiter " + CommuniqueParser.version);
+		frame.setTitle("Communiqué Recruiter " + CommuniqueParser.version);
 		// frame.setBounds(100, 100, (int) Math.round(2 * sWidth / 3), (int) Math.round(2 * sHeight / 3));
 
 		int windowWidth = 800;
 		int windowHeight = 500;
 
-		dialogFrame.setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth,
+		frame.setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth,
 				windowHeight);
-		dialogFrame.setMinimumSize(new Dimension(600, 400));
+		frame.setMinimumSize(new Dimension(600, 400));
 
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		dialogFrame.setContentPane(panel);
+		frame.setContentPane(panel);
 		panel.setLayout(new GridLayout(0, 2, 5, 5));
 
 		JPanel leftPanel = new JPanel();
@@ -257,7 +258,7 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 					thread.interrupt();
 
 					// Save the file
-					FileDialog fDialog = new FileDialog(dialogFrame, "Save file as...", FileDialog.SAVE);
+					FileDialog fDialog = new FileDialog(frame, "Save file as...", FileDialog.SAVE);
 					fDialog.setDirectory(Communique.appSupport.toFile().toString());
 					fDialog.setVisible(true);
 
@@ -271,8 +272,8 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 						save(file);
 
 						// Close the window
-						dialogFrame.setVisible(false);
-						dialogFrame.dispose();
+						frame.setVisible(false);
+						frame.dispose();
 
 					}
 				}
@@ -310,6 +311,10 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 
 		progressBar = new JProgressBar();
 		progressBar.setMaximum(180);
+		if (SystemUtils.IS_OS_MAC) {
+			// Mac, make progress bar around the same length as the button
+			progressBar.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
+		}
 		GridBagConstraints gbc_progressBar = new GridBagConstraints();
 		gbc_progressBar.fill = GridBagConstraints.HORIZONTAL;
 		gbc_progressBar.gridwidth = 3;
