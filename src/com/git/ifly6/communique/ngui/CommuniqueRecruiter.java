@@ -16,8 +16,10 @@ package com.git.ifly6.communique.ngui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.FileDialog;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -25,6 +27,7 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,15 +41,19 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.data.CConfig;
@@ -96,7 +103,6 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 	private void initialize() {
 
 		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenDimensions.getWidth();
@@ -280,8 +286,9 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 			}
 		});
 
-		excludeList = new JList<String>(regionList);
+		excludeList = new JList(regionList);
 		// excludeList.setFont(new Font(Font.MONOSPACED, 0, 11));
+		excludeList.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		excludeList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		GridBagConstraints gbc_excludeList = new GridBagConstraints();
 		gbc_excludeList.gridwidth = 2;
@@ -313,7 +320,7 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 		progressBar.setMaximum(180);
 		if (SystemUtils.IS_OS_MAC) {
 			// Mac, make progress bar around the same length as the button
-			progressBar.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
+			progressBar.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
 		}
 		GridBagConstraints gbc_progressBar = new GridBagConstraints();
 		gbc_progressBar.fill = GridBagConstraints.HORIZONTAL;
@@ -333,10 +340,38 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 		panel.add(rightPanel);
 		rightPanel.setLayout(new BorderLayout(0, 0));
 
-		sentListArea = new JTextArea("# List of nations to which a\n" + "# recruitment telegram has been sent.\n");
+		sentListArea = new JTextArea("");
+		sentListArea.setLineWrap(true);
 		sentListArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		sentListArea.setFont(new Font(Font.MONOSPACED, 0, 11));
 		rightPanel.add(new JScrollPane(sentListArea));
+
+		JLabel lblListOfNations = new JLabel(
+				"<html>List of nations to which a recruitment telegram has been sent in the current session.</html>");
+		lblListOfNations.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 0));
+		rightPanel.add(lblListOfNations, BorderLayout.NORTH);
+
+		JMenuBar menuBar = new JMenuBar();
+		frame.setJMenuBar(menuBar);
+
+		JMenu mnWindow = new JMenu("Window");
+		menuBar.add(mnWindow);
+
+		JMenuItem mntmMinimise = new JMenuItem("Minimise");
+		if (SystemUtils.IS_OS_MAC) {
+			mntmMinimise.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, Event.META_MASK));
+		} else {
+			mntmMinimise.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, Event.CTRL_MASK));
+		}
+		mntmMinimise.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				if (frame.getState() == Frame.NORMAL) {
+					frame.setState(Frame.ICONIFIED);
+					mntmMinimise.setText("Maximise");
+				}
+			}
+		});
+		mnWindow.add(mntmMinimise);
 	}
 
 	public void setClientKey(String key) {
@@ -405,15 +440,27 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 		return hashSet;
 	}
 
-	private boolean isProscribed(String element) {
+	/**
+	 * Determines whether a nation is in a region excluded by the JList <code>excludeList</code>. This method acts with
+	 * two assumptions: (1) it is not all right to telegram to anyone who resides in a prescribed region and (2) if they
+	 * moved out of the region since founding, it is certainly all right to do so.
+	 *
+	 * @param nationName
+	 * @return <code>boolean</code> on whether it is proscribed
+	 */
+	private boolean isProscribed(String nationName) {
 
-		NSNation nation = new NSNation(element);
+		NSNation nation = new NSNation(nationName);
 
 		try {
 
 			nation.populateData();
 			String region = nation.getRegion();
-			if (excludeRegions().contains(region)) { return true; }
+
+			for (String excludeRegion : excludeRegions()) {
+				if (excludeRegion.replace(" ", "_").toLowerCase()
+						.equalsIgnoreCase(region.replace(" ", "_").toLowerCase())) { return true; }
+			}
 
 		} catch (IOException e) {
 
