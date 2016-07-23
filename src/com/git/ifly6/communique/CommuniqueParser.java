@@ -23,7 +23,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.git.ifly6.communique.data.CFlags;
 import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
@@ -87,7 +86,8 @@ public class CommuniqueParser {
 	 */
 	public static final int version = 6;
 	private static JInfoFetcher fetcher = new JInfoFetcher();
-	private CFlags flags;
+
+	private boolean randomise = false;
 
 	JTelegramLogger util;
 
@@ -101,9 +101,9 @@ public class CommuniqueParser {
 		util = logger;
 	}
 
-	public CommuniqueParser(JTelegramLogger logger, CFlags config) {
+	public CommuniqueParser(JTelegramLogger logger, boolean randomise) {
 		util = logger;
-		this.flags = config;
+		this.randomise = randomise;
 	}
 
 	/**
@@ -118,13 +118,13 @@ public class CommuniqueParser {
 		if (input.startsWith("region:")) {
 			return true;
 
-		} else if (input.equals("wa:delegates")) {
+		} else if (input.equalsIgnoreCase("wa:delegates")) {
 			return true;
 
-		} else if (input.equals("wa:nations") || input.equals("wa:members")) {
+		} else if (input.equalsIgnoreCase("wa:nations") || input.equalsIgnoreCase("wa:members")) {
 			return true;
 
-		} else if (input.equals("world:new")) { return true; }
+		} else if (input.equalsIgnoreCase("world:new")) { return true; }
 
 		return false;
 	}
@@ -295,10 +295,8 @@ public class CommuniqueParser {
 		}
 
 		// Old implementations will not have an input configuration
-		if (flags != null) {
-			if (flags.isRandomSort()) {
-				Collections.shuffle(finalRecipients);
-			}
+		if (randomise) {
+			Collections.shuffle(finalRecipients);
 		}
 
 		return finalRecipients.toArray(new String[finalRecipients.size()]);
