@@ -28,21 +28,24 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.data.CConfig;
@@ -51,6 +54,7 @@ import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.JavaTelegram;
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
+import com.git.ifly6.nsapi.NSNation;
 
 /**
  * @author Kevin
@@ -60,7 +64,7 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 
 	private static final Logger log = Logger.getLogger(CommuniqueRecruiter.class.getName());
 
-	private JFrame frame;
+	private JDialog dialogFrame;
 	private JTextField clientKeyField;
 	private JTextField secretKeyField;
 	private JTextField telegramIdField;
@@ -68,14 +72,21 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 
 	private HashSet<String> sentList = new HashSet<>();
 
+	// To keep track of the nations to whom we have sent a telegram
+	private JLabel lblNationsCount;
 	private JProgressBar progressBar;
+
+	// To keep track of the feeders
+	private JList<String> excludeList;
+	private static String[] regionList = new String[] { "the Pacific", "the North Pacific", "the East Pacific",
+			"the West Pacific", "the South Pacific", "Lazarus", "Balder", "Osiris", "the Rejected Realms" };
 
 	/**
 	 * Create the application.
 	 */
 	public CommuniqueRecruiter() {
 		initialize();
-		frame.setVisible(true);
+		dialogFrame.setVisible(true);
 	}
 
 	/**
@@ -83,36 +94,36 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 	 */
 	private void initialize() {
 
-		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		dialogFrame = new JDialog();
+		dialogFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenDimensions.getWidth();
 		double sHeight = screenDimensions.getHeight();
 
-		frame.setTitle("Communiqué Recruiter " + CommuniqueParser.version);
+		dialogFrame.setTitle("Communiqué Recruiter " + CommuniqueParser.version);
 		// frame.setBounds(100, 100, (int) Math.round(2 * sWidth / 3), (int) Math.round(2 * sHeight / 3));
 
-		int windowWidth = 600;
-		int windowHeight = 400;
+		int windowWidth = 800;
+		int windowHeight = 500;
 
-		frame.setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth,
+		dialogFrame.setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth,
 				windowHeight);
-		frame.setMinimumSize(new Dimension(600, 400));
+		dialogFrame.setMinimumSize(new Dimension(600, 400));
 
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		frame.setContentPane(panel);
+		dialogFrame.setContentPane(panel);
 		panel.setLayout(new GridLayout(0, 2, 5, 5));
 
 		JPanel leftPanel = new JPanel();
+		leftPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 		panel.add(leftPanel);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[] { 0, 0, 0, 0 };
-		gbl_panel_1.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_panel_1.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_panel_1.columnWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
-		gbl_panel_1.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-				Double.MIN_VALUE };
+		gbl_panel_1.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		leftPanel.setLayout(gbl_panel_1);
 
 		JLabel lblClientKey = new JLabel("Client Key");
@@ -172,6 +183,14 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 		leftPanel.add(telegramIdField, gbc_telegramIdField);
 		telegramIdField.setColumns(10);
 
+		JSeparator separator = new JSeparator();
+		GridBagConstraints gbc_separator = new GridBagConstraints();
+		gbc_separator.gridwidth = 3;
+		gbc_separator.insets = new Insets(0, 0, 5, 5);
+		gbc_separator.gridx = 0;
+		gbc_separator.gridy = 3;
+		leftPanel.add(separator, gbc_separator);
+
 		JLabel lblExclude = new JLabel("Exclude");
 		GridBagConstraints gbc_lblExclude = new GridBagConstraints();
 		gbc_lblExclude.anchor = GridBagConstraints.EAST;
@@ -199,11 +218,11 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 
 								String[] recipients = new String[] {};
 								recipients = new JInfoFetcher().getNew();
-								System.out.println("var\t" + Arrays.toString(recipients));
+								// System.out.println("var\t" + Arrays.toString(recipients));
 
 								String intendedRecipient = null;
 								for (String element : recipients) {
-									if (!sentList.contains(element)) {
+									if (!sentList.contains(element) && !isProscribed(element)) {
 										intendedRecipient = element;
 										break;
 									}
@@ -219,12 +238,8 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 								for (int x = 0; x < 180; x++) {
 									try {
 										progressBar.setValue(x);
-										Thread.sleep(1000);
+										Thread.sleep(1000);	// 1-second intervals, wake to update the progressBar
 									} catch (InterruptedException e) {
-
-										e.printStackTrace();
-
-										// Terminate by setting isSending to false, then breaking out of the time-loop.
 										isSending = false;
 										break;
 									}
@@ -242,7 +257,7 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 					thread.interrupt();
 
 					// Save the file
-					FileDialog fDialog = new FileDialog(frame, "Save file as...", FileDialog.SAVE);
+					FileDialog fDialog = new FileDialog(dialogFrame, "Save file as...", FileDialog.SAVE);
 					fDialog.setDirectory(Communique.appSupport.toFile().toString());
 					fDialog.setVisible(true);
 
@@ -252,111 +267,61 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 
 					} else {
 
-						Path savePath = Communique.appSupport.toAbsolutePath().resolve(file);
-						log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
+						// Save the current campaign as a file
+						save(file);
 
-						// If it does not end in txt, make it end in txt
-						if (!savePath.toAbsolutePath().toString().endsWith(".txt")) {
-							savePath = new File(savePath.toAbsolutePath().toString() + ".txt").toPath();
-						}
-
-						// Prepare to save
-						CLoader loader = new CLoader(savePath);
-						CConfig config = new CConfig();
-
-						try {
-							config = loader.load();
-						} catch (IOException e1) {
-							e1.printStackTrace();
-							// do nothing else.
-							// will also catch in case it doesn't exist, etc.
-						}
-
-						// In case nothing comes of loading and it is null
-						if (config.sentList == null) {
-							config.sentList = new String[] {};
-						}
-
-						String[] sentArray = sentList.toArray(new String[sentList.size()]);
-
-						String[] mergedSentArray = new String[config.sentList.length + sentArray.length];
-						System.arraycopy(config.sentList, 0, mergedSentArray, 0, config.sentList.length);
-						System.arraycopy(sentArray, 0, mergedSentArray, config.sentList.length, sentArray.length);
-
-						config.sentList = mergedSentArray;
-
-						try {
-							loader.save(config);
-
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
+						// Close the window
+						dialogFrame.setVisible(false);
+						dialogFrame.dispose();
 
 					}
-
 				}
 			}
 		});
 
-		JCheckBox chckbxThePacific = new JCheckBox("The Pacific");
-		GridBagConstraints gbc_chckbxThePacific = new GridBagConstraints();
-		gbc_chckbxThePacific.anchor = GridBagConstraints.WEST;
-		gbc_chckbxThePacific.gridwidth = 2;
-		gbc_chckbxThePacific.insets = new Insets(0, 0, 5, 0);
-		gbc_chckbxThePacific.gridx = 1;
-		gbc_chckbxThePacific.gridy = 4;
-		leftPanel.add(chckbxThePacific, gbc_chckbxThePacific);
+		excludeList = new JList<String>(regionList);
+		// excludeList.setFont(new Font(Font.MONOSPACED, 0, 11));
+		excludeList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		GridBagConstraints gbc_excludeList = new GridBagConstraints();
+		gbc_excludeList.gridwidth = 2;
+		gbc_excludeList.gridheight = 4;
+		gbc_excludeList.insets = new Insets(0, 0, 5, 0);
+		gbc_excludeList.fill = GridBagConstraints.BOTH;
+		gbc_excludeList.gridx = 1;
+		gbc_excludeList.gridy = 4;
+		leftPanel.add(new JScrollPane(excludeList), gbc_excludeList);
 
-		JCheckBox chckbxTheNorthPacific = new JCheckBox("The North Pacific");
-		GridBagConstraints gbc_chckbxTheNorthPacific = new GridBagConstraints();
-		gbc_chckbxTheNorthPacific.anchor = GridBagConstraints.WEST;
-		gbc_chckbxTheNorthPacific.gridwidth = 2;
-		gbc_chckbxTheNorthPacific.insets = new Insets(0, 0, 5, 0);
-		gbc_chckbxTheNorthPacific.gridx = 1;
-		gbc_chckbxTheNorthPacific.gridy = 5;
-		leftPanel.add(chckbxTheNorthPacific, gbc_chckbxTheNorthPacific);
+		JLabel lblSentTo = new JLabel("Sent to");
+		GridBagConstraints gbc_lblSentTo = new GridBagConstraints();
+		gbc_lblSentTo.anchor = GridBagConstraints.EAST;
+		gbc_lblSentTo.insets = new Insets(0, 0, 5, 5);
+		gbc_lblSentTo.gridx = 0;
+		gbc_lblSentTo.gridy = 8;
+		leftPanel.add(lblSentTo, gbc_lblSentTo);
 
-		JCheckBox chckbxTheEastPacific = new JCheckBox("The East Pacific");
-		GridBagConstraints gbc_chckbxTheEastPacific = new GridBagConstraints();
-		gbc_chckbxTheEastPacific.anchor = GridBagConstraints.WEST;
-		gbc_chckbxTheEastPacific.gridwidth = 2;
-		gbc_chckbxTheEastPacific.insets = new Insets(0, 0, 5, 0);
-		gbc_chckbxTheEastPacific.gridx = 1;
-		gbc_chckbxTheEastPacific.gridy = 6;
-		leftPanel.add(chckbxTheEastPacific, gbc_chckbxTheEastPacific);
-
-		JCheckBox chckbxTheWestPacific = new JCheckBox("The West Pacific");
-		GridBagConstraints gbc_chckbxTheWestPacific = new GridBagConstraints();
-		gbc_chckbxTheWestPacific.anchor = GridBagConstraints.WEST;
-		gbc_chckbxTheWestPacific.gridwidth = 2;
-		gbc_chckbxTheWestPacific.insets = new Insets(0, 0, 5, 0);
-		gbc_chckbxTheWestPacific.gridx = 1;
-		gbc_chckbxTheWestPacific.gridy = 7;
-		leftPanel.add(chckbxTheWestPacific, gbc_chckbxTheWestPacific);
-
-		JCheckBox chckbxTheSouthPacific = new JCheckBox("The South Pacific");
-		GridBagConstraints gbc_chckbxTheSouthPacific = new GridBagConstraints();
-		gbc_chckbxTheSouthPacific.anchor = GridBagConstraints.WEST;
-		gbc_chckbxTheSouthPacific.gridwidth = 2;
-		gbc_chckbxTheSouthPacific.insets = new Insets(0, 0, 5, 0);
-		gbc_chckbxTheSouthPacific.gridx = 1;
-		gbc_chckbxTheSouthPacific.gridy = 8;
-		leftPanel.add(chckbxTheSouthPacific, gbc_chckbxTheSouthPacific);
+		lblNationsCount = new JLabel("0 nations");
+		lblNationsCount.setText(sentList.size() + ((sentList.size() == 1) ? " nation" : " nations"));
+		GridBagConstraints gbc_lblNationscount = new GridBagConstraints();
+		gbc_lblNationscount.anchor = GridBagConstraints.WEST;
+		gbc_lblNationscount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNationscount.gridx = 1;
+		gbc_lblNationscount.gridy = 8;
+		leftPanel.add(lblNationsCount, gbc_lblNationscount);
 
 		progressBar = new JProgressBar();
 		progressBar.setMaximum(180);
 		GridBagConstraints gbc_progressBar = new GridBagConstraints();
 		gbc_progressBar.fill = GridBagConstraints.HORIZONTAL;
 		gbc_progressBar.gridwidth = 3;
-		gbc_progressBar.insets = new Insets(0, 0, 5, 5);
+		gbc_progressBar.insets = new Insets(0, 0, 5, 0);
 		gbc_progressBar.gridx = 0;
-		gbc_progressBar.gridy = 10;
+		gbc_progressBar.gridy = 9;
 		leftPanel.add(progressBar, gbc_progressBar);
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnNewButton.gridwidth = 3;
 		gbc_btnNewButton.gridx = 0;
-		gbc_btnNewButton.gridy = 11;
+		gbc_btnNewButton.gridy = 10;
 		leftPanel.add(btnSendButton, gbc_btnNewButton);
 
 		JPanel rightPanel = new JPanel();
@@ -381,16 +346,38 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 		telegramIdField.setText(id);
 	}
 
-	public void appendToSentList(String input) {
-		sentList.add(input);
-	}
+	public void setUsingRecipients(String[] cRecipients) {
+		for (String element : cRecipients) {
 
-	public void appendToSentList(Collection<String> strings) {
-		sentList.addAll(strings);
+			if (element.startsWith("flag:recruit")) {
+
+				if (element.contains("-- region:") && !element.trim().endsWith("-- region:")) {
+					int index = -1;
+					for (int x = 0; x < regionList.length; x++) {
+						if (regionList[x].equalsIgnoreCase(element.split("-- region:")[1].trim().replace("_", " "))) {
+							index = x;
+							break;
+						}
+					}
+					if (index > -1) {
+						excludeList.addSelectionInterval(index, index);
+					}
+				}
+
+			} else if (element.startsWith("/")) {
+				sentList.add(element.replaceAll("/", ""));
+			}
+		}
+
+		// Update graphical component
+		lblNationsCount.setText(sentList.size() + ((sentList.size() == 1) ? " nation" : " nations"));
 	}
 
 	@Override public void log(String input) {
-		System.err.println(input);
+		// Filter out the stuff we don't care about
+		if (!input.equals("API Queries Complete.")) {
+			System.err.println(input);
+		}
 	}
 
 	/**
@@ -398,6 +385,93 @@ public class CommuniqueRecruiter implements JTelegramLogger {
 	 */
 	@Override public void sentTo(String recipient, int x, int length) {
 		sentList.add(recipient);
+		lblNationsCount.setText(sentList.size() + ((sentList.size() == 1) ? " nation" : " nations"));
 		sentListArea.append("\n/" + recipient);
+	}
+
+	private HashSet<String> excludeRegions() {
+
+		HashSet<String> hashSet = new HashSet<>();
+		int[] sIndices = excludeList.getSelectedIndices();
+		for (int x : sIndices) {
+			hashSet.add(regionList[x]);
+		}
+
+		return hashSet;
+	}
+
+	private boolean isProscribed(String element) {
+
+		NSNation nation = new NSNation(element);
+
+		try {
+
+			nation.populateData();
+			String region = nation.getRegion();
+			if (excludeRegions().contains(region)) { return true; }
+
+		} catch (IOException e) {
+
+		}
+
+		// assume that is is not proscribed if we cannot populate the data.
+		return false;
+	}
+
+	/**
+	 * @param file
+	 */
+	private void save(String file) {
+
+		Path savePath = Communique.appSupport.toAbsolutePath().resolve(file);
+		log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
+
+		// If it does not end in txt, make it end in txt
+		if (!savePath.toAbsolutePath().toString().endsWith(".txt")) {
+			savePath = new File(savePath.toAbsolutePath().toString() + ".txt").toPath();
+		}
+
+		// Prepare to save
+		CLoader loader = new CLoader(savePath);
+		CConfig config = new CConfig();
+
+		try {
+			config = loader.load();
+		} catch (IOException e1) {
+			// do nothing else.
+			// will also catch in case it doesn't exist, etc.
+		}
+
+		config.defaultVersion();
+		config.isRecruitment = true;
+		config.keys = new JTelegramKeys(clientKeyField.getText(), secretKeyField.getText(), telegramIdField.getText());
+
+		// In case nothing comes of loading and it is null
+		if (config.sentList == null) {
+			config.sentList = new String[] {};
+		}
+
+		// Create and set recipients list
+		List<String> recipients = new ArrayList<>(0);
+		recipients.add("flag:recruit");
+		for (String element : excludeRegions()) {
+			recipients.add("flag:recruit -- " + element);
+		}
+		config.recipients = recipients.toArray(new String[recipients.size()]);
+
+		// Find the old sent-list, merge it with the new one
+		String[] sentArray = sentList.toArray(new String[sentList.size()]);
+		String[] mergedSentArray = new String[config.sentList.length + sentArray.length];
+		System.arraycopy(config.sentList, 0, mergedSentArray, 0, config.sentList.length);
+		System.arraycopy(sentArray, 0, mergedSentArray, config.sentList.length, sentArray.length);
+		config.sentList = mergedSentArray;
+
+		// Save
+		try {
+			loader.save(config);
+
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 	}
 }

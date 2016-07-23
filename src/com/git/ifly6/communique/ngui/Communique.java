@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -62,10 +63,10 @@ import javax.swing.event.DocumentListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
+import com.apple.eawt.Application;
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.CConfig;
-import com.git.ifly6.communique.data.CFlags;
 import com.git.ifly6.communique.io.CLoader;
 import com.git.ifly6.communique.io.CNetLoader;
 import com.git.ifly6.javatelegram.JTelegramKeys;
@@ -88,7 +89,7 @@ public class Communique implements JTelegramLogger {
 	private Thread sendingThread = new Thread();
 
 	private JFrame frame;
-	private JPanel panel;
+	private JPanel recipientsPanel;
 
 	private JTextField txtClientKey;
 	private JTextField txtSecretKey;
@@ -128,6 +129,9 @@ public class Communique implements JTelegramLogger {
 		} else if (SystemUtils.IS_OS_MAC) {
 			appSupport = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Communique");
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
+			Application.getApplication()
+					.setDockIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("icon.png")));
+			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Communiqué " + CommuniqueParser.version);
 
 		} else {
 			appSupport = Paths.get(System.getProperty("user.dir"), "config");
@@ -168,6 +172,7 @@ public class Communique implements JTelegramLogger {
 	private void initialize() {
 
 		frame = new JFrame();
+		frame.setIconImage(new ImageIcon("icon.png").getImage());
 
 		Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenDimensions.getWidth();
@@ -226,19 +231,41 @@ public class Communique implements JTelegramLogger {
 		txtrCode.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		dataPanel.add(new JScrollPane(txtrCode));
 
-		panel = new JPanel();
-		dataPanel.add(panel);
-		panel.setLayout(new BorderLayout(0, 0));
+		// Document listener logic
+		txtrCode.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override public void removeUpdate(DocumentEvent e) {
+				executeInTheKingdomOfNouns();
+			}
+
+			@Override public void insertUpdate(DocumentEvent e) {
+				executeInTheKingdomOfNouns();
+			}
+
+			@Override public void changedUpdate(DocumentEvent e) {
+			}
+
+			// It's a joke, look here: http://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html
+			public void executeInTheKingdomOfNouns() {
+				if (parsed) {	// to avoid constant resetting of the variable
+					triggerParsed(false);
+				}
+			}
+		});
+
+		recipientsPanel = new JPanel();
+		dataPanel.add(recipientsPanel);
+		recipientsPanel.setLayout(new BorderLayout(0, 0));
 
 		JTextArea txtrRecipients = new JTextArea();
 		txtrRecipients.setText(
 				"# == Communiqué Recipients ==\n# This tab shows all recipients after parsing of the Code tab.\n\n");
 		txtrRecipients.setFont(new Font(Font.MONOSPACED, 0, 11));
 		txtrRecipients.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		panel.add(new JScrollPane(txtrRecipients), BorderLayout.CENTER);
+		recipientsPanel.add(new JScrollPane(txtrRecipients), BorderLayout.CENTER);
 
 		progressBar = new JProgressBar();
-		panel.add(progressBar, BorderLayout.SOUTH);
+		recipientsPanel.add(progressBar, BorderLayout.SOUTH);
 
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
@@ -545,8 +572,7 @@ public class Communique implements JTelegramLogger {
 
 			@Override public void actionPerformed(ActionEvent e) {
 
-				CommuniqueParser parser = new CommuniqueParser(Communique.this,
-						new CFlags(chckbxRecruitment.isSelected(), chckbxmntmRandomiseRecipients.isSelected()));
+				CommuniqueParser parser = new CommuniqueParser(Communique.this, chckbxmntmRandomiseRecipients.isSelected());
 
 				if (!parsed) {
 
@@ -633,28 +659,6 @@ public class Communique implements JTelegramLogger {
 			}
 		});
 
-		// Document listener logic
-		txtrCode.getDocument().addDocumentListener(new DocumentListener() {
-
-			@Override public void removeUpdate(DocumentEvent e) {
-				executeInTheKingdomOfNouns();
-			}
-
-			@Override public void insertUpdate(DocumentEvent e) {
-				executeInTheKingdomOfNouns();
-			}
-
-			@Override public void changedUpdate(DocumentEvent e) {
-			}
-
-			// It's a joke, look here: http://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html
-			public void executeInTheKingdomOfNouns() {
-				if (parsed) {	// to avoid constant resetting of the variable
-					triggerParsed(false);
-				}
-			}
-		});
-
 		log.info("Shutdown hook added.");
 		log.info("Communiqué loaded.");
 	}
@@ -715,7 +719,7 @@ public class Communique implements JTelegramLogger {
 
 		for (int x = 0; x < inputList.size(); x++) {
 
-			if (StringUtils.isEmpty(inputList.get(x)) && !inputList.get(x).startsWith("#")) {
+			if (!StringUtils.isEmpty(inputList.get(x)) && !inputList.get(x).startsWith("#")) {
 
 				if (!inputList.get(x).startsWith("/")) {
 					recipients.add(inputList.get(x));
@@ -768,12 +772,6 @@ public class Communique implements JTelegramLogger {
 		recruiter.setClientKey(txtClientKey.getText());
 		recruiter.setSecretKey(txtSecretKey.getText());
 		recruiter.setTelegramId(txtTelegramId.getText());
-
-		List<String> contents = Arrays.asList(txtrCode.getText().split("\n"));
-		for (String element : contents) {
-			if (element.startsWith("/")) {
-				recruiter.appendToSentList(element);
-			}
-		}
+		recruiter.setUsingRecipients(txtrCode.getText().split("\n"));
 	}
 }
