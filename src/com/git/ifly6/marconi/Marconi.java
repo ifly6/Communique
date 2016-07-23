@@ -32,7 +32,6 @@ import com.git.ifly6.communique.CommuniqueFileReader;
 import com.git.ifly6.communique.CommuniqueFileWriter;
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
-import com.git.ifly6.communique.data.CFlags;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
 import com.git.ifly6.javatelegram.util.JTelegramException;
@@ -176,7 +175,7 @@ public class Marconi {
 		}
 
 		// Process the Recipients list into a string with two columns.
-		CommuniqueParser parser = new CommuniqueParser(util, new CFlags(isRecruitment, randomSort));
+		CommuniqueParser parser = new CommuniqueParser(util, randomSort);
 		String[] expandedRecipients = parser.recipientsParse(recipients);
 
 		// Show the recipients in the order we are to send the telegrams.
@@ -268,7 +267,7 @@ public class Marconi {
 	 */
 	private static void appendSent(File file) throws FileNotFoundException, UnsupportedEncodingException {
 
-		String[] sentList = client.sentList();
+		String[] sentList = client.sentArray();
 		for (int x = 0; x < sentList.length; x++) {
 			sentList[x] = "/" + sentList[x];
 		}

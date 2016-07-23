@@ -55,7 +55,8 @@ public class CConfig implements java.io.Serializable {
 	public String[] recipients;
 	public String[] sentList;
 
-	public void defaultVersion() {
+	public int defaultVersion() {
 		this.version = CommuniqueParser.version;
+		return CommuniqueParser.version;
 	}
 }
