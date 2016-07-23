@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -63,7 +62,6 @@ import javax.swing.event.DocumentListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
-import com.apple.eawt.Application;
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.CConfig;
@@ -129,8 +127,8 @@ public class Communique implements JTelegramLogger {
 		} else if (SystemUtils.IS_OS_MAC) {
 			appSupport = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Communique");
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			Application.getApplication()
-					.setDockIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("icon.png")));
+			// Application.getApplication()
+			// .setDockIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("icon.png")));
 			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Communiqué " + CommuniqueParser.version);
 
 		} else {
@@ -172,7 +170,7 @@ public class Communique implements JTelegramLogger {
 	private void initialize() {
 
 		frame = new JFrame();
-		frame.setIconImage(new ImageIcon("icon.png").getImage());
+		// frame.setIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("icon.png")));
 
 		Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenDimensions.getWidth();
