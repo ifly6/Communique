@@ -29,7 +29,8 @@ Note that it is *your* responsibility to know how the telegram API works. Use of
   - To say 'not', put in a `/` before the tag
   - For example, I can say: `region:europe` and `/imperium_anglorum`, which will send telegrams to everyone in Europe except Imperium Anglorum. Or, I could say `region:europe` and `/WA:members`, which would send telegrams to all residents of Europe who are not WA members.
   - In version `2`, you can use an arrow operator, `->` to specify persons who are only in both groups. For example, the line `region:europe -> wa:members` would mean 'nations in Europe in (or, who are also) WA members'.
-  - You cannot invert the tags if their resulting sample space would be something which cannot be easily queried (like 'remove members who are not in the World Assembly', as 'not in the World Assembly' is not defined).
+  - In version `5`, a local negation operator, `--`, can be used to specify nations in the first group to remove by the second group. Thus, the line `region:europe -- wa:members` would result in all non-WA European nations. This is also local, so the line `region:europe -> wa:delegate` can be used as well, adding the delegate of Europe to that list.
+  - In version `6`, a Recruitment wizard was added. Simply use `flag:recruit` (or go into the menu) as your recipient to bring it up. Note that `flag:recruit` is not compatible with sending a telegram to any other nations. You can also specify feeders to exclude from recruitment. This recruitment wizard only looks a the results of the new nation API call. Mass recruitment of pre-existing nations should be done by using the old format.
 
 5. Click the 'Parse' button to see a list of all your recipients. When ready, click the 'Send' button to send the telegrams.
 
@@ -56,9 +57,9 @@ While there will be a version number, currently, there is no such number, since,
 4. Version 4 introduces a flag into the file system to randomise the list of recipients. This flag is defined by the `randomSort` flag inside the file system and a system for generating that flag has been added to Communiqué. 
 
 5. Version 5 introduces a new operator which is written to file along with a new flag. 
-  - The `--` operator, signifying 'not', cannot be parsed by previous versions, necessitating a version change. It allows for local negation instead of a global negation as `/` does. The `--` allows for one to specify `region:europe -- wa:members` followed by `region:europe -> wa:delegates`. Since delegates are a subset of members, this would be impossible with global negation. 
-  - Furthermore, this version introduces a `isDelegatePrioritised` flag, which will place delegates in their own set before all other recipients.
+  - The `--` operator, signifying 'not', cannot be parsed by previous versions, necessitating a version change. It allows for local negation instead of a global negation as `/` does. The `--` allows for one to specify `region:europe -- wa:members` followed by `region:europe -> wa:delegates`. Since delegates are a subset of members, this would be impossible with global negation.
   - Version 5 also transitions to a new UI and back to Swing instead of JavaFX. It also works to eliminate the use of multiple tabs and put all relevant information at your fingertips.
+  - Note that version 5 was never released to the public and exists as a development bridge to version 6.
 
 6. Version 6 introduces a new window to the program, called the Communique Recruiter for recruiting nations. It also has a built-in filter to check nations and make sure that you can exclude certain feeders. This is accessible using commands `flag:recruit` and `flag:recruit -- region:x` or using the set-up wizard.
   - There have also been significant changes to the program's interface, being entirely rebuilt in Swing, with accelerators and other improvements — like on the fly alerts that inform the user immediately instead of waiting.

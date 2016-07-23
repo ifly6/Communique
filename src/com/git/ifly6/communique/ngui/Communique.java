@@ -21,6 +21,7 @@ import java.awt.Event;
 import java.awt.EventQueue;
 import java.awt.FileDialog;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -170,7 +172,9 @@ public class Communique implements JTelegramLogger {
 	private void initialize() {
 
 		frame = new JFrame();
-		// frame.setIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("icon.png")));
+		if (!SystemUtils.IS_OS_MAC) {
+			frame.setIconImage(new ImageIcon(getClass().getResource("/icon.png")).getImage());
+		}
 
 		Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenDimensions.getWidth();
@@ -223,8 +227,10 @@ public class Communique implements JTelegramLogger {
 		dataPanel.setLayout(new GridLayout(1, 0, 5, 5));
 
 		txtrCode = new JTextArea();
-		txtrCode.setText(
-				"# == Communiqué Recipients Code ==\n# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n\n");
+		String codeHeader = "# == Communiqué Recipients Code ==\n"
+				+ "# Enter recipients, one for each line or use 'region:', 'WA:',\n"
+				+ "# etc tags. Use '/' to say: 'not'. Ex: 'region:europe',\n" + "# '/imperium anglorum'.\n\n";
+		txtrCode.setText(codeHeader);
 		txtrCode.setFont(new Font(Font.MONOSPACED, 0, 11));
 		txtrCode.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		dataPanel.add(new JScrollPane(txtrCode));
@@ -312,13 +318,11 @@ public class Communique implements JTelegramLogger {
 		mnFile.add(mntmSave);
 
 		JMenuItem mntmOpen = new JMenuItem("Open");
-
 		if (SystemUtils.IS_OS_MAC) {
 			mntmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.META_MASK));
 		} else {
 			mntmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK));
 		}
-
 		mntmOpen.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 
@@ -366,21 +370,6 @@ public class Communique implements JTelegramLogger {
 			}
 		});
 		mnFile.add(mntmShowDirectory);
-
-		mnFile.addSeparator();
-
-		JMenuItem mntmRecruiter = new JMenuItem("Recruiter...");
-		if (SystemUtils.IS_OS_MAC) {
-			mntmRecruiter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.META_MASK));
-		} else {
-			mntmRecruiter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.CTRL_MASK));
-		}
-		mntmRecruiter.addActionListener(new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) {
-				showRecruiter();
-			}
-		});
-		mnFile.add(mntmRecruiter);
 
 		mnFile.addSeparator();
 
@@ -496,6 +485,39 @@ public class Communique implements JTelegramLogger {
 		chckbxmntmPrioritiseDelegates = new JCheckBoxMenuItem("Prioritise Delegates");
 		mnData.add(chckbxmntmPrioritiseDelegates);
 
+		JMenu mnWindow = new JMenu("Window");
+		menuBar.add(mnWindow);
+
+		JMenuItem mntmMinimise = new JMenuItem("Minimise");
+		if (SystemUtils.IS_OS_MAC) {
+			mntmMinimise.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, Event.META_MASK));
+		} else {
+			mntmMinimise.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, Event.CTRL_MASK));
+		}
+		mntmMinimise.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				if (frame.getState() == Frame.NORMAL) {
+					frame.setState(Frame.ICONIFIED);
+				}
+			}
+		});
+		mnWindow.add(mntmMinimise);
+
+		mnWindow.addSeparator();
+
+		JMenuItem mntmRecruiter = new JMenuItem("Recruiter...");
+		if (SystemUtils.IS_OS_MAC) {
+			mntmRecruiter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.META_MASK));
+		} else {
+			mntmRecruiter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.CTRL_MASK));
+		}
+		mntmRecruiter.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				showRecruiter();
+			}
+		});
+		mnWindow.add(mntmRecruiter);
+
 		JMenu mnHelp = new JMenu("Help");
 		menuBar.add(mnHelp);
 
@@ -504,7 +526,7 @@ public class Communique implements JTelegramLogger {
 			@Override public void actionPerformed(ActionEvent e) {
 				new CTextDialog(frame, "About",
 						"Developed by His Grace, Cyril Parsons, the Duke of Geneva and the staff of the Democratic Empire of Imperium Anglorum's "
-								+ "Delegation to the World Assembly.\n" + "OOC: Created by ifly6.");
+								+ "Delegation to the World Assembly.\n\n" + "OOC: Created by ifly6.");
 			}
 		});
 		mnHelp.add(mntmAbout);
@@ -515,7 +537,7 @@ public class Communique implements JTelegramLogger {
 		mntmDocumentation.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 				try {
-					Desktop.getDesktop().browse(new URL("https://github.com/iFlyCode/Communique#communiqué").toURI());
+					Desktop.getDesktop().browse(new URL("https://github.com/iFlyCode/Communique").toURI());
 				} catch (IOException | URISyntaxException e1) {
 					log.warning("Cannot open Communiqué documentation.");
 					e1.printStackTrace();

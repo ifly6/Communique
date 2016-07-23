@@ -14,7 +14,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 package com.git.ifly6.communique.io;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,6 +23,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 
 import com.git.ifly6.communique.data.CConfig;
+import com.git.ifly6.communique.ngui.Communique;
 
 /**
  * <code>CLoader</code> is a class allowing the easy abstraction of access to a single point and simplifying the process
@@ -82,7 +82,7 @@ public class CLoader {
 		try {
 
 			Properties prop = new Properties();
-			FileOutputStream output = new FileOutputStream(System.getProperty("user.dir") + "/config.properties");
+			FileOutputStream output = new FileOutputStream(Communique.appSupport + "/config.properties");
 			prop.setProperty("clientKey", clientKey);
 			prop.store(output, "");
 			output.close();
@@ -104,7 +104,7 @@ public class CLoader {
 		Properties prop = new Properties();
 
 		try {
-			FileInputStream stream = new FileInputStream(new File(System.getProperty("user.dir") + "/config.properties"));
+			FileInputStream stream = new FileInputStream(Communique.appSupport + "/config.properties");
 			prop.load(stream);
 
 		} catch (IOException e) {
