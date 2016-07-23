@@ -59,7 +59,7 @@ While there will be a version number, currently, there is no such number, since,
   - The `--` operator, signifying 'not', cannot be parsed by previous versions, necessitating a version change. It allows for local negation instead of a global negation as `/` does. The `--` allows for one to specify `region:europe -- wa:members` followed by `region:europe -> wa:delegates`. Since delegates are a subset of members, this would be impossible with global negation. 
   - Furthermore, this version introduces a `isDelegatePrioritised` flag, which will place delegates in their own set before all other recipients.
   - Version 5 also transitions to a new UI and back to Swing instead of JavaFX. It also works to eliminate the use of multiple tabs and put all relevant information at your fingertips.
-  
+
 6. Version 6 introduces a new window to the program, called the Communique Recruiter for recruiting nations. It also has a built-in filter to check nations and make sure that you can exclude certain feeders. This is accessible using commands `flag:recruit` and `flag:recruit -- region:x` or using the set-up wizard.
   - There have also been significant changes to the program's interface, being entirely rebuilt in Swing, with accelerators and other improvements — like on the fly alerts that inform the user immediately instead of waiting.
   - A logging system has also been built to export relevant logs to a text area and print them to file.
