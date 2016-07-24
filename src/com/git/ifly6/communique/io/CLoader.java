@@ -22,14 +22,13 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.git.ifly6.communique.data.CConfig;
 import com.git.ifly6.communique.ngui.Communique;
 
 /**
  * <code>CLoader</code> is a class allowing the easy abstraction of access to a single point and simplifying the process
  * of reading and writing to that data. It uses the <code>{@link CReader}</code> and <code>{@link CWriter}</code>
- * classes to access that data. They are based on reading and writing through the Java properties system, which then use
- * functions to pass around, read, and write to a {@link com.git.ifly6.communique.data.CConfig CConfig} object.
+ * classes to access that data. They are based on reading and writing via use of Google's Gson library, which then allow
+ * for reading, writing, and manipulation of a {@link com.git.ifly6.communique.io.CConfig CConfig} object.
  */
 public class CLoader {
 
@@ -40,8 +39,9 @@ public class CLoader {
 	}
 
 	/**
-	 * Sets the path at which the program will do its file operations. The Communiqué program defaults this to the
-	 * relevant application support folder, resolved to the Communiqué folder.
+	 * Creates the <code>CLoader</code> and sets the path at which the program will do its file operations. The
+	 * Communique program attempts to default this to the relevant application support folder, resolved to the
+	 * Communique folder, by specifying such in the program's myriad file dialog prompts.
 	 *
 	 * @param path
 	 */

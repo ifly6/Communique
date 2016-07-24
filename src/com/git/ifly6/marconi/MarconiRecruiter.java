@@ -12,33 +12,45 @@
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
-package com.git.ifly6.communique.io;
+package com.git.ifly6.marconi;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
+import com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+/**
+ * @author Kevin
+ *
+ */
+public class MarconiRecruiter extends AbstractCommuniqueRecruiter {
 
-class CWriter {
+	/**
+	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setClientKey(java.lang.String)
+	 */
+	@Override public void setClientKey(String key) {
+		// TODO Auto-generated method stub
 
-	private Path path;
-	private CConfig config;
-
-	public CWriter(Path path, CConfig config) {
-		this.path = path;
-		this.config = config;
 	}
 
-	// Return boolean for errors.
-	public void write() throws IOException {
+	/**
+	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setSecretKey(java.lang.String)
+	 */
+	@Override public void setSecretKey(String key) {
+		// TODO Auto-generated method stub
 
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		String response = gson.toJson(config);
+	}
 
-		Files.write(path, Arrays.asList(response.split("\n")));
+	/**
+	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setTelegramId(java.lang.String)
+	 */
+	@Override public void setTelegramId(String id) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#send()
+	 */
+	@Override public void send() {
+		// TODO Auto-generated method stub
 
 	}
 

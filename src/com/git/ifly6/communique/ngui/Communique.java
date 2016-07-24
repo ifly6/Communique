@@ -27,6 +27,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -45,7 +47,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -61,20 +65,18 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
-import com.git.ifly6.communique.data.CConfig;
+import com.git.ifly6.communique.io.CConfig;
 import com.git.ifly6.communique.io.CLoader;
 import com.git.ifly6.communique.io.CNetLoader;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.JavaTelegram;
-
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 
 /**
  * <code>Communiqué</code> is the main class of the Communiqué system. It handles the GUI aspect of the entire program
@@ -108,8 +110,10 @@ public class Communique implements JTelegramLogger {
 	public static Path appSupport;
 
 	private static String codeHeader = "# == Communiqué Recipients Code ==\n"
-			+ "# Enter recipients, one for each line or use 'region:', 'WA:', etc tags.\n"
-			+ "# Use '/' to say: 'not'. Ex: 'region:europe, /imperium anglorum'.\n\n";
+			+ "# Enter recipients, one for each line or use 'region:', 'WA:',\n"
+			+ "# etc tags. Use '/' to say: 'not'. Ex: 'region:europe',\n" + "# '/imperium anglorum'.\n\n";
+
+	private CommuniqueRecruiter recruiter;
 
 	/**
 	 * Launch the application.
@@ -124,13 +128,11 @@ public class Communique implements JTelegramLogger {
 		}
 
 		if (SystemUtils.IS_OS_WINDOWS) {
-			appSupport = Paths.get(System.getenv("LOCALAPPDATA"));
+			appSupport = Paths.get(System.getenv("LOCALAPPDATA"), "Communique");
 
 		} else if (SystemUtils.IS_OS_MAC) {
 			appSupport = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Communique");
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			// Application.getApplication()
-			// .setDockIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("icon.png")));
 			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Communiqué " + CommuniqueParser.version);
 
 		} else {
@@ -198,38 +200,57 @@ public class Communique implements JTelegramLogger {
 		txtClientKey = new JTextField();
 		txtClientKey.setFont(new Font(Font.MONOSPACED, 0, 11));
 		txtClientKey.setText(CLoader.readProperties());
+		txtClientKey.addMouseListener(new MouseAdapter() {
+			@Override public void mouseClicked(MouseEvent e) {
+				((JTextField) e.getComponent()).setText("");
+				triggerParsed(false);
+			}
+		});
 		controlPanel.add(txtClientKey);
 		txtClientKey.setColumns(10);
 
 		txtSecretKey = new JTextField();
 		txtSecretKey.setFont(new Font(Font.MONOSPACED, 0, 11));
 		txtSecretKey.setText("Secret Key");
+		txtSecretKey.addMouseListener(new MouseAdapter() {
+			@Override public void mouseClicked(MouseEvent e) {
+				((JTextField) e.getComponent()).setText("");
+				triggerParsed(false);
+			}
+		});
 		controlPanel.add(txtSecretKey);
 		txtSecretKey.setColumns(10);
 
 		txtTelegramId = new JTextField();
 		txtTelegramId.setFont(new Font(Font.MONOSPACED, 0, 11));
 		txtTelegramId.setText("Telegram ID");
+		txtTelegramId.addMouseListener(new MouseAdapter() {
+			@Override public void mouseClicked(MouseEvent e) {
+				((JTextField) e.getComponent()).setText("");
+				triggerParsed(false);
+			}
+		});
 		controlPanel.add(txtTelegramId);
 		txtTelegramId.setColumns(10);
 
 		btnSend = new JButton("Parse");
 
-		chckbxRecruitment = new JCheckBox("Recruitment");
+		chckbxRecruitment = new JCheckBox("Recruit Ratelimit");
 		chckbxRecruitment.addActionListener(l -> {
 			triggerParsed(false);
 		});
 		controlPanel.add(chckbxRecruitment);
 		controlPanel.add(btnSend);
 
+		JPanel metaDataPanel = new JPanel();
+		metaDataPanel.setLayout(new BorderLayout());
+		contentPane.add(metaDataPanel, BorderLayout.CENTER);
+
 		JPanel dataPanel = new JPanel();
-		contentPane.add(dataPanel, BorderLayout.CENTER);
+		metaDataPanel.add(dataPanel, BorderLayout.CENTER);
 		dataPanel.setLayout(new GridLayout(1, 0, 5, 5));
 
 		txtrCode = new JTextArea();
-		String codeHeader = "# == Communiqué Recipients Code ==\n"
-				+ "# Enter recipients, one for each line or use 'region:', 'WA:',\n"
-				+ "# etc tags. Use '/' to say: 'not'. Ex: 'region:europe',\n" + "# '/imperium anglorum'.\n\n";
 		txtrCode.setText(codeHeader);
 		txtrCode.setFont(new Font(Font.MONOSPACED, 0, 11));
 		txtrCode.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -269,7 +290,8 @@ public class Communique implements JTelegramLogger {
 		recipientsPanel.add(new JScrollPane(txtrRecipients), BorderLayout.CENTER);
 
 		progressBar = new JProgressBar();
-		recipientsPanel.add(progressBar, BorderLayout.SOUTH);
+		progressBar.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
+		metaDataPanel.add(progressBar, BorderLayout.SOUTH);
 
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
@@ -278,75 +300,34 @@ public class Communique implements JTelegramLogger {
 		menuBar.add(mnFile);
 
 		JMenuItem mntmSave = new JMenuItem("Save");
-		if (SystemUtils.IS_OS_MAC) {
-			mntmSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.META_MASK));
-		} else {
-			mntmSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK));
-		}
+		mntmSave.setAccelerator(getOSKeyStroke(KeyEvent.VK_S));
 		mntmSave.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
+				Path savePath = showFileChooser(frame, FileDialog.SAVE);
+				if (savePath == null) { return; }
+				CLoader loader = new CLoader(savePath);
+				try {
+					loader.save(exportState());
 
-				FileDialog fDialog = new FileDialog(frame, "Save file as...", FileDialog.SAVE);
-				fDialog.setDirectory(appSupport.toFile().toString());
-				fDialog.setVisible(true);
-
-				String file = fDialog.getFile();
-				if (file == null) {
-					log.info("User cancelled file save dialog");
-
-				} else {
-
-					Path savePath = appSupport.toAbsolutePath().resolve(file);
-					log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
-
-					// If it does not end in txt, make it end in txt
-					if (!savePath.toAbsolutePath().toString().endsWith(".txt")) {
-						savePath = new File(savePath.toAbsolutePath().toString() + ".txt").toPath();
-					}
-
-					CLoader loader = new CLoader(savePath);
-					try {
-						loader.save(exportState());
-
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-
+				} catch (IOException e1) {
+					e1.printStackTrace();
 				}
 			}
 		});
 		mnFile.add(mntmSave);
 
 		JMenuItem mntmOpen = new JMenuItem("Open");
-		if (SystemUtils.IS_OS_MAC) {
-			mntmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.META_MASK));
-		} else {
-			mntmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK));
-		}
+		mntmOpen.setAccelerator(getOSKeyStroke(KeyEvent.VK_O));
 		mntmOpen.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
+				Path savePath = showFileChooser(frame, FileDialog.LOAD);
+				if (savePath == null) { return; }
+				CLoader loader = new CLoader(savePath);
+				try {
+					importState(loader.load());
 
-				FileDialog fDialog = new FileDialog(frame, "Load file...", FileDialog.LOAD);
-				fDialog.setDirectory(appSupport.toFile().toString());
-				fDialog.setVisible(true);
-
-				String file = fDialog.getFile();
-				if (file == null) {
-					log.info("User cancelled file load dialog");
-
-				} else {
-
-					Path savePath = appSupport.resolve(file);
-					log.info("User elected to load file at " + savePath.toAbsolutePath().toString());
-
-					CLoader loader = new CLoader(savePath);
-					try {
-						importState(loader.load());
-
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-
+				} catch (IOException e1) {
+					e1.printStackTrace();
 				}
 			}
 		});
@@ -355,11 +336,7 @@ public class Communique implements JTelegramLogger {
 		mnFile.addSeparator();
 
 		JMenuItem mntmShowDirectory = new JMenuItem("Show Directory");
-		if (SystemUtils.IS_OS_MAC) {
-			mntmShowDirectory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.META_MASK | Event.SHIFT_MASK));
-		} else {
-			mntmShowDirectory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK | Event.SHIFT_MASK));
-		}
+		mntmShowDirectory.setAccelerator(getOSKeyStroke(KeyEvent.VK_O, true));
 		mntmShowDirectory.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 				try {
@@ -375,14 +352,14 @@ public class Communique implements JTelegramLogger {
 
 		// Only add the Quit menu item if the OS is not Mac
 		if (!SystemUtils.IS_OS_MAC) {
-			JMenuItem mntmQuit = new JMenuItem("Quit");
-			mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Event.CTRL_MASK));
-			mntmQuit.addActionListener(new ActionListener() {
+			JMenuItem mntmExit = new JMenuItem("Exit");
+			mntmExit.setAccelerator(getOSKeyStroke(KeyEvent.VK_Q));
+			mntmExit.addActionListener(new ActionListener() {
 				@Override public void actionPerformed(ActionEvent e) {
 					System.exit(0);
 				}
 			});
-			mnFile.add(mntmQuit);
+			mnFile.add(mntmExit);
 		}
 
 		JMenu mnData = new JMenu("Data");
@@ -397,21 +374,22 @@ public class Communique implements JTelegramLogger {
 						.showInputDialog("Paste in keys from the URL provided by receipt by the Telegrams API");
 
 				// Verify that it is a valid NationStates URL
-				if (rawURL.startsWith("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&")) {
+				String rawUrlStart = "http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&";
+				if (rawURL.startsWith(rawUrlStart)) {
 
-					rawURL = rawURL
-							.replace("http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&", "");
+					rawURL = rawURL.replace(rawUrlStart, "");
 					rawURL = rawURL.replace("&to=NATION_NAME", "");
 
 					String[] tags = rawURL.split("&");
-					txtTelegramId.setText(tags[0].substring(tags[0].indexOf("=") + 1, tags[0].length()));
-					txtSecretKey.setText(tags[1].substring(tags[1].indexOf("=") + 1, tags[1].length()));
+					if (tags.length == 2) {
+						txtTelegramId.setText(tags[0].substring(tags[0].indexOf("=") + 1, tags[0].length()));
+						txtSecretKey.setText(tags[1].substring(tags[1].indexOf("=") + 1, tags[1].length()));
+					}
 
 				} else {
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("Communiqué Error");
-					alert.setHeaderText("Please input a correct URL.");
-					alert.showAndWait();
+					String message = "<html>Please input a properly formatted NationStates URL in the form displayed when a "
+							+ "telegram is sent to 'tag:api'</html>";
+					JOptionPane.showMessageDialog(frame, new JLabel(message));
 				}
 			}
 		});
@@ -430,14 +408,16 @@ public class Communique implements JTelegramLogger {
 		JMenuItem mntmAsCommaSeparated = new JMenuItem("As Comma Separated List");
 		mntmAsCommaSeparated.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
-				String input = JOptionPane.showInputDialog("Input the string of delegates:");
+				String message = "<html>Input a string of delegates, as found on a list of delegates in one of the "
+						+ "NationStates World Assembly pages:</html>";
+				String input = JOptionPane.showInputDialog(new JLabel(message));
 				if (input != null) {
 
 					input = input.replaceAll("\\(.+?\\)", "");
 					String[] list = input.split(",");
 
 					for (String element : list) {
-						appendCode(element.toLowerCase().trim().replace(" ", "_"));
+						appendCode(element.toLowerCase().replace(" ", "_").trim());
 					}
 				}
 			}
@@ -456,7 +436,7 @@ public class Communique implements JTelegramLogger {
 
 				if (!StringUtils.isEmpty(output)) {
 					String[] elements = output.split(" ");
-					if (elements.length > 0) {
+					if (elements.length == 2) {
 
 						String chamber = (elements[0].equals("GA")) ? CNetLoader.GA : CNetLoader.SC;
 						String side = (elements[1].equals("For")) ? CNetLoader.FOR : CNetLoader.AGAINST;
@@ -465,8 +445,7 @@ public class Communique implements JTelegramLogger {
 							txtrCode.append(CommuniqueUtilities
 									.joinListWith(Arrays.asList(CNetLoader.importAtVoteDelegates(chamber, side)), '\n'));
 						} catch (NullPointerException exc) {
-							JOptionPane.showMessageDialog(Communique.this.frame,
-									"Cannot import data from NationStates website.");
+							JOptionPane.showMessageDialog(frame, "Cannot import data from NationStates website.");
 							log.warning("Cannot import data.");
 						}
 
@@ -489,11 +468,7 @@ public class Communique implements JTelegramLogger {
 		menuBar.add(mnWindow);
 
 		JMenuItem mntmMinimise = new JMenuItem("Minimise");
-		if (SystemUtils.IS_OS_MAC) {
-			mntmMinimise.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, Event.META_MASK));
-		} else {
-			mntmMinimise.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, Event.CTRL_MASK));
-		}
+		mntmMinimise.setAccelerator(getOSKeyStroke(KeyEvent.VK_M));
 		mntmMinimise.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 				if (frame.getState() == Frame.NORMAL) {
@@ -506,11 +481,7 @@ public class Communique implements JTelegramLogger {
 		mnWindow.addSeparator();
 
 		JMenuItem mntmRecruiter = new JMenuItem("Recruiter...");
-		if (SystemUtils.IS_OS_MAC) {
-			mntmRecruiter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.META_MASK));
-		} else {
-			mntmRecruiter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.CTRL_MASK));
-		}
+		mntmRecruiter.setAccelerator(getOSKeyStroke(KeyEvent.VK_R));
 		mntmRecruiter.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 				showRecruiter();
@@ -525,8 +496,9 @@ public class Communique implements JTelegramLogger {
 		mntmAbout.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 				new CTextDialog(frame, "About",
-						"Developed by His Grace, Cyril Parsons, the Duke of Geneva and the staff of the Democratic Empire of Imperium Anglorum's "
-								+ "Delegation to the World Assembly.\n\n" + "OOC: Created by ifly6.");
+						"Developed by ifly6, contributing to the repository at [ github.com/iflycode/communique ], also known "
+								+ "as the nation Imperium Anglorum on NationStates. Helpful contributions in bug-testing and "
+								+ "feedback by nations Tinfect and Krypton Nova.");
 			}
 		});
 		mnHelp.add(mntmAbout);
@@ -561,17 +533,19 @@ public class Communique implements JTelegramLogger {
 
 		mnHelp.addSeparator();
 
-		JMenuItem mntmClaims = new JMenuItem("Claims");
-		mntmClaims.addActionListener(new ActionListener() {
+		JMenuItem mntmLicence = new JMenuItem("Licence");
+		mntmLicence.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
-				new CTextDialog(frame, "Claims",
-						"The Software is provided 'as is', without warrant of any kind, express or implied, including but not limited to the"
-								+ "warranties of merchantability, fitness for a particular purpose and noninfringement. In no even shall the authors or"
-								+ "copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or"
-								+ "otherwise, arising from, out of, or in connect with the Software or the use or other dealings in the Software.");
+				new CTextDialog(frame, "Licence",
+						"The Software is provided 'as is', without warrant of any kind, express or implied, including but not "
+								+ "limited to the warranties of merchantability, fitness for a particular purpose and "
+								+ "noninfringement. In no even shall the authors or copyright holders be liable for any "
+								+ "claim, damages, or other liability, whether in an action of contract, tort, or otherwise, "
+								+ "arising from, out of, or in connect with the Software or the use or other dealings in the "
+								+ "Software.");
 			}
 		});
-		mnHelp.add(mntmClaims);
+		mnHelp.add(mntmLicence);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override public void run() {
@@ -586,32 +560,32 @@ public class Communique implements JTelegramLogger {
 				}
 			}
 		});
+		log.info("Shutdown hook added.");
 
 		// Parse action for above
 		btnSend.addActionListener(new ActionListener() {
 
 			@Override public void actionPerformed(ActionEvent e) {
 
-				CommuniqueParser parser = new CommuniqueParser(Communique.this, chckbxmntmRandomiseRecipients.isSelected());
+				CommuniqueParser parser = new CommuniqueParser();
+
+				// Check if a recruit-flag has been used.
+				String[] lines = txtrCode.getText().split("\n");
+				for (String element : lines) {
+					if (element.startsWith("flag:recruit")) {
+						showRecruiter();
+						return;
+					}
+				}
 
 				if (!parsed) {
-
-					// Check if a recruit-flag has been used.
-					String[] lines = txtrCode.getText().split("\n");
-					for (String element : lines) {
-						if (element.startsWith("flag:recruit")) {
-							showRecruiter();
-						}
-					}
 
 					// Call and do the parsing
 					log.info("Called parser");
 					Communique.this.parsedRecipients = parser.recipientsParse(txtrCode.getText().split("\n"));
 
 					// Estimate Time Needed
-					double numRecipients = parsedRecipients.length;
-					int seconds = (int) Math.round(numRecipients * ((chckbxRecruitment.isSelected()) ? 180.05 : 30.05));
-					String timeNeeded = CommuniqueUtilities.time(seconds);
+					String timeNeeded = estimateTime(parsedRecipients.length, chckbxRecruitment.isSelected());
 
 					// Show Recipients
 					StringBuilder builder = new StringBuilder();
@@ -629,58 +603,29 @@ public class Communique implements JTelegramLogger {
 					triggerParsed(true);
 
 				} else {
-
-					// sending logic
-					if (!sendingThread.isAlive()) {
-						client.setKillThread(false);
-
-						Runnable runner = new Runnable() {
-							@Override public void run() {
-
-								client.setRecipients(parsedRecipients);	// Set recipients
-								client.setKeys(new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(),
-										txtTelegramId.getText()));
-
-								// Set Recruitment Status
-								client.setRecruitment(chckbxRecruitment.isSelected());
-
-								// Save client key
-								try {
-									CLoader.writeProperties(txtClientKey.getText());
-									CLoader loader = new CLoader(appSupport.resolve("autosave.txt"));
-									loader.save(exportState());
-
-								} catch (IOException e) {
-									System.err.println("Exception in writing autosave or properties file.");
-								}
-
-								client.connect();
-								log.info("Queries Complete.");
-								JOptionPane.showMessageDialog(Communique.this.frame,
-										"Queries to " + (progressBar.getValue() + 1) + " nations complete.");
-
-								// Reset the progress bar
-								progressBar.setValue(0);
-								progressBar.setMaximum(0);
-
-								// Update code has been removed because of a change to the JTelegramLogger which allows
-								// for direct event dispatch.
-							}
-						};
-
-						sendingThread = new Thread(runner);
-						sendingThread.start();
-
-					} else {
-						log.info("There is already a campaign running. Terminate that campaign and then retry.");
-					}
-
+					send();
 				}
+			}
+
+			private String estimateTime(int count, boolean isRecruitment) {
+				int numRecipients = count;
+				int seconds = (int) Math.round(numRecipients * (isRecruitment ? 180.05 : 30.05));
+				return CommuniqueUtilities.time(seconds);
 			}
 		});
 
-		log.info("Shutdown hook added.");
 		log.info("Communiqué loaded.");
+
+		// If there is an auto-save, load it
+		if (Files.exists(appSupport.resolve("autosave.txt"))) {
+			CLoader loader = new CLoader(appSupport.resolve("autosave.txt"));
+			try {
+				this.importState(loader.load());
+			} catch (IOException e1) {
+				// do nothing if it fails to load
+			}
+		}
+
 	}
 
 	public CConfig exportState() {
@@ -714,16 +659,20 @@ public class Communique implements JTelegramLogger {
 		txtSecretKey.setText(config.keys.getSecretKey());
 		txtTelegramId.setText(config.keys.getTelegramId());
 
-		txtrCode.setText(codeHeader + CommuniqueUtilities.joinListWith(Arrays.asList(config.recipients), '\n'));
-
-		// Format the universal negation.
-		for (int x = 0; x < config.sentList.length; x++) {
-			config.sentList[x] = "/" + config.sentList[x];
+		// Format the standard recipients.
+		if (!ArrayUtils.isEmpty(config.recipients)) {
+			txtrCode.setText(codeHeader + CommuniqueUtilities.joinListWith(Arrays.asList(config.recipients), '\n'));
 		}
-		txtrCode.append("\n\n" + CommuniqueUtilities.joinListWith(Arrays.asList(config.sentList), '\n'));
+
+		// Format the universal negations.
+		if (!ArrayUtils.isEmpty(config.sentList)) {
+			for (int x = 0; x < config.sentList.length; x++) {
+				config.sentList[x] = "/" + config.sentList[x];
+			}
+			txtrCode.append("\n\n" + CommuniqueUtilities.joinListWith(Arrays.asList(config.sentList), '\n'));
+		}
 
 		log.info("Communique info imported");
-
 	}
 
 	private void appendCode(String input) {
@@ -740,23 +689,20 @@ public class Communique implements JTelegramLogger {
 		for (int x = 0; x < inputList.size(); x++) {
 
 			if (!StringUtils.isEmpty(inputList.get(x)) && !inputList.get(x).startsWith("#")) {
-
 				if (!inputList.get(x).startsWith("/")) {
 					recipients.add(inputList.get(x));
 
 				} else {
 					sents.add(inputList.get(x).replaceFirst("/", ""));
 				}
-
 			}
-
 		}
 
 		return new String[][] { recipients.toArray(new String[recipients.size()]), sents.toArray(new String[sents.size()]) };
 	}
 
 	// Changes the state of the button to reflect whether it is ready to send and or parsed
-	private void triggerParsed(boolean parsed) {
+	void triggerParsed(boolean parsed) {
 		this.parsed = parsed;
 		btnSend.setText((parsed) ? "Send" : "Parse");
 	}
@@ -788,10 +734,126 @@ public class Communique implements JTelegramLogger {
 	 * @see com.git.ifly6.communique.ngui.CommuniqueRecruiter
 	 */
 	private void showRecruiter() {
-		CommuniqueRecruiter recruiter = new CommuniqueRecruiter();
-		recruiter.setClientKey(txtClientKey.getText());
-		recruiter.setSecretKey(txtSecretKey.getText());
-		recruiter.setTelegramId(txtTelegramId.getText());
-		recruiter.setUsingRecipients(txtrCode.getText().split("\n"));
+		if (recruiter == null || !recruiter.isDisplayable()) {
+			recruiter = new CommuniqueRecruiter(this);
+			recruiter.setWithCConfig(this.exportState());
+		} else {
+			recruiter.toFront();
+		}
+	}
+
+	public static KeyStroke getOSKeyStroke(int keyEvent, boolean shiftMask) {
+		if (shiftMask) {
+			if (SystemUtils.IS_OS_MAC) {
+				return KeyStroke.getKeyStroke(keyEvent, Event.META_MASK | Event.SHIFT_MASK);
+			} else {
+				return KeyStroke.getKeyStroke(keyEvent, Event.CTRL_MASK | Event.SHIFT_MASK);
+			}
+		} else {
+			return KeyStroke.getKeyStroke(keyEvent, (SystemUtils.IS_OS_MAC) ? Event.META_MASK : Event.CTRL_MASK);
+		}
+	}
+
+	public static KeyStroke getOSKeyStroke(int keyEvent) {
+		return getOSKeyStroke(keyEvent, false);
+	}
+
+	/**
+	 * @param type
+	 *
+	 */
+	public Path showFileChooser(Frame parent, int type) {
+
+		// Due to a problem in Windows and the AWT FileDialog, this will show a JFileChooser on Windows systems.
+		if (SystemUtils.IS_OS_WINDOWS) {
+
+			JFileChooser fChooser = new JFileChooser(appSupport.toFile());
+			if (type == FileDialog.SAVE) {
+				fChooser.showSaveDialog(parent);
+			} else {
+				fChooser.showOpenDialog(parent);
+			}
+			fChooser.setVisible(true);
+
+			if (!fChooser.getSelectedFile().isDirectory() && !fChooser.getName().endsWith(".txt")) { return Paths
+					.get(fChooser.getSelectedFile().getAbsolutePath() + ".txt"); }
+
+			return fChooser.getSelectedFile().toPath();
+		}
+
+		FileDialog fDialog = new FileDialog(parent, "Save file as...", type);
+		fDialog.setDirectory(appSupport.toFile().toString());
+		fDialog.setVisible(true);
+
+		if (fDialog.getFile() == null) {
+			log.info("User cancelled file save dialog");
+			return null;
+
+		} else {
+
+			Path savePath = Paths.get((fDialog.getDirectory() == null) ? "" : fDialog.getDirectory())
+					.resolve(fDialog.getFile());
+			log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
+
+			// If it does not end in txt, make it end in txt
+			if (!savePath.toAbsolutePath().toString().endsWith(".txt")) {
+				savePath = new File(savePath.toAbsolutePath().toString() + ".txt").toPath();
+			}
+			return savePath;
+		}
+	}
+
+	/**
+	 *
+	 */
+	private void send() {
+		// sending logic
+		if (!sendingThread.isAlive()) {
+			client.setKillThread(false);
+
+			Runnable runner = new Runnable() {
+				@Override public void run() {
+
+					if (chckbxmntmRandomiseRecipients.isSelected()) {
+						CommuniqueUtilities.randomiseArray(parsedRecipients);
+					}
+
+					client.setRecipients(parsedRecipients);	// Set recipients
+					client.setKeys(
+							new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId.getText()));
+
+					// Set Recruitment Status, JavaTelegram defaults to true
+					client.setRecruitment(chckbxRecruitment.isSelected());
+
+					// Save client key
+					try {
+						CLoader.writeProperties(txtClientKey.getText());
+						CLoader loader = new CLoader(appSupport.resolve("autosave.txt"));
+						loader.save(exportState());
+
+					} catch (IOException e) {
+						System.err.println("Exception in writing autosave or properties file.");
+					}
+
+					client.connect();
+					log.info("Queries Complete.");
+					JOptionPane.showMessageDialog(Communique.this.frame,
+							"Queries to " + (progressBar.getValue() + 1) + " nations complete.");
+
+					// Reset the progress bar
+					progressBar.setValue(0);
+					progressBar.setMaximum(0);
+
+					// Update code has been removed because of a change to the JTelegramLogger which allows
+					// for direct event dispatch.
+				}
+			};
+
+			sendingThread = new Thread(runner);
+			sendingThread.start();
+
+		} else {
+			log.info("There is already a campaign running. Terminate that campaign and then retry.");
+		}
 	}
 }
