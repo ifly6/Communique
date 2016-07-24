@@ -23,7 +23,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
 /**
@@ -88,23 +87,6 @@ public class CommuniqueParser {
 	private static JInfoFetcher fetcher = new JInfoFetcher();
 
 	private boolean randomise = false;
-
-	JTelegramLogger util;
-
-	/**
-	 * Method constructs the object. A JTelegramLogger must be provided to effectively provide an outlet for
-	 * information.
-	 *
-	 * @param logger
-	 */
-	public CommuniqueParser(JTelegramLogger logger) {
-		util = logger;
-	}
-
-	public CommuniqueParser(JTelegramLogger logger, boolean randomise) {
-		util = logger;
-		this.randomise = randomise;
-	}
 
 	/**
 	 * Determine whether a <code>String</code> is a special tag or not. What strings are tags is determined in the
@@ -194,7 +176,7 @@ public class CommuniqueParser {
 				}
 
 				// Split into the two lists
-				// firsts and seconds refer to the elements on either side of the '->' operator
+				// firsts and seconds refer to the elements on either side of the '->' or '--' operator
 				String[] firsts = expandTag(bothArr[0]);
 				String[] seconds = expandTag(bothArr[1]);
 
@@ -263,6 +245,8 @@ public class CommuniqueParser {
 			}
 		}
 		input = unComments.toArray(new String[unComments.size()]);
+
+		// If there is a recruitment flag, call the recruiter
 
 		// Form a list of all the nation we want in this list.
 		List<String> whitelist = new ArrayList<String>();

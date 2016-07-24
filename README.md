@@ -29,6 +29,7 @@ Note that it is *your* responsibility to know how the telegram API works. Use of
   - To say 'not', put in a `/` before the tag
   - For example, I can say: `region:europe` and `/imperium_anglorum`, which will send telegrams to everyone in Europe except Imperium Anglorum. Or, I could say `region:europe` and `/WA:members`, which would send telegrams to all residents of Europe who are not WA members.
   - In version `2`, you can use an arrow operator, `->` to specify persons who are only in both groups. For example, the line `region:europe -> wa:members` would mean 'nations in Europe in (or, who are also) WA members'.
+  - In version `4`, you can now shuffle your pre-defined recipients randomly using the sorting flag in the toolbar.
   - In version `5`, a local negation operator, `--`, can be used to specify nations in the first group to remove by the second group. Thus, the line `region:europe -- wa:members` would result in all non-WA European nations. This is also local, so the line `region:europe -> wa:delegate` can be used as well, adding the delegate of Europe to that list.
   - In version `6`, a Recruitment wizard was added. Simply use `flag:recruit` (or go into the menu) as your recipient to bring it up. Note that `flag:recruit` is not compatible with sending a telegram to any other nations. You can also specify feeders to exclude from recruitment. This recruitment wizard only looks a the results of the new nation API call. Mass recruitment of pre-existing nations should be done by using the old format.
 

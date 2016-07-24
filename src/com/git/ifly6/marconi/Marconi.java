@@ -17,6 +17,7 @@ package com.git.ifly6.marconi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,6 +33,8 @@ import com.git.ifly6.communique.CommuniqueFileReader;
 import com.git.ifly6.communique.CommuniqueFileWriter;
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.communique.io.CConfig;
+import com.git.ifly6.communique.io.CLoader;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JavaTelegram;
 import com.git.ifly6.javatelegram.util.JTelegramException;
@@ -56,10 +59,7 @@ public class Marconi {
 	private static boolean randomSort = false;
 	private static boolean skipChecks = false;
 
-	private static boolean recruitSet = false;
-	private static boolean sortSet = false;
-
-	// Deal with commadn line options
+	// Deal with command line options
 	public static final Options COMMAND_LINE_OPTIONS;
 
 	static {
@@ -67,12 +67,7 @@ public class Marconi {
 		options.addOption("h", "help", false, "Displays this message");
 		options.addOption("S", "skip", false,
 				"Skips all checks for confirmation such that the command immediately executes");
-		options.addOption("I", false, "Forces an opporitunity to double-check all keys");
 		options.addOption("R", false, "Forces recruitment time (180 seconds) for the sending list");
-		options.addOption("C", false, "Forces campaign time (30 seconds) for the sending list");
-		options.addOption("r", false, "Forces randomisation of the sending list");
-		options.addOption("s", "seq", false, "Forces sequential sending of the sending list");
-		options.addOption("a", "auto", false, "Allows program to autonomously update the sending list");
 		options.addOption("v", "version", false, "Prints version");
 
 		COMMAND_LINE_OPTIONS = options;
@@ -100,36 +95,19 @@ public class Marconi {
 
 			// Deal with options
 			if (commandLine.hasOption("h")) {
-				quit();
+				HelpFormatter formatter = new HelpFormatter();
+				String header = "Send telegrams on NationStates from the command line";
+				String footer = "Please report issues to the NationStates nation Imperium Anglorum via telegram or to "
+						+ "http://forum.nationstates.net/viewtopic.php?f=15&t=352065.";
+				formatter.printHelp("myapp", header, options, footer, true);
 			}
 			if (commandLine.hasOption("S")) {
 				// This option is overridden by the interactivity flag
 				skipChecks = true;
 			}
-			if (commandLine.hasOption("I")) {
-				// This option overrides the attempt to skip checks
-				skipChecks = false;
-			}
-			if (commandLine.hasOption("C")) {
-				// This option is overridden by the recruitment-delay setting
-				isRecruitment = false;
-				recruitSet = true;
-			}
 			if (commandLine.hasOption("R")) {
 				// This option overrides the campaign-delay setting
 				isRecruitment = true;
-				recruitSet = true;
-			}
-			if (commandLine.hasOption("r")) {
-				randomSort = true;
-				sortSet = true;
-			}
-			if (commandLine.hasOption("s")) {
-				randomSort = false;
-				sortSet = true;
-			}
-			if (commandLine.hasOption("a")) {
-				// IMPLEMENT.
 			}
 			if (commandLine.hasOption("v")) {
 				System.out.println("Marconi version " + version + "\n"
@@ -151,7 +129,7 @@ public class Marconi {
 		// Load in information and keys from configuration file
 		try {
 			loadConfig(execConfiguration);
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			util.err("Internal Error. File either does not exist or is in the incorrect encoding.");
 		} catch (JTelegramException e) {
 			util.err("Incorrect file version. This is a version " + version + " client.");
@@ -175,8 +153,13 @@ public class Marconi {
 		}
 
 		// Process the Recipients list into a string with two columns.
-		CommuniqueParser parser = new CommuniqueParser(util, randomSort);
+		CommuniqueParser parser = new CommuniqueParser();
 		String[] expandedRecipients = parser.recipientsParse(recipients);
+
+		// If it needs to be randomised, do so.
+		if (randomSort) {
+			CommuniqueUtilities.randomiseArray(expandedRecipients);
+		}
 
 		// Show the recipients in the order we are to send the telegrams.
 		System.out.println();
@@ -285,22 +268,20 @@ public class Marconi {
 	 * <code>-s</code> option is not already set.
 	 *
 	 * @param file at which this program will look.
-	 * @throws FileNotFoundException
 	 * @throws JTelegramException if the fileReader is not compatible
+	 * @throws IOException
 	 */
-	private static void loadConfig(File file) throws FileNotFoundException, JTelegramException {
+	private static void loadConfig(File file) throws JTelegramException, IOException {
+
+		CLoader loader = new CLoader(file.toPath());
+		CConfig config = loader.load();
+
+		keys = config.keys;
 
 		CommuniqueFileReader fileReader = new CommuniqueFileReader(file);
 		keys = fileReader.getKeys();
 		recipients = fileReader.getRecipients();
 
-		if (!sortSet) {
-			randomSort = fileReader.isRandomised();
-		}
-
-		if (!recruitSet) {
-			isRecruitment = fileReader.isRecruitment();
-		}
 	}
 
 	/**

@@ -39,14 +39,14 @@ public class CommuniqueUtilities {
 	 * @param inputArray which is to be shuffled
 	 * @return a copy of the inputArray which is shuffled randomly
 	 */
-	@Deprecated public static String[] randomiseArray(String[] inputArray) {
+	public static Object[] randomiseArray(Object[] inputArray) {
 
 		Random rnd = ThreadLocalRandom.current();
 		for (int i = inputArray.length - 1; i > 0; i--) {
 
 			int index = rnd.nextInt(i + 1);
 
-			String a = inputArray[index];
+			Object a = inputArray[index];
 			inputArray[index] = inputArray[i];
 			inputArray[i] = a;
 		}

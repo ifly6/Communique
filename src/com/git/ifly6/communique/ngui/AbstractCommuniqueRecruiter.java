@@ -12,7 +12,39 @@
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+package com.git.ifly6.communique.ngui;
+
+import java.util.Arrays;
+import java.util.List;
+
+import com.git.ifly6.communique.io.CConfig;
+
 /**
- * A package full of a bunch of data holder objects. Welcome to the land of the <code>struct</code>.
+ * @author Kevin
+ *
  */
-package com.git.ifly6.communique.data;
+public abstract class AbstractCommuniqueRecruiter {
+
+	private List<String> recipients;
+	private List<String> sentList;
+
+	public void setWithCConfig(CConfig config) {
+
+		setClientKey(config.keys.getClientKey());
+		setSecretKey(config.keys.getSecretKey());
+		setTelegramId(config.keys.getTelegramId());
+
+		recipients = Arrays.asList(config.recipients);
+		sentList = Arrays.asList(config.sentList);
+
+	}
+
+	public abstract void setClientKey(String key);
+
+	public abstract void setSecretKey(String key);
+
+	public abstract void setTelegramId(String id);
+
+	public abstract void send();
+
+}
