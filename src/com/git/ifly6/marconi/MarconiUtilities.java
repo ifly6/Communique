@@ -17,39 +17,19 @@ package com.git.ifly6.marconi;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
-import com.git.ifly6.javatelegram.JTelegramLogger;
+public class MarconiUtilities {
 
-public class MarconiLogger implements JTelegramLogger {
-
-	Scanner scan = new Scanner(System.in);
-
-	/**
-	 * This logs a <code>String</code> to the standard system out.
-	 *
-	 * @param output is the <code>String</code> to be logged
-	 */
-	@Override public void log(String output) {
-		System.out.println("[" + currentTime() + "] " + output);
-	}
-
-	/**
-	 * This logs a <code>String</code> to the standard system out. However, it is important to note that this also
-	 * forces the thread to suspend for two seconds after sending the error message.
-	 *
-	 * @param output is the <code>String</code> to be logged
-	 */
-	public void err(String output) {
-		log(output);
-		/* try { Thread.sleep(2000); } catch (InterruptedException e) { } */
-	}
+	private static Scanner scan = new Scanner(System.in);
 
 	/**
 	 * @return the current date and time in the format YYYY/MM/DD HH:MM:SS
 	 */
-	private String currentTime() {
+	public static String currentTime() {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		String finalDate = dateFormat.format(date);
@@ -63,7 +43,7 @@ public class MarconiLogger implements JTelegramLogger {
 	 * @param prompt The question posed to the user.
 	 * @return
 	 */
-	public String prompt(String prompt) {
+	public static String prompt(String prompt) {
 
 		System.out.print(prompt + "\t");
 		String response = scan.nextLine();
@@ -76,20 +56,18 @@ public class MarconiLogger implements JTelegramLogger {
 	 * the only way the data can be effectively sanitised.
 	 *
 	 * @param prompt The question posed to the user.
-	 * @param conditions A list of valid responses.
+	 * @param acceptableAnswers A list of valid responses.
 	 * @return
 	 */
-	public String prompt(String prompt, String[] conditions) {
+	public static String prompt(String prompt, List<String> acceptableAnswers) {
 		String response = "";
 		boolean kosher = false;
 
 		while (!kosher) {
-			response = this.prompt(prompt).toLowerCase();
-
-			for (String element : conditions) {
-				if (element.equals(response)) {
-					kosher = true;
-				}
+			response = prompt(prompt).toLowerCase();
+			if (acceptableAnswers.contains(response)) {
+				kosher = true;
+				break;
 			}
 
 			if (!kosher) {
@@ -105,14 +83,7 @@ public class MarconiLogger implements JTelegramLogger {
 	 * @param trueFalse this boolean leads to the setting of valid responses to ones appropriate for a yes or no answer.
 	 * @return
 	 */
-	public String prompt(String prompt, boolean trueFalse) {
-		return prompt(prompt, new String[] { "yes", "no", "y", "n" });
-	}
-
-	/**
-	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
-	 */
-	@Override public void sentTo(String recipient, int x, int length) {
-		// stuff, might do.
+	public static String promptYN(String prompt) {
+		return prompt(prompt, Arrays.asList("yes", "no", "y", "n"));
 	}
 }

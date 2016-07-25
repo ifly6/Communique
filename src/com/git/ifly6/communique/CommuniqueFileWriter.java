@@ -41,7 +41,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
  * @see CommuniqueFileWriter
  * @see CommuniqueParser
  */
-public class CommuniqueFileWriter {
+@Deprecated public class CommuniqueFileWriter {
 
 	static final int version = CommuniqueParser.getVersion();
 

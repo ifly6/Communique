@@ -25,7 +25,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.git.ifly6.communique.CommuniqueFileReader;
 import com.google.gson.Gson;
 
-class CReader {
+//Suppresses deprecation, since it is supposed to read those deprecated files
+@SuppressWarnings("deprecation") class CReader {
 
 	Path path;
 
@@ -43,7 +44,7 @@ class CReader {
 
 		} catch (RuntimeException e) {
 
-			// If we are reading one of the old files, which would throw a MalformedJsonException,
+			// If we are reading one of the old files, which would throw some RuntimeExceptions,
 			// try the old reader.
 
 			CommuniqueFileReader reader = new CommuniqueFileReader(path.toFile());

@@ -16,9 +16,9 @@
 package com.git.ifly6.communique;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
@@ -112,27 +112,27 @@ public class CommuniqueParser {
 	 * @param element The tag you want expanded
 	 * @return
 	 */
-	private String[] expandTag(String element) {
+	private List<String> expandTag(String element) {
 
 		if (element.startsWith("region:")) {
-			String[] regionContentsArr = fetcher.getRegion(element.replace("region:", ""));
+			List<String> regionContentsArr = fetcher.getRegion(element.replace("region:", ""));
 			return regionContentsArr;
 
 		} else if (element.startsWith("wa:delegate")) {
-			String[] delegatesArr = fetcher.getDelegates();
+			List<String> delegatesArr = fetcher.getDelegates();
 			return delegatesArr;
 
 		} else if (element.equals("wa:nations") || element.equals("wa:members")) {
-			String[] waNationsArr = fetcher.getWAMembers();
+			List<String> waNationsArr = fetcher.getWAMembers();
 			return waNationsArr;
 
 		} else if (element.equals("world:new")) {
-			String[] newNationsArr = fetcher.getNew();
+			List<String> newNationsArr = fetcher.getNew();
 			return newNationsArr;
 		}
 
 		// If all else fails...
-		return new String[] {};
+		return new ArrayList<String>(0);
 	}
 
 	/**
@@ -172,19 +172,18 @@ public class CommuniqueParser {
 
 				// Split into the two lists
 				// firsts and seconds refer to the elements on either side of the '->' or '--' operator
-				String[] firsts = expandTag(bothArr[0]);
-				String[] seconds = expandTag(bothArr[1]);
+				Set<String> firsts = new HashSet<>(expandTag(bothArr[0]));
+				Set<String> seconds = new HashSet<>(expandTag(bothArr[1]));
 
-				ArrayList<String> both = new ArrayList<String>();
+				List<String> both = new ArrayList<String>(0);
 
 				// This section is for
 				if (element.contains("->")) {
 
 					// If it appears in both lists, add it. Use the new 'contains' algorithm instead of the old 'nested
 					// for loops' algorithm. This gives significant speed advantages.
-					HashSet<String> firstsSet = new HashSet<String>(Arrays.asList(firsts));
 					for (String second : seconds) {
-						if (firstsSet.contains(second)) {
+						if (firsts.contains(second)) {
 							both.add(second);
 						}
 					}
@@ -193,9 +192,8 @@ public class CommuniqueParser {
 
 					// If an element in the first list is also contained in the second list, do not add it to the 'both'
 					// list. This basically removes it from the firsts list as output is concerned.
-					HashSet<String> secondsSet = new HashSet<>(Arrays.asList(seconds));
 					for (String first : firsts) {
-						if (!secondsSet.contains(first)) {
+						if (!seconds.contains(first)) {
 							both.add(first);
 						}
 					}
@@ -205,7 +203,7 @@ public class CommuniqueParser {
 				expandedList.addAll(both);
 
 			} else if (isTag(element)) {
-				expandedList.addAll(Arrays.asList(expandTag(element)));
+				expandedList.addAll(expandTag(element));
 
 			} else {
 				expandedList.add(element);

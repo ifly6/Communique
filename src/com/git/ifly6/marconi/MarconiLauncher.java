@@ -40,7 +40,6 @@ public class MarconiLauncher {
 
 	// Deal with command line options
 	public static final Options COMMAND_LINE_OPTIONS;
-	private static HelpFormatter helpFormatter = new HelpFormatter();
 
 	private static boolean skipChecks = false;
 	private static boolean recruiting = false;
@@ -137,9 +136,7 @@ public class MarconiLauncher {
 
 	private static void initSend(Path configPath) throws IOException {
 
-		Marconi marconi = new Marconi();
-		marconi.setSkipChecks(skipChecks);
-
+		Marconi marconi = new Marconi(skipChecks, recruiting);
 		marconi.load(configPath);
 
 		// Accept text commands to recruit...
