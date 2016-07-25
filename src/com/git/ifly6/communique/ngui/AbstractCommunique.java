@@ -14,48 +14,27 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 package com.git.ifly6.communique.ngui;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Path;
 
 import com.git.ifly6.communique.io.CConfig;
+import com.git.ifly6.communique.io.CLoader;
 
-/**
- * @author Kevin
- *
- */
-public abstract class AbstractCommuniqueRecruiter {
+public abstract class AbstractCommunique {
 
-	protected String clientKey;
-	protected String secretKey;
-	protected String telegramId;
+	public abstract CConfig exportState();
 
-	protected List<String> recipients;
-	protected List<String> sentList;
+	public abstract void importState(CConfig config);
 
-	public void setWithCConfig(CConfig config) {
-
-		setClientKey(config.keys.getClientKey());
-		setSecretKey(config.keys.getSecretKey());
-		setTelegramId(config.keys.getTelegramId());
-
-		recipients = new ArrayList<>(Arrays.asList(config.recipients));
-		sentList = new ArrayList<>(Arrays.asList(config.sentList));
-
+	public void save(Path savePath) throws IOException {
+		// System.out.println("exportState().sentList\t" + Arrays.toString(exportState().sentList));
+		CLoader loader = new CLoader(savePath);
+		loader.save(exportState());
 	}
 
-	public void setClientKey(String key) {
-		this.clientKey = key;
+	public void load(Path savePath) throws IOException {
+		CLoader loader = new CLoader(savePath);
+		this.importState(loader.load());
 	}
-
-	public void setSecretKey(String key) {
-		this.secretKey = key;
-	}
-
-	public void setTelegramId(String id) {
-		this.telegramId = id;
-	}
-
-	public abstract void send();
 
 }

@@ -82,7 +82,7 @@ import com.git.ifly6.javatelegram.JavaTelegram;
  * <code>Communiqué</code> is the main class of the Communiqué system. It handles the GUI aspect of the entire program
  * and other actions.
  */
-public class Communique implements JTelegramLogger {
+public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 	private static final Logger log = Logger.getLogger(Communique.class.getName());
 
@@ -305,10 +305,8 @@ public class Communique implements JTelegramLogger {
 			@Override public void actionPerformed(ActionEvent e) {
 				Path savePath = showFileChooser(frame, FileDialog.SAVE);
 				if (savePath == null) { return; }
-				CLoader loader = new CLoader(savePath);
 				try {
-					loader.save(exportState());
-
+					Communique.this.save(savePath);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -322,10 +320,8 @@ public class Communique implements JTelegramLogger {
 			@Override public void actionPerformed(ActionEvent e) {
 				Path savePath = showFileChooser(frame, FileDialog.LOAD);
 				if (savePath == null) { return; }
-				CLoader loader = new CLoader(savePath);
 				try {
-					importState(loader.load());
-
+					Communique.this.load(savePath);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -582,7 +578,7 @@ public class Communique implements JTelegramLogger {
 
 					// Call and do the parsing
 					log.info("Called parser");
-					Communique.this.parsedRecipients = parser.recipientsParse(txtrCode.getText().split("\n"));
+					Communique.this.parsedRecipients = parser.filterAndParse(txtrCode.getText().split("\n"));
 
 					// Estimate Time Needed
 					String timeNeeded = estimateTime(parsedRecipients.length, chckbxRecruitment.isSelected());
@@ -628,7 +624,7 @@ public class Communique implements JTelegramLogger {
 
 	}
 
-	public CConfig exportState() {
+	@Override public CConfig exportState() {
 
 		CConfig config = new CConfig();
 
@@ -649,7 +645,7 @@ public class Communique implements JTelegramLogger {
 
 	}
 
-	public void importState(CConfig config) {
+	@Override public void importState(CConfig config) {
 
 		chckbxRecruitment.setSelected(config.isRecruitment);
 		chckbxmntmRandomiseRecipients.setSelected(config.isRandomised);

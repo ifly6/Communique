@@ -53,6 +53,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import com.git.ifly6.communique.CommuniqueParser;
@@ -77,12 +78,11 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	private Communique communique;
 
 	private JFrame frame;
-	JTextField clientKeyField;
-	JTextField secretKeyField;
-	JTextField telegramIdField;
+	private JTextField clientKeyField;
+	private JTextField secretKeyField;
+	private JTextField telegramIdField;
 	private JTextArea sentListArea;
 
-	HashSet<String> sentList = new HashSet<>();
 	Thread thread;
 
 	// To keep track of the nations to whom we have sent a telegram
@@ -287,7 +287,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		leftPanel.add(lblSentTo, gbc_lblSentTo);
 
 		lblNationsCount = new JLabel("0 nations");
-		lblNationsCount.setText(sentList.size() + ((sentList.size() == 1) ? " nation" : " nations"));
+		lblNationsCount.setText("0 nations");
 		GridBagConstraints gbc_lblNationscount = new GridBagConstraints();
 		gbc_lblNationscount.anchor = GridBagConstraints.WEST;
 		gbc_lblNationscount.insets = new Insets(0, 0, 5, 5);
@@ -322,6 +322,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		rightPanel.setLayout(new BorderLayout(0, 0));
 
 		sentListArea = new JTextArea("");
+		sentListArea.setEditable(false);
 		sentListArea.setLineWrap(true);
 		sentListArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		sentListArea.setFont(new Font(Font.MONOSPACED, 0, 11));
@@ -361,19 +362,15 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
 	 */
 	@Override public void sentTo(String recipient, int x, int length) {
+
 		sentList.add(recipient);
 		lblNationsCount.setText(sentList.size() + ((sentList.size() == 1) ? " nation" : " nations"));
-		sentListArea.append("\n/" + recipient);
-	}
 
-	private HashSet<String> listExcludedRegions() {
-		HashSet<String> hashSet = new HashSet<>();
-		int[] sIndices = excludeList.getSelectedIndices();
-		for (int x : sIndices) {
-			hashSet.add(regionList[x]);
+		if (!StringUtils.isEmpty(sentListArea.getText())) {
+			sentListArea.append("\n/" + recipient);
+		} else {
+			sentListArea.setText("/" + recipient);
 		}
-
-		return hashSet;
 	}
 
 	/**
@@ -384,7 +381,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	 * @param nationName
 	 * @return <code>boolean</code> on whether it is proscribed
 	 */
-	boolean isProscribed(String nationName) {
+	private boolean isProscribed(String nationName) {
 
 		NSNation nation = new NSNation(nationName);
 
@@ -406,6 +403,16 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		return false;
 	}
 
+	private HashSet<String> listExcludedRegions() {
+		HashSet<String> hashSet = new HashSet<>();
+		int[] sIndices = excludeList.getSelectedIndices();
+		for (int x : sIndices) {
+			hashSet.add(regionList[x]);
+		}
+
+		return hashSet;
+	}
+
 	/**
 	 * @param file
 	 */
@@ -423,15 +430,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		// * Importing that configuration into Communique
 		// * Have Communique save that file
 		// ===================
-		CLoader loader = new CLoader(savePath);
 		CConfig config = new CConfig();
-
-		try {
-			config = loader.load();
-		} catch (IOException e1) {
-			// do nothing else.
-			// will also catch in case it doesn't exist, etc.
-		}
 
 		// Set the many flags that need to be set
 		config.isDelegatePrioritised = false;
@@ -456,6 +455,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 
 		// Save
 		try {
+			CLoader loader = new CLoader(savePath);
 			loader.save(communique.exportState());
 
 		} catch (IOException e1) {
@@ -476,6 +476,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setClientKey(java.lang.String)
 	 */
 	@Override public void setClientKey(String key) {
+		super.setClientKey(key);
 		clientKeyField.setText(key);
 	}
 
@@ -483,6 +484,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setSecretKey(java.lang.String)
 	 */
 	@Override public void setSecretKey(String key) {
+		super.setSecretKey(key);
 		secretKeyField.setText(key);
 	}
 
@@ -490,8 +492,14 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setTelegramId(java.lang.String)
 	 */
 	@Override public void setTelegramId(String id) {
+		super.setTelegramId(id);
 		telegramIdField.setText(id);
 	}
+
+	@Override public void setWithCConfig(CConfig config) {
+		super.setWithCConfig(config);
+		lblNationsCount.setText(sentList.size() + ((sentList.size() == 1) ? " nation" : " nations"));
+	};
 
 	/**
 	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#send()
@@ -528,7 +536,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 							Thread.sleep(1000);	// 1-second intervals, wake to update the progressBar
 						} catch (InterruptedException e) {
 							isSending = false;
-							break;
+							return;
 						}
 					}
 				}
