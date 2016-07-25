@@ -17,11 +17,8 @@ package com.git.ifly6.communique;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
@@ -86,8 +83,6 @@ public class CommuniqueParser {
 	public static final int version = 6;
 	private static JInfoFetcher fetcher = new JInfoFetcher();
 
-	private boolean randomise = false;
-
 	/**
 	 * Determine whether a <code>String</code> is a special tag or not. What strings are tags is determined in the
 	 * documentation on the grammar of the Communiqué syntax.
@@ -148,8 +143,8 @@ public class CommuniqueParser {
 	 * @param fetcher
 	 * @param tagsList
 	 */
-	private String[] expandList(List<String> tagsList) {
-		ArrayList<String> expandedList = new ArrayList<String>();
+	private HashSet<String> expandList(List<String> tagsList) {
+		List<String> expandedList = new ArrayList<String>();
 
 		for (int x = 0; x < tagsList.size(); x++) {
 			String element = tagsList.get(x).toLowerCase();
@@ -217,14 +212,10 @@ public class CommuniqueParser {
 			}
 		}
 
-		// Remove duplicates
-		Set<String> tagsSet = new LinkedHashSet<String>();
+		// Remove duplicates & return
+		HashSet<String> tagsSet = new HashSet<String>();
 		tagsSet.addAll(expandedList);
-		tagsList.clear();
-		tagsList.addAll(tagsSet);
-
-		// Return!
-		return tagsList.toArray(new String[tagsList.size()]);
+		return tagsSet;
 	}
 
 	/**
@@ -235,9 +226,9 @@ public class CommuniqueParser {
 	 * @param input an array of the recipients, each one on an individual index, which can include commented lines
 	 * @return a final array of the recipients, compatible with JavaTelegram
 	 */
-	public String[] recipientsParse(String[] input) {
+	public String[] filterAndParse(String[] input) {
 
-		// Remove commented or empty lines.
+		// FILTER OUT COMMENTED OR EMPTY LINES
 		List<String> unComments = new ArrayList<String>();
 		for (String element : input) {
 			if (!element.startsWith("#") && !element.isEmpty()) {
@@ -245,45 +236,53 @@ public class CommuniqueParser {
 			}
 		}
 		input = unComments.toArray(new String[unComments.size()]);
-
-		// If there is a recruitment flag, call the recruiter
+		// END FILTER
 
 		// Form a list of all the nation we want in this list.
-		List<String> whitelist = new ArrayList<String>();
+		List<String> recipients = new ArrayList<String>();
 		for (String element : input) {
 			if (!element.startsWith("/")) {
-				whitelist.add(element.toLowerCase().trim().replace(" ", "_"));
+				recipients.add(element.toLowerCase().trim().replace(" ", "_"));
 			}
 		}
 
 		// Form a list of all nations we can't have in this list.
-		List<String> blacklist = new ArrayList<String>();
+		List<String> sentList = new ArrayList<String>();
 		for (String element : input) {
 			if (element.startsWith("/")) {
-				blacklist.add(element.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_"));
+				sentList.add(element.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_"));
 			}
 		}
 
+		List<String> list = recipientsParse(recipients, sentList);
+		return list.toArray(new String[list.size()]);
+	}
+
+	/**
+	 * This method parses the recipients based on the list of recipients and the list of nations to which a telegram has
+	 * already been sent. Recipients and sent-s are in tag-form when provided, they are automatically expanded. This
+	 * method requires that they are separated individually into two lists.
+	 *
+	 * @param recipients
+	 * @param sentList
+	 * @return a <code>List</code> containing the recipients in <code>String</code> format.
+	 */
+	public List<String> recipientsParse(List<String> recipients, List<String> sentList) {
+
 		// Expand the lists.
-		String[] whitelistExpanded = expandList(whitelist);
-		String[] blacklistExpanded = expandList(blacklist);
+		HashSet<String> recipientsExpanded = expandList(recipients);
+		HashSet<String> sentlistExpanded = expandList(sentList);
 
 		List<String> finalRecipients = new ArrayList<String>();
 
 		// Filter using new algorithm
-		HashSet<String> blackSet = new HashSet<>(Arrays.asList(blacklistExpanded));
-		for (String element : whitelistExpanded) {
-			if (!blackSet.contains(element)) {
+		for (String element : recipientsExpanded) {
+			if (!sentlistExpanded.contains(element)) {
 				finalRecipients.add(element);
 			}
 		}
 
-		// Old implementations will not have an input configuration
-		if (randomise) {
-			Collections.shuffle(finalRecipients);
-		}
-
-		return finalRecipients.toArray(new String[finalRecipients.size()]);
+		return finalRecipients;
 	}
 
 	/**
@@ -293,8 +292,8 @@ public class CommuniqueParser {
 	 * @param input A <code>String</code>, with each line separated by new line.
 	 * @return
 	 */
-	public String[] recipientsParse(String input) {
-		return recipientsParse(input.split("\n"));
+	@Deprecated public String[] recipientsParse(String input) {
+		return filterAndParse(input.split("\n"));
 	}
 
 	public static int getVersion() {
