@@ -24,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.git.ifly6.communique.CommuniqueFileReader;
 import com.google.gson.Gson;
-import com.google.gson.stream.MalformedJsonException;
 
 class CReader {
 
@@ -42,7 +41,7 @@ class CReader {
 			CConfig config = gson.fromJson(Files.newBufferedReader(path), CConfig.class);
 			return config;
 
-		} catch (MalformedJsonException e) {
+		} catch (RuntimeException e) {
 
 			// If we are reading one of the old files, which would throw a MalformedJsonException,
 			// try the old reader.
