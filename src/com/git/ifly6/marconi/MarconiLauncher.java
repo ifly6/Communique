@@ -142,22 +142,34 @@ public class MarconiLauncher {
 
 		marconi.load(configPath);
 
-		if (recruiting) {
+		// Accept text commands to recruit...
+		String[] recipients = marconi.exportState().recipients;
+		for (String element : recipients) {
+			if (element.startsWith("flag:recruit")) {
+				recruiting = true;
+				break;
+			}
+		}
 
-			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-				@Override public void run() {
-					try {
-						System.err.println("Attempting to save to:" + configPath.toAbsolutePath().toString());
-						marconi.save(configPath);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+		// Add shutdown hook
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override public void run() {
+				try {
+					System.err.println("Attempting to save to:" + configPath.toAbsolutePath().toString());
+					marconi.save(configPath);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			}));
+			}
+		}));
+
+		if (recruiting) {
 
 			MarconiRecruiter recruiter = new MarconiRecruiter(marconi);
 			recruiter.setWithCConfig(marconi.exportState());
 			recruiter.send();
+
+			// Indefinite ending point, so use ShutdownHook to save
 
 		} else {
 
@@ -165,6 +177,5 @@ public class MarconiLauncher {
 			marconi.save(configPath);
 
 		}
-
 	}
 }
