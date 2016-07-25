@@ -15,225 +15,110 @@
 
 package com.git.ifly6.marconi;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.ArrayUtils;
 
-import com.git.ifly6.communique.CommuniqueFileReader;
-import com.git.ifly6.communique.CommuniqueFileWriter;
 import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.io.CConfig;
-import com.git.ifly6.communique.io.CLoader;
-import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.communique.ngui.AbstractCommunique;
+import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.JavaTelegram;
-import com.git.ifly6.javatelegram.util.JTelegramException;
 
-public class Marconi {
+public class Marconi extends AbstractCommunique implements JTelegramLogger {
 
-	public static final int version = CommuniqueParser.getVersion();
-	private static String jarLocation = "Marconi_" + version + ".jar";
-	private static File execConfiguration;
+	private MarconiLogger util = new MarconiLogger();
+	private JavaTelegram client = new JavaTelegram(util);
+	private CConfig config;
 
-	private static final Logger log = Logger.getLogger(Marconi.class.getName());
-	private static MarconiLogger util = new MarconiLogger();
+	private boolean skipChecks = false;
 
-	private static JavaTelegram client = new JavaTelegram(util);
-	private static JTelegramKeys keys = new JTelegramKeys();
-	private static String[] recipients = {};
-
-	private static Options options = new Options();
-	private static HelpFormatter helpFormatter = new HelpFormatter();
-
-	private static boolean isRecruitment = true;
-	private static boolean randomSort = false;
-	private static boolean skipChecks = false;
-
-	// Deal with command line options
-	public static final Options COMMAND_LINE_OPTIONS;
-
-	static {
-		Options options = new Options();
-		options.addOption("h", "help", false, "Displays this message");
-		options.addOption("S", "skip", false,
-				"Skips all checks for confirmation such that the command immediately executes");
-		options.addOption("R", false, "Forces recruitment time (180 seconds) for the sending list");
-		options.addOption("v", "version", false, "Prints version");
-
-		COMMAND_LINE_OPTIONS = options;
+	public void setSkipChecks(boolean skipChecks) {
+		this.skipChecks = skipChecks;
 	}
 
-	public static void main(String[] args) {
+	public void send() {
 
-		if (args.length == 0) {
-			util.err("Runtime Error. Please provide a single valid Communiqué configuration file of version " + version
-					+ ".");
-			quit();
-		}
-
-		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-			@Override public void uncaughtException(Thread t, Throwable e) {
-				e.printStackTrace();
-				log.log(Level.SEVERE, "Exception in " + t + ": " + e.toString(), e);
-			}
-		});
-
-		CommandLineParser cliParse = new DefaultParser();
-
-		try {
-			CommandLine commandLine = cliParse.parse(COMMAND_LINE_OPTIONS, args);
-
-			// Deal with options
-			if (commandLine.hasOption("h")) {
-				HelpFormatter formatter = new HelpFormatter();
-				String header = "Send telegrams on NationStates from the command line";
-				String footer = "Please report issues to the NationStates nation Imperium Anglorum via telegram or to "
-						+ "http://forum.nationstates.net/viewtopic.php?f=15&t=352065.";
-				formatter.printHelp("myapp", header, options, footer, true);
-			}
-			if (commandLine.hasOption("S")) {
-				// This option is overridden by the interactivity flag
-				skipChecks = true;
-			}
-			if (commandLine.hasOption("R")) {
-				// This option overrides the campaign-delay setting
-				isRecruitment = true;
-			}
-			if (commandLine.hasOption("v")) {
-				System.out.println("Marconi version " + version + "\n"
-						+ "Please visit https://github.com/iFlyCode/Communique/releases.");
-				System.exit(0);
-			}
-
-			// Deal with the argument
-			String[] fileList = commandLine.getArgs();
-			if (fileList.length != 1) {
-				quitMessage("Please only provide ONE file argument to the program.");
-			} else {
-				execConfiguration = new File(fileList[0]);
-			}
-		} catch (ParseException e1) {
-			util.err("Error. Failed to parse options and commands.");
-		}
-
-		// Load in information and keys from configuration file
-		try {
-			loadConfig(execConfiguration);
-		} catch (IOException e) {
-			util.err("Internal Error. File either does not exist or is in the incorrect encoding.");
-		} catch (JTelegramException e) {
-			util.err("Incorrect file version. This is a version " + version + " client.");
-		}
-
-		// When asked to shut down, write the sentList to disc
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override public void run() {
-				try {
-					appendSent(execConfiguration);
-				} catch (FileNotFoundException | UnsupportedEncodingException e) {
-					util.err(
-							"Internal Error. File either does not exist or is in the incorrect encoding. File not saved in shutdown.");
-				}
-			}
-		});
-
-		// If we are to check the keys, check.
+		// If we to check the keys, check.
 		if (!skipChecks) {
 			manualFlagCheck();
 		}
 
 		// Process the Recipients list into a string with two columns.
 		CommuniqueParser parser = new CommuniqueParser();
-		String[] expandedRecipients = parser.recipientsParse(recipients);
+		List<String> expandedRecipients = parser.recipientsParse(Arrays.asList(config.recipients),
+				Arrays.asList(config.sentList));
 
 		// If it needs to be randomised, do so.
-		if (randomSort) {
-			CommuniqueUtilities.randomiseArray(expandedRecipients);
+		if (config.isRandomised) {
+			Collections.shuffle(expandedRecipients);
 		}
 
 		// Show the recipients in the order we are to send the telegrams.
 		System.out.println();
-		for (int x = 0; x < expandedRecipients.length; x = x + 2) {
+		for (int x = 0; x < expandedRecipients.size(); x = x + 2) {
 			try {
-				System.out.printf("%-30.30s  %-30.30s%n", expandedRecipients[x], expandedRecipients[x + 1]);
+				System.out.printf("%-30.30s  %-30.30s%n", expandedRecipients.get(x), expandedRecipients.get(x + 1));
 			} catch (IndexOutOfBoundsException e) {
-				System.out.printf(expandedRecipients[x] + "\n");
+				System.out.printf(expandedRecipients.get(x) + "\n");
 			}
 		}
 
 		System.out.println();
-		System.out.println("This will take "
-				+ CommuniqueUtilities.time((int) Math.round(expandedRecipients.length * ((isRecruitment) ? 180.05 : 30.05)))
-				+ " to send " + expandedRecipients.length + " telegrams.");
+		System.out
+				.println(
+						"This will take "
+								+ CommuniqueUtilities.time((int) Math
+										.round(expandedRecipients.size() * ((config.isRecruitment) ? 180.05 : 30.05)))
+								+ " to send " + expandedRecipients.size() + " telegrams.");
 
 		if (!skipChecks) {
 			// Give a chance to check the recipients.
 			String recipientsReponse = util.prompt("Are you sure you want to send to these recipients? [Yes] or [No]?",
 					new String[] { "yes", "no", "y", "n" });
 			if (recipientsReponse.startsWith("n")) {
-				quit();
+				System.exit(0);
 			}
 		}
 
 		// Set the client up and go.
-		client.setKeys(keys);
-		client.setRecruitment(isRecruitment);
+		client.setKeys(config.keys);
+		client.setRecruitment(config.isRecruitment);
 		client.setRecipients(expandedRecipients);
 
 		client.connect();
-
-		// Update the configuration file to reflect the changed reality.
-		try {
-			appendSent(execConfiguration);
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			util.err("Internal Error. File either does not exist or is in the incorrect encoding.");
-		}
 	}
 
 	/**
 	 * Should the problem be prompted to manually check all flags, this method does so, retrieving the flags and asking
 	 * for the user to reconfirm them.
 	 */
-	private static void manualFlagCheck() {
+	private void manualFlagCheck() {
+
+		String[] ynArr = new String[] { "yes", "no", "y", "n" };
 
 		// Give a chance to check the keys.
-		String keysResponse = util.prompt("Are these keys correct? " + keys.getClientKey() + ", " + keys.getSecretKey()
-				+ ", " + keys.getTelegramId() + " [Yes] or [No]?", new String[] { "yes", "no", "y", "n" });
-		if (!keysResponse.startsWith("y")) {
-			quit();
-		}
+		String keysResponse = util.prompt("Are these keys correct? " + config.keys.getClientKey() + ", "
+				+ config.keys.getSecretKey() + ", " + config.keys.getTelegramId() + " [Yes] or [No]?", ynArr);
+		if (!keysResponse.startsWith("y")) { return; }
 
 		// Confirm the recruitment flag.
-		while (true) {
-			String recruitmentResponse = util.prompt(
-					"Is the recruitment flag (" + isRecruitment + ") set correctly? [Yes] or [No]?",
-					new String[] { "yes", "no", "y", "n" });
-
-			if (recruitmentResponse.startsWith("n")) {
-				isRecruitment = !isRecruitment;
-			} else if (recruitmentResponse.startsWith("y")) {
-				break;
-			}
-		}
+		sanitisedPrompt("Is the recruitment flag (" + config.isRecruitment + ") set correctly? [Yes] or [No]?", ynArr);
 
 		// Confirm the randomisation flag.
-		while (true) {
-			String randomResponse = util.prompt(
-					"Is the randomisation flag (" + randomSort + ") set correctly? [Yes] or [No]?",
-					new String[] { "yes", "no", "y", "n" });
+		sanitisedPrompt("Is the randomisation flag (" + config.isRandomised + ") set correctly? [Yes] or [No]?", ynArr);
+	}
 
+	private void sanitisedPrompt(String prompt, String[] ynArr) {
+		while (true) {
+			String randomResponse = util.prompt(prompt, ynArr);
 			if (randomResponse.startsWith("n")) {
-				randomSort = !randomSort;
+				config.isRandomised = !config.isRandomised;
 			} else if (randomResponse.startsWith("y")) {
 				break;
 			}
@@ -241,66 +126,35 @@ public class Marconi {
 	}
 
 	/**
-	 * Gets the list of recipients to which the client has already sent telegrams, appends that to the sent list, then
-	 * creates a <code>CommuniquéFileWriter</code> to write that new payload to disc.
-	 *
-	 * @param file to where this program will write.
-	 * @throws FileNotFoundException if the file cannot be found
-	 * @throws UnsupportedEncodingException if the file's encoding is unsupported
+	 * @see com.git.ifly6.communique.ngui.AbstractCommunique#exportState()
 	 */
-	private static void appendSent(File file) throws FileNotFoundException, UnsupportedEncodingException {
-
-		String[] sentList = client.sentArray();
-		for (int x = 0; x < sentList.length; x++) {
-			sentList[x] = "/" + sentList[x];
-		}
-
-		String[] body = new String[recipients.length + sentList.length];
-		System.arraycopy(recipients, 0, body, 0, recipients.length);
-		System.arraycopy(sentList, 0, body, recipients.length, sentList.length);
-
-		CommuniqueFileWriter fileWriter = new CommuniqueFileWriter(file, keys, isRecruitment, body);
-		fileWriter.write();
+	@Override public CConfig exportState() {
+		return config;
 	}
 
 	/**
-	 * Loads configuration and sets all flags based off that configuration. Only sets flags given that the
-	 * <code>-s</code> option is not already set.
-	 *
-	 * @param file at which this program will look.
-	 * @throws JTelegramException if the fileReader is not compatible
-	 * @throws IOException
+	 * @see com.git.ifly6.communique.ngui.AbstractCommunique#importState(com.git.ifly6.communique.io.CConfig)
 	 */
-	private static void loadConfig(File file) throws JTelegramException, IOException {
-
-		CLoader loader = new CLoader(file.toPath());
-		CConfig config = loader.load();
-
-		keys = config.keys;
-
-		CommuniqueFileReader fileReader = new CommuniqueFileReader(file);
-		keys = fileReader.getKeys();
-		recipients = fileReader.getRecipients();
-
+	@Override public void importState(CConfig config) {
+		this.config = config;
 	}
 
 	/**
-	 * Prints out help information to <code>System.out</code> using the Apache Commons CLI library, then quits the
-	 * application.
+	 * @see com.git.ifly6.javatelegram.JTelegramLogger#log(java.lang.String)
 	 */
-	private static void quit() {
-		helpFormatter.printHelp("java -jar " + jarLocation + " [options] <FILE>", options);
-		System.exit(0);
+	@Override public void log(String input) {
+		util.log(input);
 	}
 
 	/**
-	 * Prints out help information to <code>System.out</code> using the Apache Commons CLI library, preceded by a
-	 * message, then quits the application.
-	 *
-	 * @param message which prefaces the help text
+	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
 	 */
-	private static void quitMessage(final String message) {
-		util.err(message);
-		quit();
+	@Override public void sentTo(String recipient, int x, int length) {
+
+		config.sentList = ArrayUtils.add(config.sentList, recipient);
+
+		Calendar now = Calendar.getInstance();
+		now.add(Calendar.SECOND, (config.isRecruitment) ? 180 : 30);
+		util.log("Next telegram at " + new SimpleDateFormat("HH:mm:ss").format(now.getTime()));
 	}
 }

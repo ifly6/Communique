@@ -14,7 +14,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 package com.git.ifly6.marconi;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter;
+import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.javatelegram.util.JInfoFetcher;
+import com.git.ifly6.nsapi.NSNation;
 
 /**
  * @author Kevin
@@ -22,36 +29,83 @@ import com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter;
  */
 public class MarconiRecruiter extends AbstractCommuniqueRecruiter {
 
-	/**
-	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setClientKey(java.lang.String)
-	 */
-	@Override public void setClientKey(String key) {
-		// TODO Auto-generated method stub
-
-	}
+	private Marconi marconi;
+	private Thread thread;
+	private Set<String> flagsSet;
 
 	/**
-	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setSecretKey(java.lang.String)
+	 * @param marconi
 	 */
-	@Override public void setSecretKey(String key) {
-		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setTelegramId(java.lang.String)
-	 */
-	@Override public void setTelegramId(String id) {
-		// TODO Auto-generated method stub
-
+	public MarconiRecruiter(Marconi marconi) {
+		this.marconi = marconi;
 	}
 
 	/**
 	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#send()
 	 */
 	@Override public void send() {
-		// TODO Auto-generated method stub
 
+		Runnable runner = new Runnable() {
+			@Override public void run() {
+
+				boolean isSending = true;
+				while (isSending) {
+
+					String[] recipients = new String[] {};
+					recipients = new JInfoFetcher().getNew();
+
+					String intendedRecipient = null;
+					for (String element : recipients) {
+						if (!sentList.contains(element) && !MarconiRecruiter.this.isProscribed(element)) {
+							intendedRecipient = element;
+							break;
+						}
+					}
+
+					// Otherwise, start sending.
+					JavaTelegram client = new JavaTelegram(marconi);
+					client.setKeys(marconi.exportState().keys);
+					client.setRecipients(new String[] { intendedRecipient });
+					client.connect();
+
+					try {
+						Thread.sleep(180 * 1000);
+					} catch (InterruptedException e) {
+						// nothing, since it cannot be interrupted.
+					}
+
+				}
+			}
+		};
+
+		thread = new Thread(runner);
+		thread.start();
+	}
+
+	private boolean isProscribed(String nationName) {
+
+		if (flagsSet == null) {
+			String[] recipients = marconi.exportState().recipients;
+			flagsSet = new HashSet<>();
+			for (String element : recipients) {
+				if (element.startsWith("flags:recruit -- region:")) {
+					flagsSet.add(element);
+				}
+			}
+		}
+
+		try {
+
+			String region = new NSNation(nationName).populateData().getRegion();
+			for (String excludeRegion : flagsSet) {
+				if (excludeRegion.replace(" ", "_").equalsIgnoreCase(region.replace(" ", "_"))) { return true; }
+			}
+
+		} catch (IOException e) {
+			// do nothing and fall to return false
+		}
+
+		return false;
 	}
 
 }
