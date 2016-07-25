@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 
 import com.git.ifly6.javatelegram.JTelegramKeys;
@@ -34,12 +35,16 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
  * that behaviour to change, extend the class and write a new constructor.
  * </p>
  *
+ * <p>
+ * <b>This class has been deprecated.</b>
+ * </p>
+ *
  * @see CommuniqueFileWriter
  * @see CommuniqueParser
  */
-public class CommuniqueFileReader {
+@Deprecated public class CommuniqueFileReader {
 
-	ArrayList<String> fileContents = new ArrayList<String>();
+	List<String> fileContents = new ArrayList<String>();
 	static final int version = CommuniqueParser.getVersion();
 
 	private boolean recruitment;
@@ -132,7 +137,7 @@ public class CommuniqueFileReader {
 	 */
 	private Object[] parseConfig() {
 		JTelegramKeys keys = new JTelegramKeys();
-		ArrayList<String> recipientsList = new ArrayList<String>(0);
+		List<String> recipientsList = new ArrayList<String>(0);
 
 		for (String element : fileContents) {
 			element = element.trim();
@@ -162,7 +167,8 @@ public class CommuniqueFileReader {
 
 	/**
 	 * Queries the file for an integer version to determine whether it is compatible with this parser. If so, it returns
-	 * true. Otherwise, it will return false.
+	 * true. Otherwise, it will return false. This operation also effectively makes sure that there is a file which can
+	 * be read.
 	 *
 	 * @param version <code>boolean</code> containing true or false on whether the configuration file is compatible.
 	 * @return
@@ -187,7 +193,8 @@ public class CommuniqueFileReader {
 
 		// If the version tag does not yet exist, look for header version tag
 		for (String element : fileContents) {
-			if (element.startsWith("# Produced by version ")) { return Integer.parseInt(element.replace("# Produced by version ", "")); }
+			if (element.startsWith(
+					"# Produced by version ")) { return Integer.parseInt(element.replace("# Produced by version ", "")); }
 		}
 
 		return 0;
@@ -201,7 +208,8 @@ public class CommuniqueFileReader {
 	 */
 	public String[] getHeader() {
 		ArrayList<String> header = new ArrayList<String>();
-		String[] filteredContents = CommuniqueUtilities.filterNewLines(fileContents.toArray(new String[fileContents.size()]));
+		String[] filteredContents = CommuniqueUtilities
+				.filterNewLines(fileContents.toArray(new String[fileContents.size()]));
 
 		for (int i = 0; i < filteredContents.length; i++) {
 			if (!filteredContents[i].startsWith("#")) {
