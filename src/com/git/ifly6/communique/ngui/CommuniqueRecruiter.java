@@ -62,8 +62,6 @@ import com.git.ifly6.communique.io.CLoader;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.JavaTelegram;
-import com.git.ifly6.javatelegram.util.JInfoFetcher;
-import com.git.ifly6.nsapi.NSNation;
 
 /**
  * @author Kevin
@@ -373,37 +371,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		}
 	}
 
-	/**
-	 * Determines whether a nation is in a region excluded by the JList <code>excludeList</code>. This method acts with
-	 * two assumptions: (1) it is not all right to telegram to anyone who resides in a prescribed region and (2) if they
-	 * moved out of the region since founding, it is certainly all right to do so.
-	 *
-	 * @param nationName
-	 * @return <code>boolean</code> on whether it is proscribed
-	 */
-	private boolean isProscribed(String nationName) {
-
-		NSNation nation = new NSNation(nationName);
-
-		try {
-
-			nation.populateData();
-			String region = nation.getRegion();
-
-			for (String excludeRegion : listExcludedRegions()) {
-				if (excludeRegion.replace(" ", "_").toLowerCase()
-						.equalsIgnoreCase(region.replace(" ", "_").toLowerCase())) { return true; }
-			}
-
-		} catch (IOException e) {
-
-		}
-
-		// assume that is is not proscribed if we cannot populate the data.
-		return false;
-	}
-
-	private HashSet<String> listExcludedRegions() {
+	private HashSet<String> listProscribedRegions() {
 		HashSet<String> hashSet = new HashSet<>();
 		int[] sIndices = excludeList.getSelectedIndices();
 		for (int x : sIndices) {
@@ -443,7 +411,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		// Create and set recipients and sent-lists
 		List<String> recipients = new ArrayList<>(0);
 		recipients.add("flag:recruit");
-		for (String element : listExcludedRegions()) {
+		for (String element : listProscribedRegions()) {
 			recipients.add("flag:recruit -- region:" + element);
 		}
 		config.recipients = recipients.toArray(new String[recipients.size()]);
@@ -511,23 +479,13 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 				boolean isSending = true;
 				while (isSending) {
 
-					String[] recipients = new String[] {};
-					recipients = new JInfoFetcher().getNew();
-					// System.out.println("var\t" + Arrays.toString(recipients));
-
-					String intendedRecipient = null;
-					for (String element : recipients) {
-						if (!sentList.contains(element) && !isProscribed(element)) {
-							intendedRecipient = element;
-							break;
-						}
-					}
+					proscribedRegions = listProscribedRegions();
 
 					// Otherwise, start sending.
 					JavaTelegram client = new JavaTelegram(CommuniqueRecruiter.this);
 					client.setKeys(new JTelegramKeys(clientKeyField.getText(), secretKeyField.getText(),
 							telegramIdField.getText()));
-					client.setRecipients(new String[] { intendedRecipient });
+					client.setRecipient(getRecipient());
 					client.connect();
 
 					for (int x = 0; x < 180; x++) {

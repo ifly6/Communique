@@ -15,9 +15,7 @@
 
 package com.git.ifly6.marconi;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,22 +30,18 @@ import com.git.ifly6.javatelegram.JavaTelegram;
 
 public class Marconi extends AbstractCommunique implements JTelegramLogger {
 
-	private MarconiLogger util = new MarconiLogger();
-	private JavaTelegram client = new JavaTelegram(util);
+	private JavaTelegram client = new JavaTelegram(this);
 	private CConfig config;
 
 	private boolean skipChecks = false;
+	private boolean recruiting = false;
 
-	public void setSkipChecks(boolean skipChecks) {
+	public Marconi(boolean skipChecks, boolean recruiting) {
 		this.skipChecks = skipChecks;
+		this.recruiting = recruiting;
 	}
 
 	public void send() {
-
-		// If we to check the keys, check.
-		if (!skipChecks) {
-			manualFlagCheck();
-		}
 
 		// Process the Recipients list into a string with two columns.
 		CommuniqueParser parser = new CommuniqueParser();
@@ -79,8 +73,8 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 
 		if (!skipChecks) {
 			// Give a chance to check the recipients.
-			String recipientsReponse = util.prompt("Are you sure you want to send to these recipients? [Yes] or [No]?",
-					new String[] { "yes", "no", "y", "n" });
+			String recipientsReponse = MarconiUtilities
+					.promptYN("Are you sure you want to send to these recipients? [Yes] or [No]?");
 			if (recipientsReponse.startsWith("n")) {
 				System.exit(0);
 			}
@@ -98,29 +92,37 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 	 * Should the problem be prompted to manually check all flags, this method does so, retrieving the flags and asking
 	 * for the user to reconfirm them.
 	 */
-	private void manualFlagCheck() {
+	public void manualFlagCheck() {
 
-		String[] ynArr = new String[] { "yes", "no", "y", "n" };
+		if (!skipChecks) {
 
-		// Give a chance to check the keys.
-		String keysResponse = util.prompt("Are these keys correct? " + config.keys.getClientKey() + ", "
-				+ config.keys.getSecretKey() + ", " + config.keys.getTelegramId() + " [Yes] or [No]?", ynArr);
-		if (!keysResponse.startsWith("y")) { return; }
+			// Give a chance to check the keys.
+			String keysResponse = MarconiUtilities.promptYN("Are these keys correct? " + config.keys.getClientKey() + ", "
+					+ config.keys.getSecretKey() + ", " + config.keys.getTelegramId() + " [Yes] or [No]?");
+			if (!keysResponse.startsWith("y")) { return; }
 
-		// Confirm the recruitment flag.
-		sanitisedPrompt("Is the recruitment flag (" + config.isRecruitment + ") set correctly? [Yes] or [No]?", ynArr);
+			if (!recruiting) {
+				// Confirm the recruitment flag.
+				while (true) {
+					String recruitResponse = MarconiUtilities.promptYN(
+							"Is the recruitment flag (" + config.isRecruitment + ") set correctly? [Yes] or [No]?");
+					if (recruitResponse.startsWith("n")) {
+						config.isRecruitment = !config.isRecruitment;
+					} else if (recruitResponse.startsWith("y")) {
+						break;
+					}
+				}
 
-		// Confirm the randomisation flag.
-		sanitisedPrompt("Is the randomisation flag (" + config.isRandomised + ") set correctly? [Yes] or [No]?", ynArr);
-	}
-
-	private void sanitisedPrompt(String prompt, String[] ynArr) {
-		while (true) {
-			String randomResponse = util.prompt(prompt, ynArr);
-			if (randomResponse.startsWith("n")) {
-				config.isRandomised = !config.isRandomised;
-			} else if (randomResponse.startsWith("y")) {
-				break;
+				// Confirm the randomisation flag.
+				while (true) {
+					String randomResponse = MarconiUtilities.promptYN(
+							"Is the randomisation flag (" + config.isRandomised + ") set correctly? [Yes] or [No]?");
+					if (randomResponse.startsWith("n")) {
+						config.isRandomised = !config.isRandomised;
+					} else if (randomResponse.startsWith("y")) {
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -143,7 +145,14 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 	 * @see com.git.ifly6.javatelegram.JTelegramLogger#log(java.lang.String)
 	 */
 	@Override public void log(String input) {
-		util.log(input);
+
+		if (recruiting) {
+			if (input.equals("API Queries Complete.")) { return; }
+		} else {
+			if (input.equals("Sent recruitment telegram to ")) { return; }
+		}
+
+		System.out.println("[" + MarconiUtilities.currentTime() + "] " + input);
 	}
 
 	/**
@@ -153,8 +162,8 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 
 		config.sentList = ArrayUtils.add(config.sentList, recipient);
 
-		Calendar now = Calendar.getInstance();
-		now.add(Calendar.SECOND, (config.isRecruitment) ? 180 : 30);
-		util.log("Next telegram at " + new SimpleDateFormat("HH:mm:ss").format(now.getTime()));
+		// Calendar now = Calendar.getInstance();
+		// now.add(Calendar.SECOND, (config.isRecruitment) ? 180 : 30);
+		// util.log("Next telegram at " + new SimpleDateFormat("HH:mm:ss").format(now.getTime()));
 	}
 }

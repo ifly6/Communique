@@ -14,11 +14,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 package com.git.ifly6.communique.ngui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import com.git.ifly6.communique.io.CConfig;
+import com.git.ifly6.javatelegram.util.JInfoFetcher;
+import com.git.ifly6.nsapi.NSNation;
 
 /**
  * @author Kevin
@@ -32,6 +36,7 @@ public abstract class AbstractCommuniqueRecruiter {
 
 	protected List<String> recipients;
 	protected List<String> sentList;
+	protected Set<String> proscribedRegions;
 
 	public void setWithCConfig(CConfig config) {
 
@@ -57,5 +62,50 @@ public abstract class AbstractCommuniqueRecruiter {
 	}
 
 	public abstract void send();
+
+	/**
+	 * Returns a recipient based on the new recipients list from the NS API, filtered by whether it is proscribed. Note
+	 * that any issues or problems are dealt with my defaulting to the newest nation, ignoring the proscription filter.
+	 *
+	 * @return a <code>String</code> with the recipient
+	 */
+	public String getRecipient() {
+
+		List<String> recipients = new JInfoFetcher().getNew();
+		// System.out.println("var\t" + Arrays.toString(recipients));
+
+		for (String element : recipients) {
+			if (!sentList.contains(element) && !isProscribed(element, proscribedRegions)) { return element; }
+		}
+
+		// If it failed, then simply just return the newest nation.
+		return recipients.get(0);
+	}
+
+	/**
+	 * Determines whether a nation is in a region excluded by the JList <code>excludeList</code>. This method acts with
+	 * two assumptions: (1) it is not all right to telegram to anyone who resides in a prescribed region and (2) if they
+	 * moved out of the region since founding, it is certainly all right to do so.
+	 *
+	 * @param nationName
+	 * @return <code>boolean</code> on whether it is proscribed
+	 */
+	public boolean isProscribed(String element, Set<String> proscribedRegions) {
+
+		NSNation nation = new NSNation(element);
+		try {
+			nation.populateData();
+		} catch (IOException e) {
+			// Failure to fetch information means false
+			return false;
+		}
+
+		String nRegion = nation.getRegion().replaceAll(" ", "_");
+		for (String proscribedRegion : proscribedRegions) {
+			if (proscribedRegion.replaceAll(" ", "_").equalsIgnoreCase(nRegion)) { return true; }
+		}
+
+		return false;
+	}
 
 }
