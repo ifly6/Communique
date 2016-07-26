@@ -14,6 +14,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 package com.git.ifly6.marconi;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,14 +50,21 @@ public class MarconiRecruiter extends AbstractCommuniqueRecruiter {
 				while (isSending) {
 
 					proscribedRegions = populateProscribedRegions();
+					String recipient = getRecipient();
 
 					// Otherwise, start sending.
 					JavaTelegram client = new JavaTelegram(marconi);
 					client.setKeys(marconi.exportState().keys);
-					client.setRecipient(getRecipient());
+					client.setRecipient(recipient);
 					client.connect();
 
-					marconi.log("Sent recruitment telegram " + marconi.exportState().sentList.length);
+					// Report information
+					marconi.log("Sent recruitment telegram " + marconi.exportState().sentList.length + " to " + recipient);
+
+					Calendar now = Calendar.getInstance();
+					now.add(Calendar.SECOND, 180);
+					String nextTelegramTime = new SimpleDateFormat("HH:mm:ss").format(now.getTime());
+					marconi.log("Next recruitment telegram in 180 seconds at " + nextTelegramTime);
 
 					try {
 						Thread.sleep(180 * 1000);

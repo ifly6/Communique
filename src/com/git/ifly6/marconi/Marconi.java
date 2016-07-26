@@ -146,10 +146,9 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 	 */
 	@Override public void log(String input) {
 
+		// If we are recruiting, suppress the API Queries message
 		if (recruiting) {
 			if (input.equals("API Queries Complete.")) { return; }
-		} else {
-			if (input.equals("Sent recruitment telegram to ")) { return; }
 		}
 
 		System.out.println("[" + MarconiUtilities.currentTime() + "] " + input);
@@ -159,11 +158,6 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
 	 */
 	@Override public void sentTo(String recipient, int x, int length) {
-
 		config.sentList = ArrayUtils.add(config.sentList, recipient);
-
-		// Calendar now = Calendar.getInstance();
-		// now.add(Calendar.SECOND, (config.isRecruitment) ? 180 : 30);
-		// util.log("Next telegram at " + new SimpleDateFormat("HH:mm:ss").format(now.getTime()));
 	}
 }

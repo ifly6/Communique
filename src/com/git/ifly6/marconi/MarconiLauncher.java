@@ -114,7 +114,7 @@ public class MarconiLauncher {
 			String[] fileList = commandLine.getArgs();
 			if (fileList.length != 1) {
 
-				System.err.println("Please provide only one file argument to the program.");
+				System.err.println("Please provide only one file argument to the program.\n");
 				System.exit(0);
 
 			} else {
@@ -125,11 +125,11 @@ public class MarconiLauncher {
 			}
 
 		} catch (ParseException e) {
-			System.err.println("Please refer to the help, accessible using '-h'");
+			System.err.println("Please refer to the help, accessible using '-h'\n");
 			e.printStackTrace();
 
 		} catch (IOException e) {
-			System.err.println("Please provide a valid or existing file argument to the program");
+			System.err.println("Please provide a valid or existing file argument to the program.\n");
 			e.printStackTrace();
 		}
 	}
