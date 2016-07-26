@@ -491,10 +491,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		JMenuItem mntmAbout = new JMenuItem("About");
 		mntmAbout.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
-				new CTextDialog(frame, "About",
-						"Developed by ifly6, contributing to the repository at [ github.com/iflycode/communique ], also known "
-								+ "as the nation Imperium Anglorum on NationStates. Helpful contributions in bug-testing and "
-								+ "feedback by nations Tinfect and Krypton Nova.");
+				new CTextDialog(frame, "About", CommuniqueMessages.acknowledgement);
 			}
 		});
 		mnHelp.add(mntmAbout);
@@ -532,13 +529,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		JMenuItem mntmLicence = new JMenuItem("Licence");
 		mntmLicence.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
-				new CTextDialog(frame, "Licence",
-						"The Software is provided 'as is', without warrant of any kind, express or implied, including but not "
-								+ "limited to the warranties of merchantability, fitness for a particular purpose and "
-								+ "noninfringement. In no even shall the authors or copyright holders be liable for any "
-								+ "claim, damages, or other liability, whether in an action of contract, tort, or otherwise, "
-								+ "arising from, out of, or in connect with the Software or the use or other dealings in the "
-								+ "Software.");
+				new CTextDialog(frame, "Licence", CommuniqueMessages.licence);
 			}
 		});
 		mnHelp.add(mntmLicence);
@@ -800,7 +791,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		}
 
 		// Make it end in .txt
-		if (!FilenameUtils.getExtension(savePath.toString()).equals(".txt")) {
+		if (!FilenameUtils.getExtension(savePath.toString()).equals("txt")) {
 			savePath = savePath.resolveSibling(savePath.getFileName() + ".txt");
 		}
 
