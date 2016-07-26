@@ -29,7 +29,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -65,6 +64,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -164,14 +164,14 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	public Communique() {
 
 		client = new JavaTelegram(this);
-		initialize();
+		initialise();
 
 	}
 
 	/**
-	 * Initialize the contents of the frame.
+	 * Initialise the contents of the frame.
 	 */
-	private void initialize() {
+	private void initialise() {
 
 		frame = new JFrame();
 		if (!SystemUtils.IS_OS_MAC) {
@@ -760,43 +760,52 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	 */
 	public Path showFileChooser(Frame parent, int type) {
 
+		Path savePath;
+
 		// Due to a problem in Windows and the AWT FileDialog, this will show a JFileChooser on Windows systems.
-		if (SystemUtils.IS_OS_WINDOWS) {
+		if (!SystemUtils.IS_OS_MAC) {
 
 			JFileChooser fChooser = new JFileChooser(appSupport.toFile());
+			fChooser.setDialogTitle("Choose file...");
+
+			int returnVal = JFileChooser.CANCEL_OPTION;
 			if (type == FileDialog.SAVE) {
-				fChooser.showSaveDialog(parent);
+				returnVal = fChooser.showSaveDialog(parent);
 			} else {
 				fChooser.showOpenDialog(parent);
 			}
 			fChooser.setVisible(true);
 
-			if (!fChooser.getSelectedFile().isDirectory() && !fChooser.getName().endsWith(".txt")) { return Paths
-					.get(fChooser.getSelectedFile().getAbsolutePath() + ".txt"); }
-
-			return fChooser.getSelectedFile().toPath();
-		}
-
-		FileDialog fDialog = new FileDialog(parent, "Save file as...", type);
-		fDialog.setDirectory(appSupport.toFile().toString());
-		fDialog.setVisible(true);
-
-		if (fDialog.getFile() == null) {
-			log.info("User cancelled file save dialog");
-			return null;
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				savePath = fChooser.getSelectedFile().toPath();
+			} else {
+				return null;
+			}
 
 		} else {
 
-			Path savePath = Paths.get((fDialog.getDirectory() == null) ? "" : fDialog.getDirectory())
-					.resolve(fDialog.getFile());
-			log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
+			FileDialog fDialog = new FileDialog(parent, "Choose file...", type);
+			fDialog.setDirectory(appSupport.toFile().toString());
+			fDialog.setVisible(true);
 
-			// If it does not end in txt, make it end in txt
-			if (!savePath.toAbsolutePath().toString().endsWith(".txt")) {
-				savePath = new File(savePath.toAbsolutePath().toString() + ".txt").toPath();
+			String fileName = fDialog.getFile();
+			if (fileName == null) {
+				log.info("User cancelled file file dialog");
+				return null;
+
+			} else {
+				savePath = Paths.get((fDialog.getDirectory() == null) ? "" : fDialog.getDirectory())
+						.resolve(fDialog.getFile());
 			}
-			return savePath;
 		}
+
+		// Make it end in .txt
+		if (!FilenameUtils.getExtension(savePath.toString()).equals(".txt")) {
+			savePath = savePath.resolveSibling(savePath.getFileName() + ".txt");
+		}
+
+		log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
+		return savePath;
 	}
 
 	/**
