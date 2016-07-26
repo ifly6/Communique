@@ -17,8 +17,8 @@ package com.git.ifly6.communique;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -78,25 +78,25 @@ public class CommuniqueUtilities {
 	 * @return the array without new lines
 	 */
 	public static String[] filterNewLines(String[] array) {
-
-		ArrayList<String> temp = new ArrayList<String>();
-		for (String element : array) {
-			if (!element.equals("\n")) {
-				temp.add(element);
-			}
-		}
-
-		return temp.toArray(new String[temp.size()]);
+		return Arrays.stream(array).filter(s -> !s.equals("\n")).toArray(String[]::new);
+		// ArrayList<String> temp = new ArrayList<String>();
+		// for (String element : array) {
+		// if (!element.equals("\n")) {
+		// temp.add(element);
+		// }
+		// }
+		//
+		// return temp.toArray(new String[temp.size()]);
 	}
 
 	public static String getCurrentDate() {
 		DateFormat dateDays = new SimpleDateFormat("yyyy-MM-dd");
-		return dateDays.format(new Date());
+		return dateDays.format(Calendar.getInstance());
 	}
 
 	public static String getCurrentDateAndTime() {
 		DateFormat dateWithTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		return dateWithTime.format(new Date());
+		return dateWithTime.format(Calendar.getInstance());
 	}
 
 	public static String joinListWith(List<String> input, char joinChar) {
@@ -109,6 +109,7 @@ public class CommuniqueUtilities {
 		if (input == null) { return "null"; }
 
 		// If there are no elements
+		// Based on the Arrays.toString in java.util.Arrays
 		int iMax = input.size() - 1;
 		if (iMax == -1) { return ""; }
 

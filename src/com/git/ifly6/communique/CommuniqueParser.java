@@ -16,9 +16,14 @@
 package com.git.ifly6.communique;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
@@ -76,9 +81,9 @@ import com.git.ifly6.javatelegram.util.JInfoFetcher;
 public class CommuniqueParser {
 
 	/**
-	 * This string determines what version of the parser is currently being used. The entire program is build around
-	 * this string for extended compatibility purposes. However, due to the separation between the Parser itself and the
-	 * IO system, either of them can trigger a change in the version number.
+	 * This <code>int</code> determines what version of the parser is currently being used. The entire program is build
+	 * around this string for extended compatibility purposes. However, due to the separation between the parser itself
+	 * and the IO system, either of them can trigger a change in the version number.
 	 */
 	public static final int version = 6;
 	private static JInfoFetcher fetcher = new JInfoFetcher();
@@ -107,26 +112,28 @@ public class CommuniqueParser {
 	}
 
 	/**
-	 * Tag expansion system for Communiqué.
+	 * Expands a single Communique tag into a list of nations represented by that tag. For example, something like
+	 * <code>region:Europe</code> would result in a <code>List&lt;String&gt;</code> of all nations in Europe. Other
+	 * elements, like <code>wa:delegates</code> would yield all the delegates in the World Assembly.
 	 *
-	 * @param element The tag you want expanded
-	 * @return
+	 * @param tag to be expanded
+	 * @return a <code>List&lt;String&gt;</code> of nations represented
 	 */
-	private List<String> expandTag(String element) {
+	private List<String> expandTag(String tag) {
 
-		if (element.startsWith("region:")) {
-			List<String> regionContentsArr = fetcher.getRegion(element.replace("region:", ""));
+		if (tag.startsWith("region:")) {
+			List<String> regionContentsArr = fetcher.getRegion(tag.replace("region:", ""));
 			return regionContentsArr;
 
-		} else if (element.startsWith("wa:delegate")) {
+		} else if (tag.startsWith("wa:delegate")) {
 			List<String> delegatesArr = fetcher.getDelegates();
 			return delegatesArr;
 
-		} else if (element.equals("wa:nations") || element.equals("wa:members")) {
+		} else if (tag.equals("wa:nations") || tag.equals("wa:members")) {
 			List<String> waNationsArr = fetcher.getWAMembers();
 			return waNationsArr;
 
-		} else if (element.equals("world:new")) {
+		} else if (tag.equals("world:new")) {
 			List<String> newNationsArr = fetcher.getNew();
 			return newNationsArr;
 		}
@@ -136,20 +143,19 @@ public class CommuniqueParser {
 	}
 
 	/**
-	 * What it says on the tin. It expands the list given in recipients into a full list of nations. If you give it
-	 * something like 'region:europe', then you'll get back the entire list of nations in Europe. Same with
-	 * 'WA:delegates' or 'WA:nations'.
+	 * Expands the <code>List&lt;String&gt;</code> into a list of nations based on the tags, operators, etc. If you give
+	 * it something like <code>region:europe</code>, then you'll get back the entire list of nations in Europe. It is
+	 * provided as a list of tags, each on a list. This processes the operators.
 	 *
-	 * @param fetcher
-	 * @param tagsList
+	 * @param tagsList a <code>List&lt;String&gt;</code> of tags
 	 */
-	private HashSet<String> expandList(List<String> tagsList) {
+	private Set<String> expandList(List<String> tagsList) {
 		List<String> expandedList = new ArrayList<String>();
 
 		for (int x = 0; x < tagsList.size(); x++) {
 			String element = tagsList.get(x).toLowerCase();
 
-			// Operator meaning-- 'region:europe->wa:nations' would be 'those in Europe in (who are) WA nations'
+			// Operator meaning 'region:europe->wa:nations' would be 'those in Europe in (who are) WA nations'
 			if (element.contains("->") || element.contains("--")) {
 
 				String[] bothArr = new String[2];
@@ -162,6 +168,7 @@ public class CommuniqueParser {
 
 				// Remove leading and trailing underscores.
 				for (int i = 0; i < bothArr.length; i++) {
+					bothArr[i] = bothArr[i].trim();
 					if (bothArr[i].startsWith("_")) {
 						bothArr[i] = bothArr[i].substring(1, bothArr[i].length());
 					}
@@ -177,7 +184,7 @@ public class CommuniqueParser {
 
 				List<String> both = new ArrayList<String>(0);
 
-				// This section is for
+				// This section is for the addition and subtraction operators
 				if (element.contains("->")) {
 
 					// If it appears in both lists, add it. Use the new 'contains' algorithm instead of the old 'nested
@@ -211,46 +218,38 @@ public class CommuniqueParser {
 		}
 
 		// Remove duplicates & return
-		HashSet<String> tagsSet = new HashSet<String>();
+		LinkedHashSet<String> tagsSet = new LinkedHashSet<String>();
 		tagsSet.addAll(expandedList);
 		return tagsSet;
 	}
 
 	/**
-	 * This parses the contents of the recipients and allows us to actually make the tag system work through interfacing
-	 * with the expansion system above. Note that this method automatically handles the removal of commented lines with
-	 * <code>#</code> as the comment.
+	 * This parses the entire contents of the recipients and allows us to actually make the tag system work through
+	 * interfacing with the expansion system above. Note that this method automatically handles the removal of commented
+	 * lines with <code>#</code> as the comment. This method calls all other methods to process all of the recipients.
+	 *
+	 * <p>
+	 * This is the old version. It is based solely on the provided <code>String[]</code>. The newer method to do this is
+	 * by provision of two <code>List&lt;String&gt;</code>, one of the recipients and one of the sentList. That method
+	 * is the proper way to call the parsing method. However, this is kept for legacy purposes and the fact that it
+	 * automatically processes this data.
+	 * </p>
 	 *
 	 * @param input an array of the recipients, each one on an individual index, which can include commented lines
 	 * @return a final array of the recipients, compatible with JavaTelegram
 	 */
 	public String[] filterAndParse(String[] input) {
 
-		// FILTER OUT COMMENTED OR EMPTY LINES
-		List<String> unComments = new ArrayList<String>();
-		for (String element : input) {
-			if (!element.startsWith("#") && !element.isEmpty()) {
-				unComments.add(element);
-			}
-		}
-		input = unComments.toArray(new String[unComments.size()]);
-		// END FILTER
+		// Filter out comments and empty lines
+		input = Arrays.stream(input).filter(p -> !p.startsWith("#") && !StringUtils.isEmpty(p)).toArray(String[]::new);
 
 		// Form a list of all the nation we want in this list.
-		List<String> recipients = new ArrayList<String>();
-		for (String element : input) {
-			if (!element.startsWith("/")) {
-				recipients.add(element.toLowerCase().trim().replace(" ", "_"));
-			}
-		}
+		List<String> recipients = Arrays.stream(input).filter(s -> !s.startsWith("/")).collect(Collectors.toList());
+		recipients.stream().forEach(s -> s.toLowerCase().replace(" ", "_").trim());
 
 		// Form a list of all nations we can't have in this list.
-		List<String> sentList = new ArrayList<String>();
-		for (String element : input) {
-			if (element.startsWith("/")) {
-				sentList.add(element.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_"));
-			}
-		}
+		List<String> sentList = Arrays.stream(input).filter(s -> s.startsWith("/")).collect(Collectors.toList());
+		sentList.stream().forEach(s -> s.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_"));
 
 		List<String> list = recipientsParse(recipients, sentList);
 		return list.toArray(new String[list.size()]);
@@ -268,12 +267,11 @@ public class CommuniqueParser {
 	public List<String> recipientsParse(List<String> recipients, List<String> sentList) {
 
 		// Expand the lists.
-		HashSet<String> recipientsExpanded = expandList(recipients);
-		HashSet<String> sentlistExpanded = expandList(sentList);
-
-		List<String> finalRecipients = new ArrayList<String>();
+		Set<String> recipientsExpanded = expandList(recipients);
+		Set<String> sentlistExpanded = expandList(sentList);
 
 		// Filter using new algorithm
+		List<String> finalRecipients = new ArrayList<String>();
 		for (String element : recipientsExpanded) {
 			if (!sentlistExpanded.contains(element)) {
 				finalRecipients.add(element);
@@ -292,9 +290,5 @@ public class CommuniqueParser {
 	 */
 	@Deprecated public String[] recipientsParse(String input) {
 		return filterAndParse(input.split("\n"));
-	}
-
-	public static int getVersion() {
-		return version;
 	}
 }
