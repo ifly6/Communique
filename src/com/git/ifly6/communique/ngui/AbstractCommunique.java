@@ -36,5 +36,4 @@ public abstract class AbstractCommunique {
 		CLoader loader = new CLoader(savePath);
 		this.importState(loader.load());
 	}
-
 }
