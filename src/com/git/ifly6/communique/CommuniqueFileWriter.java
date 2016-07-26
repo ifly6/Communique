@@ -43,17 +43,15 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
  */
 @Deprecated public class CommuniqueFileWriter {
 
-	static final int version = CommuniqueParser.getVersion();
-
 	// Requirements to Write
 	PrintWriter writer;
 	JTelegramKeys keys = new JTelegramKeys();
 	String[] recipients = {};
 
 	// Flags
-	boolean isRecruitment = true;
-	boolean randomSort = false;
-	boolean preexisting = false;
+	private boolean isRecruitment = true;
+	private boolean randomSort = false;
+	private boolean preexisting = false;
 
 	// Preservation information
 	private String[] originalHeader = {};
@@ -187,11 +185,11 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 		} else {
 			writer.println("# Communiqué Configuration File. Do not edit by hand.");
 			writer.println("# Produced at: " + dateFormat.format(date));
-			writer.println("# Produced by version " + version);
+			writer.println("# Produced by version " + CommuniqueParser.version);
 		}
 
 		writer.println();
-		writer.println("version=" + version);
+		writer.println("version=" + CommuniqueParser.version);
 		writer.println("client_key=" + keys.getClientKey());
 		writer.println("secret_key=" + keys.getSecretKey());
 		writer.println("telegram_id=" + keys.getTelegramId());
@@ -237,7 +235,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 			for (String element : originalFooter) {
 				writer.println(element);
 			}
-			writer.println("# Changed at " + dateFormat.format(date) + " by version " + version);
+			writer.println("# Changed at " + dateFormat.format(date) + " by version " + CommuniqueParser.version);
 		}
 
 		writer.close();

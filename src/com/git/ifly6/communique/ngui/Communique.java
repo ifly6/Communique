@@ -331,6 +331,19 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 		mnFile.addSeparator();
 
+		JMenuItem mntmClose = new JMenuItem("Close");
+		mntmClose.setAccelerator(getOSKeyStroke(KeyEvent.VK_W));
+		mntmClose.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				frame.setVisible(false);
+				frame.dispose();
+				System.exit(0);
+			}
+		});
+		mnFile.add(mntmClose);
+
+		mnFile.addSeparator();
+
 		JMenuItem mntmShowDirectory = new JMenuItem("Show Directory");
 		mntmShowDirectory.setAccelerator(getOSKeyStroke(KeyEvent.VK_O, true));
 		mntmShowDirectory.addActionListener(new ActionListener() {
@@ -344,10 +357,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		});
 		mnFile.add(mntmShowDirectory);
 
-		mnFile.addSeparator();
-
 		// Only add the Quit menu item if the OS is not Mac
 		if (!SystemUtils.IS_OS_MAC) {
+			mnFile.addSeparator();
 			JMenuItem mntmExit = new JMenuItem("Exit");
 			mntmExit.setAccelerator(getOSKeyStroke(KeyEvent.VK_Q));
 			mntmExit.addActionListener(new ActionListener() {

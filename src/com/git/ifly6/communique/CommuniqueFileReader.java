@@ -44,8 +44,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
  */
 @Deprecated public class CommuniqueFileReader {
 
-	List<String> fileContents = new ArrayList<String>();
-	static final int version = CommuniqueParser.getVersion();
+	List<String> fileContents = new ArrayList<String>(0);
 
 	private boolean recruitment;
 	private boolean randomised;
@@ -174,7 +173,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	 * @return
 	 */
 	public boolean isCompatible() {
-		return (getFileVersion() <= version) ? true : false;
+		return (getFileVersion() <= CommuniqueParser.version) ? true : false;
 	}
 
 	/**
