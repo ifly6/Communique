@@ -18,7 +18,7 @@ package com.git.ifly6.communique;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -91,12 +91,12 @@ public class CommuniqueUtilities {
 
 	public static String getCurrentDate() {
 		DateFormat dateDays = new SimpleDateFormat("yyyy-MM-dd");
-		return dateDays.format(Calendar.getInstance());
+		return dateDays.format(new Date());
 	}
 
 	public static String getCurrentDateAndTime() {
 		DateFormat dateWithTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		return dateWithTime.format(Calendar.getInstance());
+		return dateWithTime.format(new Date());
 	}
 
 	public static String joinListWith(List<String> input, char joinChar) {
