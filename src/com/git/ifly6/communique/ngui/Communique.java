@@ -121,9 +121,17 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	public static void main(String[] args) {
 
 		try {
+			// Set system look and feel.
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException lfE) {
+			// Set cross-platform look and feel.
+			try {
+				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+					| UnsupportedLookAndFeelException e) {
+				e.printStackTrace();
+			}
 			lfE.printStackTrace();
 		}
 
