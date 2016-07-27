@@ -810,9 +810,12 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			}
 		}
 
-		// Make it end in .txt
-		if (!FilenameUtils.getExtension(savePath.toString()).equals("txt")) {
-			savePath = savePath.resolveSibling(savePath.getFileName() + ".txt");
+		// Make it end in txt if saving
+		if (type == FileDialog.SAVE) {
+			if (!FilenameUtils.getExtension(savePath.toString()).equals("txt")) {
+				log.info("Append txt to savePath");
+				savePath = savePath.resolveSibling(savePath.getFileName() + ".txt");
+			}
 		}
 
 		log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
