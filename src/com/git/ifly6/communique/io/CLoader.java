@@ -31,13 +31,13 @@ import com.git.ifly6.communique.ngui.Communique;
  * for reading, writing, and manipulation of a {@link com.git.ifly6.communique.io.CConfig CConfig} object.
  */
 public class CLoader {
-
+	
 	Path path;
-
+	
 	// Force initialisation with appropriate variables
 	@SuppressWarnings(value = { "unused" }) private CLoader() {
 	}
-
+	
 	/**
 	 * Creates the <code>CLoader</code> and sets the path at which the program will do its file operations. The
 	 * Communique program attempts to default this to the relevant application support folder, resolved to the
@@ -48,7 +48,7 @@ public class CLoader {
 	public CLoader(Path path) {
 		this.path = path;
 	}
-
+	
 	/**
 	 * Saves a configuration file based on the provided <code>CCoNfig</code>.
 	 *
@@ -59,7 +59,7 @@ public class CLoader {
 		CWriter writer = new CWriter(path, config);
 		writer.write();
 	}
-
+	
 	/**
 	 * Loads a configuration file to a new CConfig.
 	 *
@@ -70,7 +70,7 @@ public class CLoader {
 		CReader reader = new CReader(path);
 		return reader.read();
 	}
-
+	
 	/**
 	 * Writes the standard configuration file for the currently used client key. Properties writing here has been
 	 * localised for this setup using this method.
@@ -78,20 +78,20 @@ public class CLoader {
 	 * @throws IOException
 	 */
 	public static void writeProperties(String clientKey) {
-
+		
 		try {
-
+			
 			Properties prop = new Properties();
 			FileOutputStream output = new FileOutputStream(Communique.appSupport + "/config.properties");
 			prop.setProperty("clientKey", clientKey);
 			prop.store(output, "");
 			output.close();
-
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * Reads the standard configuration file for the last used client key. The method returns the client key from the
 	 * configuration file.
@@ -100,17 +100,17 @@ public class CLoader {
 	 * @throws IOException if there was a problem in reading or finding the configuration file
 	 */
 	public static String readProperties() {
-
+		
 		Properties prop = new Properties();
-
+		
 		try {
 			FileInputStream stream = new FileInputStream(Communique.appSupport + "/config.properties");
 			prop.load(stream);
-
+			
 		} catch (IOException e) {
 			return "Client Key";
 		}
-
+		
 		String clientKey = prop.getProperty("clientKey");
 		return (StringUtils.isEmpty(clientKey)) ? "Client Key" : clientKey;
 	}

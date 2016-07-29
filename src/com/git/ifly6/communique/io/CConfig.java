@@ -35,26 +35,26 @@ import com.git.ifly6.javatelegram.JTelegramKeys;
  *
  */
 public class CConfig implements java.io.Serializable {
-
+	
 	// For reflection in CLoader to work, these MUST be the only fields
 	// For backwards compatibility, these names cannot be changed
-
+	
 	private static final long serialVersionUID = CommuniqueParser.version;
-
+	
 	public final String header = "Communiqué Configuration File. Do not edit by hand. Produced at: "
 			+ CommuniqueUtilities.getCurrentDateAndTime() + ". Produced by version " + CommuniqueParser.version;
-
+	
 	public int version;
-
-	public boolean isRecruitment;
-	public boolean isRandomised;
-	public boolean isDelegatePrioritised;
-
+	
+	public boolean	isRecruitment;
+	public boolean	isRandomised;
+	public boolean	isDelegatePrioritised;
+	
 	public JTelegramKeys keys;
-
-	public String[] recipients;
-	public String[] sentList;
-
+	
+	public String[]	recipients;
+	public String[]	sentList;
+	
 	public int defaultVersion() {
 		this.version = CommuniqueParser.version;
 		return CommuniqueParser.version;

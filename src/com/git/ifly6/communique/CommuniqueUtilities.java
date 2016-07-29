@@ -29,10 +29,10 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author ifly6
  */
 public class CommuniqueUtilities {
-
+	
 	private CommuniqueUtilities() {
 	}
-
+	
 	/**
 	 * Randomises an array's sequence of contents.
 	 *
@@ -40,20 +40,20 @@ public class CommuniqueUtilities {
 	 * @return a copy of the inputArray which is shuffled randomly
 	 */
 	public static Object[] randomiseArray(Object[] inputArray) {
-
+		
 		Random rnd = ThreadLocalRandom.current();
 		for (int i = inputArray.length - 1; i > 0; i--) {
-
+			
 			int index = rnd.nextInt(i + 1);
-
+			
 			Object a = inputArray[index];
 			inputArray[index] = inputArray[i];
 			inputArray[i] = a;
 		}
-
+		
 		return inputArray;
 	}
-
+	
 	/**
 	 * This changes raw seconds directly into days, hours, minutes, and seconds. Very helpful for creating a system of
 	 * information which humans can use and are not just machine constructs.
@@ -70,7 +70,7 @@ public class CommuniqueUtilities {
 		hours -= days * 24;
 		return days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
 	}
-
+	
 	/**
 	 * This filters out all new lines from an array.
 	 *
@@ -88,31 +88,31 @@ public class CommuniqueUtilities {
 		//
 		// return temp.toArray(new String[temp.size()]);
 	}
-
+	
 	public static String getCurrentDate() {
 		DateFormat dateDays = new SimpleDateFormat("yyyy-MM-dd");
 		return dateDays.format(new Date());
 	}
-
+	
 	public static String getCurrentDateAndTime() {
 		DateFormat dateWithTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		return dateWithTime.format(new Date());
 	}
-
+	
 	public static String joinListWith(List<String> input, char joinChar) {
 		return joinListWith(input, String.valueOf(joinChar));
 	}
-
+	
 	public static String joinListWith(List<String> input, CharSequence joinChar) {
-
+		
 		// If this is null
 		if (input == null) { return "null"; }
-
+		
 		// If there are no elements
 		// Based on the Arrays.toString in java.util.Arrays
 		int iMax = input.size() - 1;
 		if (iMax == -1) { return ""; }
-
+		
 		// If there are many elements
 		StringBuilder builder = new StringBuilder();
 		for (int x = 0;; x++) {

@@ -42,21 +42,21 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
  * @see CommuniqueParser
  */
 @Deprecated public class CommuniqueFileWriter {
-
+	
 	// Requirements to Write
-	PrintWriter writer;
-	JTelegramKeys keys = new JTelegramKeys();
-	String[] recipients = {};
-
+	PrintWriter		writer;
+	JTelegramKeys	keys		= new JTelegramKeys();
+	String[]		recipients	= {};
+	
 	// Flags
-	private boolean isRecruitment = true;
-	private boolean randomSort = false;
-	private boolean preexisting = false;
-
+	private boolean	isRecruitment	= true;
+	private boolean	randomSort		= false;
+	private boolean	preexisting		= false;
+	
 	// Preservation information
-	private String[] originalHeader = {};
-	private String[] originalFooter = {};
-
+	private String[]	originalHeader	= {};
+	private String[]	originalFooter	= {};
+	
 	/**
 	 * This is the basic constructor, which initialises an empty CommuniquéFileWriter. After creating a
 	 * CommuniquéFileWriter in this fashion, provide the keys, the state of the recruitment flag, and a
@@ -68,7 +68,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	 * @throws JTelegramException
 	 */
 	public CommuniqueFileWriter(File file) throws FileNotFoundException, UnsupportedEncodingException, JTelegramException {
-
+		
 		// Get file before destroying it
 		if (file.exists()) {
 			preexisting = true;
@@ -76,10 +76,10 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 			originalHeader = reader.getHeader();
 			originalFooter = reader.getFooter();
 		}
-
+		
 		writer = new PrintWriter(file, "UTF-8");
 	}
-
+	
 	/**
 	 * This is a more advanced constructor which initialises the keys, recruitment flag, and recipients list directly.
 	 *
@@ -97,7 +97,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 		this.setRecuitment(isRecruitment);
 		this.setBody(bodyString);
 	}
-
+	
 	/**
 	 * Sets the keys inside a <code>JTelegramKeys</code> object which will then be written to disc.
 	 *
@@ -110,7 +110,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 		keys.setSecretKey(secretKey);
 		keys.setTelegramId(telegramId);
 	}
-
+	
 	/**
 	 * This is an old method to set the keys inside the new <code>JTelegramKeys</code> object which will then be written
 	 * to disc. It was written to keep compatibility with API version 1.
@@ -121,7 +121,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	@Deprecated public void setKeys(String[] inputKeys) {
 		keys.setKeys(inputKeys);
 	}
-
+	
 	/**
 	 * Sets the keys inside a <code>JTelegramKeys</code> object which will then be written to disc.
 	 *
@@ -130,7 +130,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public void setKeys(JTelegramKeys inputKeys) {
 		keys = inputKeys;
 	}
-
+	
 	/**
 	 * Sets the contents of the recipients.
 	 *
@@ -139,7 +139,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public void setBody(String[] codeContents) {
 		recipients = codeContents;
 	}
-
+	
 	/**
 	 * Sets the contents of the recipients.
 	 *
@@ -149,7 +149,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 		String[] contents = codeContents.split("\n");
 		setBody(contents);
 	}
-
+	
 	/**
 	 * Sets the <code>isRecruitment</code> flag inside the object. This determines what delay timer the program is to
 	 * use.
@@ -159,7 +159,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public void setRecuitment(boolean recuitment) {
 		isRecruitment = recuitment;
 	}
-
+	
 	/**
 	 * Sets the <code>randomSort</code> flag inside the object. This determines whether the program is to sort the list
 	 * of recipients randomly.
@@ -169,7 +169,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public void setRandom(boolean random) {
 		randomSort = random;
 	}
-
+	
 	/**
 	 * Instructs the instance of the <code>CommuniquéFileWriter</code> to write the given information to file. The
 	 * instance automatically closes the created <code>PrintWriter</code>.
@@ -177,7 +177,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public void write() {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
-
+		
 		if (preexisting) {
 			for (String element : originalHeader) {
 				writer.println(element);
@@ -187,7 +187,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 			writer.println("# Produced at: " + dateFormat.format(date));
 			writer.println("# Produced by version " + CommuniqueParser.version);
 		}
-
+		
 		writer.println();
 		writer.println("version=" + CommuniqueParser.version);
 		writer.println("client_key=" + keys.getClientKey());
@@ -197,7 +197,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 		writer.println("randomSort=" + randomSort);
 		writer.println();
 		writer.println("# Recipients");
-
+		
 		// Ignore commented and empty lines.
 		ArrayList<String> contentList = new ArrayList<String>(0);
 		for (String element : recipients) {
@@ -205,7 +205,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 				contentList.add(element);
 			}
 		}
-
+		
 		// Sort out recipients from the sent and get rid of duplicates.
 		LinkedHashSet<String> recpList = new LinkedHashSet<String>(0);
 		LinkedHashSet<String> nopeList = new LinkedHashSet<String>(0);
@@ -216,28 +216,28 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 				recpList.add(element);
 			}
 		}
-
+		
 		// Print in the recipients
 		for (String element : recpList) {
 			writer.println(element);
 		}
-
+		
 		writer.println("");
-
+		
 		// Print in the nopeList
 		for (String element : nopeList) {
 			writer.println(element);
 		}
-
+		
 		if (preexisting) {
 			writer.println();
-
+			
 			for (String element : originalFooter) {
 				writer.println(element);
 			}
 			writer.println("# Changed at " + dateFormat.format(date) + " by version " + CommuniqueParser.version);
 		}
-
+		
 		writer.close();
 	}
 }

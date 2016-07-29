@@ -22,6 +22,7 @@ import java.util.Set;
 
 import com.git.ifly6.communique.io.CConfig;
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
+import com.git.ifly6.javatelegram.util.JTelegramException;
 import com.git.ifly6.nsapi.NSNation;
 
 /**
@@ -29,40 +30,42 @@ import com.git.ifly6.nsapi.NSNation;
  *
  */
 public abstract class AbstractCommuniqueRecruiter {
-
-	protected String clientKey;
-	protected String secretKey;
-	protected String telegramId;
-
-	protected List<String> recipients;
-	protected List<String> sentList;
-	protected Set<String> proscribedRegions;
-
+	
+	public static final JInfoFetcher fetcher = new JInfoFetcher();
+	
+	protected String	clientKey;
+	protected String	secretKey;
+	protected String	telegramId;
+	
+	protected List<String>	recipients;
+	protected List<String>	sentList;
+	protected Set<String>	proscribedRegions;
+	
 	public void setWithCConfig(CConfig config) {
-
+		
 		setClientKey(config.keys.getClientKey());
 		setSecretKey(config.keys.getSecretKey());
 		setTelegramId(config.keys.getTelegramId());
-
+		
 		recipients = new ArrayList<>(Arrays.asList(config.recipients));
 		sentList = new ArrayList<>(Arrays.asList(config.sentList));
-
+		
 	}
-
+	
 	public void setClientKey(String key) {
 		this.clientKey = key;
 	}
-
+	
 	public void setSecretKey(String key) {
 		this.secretKey = key;
 	}
-
+	
 	public void setTelegramId(String id) {
 		this.telegramId = id;
 	}
-
+	
 	public abstract void send();
-
+	
 	/**
 	 * Returns a recipient based on the new recipients list from the NS API, filtered by whether it is proscribed. Note
 	 * that any issues or problems are dealt with my defaulting to the newest nation, ignoring the proscription filter.
@@ -70,18 +73,25 @@ public abstract class AbstractCommuniqueRecruiter {
 	 * @return a <code>String</code> with the recipient
 	 */
 	public String getRecipient() {
-
-		List<String> recipients = new JInfoFetcher().getNew();
+		
+		try {
+			recipients = fetcher.getNew();
+			// If recipients cannot be got, try again.
+			
+		} catch (JTelegramException e) {
+			e.printStackTrace();
+			return getRecipient();
+		}
 		// System.out.println("var\t" + Arrays.toString(recipients));
-
+		
 		for (String element : recipients) {
 			if (!sentList.contains(element) && !isProscribed(element, proscribedRegions)) { return element; }
 		}
-
-		// If it failed, then simply just return the newest nation.
+		
+		// If the filtering failed, then simply just return the newest nation.
 		return recipients.get(0);
 	}
-
+	
 	/**
 	 * Determines whether a nation is in a region excluded by the JList <code>excludeList</code>. This method acts with
 	 * two assumptions: (1) it is not all right to telegram to anyone who resides in a prescribed region and (2) if they
@@ -91,7 +101,7 @@ public abstract class AbstractCommuniqueRecruiter {
 	 * @return <code>boolean</code> on whether it is proscribed
 	 */
 	public boolean isProscribed(String element, Set<String> proscribedRegions) {
-
+		
 		NSNation nation = new NSNation(element);
 		try {
 			nation.populateData();
@@ -99,13 +109,13 @@ public abstract class AbstractCommuniqueRecruiter {
 			// Failure to fetch information means false
 			return false;
 		}
-
+		
 		String nRegion = nation.getRegion().replaceAll(" ", "_");
 		for (String proscribedRegion : proscribedRegions) {
 			if (proscribedRegion.replaceAll(" ", "_").equalsIgnoreCase(nRegion)) { return true; }
 		}
-
+		
 		return false;
 	}
-
+	
 }
