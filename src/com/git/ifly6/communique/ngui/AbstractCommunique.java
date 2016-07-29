@@ -21,17 +21,17 @@ import com.git.ifly6.communique.io.CConfig;
 import com.git.ifly6.communique.io.CLoader;
 
 public abstract class AbstractCommunique {
-
+	
 	public abstract CConfig exportState();
-
+	
 	public abstract void importState(CConfig config);
-
+	
 	public void save(Path savePath) throws IOException {
 		// System.out.println("exportState().sentList\t" + Arrays.toString(exportState().sentList));
 		CLoader loader = new CLoader(savePath);
 		loader.save(exportState());
 	}
-
+	
 	public void load(Path savePath) throws IOException {
 		CLoader loader = new CLoader(savePath);
 		this.importState(loader.load());

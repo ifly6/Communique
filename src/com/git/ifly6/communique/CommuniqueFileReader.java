@@ -43,17 +43,17 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
  * @see CommuniqueParser
  */
 @Deprecated public class CommuniqueFileReader {
-
+	
 	List<String> fileContents = new ArrayList<String>(0);
-
-	private boolean recruitment;
-	private boolean randomised;
-
+	
+	private boolean	recruitment;
+	private boolean	randomised;
+	
 	/**
 	 * <code>information</code> encapsulates the returning information of the JTelegramKeys and the recipients.
 	 */
 	Object[] information = { new JTelegramKeys(), new String[] {} };
-
+	
 	/**
 	 * Constructs a FileReader tailored to the correct file and loads the entire file into an ArrayList. From there, it
 	 * calls <code>parseConfig()</code> to load all the processed information into an accessible object.
@@ -63,23 +63,23 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	 * @throws JTelegramException if the version is incorrect
 	 */
 	public CommuniqueFileReader(File file) throws FileNotFoundException, JTelegramException {
-
+		
 		// Immediately load the file into memory.
 		FileReader configRead = new FileReader(file);
 		Scanner scan = new Scanner(configRead);
-
+		
 		while (scan.hasNextLine()) {
 			fileContents.add(scan.nextLine().trim());
 		}
 		scan.close();
-
+		
 		if (isCompatible()) {
 			information = parseConfig();
 		} else {
 			throw new JTelegramException("Communiqué file version mismatch");
 		}
 	}
-
+	
 	/**
 	 * Gets the keys from <code>information</code> which is returned in a JTelegramKeys object containing the keys which
 	 * were written onto the configuration file.
@@ -89,7 +89,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public JTelegramKeys getKeys() {
 		return (JTelegramKeys) information[0];
 	}
-
+	
 	/**
 	 * Gets the list of recipients from <code>information</code> which was written on the configuration file.
 	 *
@@ -108,7 +108,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public String[] getRecipients() {
 		return (String[]) information[1];
 	}
-
+	
 	/**
 	 * Gets the flag <code>isRecruitment</code> which was loaded off the provided configuration file.
 	 *
@@ -117,7 +117,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public boolean isRecruitment() {
 		return recruitment;
 	}
-
+	
 	/**
 	 * Gets the flag <code>randomSort</code> which was loaded off the provided configuration file.
 	 *
@@ -126,7 +126,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public boolean isRandomised() {
 		return randomised;
 	}
-
+	
 	/**
 	 * Parses the entire configuration file by searching out the <code>client_key</code> and other such keys, ignores
 	 * lines which start with <code>#</code> and then returns everything else as the recipients list.
@@ -137,33 +137,33 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	private Object[] parseConfig() {
 		JTelegramKeys keys = new JTelegramKeys();
 		List<String> recipientsList = new ArrayList<String>(0);
-
+		
 		for (String element : fileContents) {
 			element = element.trim();
-
+			
 			if (element.startsWith("client_key=")) {
 				keys.setClientKey(element.replace("client_key=", ""));
-
+				
 			} else if (element.startsWith("secret_key=")) {
 				keys.setSecretKey(element.replace("secret_key=", ""));
-
+				
 			} else if (element.startsWith("telegram_id=")) {
 				keys.setTelegramId(element.replace("telegram_id=", ""));
-
+				
 			} else if (element.startsWith("isRecruitment=")) {
 				recruitment = Boolean.parseBoolean(element.replace("isRecruitment=", ""));
-
+				
 			} else if (element.startsWith("randomSort=")) {
 				randomised = Boolean.parseBoolean(element.replace("randomSort=", ""));
-
+				
 			} else if (!element.startsWith("#") && !element.isEmpty() && !element.contains("=")) {
 				recipientsList.add(element.toLowerCase().trim().replace(" ", "_"));
 			}
 		}
-
+		
 		return new Object[] { keys, recipientsList.toArray(new String[recipientsList.size()]) };
 	}
-
+	
 	/**
 	 * Queries the file for an integer version to determine whether it is compatible with this parser. If so, it returns
 	 * true. Otherwise, it will return false. This operation also effectively makes sure that there is a file which can
@@ -175,7 +175,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	public boolean isCompatible() {
 		return (getFileVersion() <= CommuniqueParser.version) ? true : false;
 	}
-
+	
 	/**
 	 * Finds the file version declarer by finding the line which states "# Produced by version" or the version tag. The
 	 * following is an integer which determines which version of the program this file was made by. Returns its
@@ -184,21 +184,21 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	 * @return <code>String</code> containing the ending of the commented version line
 	 */
 	public int getFileVersion() {
-
+		
 		// Look for version tag first
 		for (String element : fileContents) {
 			if (element.startsWith("version")) { return Integer.parseInt(element.replace("version=", "")); }
 		}
-
+		
 		// If the version tag does not yet exist, look for header version tag
 		for (String element : fileContents) {
 			if (element.startsWith(
 					"# Produced by version ")) { return Integer.parseInt(element.replace("# Produced by version ", "")); }
 		}
-
+		
 		return 0;
 	}
-
+	
 	/**
 	 * Gets the header of the entire file (that is, all comments before the first real entry) and returns it in a String
 	 * array.
@@ -209,7 +209,7 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 		ArrayList<String> header = new ArrayList<String>();
 		String[] filteredContents = CommuniqueUtilities
 				.filterNewLines(fileContents.toArray(new String[fileContents.size()]));
-
+		
 		for (int i = 0; i < filteredContents.length; i++) {
 			if (!filteredContents[i].startsWith("#")) {
 				// When comments end, break.
@@ -218,10 +218,10 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 				header.add(filteredContents[i]);
 			}
 		}
-
+		
 		return header.toArray(new String[header.size()]);
 	}
-
+	
 	/**
 	 * Gets the footer sections of the file (that is, all comments after the last real entry) and returns it in a String
 	 * array.
@@ -232,10 +232,10 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 		ArrayList<String> header = new ArrayList<String>();
 		String[] tempContents = fileContents.toArray(new String[fileContents.size()]);
 		String[] filteredContents = CommuniqueUtilities.filterNewLines(tempContents);
-
+		
 		for (int i = filteredContents.length - 1; i >= 0; i--) {
 			// Start from the bottom and read commented lines.
-
+			
 			if (!filteredContents[i].startsWith("#")) {
 				// When those commented lines terminate, break.
 				break;
@@ -243,9 +243,9 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 				header.add(filteredContents[i]);
 			}
 		}
-
+		
 		Collections.reverse(header);
-
+		
 		return header.toArray(new String[header.size()]);
 	}
 }

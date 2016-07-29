@@ -29,30 +29,30 @@ import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.JavaTelegram;
 
 public class Marconi extends AbstractCommunique implements JTelegramLogger {
-
-	private JavaTelegram client = new JavaTelegram(this);
-	private CConfig config;
-
-	private boolean skipChecks = false;
-	private boolean recruiting = false;
-
+	
+	private JavaTelegram	client	= new JavaTelegram(this);
+	private CConfig			config;
+	
+	private boolean	skipChecks	= false;
+	private boolean	recruiting	= false;
+	
 	public Marconi(boolean skipChecks, boolean recruiting) {
 		this.skipChecks = skipChecks;
 		this.recruiting = recruiting;
 	}
-
+	
 	public void send() {
-
+		
 		// Process the Recipients list into a string with two columns.
 		CommuniqueParser parser = new CommuniqueParser();
 		List<String> expandedRecipients = parser.recipientsParse(Arrays.asList(config.recipients),
 				Arrays.asList(config.sentList));
-
+		
 		// If it needs to be randomised, do so.
 		if (config.isRandomised) {
 			Collections.shuffle(expandedRecipients);
 		}
-
+		
 		// Show the recipients in the order we are to send the telegrams.
 		System.out.println();
 		for (int x = 0; x < expandedRecipients.size(); x = x + 2) {
@@ -62,15 +62,13 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 				System.out.printf(expandedRecipients.get(x) + "\n");
 			}
 		}
-
+		
 		System.out.println();
-		System.out
-				.println(
-						"This will take "
-								+ CommuniqueUtilities.time((int) Math
-										.round(expandedRecipients.size() * ((config.isRecruitment) ? 180.05 : 30.05)))
-								+ " to send " + expandedRecipients.size() + " telegrams.");
-
+		System.out.println("This will take "
+				+ CommuniqueUtilities
+						.time((int) Math.round(expandedRecipients.size() * ((config.isRecruitment) ? 180.05 : 30.05)))
+				+ " to send " + expandedRecipients.size() + " telegrams.");
+		
 		if (!skipChecks) {
 			// Give a chance to check the recipients.
 			String recipientsReponse = MarconiUtilities
@@ -79,28 +77,28 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 				System.exit(0);
 			}
 		}
-
+		
 		// Set the client up and go.
 		client.setKeys(config.keys);
 		client.setRecruitment(config.isRecruitment);
 		client.setRecipients(expandedRecipients);
-
+		
 		client.connect();
 	}
-
+	
 	/**
 	 * Should the problem be prompted to manually check all flags, this method does so, retrieving the flags and asking
 	 * for the user to reconfirm them.
 	 */
 	public void manualFlagCheck() {
-
+		
 		if (!skipChecks) {
-
+			
 			// Give a chance to check the keys.
 			String keysResponse = MarconiUtilities.promptYN("Are these keys correct? " + config.keys.getClientKey() + ", "
 					+ config.keys.getSecretKey() + ", " + config.keys.getTelegramId() + " [Yes] or [No]?");
 			if (!keysResponse.startsWith("y")) { return; }
-
+			
 			if (!recruiting) {
 				// Confirm the recruitment flag.
 				while (true) {
@@ -112,7 +110,7 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 						break;
 					}
 				}
-
+				
 				// Confirm the randomisation flag.
 				while (true) {
 					String randomResponse = MarconiUtilities.promptYN(
@@ -126,34 +124,34 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 			}
 		}
 	}
-
+	
 	/**
 	 * @see com.git.ifly6.communique.ngui.AbstractCommunique#exportState()
 	 */
 	@Override public CConfig exportState() {
 		return config;
 	}
-
+	
 	/**
 	 * @see com.git.ifly6.communique.ngui.AbstractCommunique#importState(com.git.ifly6.communique.io.CConfig)
 	 */
 	@Override public void importState(CConfig config) {
 		this.config = config;
 	}
-
+	
 	/**
 	 * @see com.git.ifly6.javatelegram.JTelegramLogger#log(java.lang.String)
 	 */
 	@Override public void log(String input) {
-
+		
 		// If we are recruiting, suppress the API Queries message
 		if (recruiting) {
 			if (input.equals("API Queries Complete.")) { return; }
 		}
-
+		
 		System.out.println("[" + MarconiUtilities.currentTime() + "] " + input);
 	}
-
+	
 	/**
 	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
 	 */
