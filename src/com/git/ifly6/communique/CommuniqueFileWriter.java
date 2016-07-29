@@ -44,18 +44,18 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 @Deprecated public class CommuniqueFileWriter {
 	
 	// Requirements to Write
-	PrintWriter		writer;
-	JTelegramKeys	keys		= new JTelegramKeys();
-	String[]		recipients	= {};
+	PrintWriter writer;
+	JTelegramKeys keys = new JTelegramKeys();
+	String[] recipients = {};
 	
 	// Flags
-	private boolean	isRecruitment	= true;
-	private boolean	randomSort		= false;
-	private boolean	preexisting		= false;
+	private boolean isRecruitment = true;
+	private boolean randomSort = false;
+	private boolean preexisting = false;
 	
 	// Preservation information
-	private String[]	originalHeader	= {};
-	private String[]	originalFooter	= {};
+	private String[] originalHeader = {};
+	private String[] originalFooter = {};
 	
 	/**
 	 * This is the basic constructor, which initialises an empty CommuniquéFileWriter. After creating a

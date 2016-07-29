@@ -33,13 +33,13 @@ public abstract class AbstractCommuniqueRecruiter {
 	
 	public static final JInfoFetcher fetcher = new JInfoFetcher();
 	
-	protected String	clientKey;
-	protected String	secretKey;
-	protected String	telegramId;
+	protected String clientKey;
+	protected String secretKey;
+	protected String telegramId;
 	
-	protected List<String>	recipients;
-	protected List<String>	sentList;
-	protected Set<String>	proscribedRegions;
+	protected List<String> recipients;
+	protected List<String> sentList;
+	protected Set<String> proscribedRegions;
 	
 	public void setWithCConfig(CConfig config) {
 		

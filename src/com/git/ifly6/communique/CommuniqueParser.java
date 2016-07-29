@@ -85,8 +85,8 @@ public class CommuniqueParser {
 	 * around this string for extended compatibility purposes. However, due to the separation between the parser itself
 	 * and the IO system, either of them can trigger a change in the version number.
 	 */
-	public static final int		version	= 6;
-	private static JInfoFetcher	fetcher	= new JInfoFetcher();
+	public static final int version = 6;
+	private static JInfoFetcher fetcher = new JInfoFetcher();
 	
 	/**
 	 * Determine whether a <code>String</code> is a special tag or not. What strings are tags is determined in the

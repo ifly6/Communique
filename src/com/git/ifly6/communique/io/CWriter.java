@@ -24,8 +24,8 @@ import com.google.gson.GsonBuilder;
 
 class CWriter {
 	
-	private Path	path;
-	private CConfig	config;
+	private Path path;
+	private CConfig config;
 	
 	public CWriter(Path path, CConfig config) {
 		this.path = path;
