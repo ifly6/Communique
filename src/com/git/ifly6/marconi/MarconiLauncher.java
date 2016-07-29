@@ -41,8 +41,8 @@ public class MarconiLauncher {
 	// Deal with command line options
 	public static final Options COMMAND_LINE_OPTIONS;
 	
-	private static boolean	skipChecks	= false;
-	private static boolean	recruiting	= false;
+	private static boolean skipChecks = false;
+	private static boolean recruiting = false;
 	
 	static {
 		Options options = new Options();

@@ -86,24 +86,24 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	
 	private static final Logger log = Logger.getLogger(Communique.class.getName());
 	
-	private boolean			parsed			= false;
-	private JavaTelegram	client;
-	private Thread			sendingThread	= new Thread();
+	private boolean parsed = false;
+	private JavaTelegram client;
+	private Thread sendingThread = new Thread();
 	
-	private JFrame	frame;
-	private JPanel	recipientsPanel;
+	private JFrame frame;
+	private JPanel recipientsPanel;
 	
-	private JTextField	txtClientKey;
-	private JTextField	txtSecretKey;
-	private JTextField	txtTelegramId;
+	private JTextField txtClientKey;
+	private JTextField txtSecretKey;
+	private JTextField txtTelegramId;
 	
-	private JButton			btnSend;
-	private JProgressBar	progressBar;
-	private JTextArea		txtrCode;
+	private JButton btnSend;
+	private JProgressBar progressBar;
+	private JTextArea txtrCode;
 	
-	private JCheckBoxMenuItem	chckbxmntmRandomiseRecipients;
-	private JCheckBoxMenuItem	chckbxmntmPrioritiseDelegates;
-	private JCheckBox			chckbxRecruitment;
+	private JCheckBoxMenuItem chckbxmntmRandomiseRecipients;
+	private JCheckBoxMenuItem chckbxmntmPrioritiseDelegates;
+	private JCheckBox chckbxRecruitment;
 	
 	private String[] parsedRecipients;
 	

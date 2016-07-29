@@ -30,11 +30,11 @@ import com.git.ifly6.javatelegram.JavaTelegram;
 
 public class Marconi extends AbstractCommunique implements JTelegramLogger {
 	
-	private JavaTelegram	client	= new JavaTelegram(this);
-	private CConfig			config;
+	private JavaTelegram client = new JavaTelegram(this);
+	private CConfig config;
 	
-	private boolean	skipChecks	= false;
-	private boolean	recruiting	= false;
+	private boolean skipChecks = false;
+	private boolean recruiting = false;
 	
 	public Marconi(boolean skipChecks, boolean recruiting) {
 		this.skipChecks = skipChecks;
@@ -64,10 +64,12 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 		}
 		
 		System.out.println();
-		System.out.println("This will take "
-				+ CommuniqueUtilities
-						.time((int) Math.round(expandedRecipients.size() * ((config.isRecruitment) ? 180.05 : 30.05)))
-				+ " to send " + expandedRecipients.size() + " telegrams.");
+		System.out
+				.println(
+						"This will take "
+								+ CommuniqueUtilities.time((int) Math
+										.round(expandedRecipients.size() * ((config.isRecruitment) ? 180.05 : 30.05)))
+								+ " to send " + expandedRecipients.size() + " telegrams.");
 		
 		if (!skipChecks) {
 			// Give a chance to check the recipients.

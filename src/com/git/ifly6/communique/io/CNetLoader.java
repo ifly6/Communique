@@ -35,10 +35,10 @@ import com.git.ifly6.communique.CommuniqueUtilities;
  */
 public class CNetLoader {
 	
-	public static final String	GA		= "http://www.nationstates.net/page=UN_delegate_votes/council=1";
-	public static final String	SC		= "http://www.nationstates.net/page=UN_delegate_votes/council=2";
-	public static final String	FOR		= "Votes For:";
-	public static final String	AGAINST	= "Votes Against:";
+	public static final String GA = "http://www.nationstates.net/page=UN_delegate_votes/council=1";
+	public static final String SC = "http://www.nationstates.net/page=UN_delegate_votes/council=2";
+	public static final String FOR = "Votes For:";
+	public static final String AGAINST = "Votes Against:";
 	
 	private static synchronized List<String> callUrl(URL url) throws IOException {
 		
