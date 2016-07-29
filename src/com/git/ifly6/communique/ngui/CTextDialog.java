@@ -38,65 +38,65 @@ import com.git.ifly6.communique.CommuniqueParser;
  * in that area and a close button.
  */
 public class CTextDialog extends JDialog {
-
+	
 	private static final Logger log = Logger.getLogger(CTextDialog.class.getName());
-
+	
 	private static final long serialVersionUID = CommuniqueParser.version;
-
+	
 	public CTextDialog(JFrame parent, String title, String message) {
-
+		
 		super(parent, title);
-
+		
 		Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize();
-
+		
 		int width = 300;
 		int height = 350;
 		setSize(width, height);
-
+		
 		setLocation(Math.round((sSize.width / 2) - (width / 2)), Math.round((sSize.height / 2) - (height / 2)));
-
+		
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(5, 5));
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
+		
 		setContentPane(panel);
-
+		
 		// TextArea
 		JTextArea textArea = new JTextArea(message);
 		textArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		textArea.setEditable(false);
 		textArea.setWrapStyleWord(true);
 		textArea.setLineWrap(true);
-
+		
 		panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
-
+		
 		// Button Panel
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new GridLayout(1, 4));
 		panel.add(buttonPanel, BorderLayout.SOUTH);
-
+		
 		for (int x = 0; x < 3; x++) {
 			buttonPanel.add(new JLabel());
 		}
-
+		
 		// Button
 		JButton closeButton = new JButton("Okay");
 		closeButton.setSelected(true);
 		closeButton.addActionListener(new ActionListener() {
-
+			
 			@Override public void actionPerformed(ActionEvent e) {
-
+				
 				log.finer("Closed CTextDialog");
-
+				
 				setVisible(false);
 				dispose();
 			}
-
+			
 		});
 		buttonPanel.add(closeButton);
-
+		
 		this.setVisible(true);
 		log.finer("Showing CTextDialog with: " + message);
-
+		
 	}
 }

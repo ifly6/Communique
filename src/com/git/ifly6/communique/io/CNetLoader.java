@@ -34,66 +34,66 @@ import com.git.ifly6.communique.CommuniqueUtilities;
  *
  */
 public class CNetLoader {
-
-	public static final String GA = "http://www.nationstates.net/page=UN_delegate_votes/council=1";
-	public static final String SC = "http://www.nationstates.net/page=UN_delegate_votes/council=2";
-	public static final String FOR = "Votes For:";
-	public static final String AGAINST = "Votes Against:";
-
+	
+	public static final String	GA		= "http://www.nationstates.net/page=UN_delegate_votes/council=1";
+	public static final String	SC		= "http://www.nationstates.net/page=UN_delegate_votes/council=2";
+	public static final String	FOR		= "Votes For:";
+	public static final String	AGAINST	= "Votes Against:";
+	
 	private static synchronized List<String> callUrl(URL url) throws IOException {
-
+		
 		try {
 			Thread.sleep(610);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
+		
 		URLConnection connection = url.openConnection();
 		connection.setRequestProperty("User-Agent", "Communique, maintained by Imperium Anglorum, ifly6@me.com");
 		List<String> output = IOUtils.readLines(new InputStreamReader(connection.getInputStream()));
-
+		
 		return output;
 	}
-
+	
 	public static String[] importAtVoteDelegates(String chamber, String side) {
-
+		
 		try {
-
+			
 			Document doc = Jsoup.parse(CommuniqueUtilities.joinListWith(callUrl(new URL(chamber)), '\n'));
 			Elements elements = doc.select("div.widebox td.UN p");
-
+			
 			Iterator<Element> eIter = elements.listIterator();
 			while (eIter.hasNext()) {
 				Element element = eIter.next();
-
+				
 				try {
 					Element strong = element.select("strong").get(0);
 					String text = strong.text();
-
+					
 					if (text.startsWith(side)) {
-
+						
 						String data = element.text().replace(side, "").replaceAll("\\(.+?\\)", "");
 						data = data.substring(data.indexOf(":") + 1, data.indexOf("and  individual WA member nations."));
-
+						
 						String[] delegates = data.split(",");
 						for (int i = 0; i < delegates.length; i++) {
 							delegates[i] = delegates[i].trim().toLowerCase().replace(" ", "_");
 						}
-
+						
 						return delegates;
-
+						
 					}
-
+					
 				} catch (IndexOutOfBoundsException e) {
 					continue;
 				}
 			}
-
+			
 		} catch (IOException e) {
 			// Do nothing and return null.
 		}
-
+		
 		return null;
 	}
-
+	
 }

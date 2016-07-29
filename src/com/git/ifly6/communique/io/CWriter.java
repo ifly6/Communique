@@ -23,23 +23,23 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 class CWriter {
-
-	private Path path;
-	private CConfig config;
-
+	
+	private Path	path;
+	private CConfig	config;
+	
 	public CWriter(Path path, CConfig config) {
 		this.path = path;
 		this.config = config;
 	}
-
+	
 	// Return boolean for errors.
 	public void write() throws IOException {
-
+		
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String response = gson.toJson(config);
-
+		
 		Files.write(path, Arrays.asList(response.split("\n")));
-
+		
 	}
-
+	
 }

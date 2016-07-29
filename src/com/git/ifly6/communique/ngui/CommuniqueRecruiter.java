@@ -68,28 +68,28 @@ import com.git.ifly6.javatelegram.JavaTelegram;
  *
  */
 public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements JTelegramLogger {
-
-	private static final Logger log = Logger.getLogger(CommuniqueRecruiter.class.getName());
-	public static final String[] regionList = new String[] { "the Pacific", "the North Pacific", "the East Pacific",
+	
+	private static final Logger		log			= Logger.getLogger(CommuniqueRecruiter.class.getName());
+	public static final String[]	regionList	= new String[] { "the Pacific", "the North Pacific", "the East Pacific",
 			"the West Pacific", "the South Pacific", "Lazarus", "Balder", "Osiris", "the Rejected Realms" };
-
+	
 	private Communique communique;
-
-	private JFrame frame;
-	private JTextField clientKeyField;
-	private JTextField secretKeyField;
-	private JTextField telegramIdField;
-	private JTextArea sentListArea;
-
+	
+	private JFrame		frame;
+	private JTextField	clientKeyField;
+	private JTextField	secretKeyField;
+	private JTextField	telegramIdField;
+	private JTextArea	sentListArea;
+	
 	Thread thread;
-
+	
 	// To keep track of the nations to whom we have sent a telegram
-	JLabel lblNationsCount;
-	JProgressBar progressBar;
-
+	JLabel			lblNationsCount;
+	JProgressBar	progressBar;
+	
 	// To keep track of the feeders
 	JList<String> excludeList;
-
+	
 	/**
 	 * Create the application, if necessary.
 	 */
@@ -98,34 +98,34 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		frame.setVisible(true);
 		this.communique = comm;
 	}
-
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-
+		
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+		
 		Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenDimensions.getWidth();
 		double sHeight = screenDimensions.getHeight();
-
+		
 		frame.setTitle("Communiqué Recruiter " + CommuniqueParser.version);
 		// frame.setBounds(100, 100, (int) Math.round(2 * sWidth / 3), (int) Math.round(2 * sHeight / 3));
-
+		
 		int windowWidth = 800;
 		int windowHeight = 500;
-
+		
 		frame.setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth,
 				windowHeight);
 		frame.setMinimumSize(new Dimension(600, 400));
-
+		
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		frame.setContentPane(panel);
 		panel.setLayout(new GridLayout(0, 2, 5, 5));
-
+		
 		JPanel leftPanel = new JPanel();
 		leftPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 		panel.add(leftPanel);
@@ -136,7 +136,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbl_panel_1.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				Double.MIN_VALUE };
 		leftPanel.setLayout(gbl_panel_1);
-
+		
 		JLabel lblClientKey = new JLabel("Client Key");
 		GridBagConstraints gbc_lblClientKey = new GridBagConstraints();
 		gbc_lblClientKey.anchor = GridBagConstraints.EAST;
@@ -144,7 +144,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_lblClientKey.gridx = 0;
 		gbc_lblClientKey.gridy = 0;
 		leftPanel.add(lblClientKey, gbc_lblClientKey);
-
+		
 		clientKeyField = new JTextField();
 		clientKeyField.setFont(new Font(Font.MONOSPACED, 0, 11));
 		clientKeyField.addMouseListener(new MouseAdapter() {
@@ -160,7 +160,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_clientKeyField.gridy = 0;
 		leftPanel.add(clientKeyField, gbc_clientKeyField);
 		clientKeyField.setColumns(10);
-
+		
 		JLabel lblSecretKey = new JLabel("Secret Key");
 		GridBagConstraints gbc_lblSecretKey = new GridBagConstraints();
 		gbc_lblSecretKey.anchor = GridBagConstraints.EAST;
@@ -168,7 +168,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_lblSecretKey.gridx = 0;
 		gbc_lblSecretKey.gridy = 1;
 		leftPanel.add(lblSecretKey, gbc_lblSecretKey);
-
+		
 		secretKeyField = new JTextField();
 		secretKeyField.setFont(new Font(Font.MONOSPACED, 0, 11));
 		secretKeyField.addMouseListener(new MouseAdapter() {
@@ -184,7 +184,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_secretKeyField.gridy = 1;
 		leftPanel.add(secretKeyField, gbc_secretKeyField);
 		secretKeyField.setColumns(10);
-
+		
 		JLabel lblTelegramId = new JLabel("Telegram ID");
 		GridBagConstraints gbc_lblTelegramId = new GridBagConstraints();
 		gbc_lblTelegramId.anchor = GridBagConstraints.EAST;
@@ -192,7 +192,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_lblTelegramId.gridx = 0;
 		gbc_lblTelegramId.gridy = 2;
 		leftPanel.add(lblTelegramId, gbc_lblTelegramId);
-
+		
 		telegramIdField = new JTextField();
 		telegramIdField.setFont(new Font(Font.MONOSPACED, 0, 11));
 		telegramIdField.addMouseListener(new MouseAdapter() {
@@ -208,7 +208,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_telegramIdField.gridy = 2;
 		leftPanel.add(telegramIdField, gbc_telegramIdField);
 		telegramIdField.setColumns(10);
-
+		
 		JSeparator separator = new JSeparator();
 		GridBagConstraints gbc_separator = new GridBagConstraints();
 		gbc_separator.gridwidth = 3;
@@ -216,7 +216,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_separator.gridx = 0;
 		gbc_separator.gridy = 3;
 		leftPanel.add(separator, gbc_separator);
-
+		
 		JLabel lblExclude = new JLabel("Exclude:");
 		GridBagConstraints gbc_lblExclude = new GridBagConstraints();
 		gbc_lblExclude.anchor = GridBagConstraints.EAST;
@@ -224,33 +224,33 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_lblExclude.gridx = 0;
 		gbc_lblExclude.gridy = 4;
 		leftPanel.add(lblExclude, gbc_lblExclude);
-
+		
 		JButton btnSendButton = new JButton("Send");
 		btnSendButton.addActionListener(new ActionListener() {
-
+			
 			@Override public void actionPerformed(ActionEvent e) {
-
+				
 				if (btnSendButton.getText().equals("Send")) {		// STARTING UP
-
+					
 					btnSendButton.setText("Stop");
 					send();
-
+					
 				} else {	// SHUTTING DOWN
-
+					
 					thread.interrupt();
 					Path savePath = communique.showFileChooser(frame, FileDialog.SAVE);
-
+					
 					// Cancel saving if null
 					if (savePath == null) { return; }
 					save(savePath);
-
+					
 					// Dispose the components
 					frame.setVisible(false);
 					frame.dispose();
 				}
 			}
 		});
-
+		
 		excludeList = new JList<String>(regionList);
 		// excludeList.setFont(new Font(Font.MONOSPACED, 0, 11));
 		excludeList.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -264,7 +264,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_excludeList.gridy = 4;
 		JScrollPane scrollPane = new JScrollPane(excludeList);
 		leftPanel.add(scrollPane, gbc_excludeList);
-
+		
 		JButton btnClear = new JButton("Clear");
 		btnClear.addActionListener(al -> {
 			excludeList.clearSelection();
@@ -275,7 +275,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_btnClear.gridx = 0;
 		gbc_btnClear.gridy = 5;
 		leftPanel.add(btnClear, gbc_btnClear);
-
+		
 		JLabel lblSentTo = new JLabel("Sent to");
 		GridBagConstraints gbc_lblSentTo = new GridBagConstraints();
 		gbc_lblSentTo.anchor = GridBagConstraints.EAST;
@@ -283,7 +283,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_lblSentTo.gridx = 0;
 		gbc_lblSentTo.gridy = 9;
 		leftPanel.add(lblSentTo, gbc_lblSentTo);
-
+		
 		lblNationsCount = new JLabel("0 nations");
 		lblNationsCount.setText("0 nations");
 		GridBagConstraints gbc_lblNationscount = new GridBagConstraints();
@@ -292,7 +292,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_lblNationscount.gridx = 1;
 		gbc_lblNationscount.gridy = 9;
 		leftPanel.add(lblNationsCount, gbc_lblNationscount);
-
+		
 		progressBar = new JProgressBar();
 		progressBar.setMaximum(180);
 		if (SystemUtils.IS_OS_MAC) {
@@ -314,29 +314,29 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		gbc_btnNewButton.gridx = 0;
 		gbc_btnNewButton.gridy = 11;
 		leftPanel.add(btnSendButton, gbc_btnNewButton);
-
+		
 		JPanel rightPanel = new JPanel();
 		panel.add(rightPanel);
 		rightPanel.setLayout(new BorderLayout(0, 0));
-
+		
 		sentListArea = new JTextArea("");
 		sentListArea.setEditable(false);
 		sentListArea.setLineWrap(true);
 		sentListArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		sentListArea.setFont(new Font(Font.MONOSPACED, 0, 11));
 		rightPanel.add(new JScrollPane(sentListArea));
-
+		
 		JLabel lblListOfNations = new JLabel(
 				"<html>List of nations to which a recruitment telegram has been sent in the current session.</html>");
 		lblListOfNations.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 0));
 		rightPanel.add(lblListOfNations, BorderLayout.NORTH);
-
+		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
-
+		
 		JMenu mnWindow = new JMenu("Window");
 		menuBar.add(mnWindow);
-
+		
 		JMenuItem mntmMinimise = new JMenuItem("Minimise");
 		Communique.getOSKeyStroke(KeyEvent.VK_M);
 		mntmMinimise.addActionListener(new ActionListener() {
@@ -348,66 +348,66 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		});
 		mnWindow.add(mntmMinimise);
 	}
-
+	
 	@Override public void log(String input) {
 		// Filter out the stuff we don't care about
 		if (!input.equals("API Queries Complete.")) {
 			System.err.println(input);
 		}
 	}
-
+	
 	/**
 	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
 	 */
 	@Override public void sentTo(String recipient, int x, int length) {
-
+		
 		sentList.add(recipient);
 		lblNationsCount.setText(sentList.size() + ((sentList.size() == 1) ? " nation" : " nations"));
-
+		
 		if (!StringUtils.isEmpty(sentListArea.getText())) {
 			sentListArea.append("\n/" + recipient);
 		} else {
 			sentListArea.setText("/" + recipient);
 		}
 	}
-
+	
 	private HashSet<String> listProscribedRegions() {
 		HashSet<String> hashSet = new HashSet<>();
 		int[] sIndices = excludeList.getSelectedIndices();
 		for (int x : sIndices) {
 			hashSet.add(regionList[x]);
 		}
-
+		
 		return hashSet;
 	}
-
+	
 	/**
 	 * @param file
 	 */
 	private void save(Path savePath) {
-
+		
 		log.info("User elected to save file at " + savePath.toAbsolutePath().toString());
-
+		
 		// If it does not end in txt, make it end in txt
 		if (!savePath.toAbsolutePath().toString().endsWith(".txt")) {
 			savePath = Paths.get(savePath.toAbsolutePath().toString() + ".txt");
 		}
-
+		
 		// Prepare to save by:
 		// * Creating a configuration file up to specifications
 		// * Importing that configuration into Communique
 		// * Have Communique save that file
 		// ===================
 		CConfig config = new CConfig();
-
+		
 		// Set the many flags that need to be set
 		config.isDelegatePrioritised = false;
 		config.isRandomised = false;
 		config.isRecruitment = true;
 		config.defaultVersion();
-
+		
 		config.keys = new JTelegramKeys(clientKeyField.getText(), secretKeyField.getText(), telegramIdField.getText());
-
+		
 		// Create and set recipients and sent-lists
 		List<String> recipients = new ArrayList<>(0);
 		recipients.add("flag:recruit");
@@ -415,31 +415,31 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 			recipients.add("flag:recruit -- region:" + element);
 		}
 		config.recipients = recipients.toArray(new String[recipients.size()]);
-
+		
 		config.sentList = sentList.toArray(new String[sentList.size()]);
-
+		
 		// Sync up with Communique
 		communique.importState(config);
-
+		
 		// Save
 		try {
 			CLoader loader = new CLoader(savePath);
 			loader.save(communique.exportState());
-
+			
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 	}
-
+	
 	public boolean isDisplayable() {
 		return frame.isDisplayable();
 	}
-
+	
 	public void toFront() {
 		frame.setVisible(true);
 		frame.toFront();
 	}
-
+	
 	/**
 	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setClientKey(java.lang.String)
 	 */
@@ -447,7 +447,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		super.setClientKey(key);
 		clientKeyField.setText(key);
 	}
-
+	
 	/**
 	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setSecretKey(java.lang.String)
 	 */
@@ -455,7 +455,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		super.setSecretKey(key);
 		secretKeyField.setText(key);
 	}
-
+	
 	/**
 	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#setTelegramId(java.lang.String)
 	 */
@@ -463,31 +463,31 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		super.setTelegramId(id);
 		telegramIdField.setText(id);
 	}
-
+	
 	@Override public void setWithCConfig(CConfig config) {
 		super.setWithCConfig(config);
 		lblNationsCount.setText(sentList.size() + ((sentList.size() == 1) ? " nation" : " nations"));
 	};
-
+	
 	/**
 	 * @see com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter#send()
 	 */
 	@Override public void send() {
 		Runnable runner = new Runnable() {
 			@Override public void run() {
-
+				
 				boolean isSending = true;
 				while (isSending) {
-
+					
 					proscribedRegions = listProscribedRegions();
-
+					
 					// Otherwise, start sending.
 					JavaTelegram client = new JavaTelegram(CommuniqueRecruiter.this);
 					client.setKeys(new JTelegramKeys(clientKeyField.getText(), secretKeyField.getText(),
 							telegramIdField.getText()));
 					client.setRecipient(getRecipient());
 					client.connect();
-
+					
 					for (int x = 0; x < 180; x++) {
 						try {
 							progressBar.setValue(x);
@@ -500,7 +500,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 				}
 			}
 		};
-
+		
 		thread = new Thread(runner);
 		thread.start();
 	}
