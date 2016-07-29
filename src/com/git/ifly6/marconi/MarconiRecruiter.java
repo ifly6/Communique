@@ -28,8 +28,8 @@ import com.git.ifly6.javatelegram.JavaTelegram;
  */
 public class MarconiRecruiter extends AbstractCommuniqueRecruiter {
 	
-	private Marconi	marconi;
-	private Thread	thread;
+	private Marconi marconi;
+	private Thread thread;
 	
 	/**
 	 * @param marconi

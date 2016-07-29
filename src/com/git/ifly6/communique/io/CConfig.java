@@ -46,14 +46,14 @@ public class CConfig implements java.io.Serializable {
 	
 	public int version;
 	
-	public boolean	isRecruitment;
-	public boolean	isRandomised;
-	public boolean	isDelegatePrioritised;
+	public boolean isRecruitment;
+	public boolean isRandomised;
+	public boolean isDelegatePrioritised;
 	
 	public JTelegramKeys keys;
 	
-	public String[]	recipients;
-	public String[]	sentList;
+	public String[] recipients;
+	public String[] sentList;
 	
 	public int defaultVersion() {
 		this.version = CommuniqueParser.version;

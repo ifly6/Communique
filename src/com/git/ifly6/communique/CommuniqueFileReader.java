@@ -46,8 +46,8 @@ import com.git.ifly6.javatelegram.util.JTelegramException;
 	
 	List<String> fileContents = new ArrayList<String>(0);
 	
-	private boolean	recruitment;
-	private boolean	randomised;
+	private boolean recruitment;
+	private boolean randomised;
 	
 	/**
 	 * <code>information</code> encapsulates the returning information of the JTelegramKeys and the recipients.

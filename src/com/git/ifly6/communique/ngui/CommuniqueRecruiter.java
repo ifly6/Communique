@@ -69,23 +69,23 @@ import com.git.ifly6.javatelegram.JavaTelegram;
  */
 public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements JTelegramLogger {
 	
-	private static final Logger		log			= Logger.getLogger(CommuniqueRecruiter.class.getName());
-	public static final String[]	regionList	= new String[] { "the Pacific", "the North Pacific", "the East Pacific",
+	private static final Logger log = Logger.getLogger(CommuniqueRecruiter.class.getName());
+	public static final String[] regionList = new String[] { "the Pacific", "the North Pacific", "the East Pacific",
 			"the West Pacific", "the South Pacific", "Lazarus", "Balder", "Osiris", "the Rejected Realms" };
 	
 	private Communique communique;
 	
-	private JFrame		frame;
-	private JTextField	clientKeyField;
-	private JTextField	secretKeyField;
-	private JTextField	telegramIdField;
-	private JTextArea	sentListArea;
+	private JFrame frame;
+	private JTextField clientKeyField;
+	private JTextField secretKeyField;
+	private JTextField telegramIdField;
+	private JTextArea sentListArea;
 	
 	Thread thread;
 	
 	// To keep track of the nations to whom we have sent a telegram
-	JLabel			lblNationsCount;
-	JProgressBar	progressBar;
+	JLabel lblNationsCount;
+	JProgressBar progressBar;
 	
 	// To keep track of the feeders
 	JList<String> excludeList;
