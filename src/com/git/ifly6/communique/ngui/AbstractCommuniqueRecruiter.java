@@ -75,21 +75,23 @@ public abstract class AbstractCommuniqueRecruiter {
 	public String getRecipient() {
 		
 		try {
-			recipients = fetcher.getNew();
-			// If recipients cannot be got, try again.
 			
+			recipients = fetcher.getNew();
+
+			for (String element : recipients) {
+				if (!sentList.contains(element) && !isProscribed(element, proscribedRegions)) { return element; }
+			}
+
+			// If the filtering failed, then simply just return the newest nation.
+			return recipients.get(0);
+
 		} catch (JTelegramException e) {
 			e.printStackTrace();
+			System.err.println("Error. Retrying recipients list.");
+			
+			// If recipients cannot be got, try again.
 			return getRecipient();
 		}
-		// System.out.println("var\t" + Arrays.toString(recipients));
-		
-		for (String element : recipients) {
-			if (!sentList.contains(element) && !isProscribed(element, proscribedRegions)) { return element; }
-		}
-		
-		// If the filtering failed, then simply just return the newest nation.
-		return recipients.get(0);
 	}
 	
 	/**
