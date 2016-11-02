@@ -140,7 +140,7 @@ public class CommuniqueParser {
 	 * is provided as a list of tags, each on a list. This processes the operators.
 	 *
 	 * @param tagsList a <code>List&lt;String&gt;</code> of tags */
-	private Set<String> expandList(List<String> tagsList) {
+	private LinkedHashSet<String> expandList(List<String> tagsList) {
 		List<String> expandedList = new ArrayList<String>();
 
 		for (int x = 0; x < tagsList.size(); x++) {
@@ -230,15 +230,15 @@ public class CommuniqueParser {
 	public String[] filterAndParse(String[] input) {
 		
 		// Filter out comments and empty lines
-		input = Arrays.stream(input).filter(p -> !p.startsWith("#") && !StringUtils.isEmpty(p)).toArray(String[]::new);
+		input = Arrays.stream(input).filter(s -> !s.startsWith("#") && !StringUtils.isEmpty(s)).toArray(String[]::new);
 
 		// Form a list of all the nation we want in this list.
-		List<String> recipients = Arrays.stream(input).filter(s -> !s.startsWith("/")).collect(Collectors.toList());
-		recipients.stream().forEach(s -> s.toLowerCase().replace(" ", "_").trim());
+		List<String> recipients = Arrays.stream(input).filter(s -> !s.startsWith("/"))
+				.map(s -> s.toLowerCase().trim().replace(" ", "_")).collect(Collectors.toList());
 
 		// Form a list of all nations we can't have in this list.
-		List<String> sentList = Arrays.stream(input).filter(s -> s.startsWith("/")).collect(Collectors.toList());
-		sentList.stream().forEach(s -> s.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_"));
+		List<String> sentList = Arrays.stream(input).filter(s -> s.startsWith("/"))
+				.map(s -> s.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_")).collect(Collectors.toList());
 
 		List<String> list = recipientsParse(recipients, sentList);
 		return list.toArray(new String[list.size()]);
@@ -254,8 +254,8 @@ public class CommuniqueParser {
 	public List<String> recipientsParse(List<String> recipients, List<String> sentList) {
 		
 		// Expand the lists.
-		Set<String> recipientsExpanded = expandList(recipients);
-		Set<String> sentlistExpanded = expandList(sentList);
+		LinkedHashSet<String> recipientsExpanded = expandList(recipients);
+		LinkedHashSet<String> sentlistExpanded = expandList(sentList);
 
 		// Filter using new algorithm
 		List<String> finalRecipients = new ArrayList<String>();
