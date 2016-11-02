@@ -24,6 +24,7 @@ import java.util.Set;
 import com.git.ifly6.communique.io.CConfig;
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
 import com.git.ifly6.javatelegram.util.JTelegramException;
+import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSNation;
 
 public abstract class AbstractCommuniqueRecruiter {
@@ -65,8 +66,8 @@ public abstract class AbstractCommuniqueRecruiter {
 
 	/** Returns a recipient based on the new recipients list from the NS API, filtered by whether it is proscribed. Note
 	 * that any issues or problems are dealt with my defaulting to the newest nation, ignoring the proscription filter.
-	 *
-	 * @return a <code>String</code> with the recipient */
+	 * It also filters by whether the nation is recruitable.
+	 * @return a <code>String</code> with the name of the recipient */
 	public String getRecipient() {
 		
 		try {
@@ -76,15 +77,18 @@ public abstract class AbstractCommuniqueRecruiter {
 			for (String element : recipients) {
 				
 				boolean match = true;
+				NSNation nation = new NSNation(element);
 				
 				// @formatter:off
-				if (sentList.contains(element)) { match = false; }
-				if (isProscribed(element)) { match = false; }
-
 				try {
-					if (new NSNation(element).populateData().isRecruitable() == false) { match = false; }
+					if (sentList.contains(element)) { match = false; }
+					if (isProscribed(nation)) { match = false; }
+					if (!nation.hasData()) { nation.populateData(); }
+					if (nation.isRecruitable() == false) { match = false; }
 				} catch (IOException e) {
 					// do nothing and assume that the nation can be recruited if an exception is thrown
+				} catch (NSException e) { // If the nation no longer exists, set it to false.
+					match = false;
 				}
 				// @formatter:on
 				
@@ -110,14 +114,15 @@ public abstract class AbstractCommuniqueRecruiter {
 	 *
 	 * @param nationName
 	 * @return <code>boolean</code> on whether it is proscribed */
-	public boolean isProscribed(String element) {
+	public boolean isProscribed(NSNation nation) {
 		
-		NSNation nation = new NSNation(element);
-		try {
-			nation.populateData();
-		} catch (IOException e) {
-			// Failure to fetch information means false
-			return false;
+		if (!nation.hasData()) {
+			try {
+				nation.populateData();
+			} catch (IOException e) {
+				// Failure to fetch information means false
+				return false;
+			}
 		}
 
 		String nRegion = nation.getRegion().replaceAll(" ", "_");
