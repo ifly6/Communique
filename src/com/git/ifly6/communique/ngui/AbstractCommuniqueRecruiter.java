@@ -24,7 +24,6 @@ import java.util.Set;
 import com.git.ifly6.communique.io.CConfig;
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
 import com.git.ifly6.javatelegram.util.JTelegramException;
-import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSNation;
 
 public abstract class AbstractCommuniqueRecruiter {
@@ -71,29 +70,25 @@ public abstract class AbstractCommuniqueRecruiter {
 	public String getRecipient() {
 		
 		try {
-			
 			recipients = fetcher.getNew();
-			
 			for (String element : recipients) {
 				
 				boolean match = true;
 				NSNation nation = new NSNation(element);
-				
-				// @formatter:off
+
 				try {
+					// @formatter:off
 					if (sentList.contains(element)) { match = false; }
 					if (isProscribed(nation)) { match = false; }
-					if (!nation.hasData()) { nation.populateData(); }
 					if (nation.isRecruitable() == false) { match = false; }
-				} catch (IOException e) {
-					// do nothing and assume that the nation can be recruited if an exception is thrown
-				} catch (NSException e) { // If the nation no longer exists, set it to false.
+					// @formatter:on
+				} catch (RuntimeException e) { // If there are any issues, set it to false.
 					match = false;
 				}
-				// @formatter:on
-				
+
 				// Return if match is still true
 				if (match) { return element; }
+				
 			}
 			
 			// If the filtering failed, then simply just return the newest nation.
@@ -101,9 +96,6 @@ public abstract class AbstractCommuniqueRecruiter {
 			
 		} catch (JTelegramException e) {
 			e.printStackTrace();
-			System.err.println("Error. Retrying recipients list.");
-			
-			// If recipients cannot be got, try again.
 			return getRecipient();
 		}
 	}

@@ -117,9 +117,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	private CommuniqueRecruiter recruiter;
 	
 	private JProgressBar progressBar;
-	
 	private JLabel progressLabel;
-
 	private Timer timer;
 	
 	/** Launch the application. */
@@ -797,6 +795,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			fChooser.setDialogTitle("Choose file...");
 			
 			int returnVal = JFileChooser.CANCEL_OPTION;
+			// returnVal = (type == FileDialog.SAVE) ? fChooser.showSaveDialog(parent) :
+			// fChooser.showOpenDialog(parent);
 			if (type == FileDialog.SAVE) {
 				returnVal = fChooser.showSaveDialog(parent);
 			} else {
@@ -859,7 +859,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				client.setRecipients(parsedRecipients);	// Set recipients
 				client.setKeys(new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId.getText()));
 				
-				// Set Recruitment Status, JavaTelegram defaults to true
+				// Set recruitment Status, JavaTelegram defaults to true
 				client.setRecruitment(chckbxRecruitment.isSelected());
 				
 				// Save client key
