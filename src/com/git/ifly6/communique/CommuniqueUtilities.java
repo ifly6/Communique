@@ -22,45 +22,53 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
-/**
- * This class is nothing more than a container for utility methods used inside Communique programmes.
+import org.apache.commons.lang3.StringUtils;
+
+/** This class is nothing more than a container for utility methods used inside Communique programmes.
  *
- * @author ifly6
- */
+ * @author ifly6 */
 public class CommuniqueUtilities {
-	
+
 	private CommuniqueUtilities() {
 	}
-	
-	/**
-	 * Randomises an array's sequence of contents.
-	 *
+
+	/** Randomises an array's sequence of contents.
 	 * @param inputArray which is to be shuffled
-	 * @return a copy of the inputArray which is shuffled randomly
-	 */
+	 * @return a copy of the inputArray which is shuffled randomly */
 	public static Object[] randomiseArray(Object[] inputArray) {
-		
 		Random rnd = ThreadLocalRandom.current();
 		for (int i = inputArray.length - 1; i > 0; i--) {
-			
 			int index = rnd.nextInt(i + 1);
-			
 			Object a = inputArray[index];
 			inputArray[index] = inputArray[i];
 			inputArray[i] = a;
 		}
-		
 		return inputArray;
 	}
-	
-	/**
-	 * This changes raw seconds directly into days, hours, minutes, and seconds. Very helpful for creating a system of
+
+	/** Randomises an array's sequence of contents with a given seed, which allows for a consistent randomisation order.
+	 * Obviously, this shouldn't be used for anything really all that important.
+	 * @param inputArray which is to be shuffled
+	 * @param seed which is used in the shuffling
+	 * @return a copy of the inputArray which is shuffled randomly */
+	public static Object[] randomiseArray(Object[] inputArray, long seed) {
+		Random rnd = new Random(seed);
+		for (int i = inputArray.length - 1; i > 0; i--) {
+			int index = rnd.nextInt(i + 1);
+			Object a = inputArray[index];
+			inputArray[index] = inputArray[i];
+			inputArray[i] = a;
+		}
+		return inputArray;
+	}
+
+	/** This changes raw seconds directly into days, hours, minutes, and seconds. Very helpful for creating a system of
 	 * information which humans can use and are not just machine constructs.
 	 *
 	 * @param seconds elapsed
-	 * @return a string in days, hours, minutes, and seconds
-	 */
+	 * @return a string in days, hours, minutes, and seconds */
 	public static String time(int seconds) {
 		int minutes = seconds / 60;
 		seconds -= minutes * 60;
@@ -70,55 +78,43 @@ public class CommuniqueUtilities {
 		hours -= days * 24;
 		return days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
 	}
-	
-	/**
-	 * This filters out all new lines from an array.
-	 *
+
+	/** This filters out all new lines from an array.
 	 * @param array which contains new lines
-	 * @return the array without new lines
-	 */
+	 * @return the array without new lines */
 	public static String[] filterNewLines(String[] array) {
 		return Arrays.stream(array).filter(s -> !s.equals("\n")).toArray(String[]::new);
-		// ArrayList<String> temp = new ArrayList<String>();
-		// for (String element : array) {
-		// if (!element.equals("\n")) {
-		// temp.add(element);
-		// }
-		// }
-		//
-		// return temp.toArray(new String[temp.size()]);
 	}
 	
+	/** This filters out all new lines from a list.
+	 * @param list which contains new lines
+	 * @return the list without new lines */
+	public static List<String> filterNewLines(List<String> list) {
+		return list.stream().filter(s -> StringUtils.isEmpty(s)).collect(Collectors.toList());
+	}
+
 	public static String getCurrentDate() {
 		DateFormat dateDays = new SimpleDateFormat("yyyy-MM-dd");
 		return dateDays.format(new Date());
 	}
-	
+
 	public static String getCurrentDateAndTime() {
 		DateFormat dateWithTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		return dateWithTime.format(new Date());
 	}
-	
+
+	/** @see com.git.ifly6.CommuniqueUtilities#joinListWith */
 	public static String joinListWith(List<String> input, char joinChar) {
 		return joinListWith(input, String.valueOf(joinChar));
 	}
-	
+
+	/** Joins <code>List&lt;String&gt;</code> with a given joining character. There isn't really any need to do this
+	 * anymore, since a list can be joined using
+	 * <code>list.stream().collect(Collectors.joining(joiningCharacter))</code>.
+	 * @param input <code>List&lt;String&gt;</code>
+	 * @param joinChar
+	 * @return a reduced and joined <code>String</code> */
 	public static String joinListWith(List<String> input, CharSequence joinChar) {
-		
-		// If this is null
-		if (input == null) { return "null"; }
-		
-		// If there are no elements
-		// Based on the Arrays.toString in java.util.Arrays
-		int iMax = input.size() - 1;
-		if (iMax == -1) { return ""; }
-		
-		// If there are many elements
-		StringBuilder builder = new StringBuilder();
-		for (int x = 0;; x++) {
-			builder.append(input.get(x));
-			if (x == iMax) { return builder.toString(); }
-			builder.append(joinChar);
-		}
+		return input.stream().collect(Collectors.joining(joinChar));
 	}
 }
