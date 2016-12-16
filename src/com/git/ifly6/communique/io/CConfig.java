@@ -14,8 +14,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 package com.git.ifly6.communique.io;
 
-import com.git.ifly6.communique.CommuniqueParser;
 import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.communique.data.CommuniqueParser;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 
 /**

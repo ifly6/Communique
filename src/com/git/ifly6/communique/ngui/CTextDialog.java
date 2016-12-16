@@ -31,7 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import com.git.ifly6.communique.CommuniqueParser;
+import com.git.ifly6.communique.data.CommuniqueParser;
 
 /** When constructed, <code>CTextDialog</code> shows a JTextArea in the centre of the frame. It then displays some text
  * in that area and a close button. */

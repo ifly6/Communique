@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
+import com.git.ifly6.communique.data.CommuniqueParser;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.util.JTelegramException;
 
