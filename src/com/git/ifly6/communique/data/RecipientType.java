@@ -20,48 +20,71 @@ import java.util.stream.Stream;
 
 import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
-/** @author ifly6 */
+/** Defines a number of recipient types and provides methods to decompose those types into lists of
+ * <code>CommuniqueRecipient</code>.
+ * @author ifly6 */
 public enum RecipientType {
-
+	
+	/** Declares the recipient is a nation and requires no further processing in decomposition. */
 	NATION {
 		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
 			return Stream.of(cr).collect(Collectors.toList());
 		}
 	},
-
+	
+	/** Declares the recipient is a region, allowing for decomposition into a list of {@link CommuniqueRecipient}
+	 * nations in the region. */
 	REGION {
 		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
-			return stringToCr(JInfoFetcher.getInstance().getRegion(cr.getName()), cr);
+			return stringsToCr(JInfoFetcher.getInstance().getRegion(cr.getName()), cr);
 		}
 	},
-
+	
+	/** Declares the recipient is one of various tags, which can be used to get the members of the World Assembly,
+	 * delegates thereof, or new nations. */
 	TAG {
 		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
 			String tag = cr.getName();
-
+			
 			if (tag.equalsIgnoreCase("wa")) {
-				return stringToCr(JInfoFetcher.getInstance().getWAMembers(), cr);
-
-			} else if (tag.equalsIgnoreCase("delegates")) {
-				return stringToCr(JInfoFetcher.getInstance().getDelegates(), cr);
+				return stringsToCr(JInfoFetcher.getInstance().getWAMembers(), cr);
 				
-			} else if (tag.equalsIgnoreCase("new")) { return stringToCr(JInfoFetcher.getInstance().getNew(), cr); }
+			} else if (tag.equalsIgnoreCase("delegates")) {
+				return stringsToCr(JInfoFetcher.getInstance().getDelegates(), cr);
 
+			} else if (tag.equalsIgnoreCase("new")) { return stringsToCr(JInfoFetcher.getInstance().getNew(), cr); }
+			
 			return Stream.of(cr).collect(Collectors.toList());
 		}
 	};
-	
+
+	/** Allows for the recipient type to be compatible with the NationStates telegram system by providing the same tag
+	 * nomenclature. */
 	@Override public String toString() {
 		return super.toString().toLowerCase();
 	}
-	
-	/** @param communiqueRecipient
-	 * @return */
+
+	/** Decomposes a tag into a list of <code>CommuniqueRecipient</code> which can then be more easily used.
+	 * @param communiqueRecipient to be decomposed
+	 * @return a list of <code>CommuniqueRecipient</code> */
 	public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
-		return Stream.of(cr).collect(Collectors.toList());
+		return NATION.decompose(cr);
 	}
 
-	private static List<CommuniqueRecipient> stringToCr(List<String> list, CommuniqueRecipient cr) {
-		return list.stream().map(s -> new CommuniqueRecipient(cr.getFilterType(), NATION, s)).collect(Collectors.toList());
+	/** Translates a nation reference names into a valid <code>CommuniqueRecipient</code>s.
+	 * @param s, containing a nation reference name
+	 * @param cr from which to extract type data
+	 * @return a CommuniqueRecipient with the filter type defined in <code>cr</code>, nation recipient type, and same
+	 *         reference name as given */
+	private static CommuniqueRecipient stringToCr(String s, CommuniqueRecipient cr) {
+		return new CommuniqueRecipient(cr.getFilterType(), NATION, s);
+	}
+	
+	/** Translates a list of nation reference names into a list of valid <code>CommuniqueRecipient</code>s.
+	 * @param list of nation reference names
+	 * @param cr from which to extract type data
+	 * @return list of CommuniqueRecipients */
+	private static List<CommuniqueRecipient> stringsToCr(List<String> list, CommuniqueRecipient cr) {
+		return list.stream().map(s -> stringToCr(s, cr)).collect(Collectors.toList());
 	}
 }

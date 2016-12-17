@@ -17,20 +17,16 @@ package com.git.ifly6.communique;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
 
 /** This class is nothing more than a container for utility methods used inside Communique programmes.
  *
  * @author ifly6 */
 public class CommuniqueUtilities {
 
+	// Prevent initialisation
 	private CommuniqueUtilities() {
 	}
 
@@ -65,8 +61,7 @@ public class CommuniqueUtilities {
 	}
 
 	/** This changes raw seconds directly into days, hours, minutes, and seconds. Very helpful for creating a system of
-	 * information which humans can use and are not just machine constructs.
-	 *
+	 * information which humans can use.
 	 * @param seconds elapsed
 	 * @return a string in days, hours, minutes, and seconds */
 	public static String time(int seconds) {
@@ -79,20 +74,6 @@ public class CommuniqueUtilities {
 		return days + "d:" + hours + "h:" + minutes + "m:" + seconds + "s";
 	}
 
-	/** This filters out all new lines from an array.
-	 * @param array which contains new lines
-	 * @return the array without new lines */
-	public static String[] filterNewLines(String[] array) {
-		return Arrays.stream(array).filter(s -> !s.equals("\n")).toArray(String[]::new);
-	}
-	
-	/** This filters out all new lines from a list.
-	 * @param list which contains new lines
-	 * @return the list without new lines */
-	public static List<String> filterNewLines(List<String> list) {
-		return list.stream().filter(s -> StringUtils.isEmpty(s)).collect(Collectors.toList());
-	}
-
 	public static String getCurrentDate() {
 		DateFormat dateDays = new SimpleDateFormat("yyyy-MM-dd");
 		return dateDays.format(new Date());
@@ -101,20 +82,5 @@ public class CommuniqueUtilities {
 	public static String getCurrentDateAndTime() {
 		DateFormat dateWithTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		return dateWithTime.format(new Date());
-	}
-
-	/** @see com.git.ifly6.CommuniqueUtilities#joinListWith */
-	public static String joinListWith(List<String> input, char joinChar) {
-		return joinListWith(input, String.valueOf(joinChar));
-	}
-
-	/** Joins <code>List&lt;String&gt;</code> with a given joining character. There isn't really any need to do this
-	 * anymore, since a list can be joined using
-	 * <code>list.stream().collect(Collectors.joining(joiningCharacter))</code>.
-	 * @param input <code>List&lt;String&gt;</code>
-	 * @param joinChar
-	 * @return a reduced and joined <code>String</code> */
-	public static String joinListWith(List<String> input, CharSequence joinChar) {
-		return input.stream().collect(Collectors.joining(joinChar));
 	}
 }
