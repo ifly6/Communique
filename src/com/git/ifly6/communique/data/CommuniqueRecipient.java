@@ -51,28 +51,28 @@ public class CommuniqueRecipient {
 		return recipientType.decompose(this);
 	}
 	
-	public static CommuniqueRecipient parseRecipient(String string) {
+	public static CommuniqueRecipient parseRecipient(String s) {
 		
-		string = string.trim();
+		s = s.trim();
 
 		FilterType fType = FilterType.NORMAL;
 		for (FilterType type : FilterType.values()) {
-			if (string.startsWith(type.toString())) {
+			if (s.startsWith(type.toString())) {
 				fType = type;
-				string = string.substring(type.toString().length());
+				s = s.substring(type.toString().length());
 				break;
 			}
 		}
 		
 		RecipientType rType = RecipientType.NATION;
 		for (RecipientType type : RecipientType.values()) {
-			if (string.startsWith(type.toString())) {
+			if (s.startsWith(type.toString())) {
 				rType = type;
-				string = string.substring(type.toString().length());
+				s = s.substring(type.toString().length());
 				break;
 			}
 		}
 		
-		return new CommuniqueRecipient(fType, rType, string);
+		return new CommuniqueRecipient(fType, rType, s.substring(s.indexOf(":") + 1, s.length()));
 	}
 }

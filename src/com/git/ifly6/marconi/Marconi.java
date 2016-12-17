@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
-import com.git.ifly6.communique.data.CommuniqueParser;
+import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.io.CConfig;
 import com.git.ifly6.communique.ngui.AbstractCommunique;
 import com.git.ifly6.javatelegram.JTelegramLogger;
@@ -45,9 +45,9 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 	public void send() {
 		
 		// Process the Recipients list into a string with two columns.
-		CommuniqueParser parser = new CommuniqueParser();
-		List<String> expandedRecipients = parser.recipientsParse(Arrays.asList(config.recipients),
-				Arrays.asList(config.sentList));
+		Communique7Parser parser = new Communique7Parser();
+		List<String> expandedRecipients = parser.apply(Arrays.asList(ArrayUtils.addAll(config.recipients, config.sentList)))
+				.getRecipients();
 		
 		// If it needs to be randomised, do so.
 		if (config.isRandomised) {
@@ -65,12 +65,10 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 		}
 		
 		System.out.println();
-		System.out
-				.println(
-						"This will take "
-								+ CommuniqueUtilities.time((int) Math
-										.round(expandedRecipients.size() * (config.isRecruitment ? 180.05 : 30.05)))
-								+ " to send " + expandedRecipients.size() + " telegrams.");
+		System.out.println("This will take "
+				+ CommuniqueUtilities
+						.time((int) Math.round(expandedRecipients.size() * (config.isRecruitment ? 180.05 : 30.05)))
+				+ " to send " + expandedRecipients.size() + " telegrams.");
 		
 		if (!skipChecks) {
 			// Give a chance to check the recipients.
@@ -132,7 +130,7 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 	@Override public CConfig exportState() {
 		
 		// Remove duplicates from the sentList
-		config.sentList = Stream.of(config.sentList).distinct().map(s -> s.startsWith("/") ? s.substring(1) : s)
+		config.sentList = Stream.of(config.sentList).distinct().map(s -> s.startsWith("-") ? s.substring(1) : s)
 				.toArray(String[]::new);
 		
 		return config;
