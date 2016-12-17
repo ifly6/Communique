@@ -22,45 +22,45 @@ import com.git.ifly6.javatelegram.util.JInfoFetcher;
 
 /** @author ifly6 */
 public enum RecipientType {
-	
+
 	NATION {
 		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
 			return Stream.of(cr).collect(Collectors.toList());
 		}
 	},
-	
+
 	REGION {
 		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
 			return stringToCr(JInfoFetcher.getInstance().getRegion(cr.getName()), cr);
 		}
 	},
-	
+
 	TAG {
 		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
 			String tag = cr.getName();
-			
-			if (tag.equals("wa")) {
-				return stringToCr(JInfoFetcher.getInstance().getWAMembers(), cr);
-				
-			} else if (tag.equals("delegates")) {
-				return stringToCr(JInfoFetcher.getInstance().getDelegates(), cr);
 
-			} else if (tag.equals("new")) { return stringToCr(JInfoFetcher.getInstance().getNew(), cr); }
-			
+			if (tag.equalsIgnoreCase("wa")) {
+				return stringToCr(JInfoFetcher.getInstance().getWAMembers(), cr);
+
+			} else if (tag.equalsIgnoreCase("delegates")) {
+				return stringToCr(JInfoFetcher.getInstance().getDelegates(), cr);
+				
+			} else if (tag.equalsIgnoreCase("new")) { return stringToCr(JInfoFetcher.getInstance().getNew(), cr); }
+
 			return Stream.of(cr).collect(Collectors.toList());
 		}
 	};
-
+	
 	@Override public String toString() {
 		return super.toString().toLowerCase();
 	}
-
+	
 	/** @param communiqueRecipient
 	 * @return */
 	public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
 		return Stream.of(cr).collect(Collectors.toList());
 	}
-	
+
 	private static List<CommuniqueRecipient> stringToCr(List<String> list, CommuniqueRecipient cr) {
 		return list.stream().map(s -> new CommuniqueRecipient(cr.getFilterType(), NATION, s)).collect(Collectors.toList());
 	}

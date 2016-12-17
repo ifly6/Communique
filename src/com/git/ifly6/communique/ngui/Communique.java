@@ -41,9 +41,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -75,6 +77,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueParser;
 import com.git.ifly6.communique.io.CConfig;
 import com.git.ifly6.communique.io.CLoader;
@@ -106,7 +109,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	private JCheckBoxMenuItem chckbxmntmRandomiseRecipients;
 	private JCheckBox chckbxRecruitment;
 
-	private String[] parsedRecipients;
+	private List<String> parsedRecipients;
 
 	public static Path appSupport;
 
@@ -603,7 +606,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 			@Override public void actionPerformed(ActionEvent e) {
 
-				CommuniqueParser parser = new CommuniqueParser();
+				Communique7Parser parser = new Communique7Parser();
 
 				// Check if a recruit-flag has been used.
 				String[] lines = txtrCode.getText().split("\n");
@@ -618,14 +621,16 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 					// Call and do the parsing
 					log.info("Called parser");
-					Communique.this.parsedRecipients = parser.filterAndParse(txtrCode.getText().split("\n"));
+					
+					Communique.this.parsedRecipients = parser
+							.apply(Stream.of(txtrCode.getText().split("\n")).collect(Collectors.toList())).getRecipients();
 
 					// Estimate Time Needed
-					String timeNeeded = estimateTime(parsedRecipients.length, chckbxRecruitment.isSelected());
+					String timeNeeded = estimateTime(parsedRecipients.size(), chckbxRecruitment.isSelected());
 
 					// Show Recipients
 					StringBuilder builder = new StringBuilder();
-					builder.append("# == Communiqué Recipients ==\n" + "# This tab shows all " + parsedRecipients.length
+					builder.append("# == Communiqué Recipients ==\n" + "# This tab shows all " + parsedRecipients.size()
 							+ " recipients after parsing of the Code tab.\n# Estimated time needed is " + timeNeeded
 							+ "\n\n");
 					for (String element : parsedRecipients) {
@@ -636,7 +641,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 					// Change GUI elements
 					txtrRecipients.setText(builder.toString());
-					progressLabel.setText("0 / " + parsedRecipients.length);
+					progressLabel.setText("0 / " + parsedRecipients.size());
 					triggerParsed(true);
 
 				} else {
@@ -694,17 +699,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		txtSecretKey.setText(config.keys.getSecretKey());
 		txtTelegramId.setText(config.keys.getTelegramId());
 
-		// Format the standard recipients.
 		if (!ArrayUtils.isEmpty(config.recipients)) {
-			txtrCode.setText(codeHeader + CommuniqueUtilities.joinListWith(Arrays.asList(config.recipients), '\n'));
-		}
-
-		// Format the universal negations.
-		if (!ArrayUtils.isEmpty(config.sentList)) {
-			for (int x = 0; x < config.sentList.length; x++) {
-				config.sentList[x] = "/" + config.sentList[x];
-			}
-			txtrCode.append("\n\n" + CommuniqueUtilities.joinListWith(Arrays.asList(config.sentList), '\n'));
+			txtrCode.setText(codeHeader + Arrays.asList(config.recipients).stream().collect(Collectors.joining("\n")));
 		}
 
 		log.info("Communique info imported");
@@ -715,25 +711,10 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	}
 
 	private String[][] filterSents(String[] input) {
-
 		List<String> inputList = Arrays.asList(input);
-
-		List<String> recipients = new ArrayList<>();
-		List<String> sents = new ArrayList<>();
-
-		for (int x = 0; x < inputList.size(); x++) {
-
-			if (!StringUtils.isEmpty(inputList.get(x)) && !inputList.get(x).startsWith("#")) {
-				if (!inputList.get(x).startsWith("/")) {
-					recipients.add(inputList.get(x));
-
-				} else {
-					sents.add(inputList.get(x).replaceFirst("/", ""));
-				}
-			}
-		}
-
-		return new String[][] { recipients.toArray(new String[recipients.size()]), sents.toArray(new String[sents.size()]) };
+		List<String> recipients = inputList.stream().filter(x -> !StringUtils.isEmpty(x) && !x.startsWith("#"))
+				.collect(Collectors.toList());
+		return new String[][] { recipients.toArray(new String[recipients.size()]), new String[] {} };
 	}
 
 	// Changes the state of the button to reflect whether it is ready to send and or parsed
@@ -883,7 +864,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			Runnable runner = () -> {
 
 				if (chckbxmntmRandomiseRecipients.isSelected()) {
-					CommuniqueUtilities.randomiseArray(parsedRecipients);
+					Collections.shuffle(parsedRecipients);
 				}
 
 				client.setRecipients(parsedRecipients);	// Set recipients
@@ -919,7 +900,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	public void completeSend() {
 		
 		log.info("Queries Complete.");
-		JOptionPane.showMessageDialog(Communique.this.frame, "Queries to " + parsedRecipients.length + " nations complete.");
+		JOptionPane.showMessageDialog(Communique.this.frame, "Queries to " + parsedRecipients.size() + " nations complete.");
 
 		// Reset the progress bar
 		progressBar.setValue(0);

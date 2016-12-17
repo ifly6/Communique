@@ -20,24 +20,18 @@ import java.util.stream.Collectors;
 
 /** @author ifly6 */
 public enum FilterType {
-
-	NORMAL {
-		@Override public List<CommuniqueRecipient> apply(List<CommuniqueRecipient> recipients,
-				CommuniqueRecipient provided) {
-			recipients.addAll(provided.decompose());
-			return recipients;
-		}
-		
-		@Override public String toString() {
-			return "";
-		}
-	},
-
+	
 	INCLUDE {
 		@Override public List<CommuniqueRecipient> apply(List<CommuniqueRecipient> recipients,
 				CommuniqueRecipient provided) {
-			HashSet<CommuniqueRecipient> set = provided.decompose().stream().collect(Collectors.toCollection(HashSet::new));
-			return recipients.stream().filter(r -> set.contains(r)).collect(Collectors.toList());
+
+			System.out.println("provided\t" + provided);
+			HashSet<String> set = provided.decompose().stream().map(CommuniqueRecipient::getName)
+					.collect(Collectors.toCollection(HashSet::new));
+
+			// match by names, not by recipient type
+			return recipients.stream().map(CommuniqueRecipient::getName).filter(r -> set.contains(r))
+					.map(CommuniqueRecipient::parseRecipient).collect(Collectors.toList());
 		}
 		
 		@Override public String toString() {
@@ -48,12 +42,32 @@ public enum FilterType {
 	EXCLUDE {
 		@Override public List<CommuniqueRecipient> apply(List<CommuniqueRecipient> recipients,
 				CommuniqueRecipient provided) {
-			HashSet<CommuniqueRecipient> set = provided.decompose().stream().collect(Collectors.toCollection(HashSet::new));
-			return recipients.stream().filter(r -> !set.contains(r)).collect(Collectors.toList());
+
+			System.out.println("provided\t" + provided);
+			HashSet<String> set = provided.decompose().stream().map(CommuniqueRecipient::getName)
+					.collect(Collectors.toCollection(HashSet::new));
+
+			// match by names, not by recipient type
+			return recipients.stream().map(CommuniqueRecipient::getName).filter(r -> !set.contains(r))
+					.map(CommuniqueRecipient::parseRecipient).collect(Collectors.toList());
 		}
 		
 		@Override public String toString() {
 			return "-";
+		}
+	},
+
+	NORMAL {
+		@Override public List<CommuniqueRecipient> apply(List<CommuniqueRecipient> recipients,
+				CommuniqueRecipient provided) {
+			
+			System.out.println("provided\t" + provided);
+			recipients.addAll(provided.decompose());
+			return recipients;
+		}
+		
+		@Override public String toString() {
+			return "";
 		}
 	};
 	
