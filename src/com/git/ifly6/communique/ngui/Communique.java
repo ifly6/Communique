@@ -113,7 +113,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 	public static Path appSupport;
 
-	private static String codeHeader = "# == Communiqué Recipients Code ==\n"
+	private static final String codeHeader = "# == Communiqué Recipients Code ==\n"
 			+ "# Enter recipients, one for each line or use 'region:', 'WA:',\n"
 			+ "# etc tags. Use '/' to say: 'not'. Ex: 'region:europe',\n"
 			+ "# '/imperium anglorum'. Use 'flag:recruit' to open the \n" + "# recruiter. \n\n";
@@ -471,8 +471,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 					String side = elements[1].equals("For") ? CNetLoader.FOR : CNetLoader.AGAINST;
 
 					try {
-						txtrCode.append(CommuniqueUtilities
-								.joinListWith(Arrays.asList(CNetLoader.importAtVoteDelegates(chamber, side)), '\n'));
+						txtrCode.append(
+								CNetLoader.importAtVoteDelegates(chamber, side).stream().collect(Collectors.joining("\n")));
 					} catch (NullPointerException exc) {
 						JOptionPane.showMessageDialog(frame, "Cannot import data from NationStates website.");
 						log.warning("Cannot import data.");
@@ -609,7 +609,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				Communique7Parser parser = new Communique7Parser();
 
 				// Check if a recruit-flag has been used.
-				String[] lines = txtrCode.getText().split("\n");
+				final List<String> lines = Stream.of(txtrCode.getText().split("\n")).filter(s -> !StringUtils.isEmpty(s))
+						.filter(s -> !s.startsWith("#")).collect(Collectors.toList());
 				for (String element : lines) {
 					if (element.startsWith("flag:recruit")) {
 						showRecruiter();
@@ -622,8 +623,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 					// Call and do the parsing
 					log.info("Called parser");
 					
-					Communique.this.parsedRecipients = parser
-							.apply(Stream.of(txtrCode.getText().split("\n")).collect(Collectors.toList())).getRecipients();
+					List<String> tokens = new ArrayList<>();	// create container
+					lines.stream().forEach(s -> Stream.of(s.split(",")).forEach(tokens::add));	// decompose tokens
+					Communique.this.parsedRecipients = parser.apply(tokens).getRecipients();	// apply all tokens
 
 					// Estimate Time Needed
 					String timeNeeded = estimateTime(parsedRecipients.size(), chckbxRecruitment.isSelected());
@@ -691,18 +693,24 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	}
 
 	@Override public void importState(CConfig config) {
-
+		
 		chckbxRecruitment.setSelected(config.isRecruitment);
 		chckbxmntmRandomiseRecipients.setSelected(config.isRandomised);
-
+		
 		txtClientKey.setText(config.keys.getClientKey());
 		txtSecretKey.setText(config.keys.getSecretKey());
 		txtTelegramId.setText(config.keys.getTelegramId());
-
+		
 		if (!ArrayUtils.isEmpty(config.recipients)) {
 			txtrCode.setText(codeHeader + Arrays.asList(config.recipients).stream().collect(Collectors.joining("\n")));
 		}
-
+		
+		if (!ArrayUtils.isEmpty(config.sentList)) {
+			String temp = Stream.of(config.sentList).map(s -> s.startsWith("-") ? s : "-" + s)
+					.collect(Collectors.joining("\n", "\n", ""));
+			txtrCode.append(temp);
+		}
+		
 		log.info("Communique info imported");
 	}
 
@@ -731,7 +739,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	/** @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int) */
 	@Override public void sentTo(String recipient, int x, int length) {
 
-		txtrCode.append(x == 0 ? "\n\n/" + recipient : "\n/" + recipient);
+		txtrCode.append(x == 0 ? "\n\n-nation:" + recipient : "\n-nation:" + recipient);
 		
 		if (timer != null) {
 			timer.stop();
@@ -868,6 +876,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				}
 
 				client.setRecipients(parsedRecipients);	// Set recipients
+				System.err.println(parsedRecipients);
 				client.setKeys(new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId.getText()));
 
 				// Set recruitment Status, JavaTelegram defaults to true
@@ -900,7 +909,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	public void completeSend() {
 		
 		log.info("Queries Complete.");
-		JOptionPane.showMessageDialog(Communique.this.frame, "Queries to " + parsedRecipients.size() + " nations complete.");
+		JOptionPane.showMessageDialog(frame, "Queries to " + parsedRecipients.size() + " nations complete.", "Complete",
+				JOptionPane.PLAIN_MESSAGE, null);
 
 		// Reset the progress bar
 		progressBar.setValue(0);
