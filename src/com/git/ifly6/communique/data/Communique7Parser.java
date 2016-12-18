@@ -31,10 +31,16 @@ import org.apache.commons.lang3.StringUtils;
  * @author ifly6 */
 public class Communique7Parser {
 
-	List<CommuniqueRecipient> recipients = new ArrayList<>(0);
+	/** Declares the version of the parser, which is based on two values: (1) the syntax of the Communique recipients
+	 * language and (2) the file syntax in which that information is held. */
+	public static final int version = 7;
 	
-	/** Creates a new empty parser without any applied tokens. To actually use the parser, apply tokens from here,
-	 * either in the form of a <code>List&lt;String&gt;</code> or <code>CommuniqueRecipient</code>. */
+	/** List of recipients changed by various actions and applications called by the parser. */
+	private List<CommuniqueRecipient> recipients = new ArrayList<>(0);
+	
+	/** Creates a new empty parser without any applied tokens. To actually use the parser, apply tokens using the apply
+	 * methods, either in the form of a <code>List&lt;String&gt;</code> or any number of
+	 * <code>CommuniqueRecipient</code>. */
 	public Communique7Parser() {
 	}
 	
@@ -46,7 +52,8 @@ public class Communique7Parser {
 		recipients = token.getFilterType().apply(recipients, token);
 		/* This is the beautiful part, because I've chained everything to a filter, this means that I don't have to
 		 * write any code whatsoever to sort things into what they have to do, unlike the old parser. Now, everything is
-		 * chained to an ENUM which already knows exactly what it has to do, and therefore, can do it easily. */
+		 * chained to an ENUM which already knows exactly what it has to do, and therefore, everything is already dealt
+		 * with. */
 		return this;
 	}
 
@@ -90,11 +97,13 @@ public class Communique7Parser {
 				tokens.add(translateToken("->" + split[1]));
 				continue;
 			}
-			if (oldToken.contains("--")) {
-				String[] split = oldToken.split("--");
-				tokens.add(translateToken(split[0]));
-				tokens.add(translateToken("--" + split[1]));
-				continue;
+			if (oldToken.contains("-- ")) {
+				String[] split = oldToken.split("-- ");
+				if (split.length == 2) {
+					tokens.add(translateToken(split[0].trim()));
+					tokens.add(translateToken("-- " + split[1].trim()));
+					continue;
+				}
 			}
 			tokens.add(translateToken(oldToken));
 			
@@ -102,24 +111,24 @@ public class Communique7Parser {
 		return tokens;
 	}
 
-	/** Translates a single token from the old system to the new Communique 7 system
+	/** Translates a single token from the old system to the new Communique 7 system. This method should not change any
+	 * Communique 7 tokens and only translate applicable Communique 6 tokens.
 	 * @param oldToken in a <code>String</code> form, like "wa:delegates"
 	 * @return the token in the Communique 7 form, which, for "wa:delegates", would turn into "tag:delegates" */
 	public static String translateToken(String oldToken) {
-		
-		// logic tags, somewhat recursive to ease writing
+		// logic tags, somewhat recursive to ease translation of sub-tokens
+		// no need to use HashMap, that seems over-engineered for something this simple
 		if (oldToken.startsWith("/")) { return "-" + translateToken(oldToken.replaceFirst("/", "").trim()); }
-		if (oldToken.startsWith("--")) { return "-" + translateToken(oldToken.replace("--", "").trim()); }
-		if (oldToken.startsWith("->")) { return "+" + translateToken(oldToken.replace("->", "").trim()); }
+		if (oldToken.startsWith("-- ")) { return "-" + translateToken(oldToken.replaceFirst("--", "").trim()); }
+		if (oldToken.startsWith("-> ")) { return "+" + translateToken(oldToken.replaceFirst("->", "").trim()); }
 
-		// decomposition tags
+		// translate tags which can be decomposed
 		if (oldToken.equalsIgnoreCase("wa:delegates")) { return "tag:delegates"; }
 		if (oldToken.equalsIgnoreCase("wa:members") || oldToken.equalsIgnoreCase("wa:nations")) { return "tag:wa"; }
 		if (oldToken.startsWith("world:new")) { return "tag:new"; }
 
-		// recipient tags
+		// somewhat-direct recipient tags, like region and nation
 		if (oldToken.startsWith("region:")) { return oldToken; }
 		return "nation:" + oldToken;
-
 	}
 }

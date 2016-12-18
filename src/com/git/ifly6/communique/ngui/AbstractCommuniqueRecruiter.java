@@ -32,7 +32,7 @@ import com.git.ifly6.nsapi.NSNation;
  * @author ifly6 */
 public abstract class AbstractCommuniqueRecruiter {
 
-	public static final JInfoFetcher fetcher = JInfoFetcher.getInstance();
+	public static final JInfoFetcher fetcher = JInfoFetcher.instance();
 	
 	protected String clientKey;
 	protected String secretKey;

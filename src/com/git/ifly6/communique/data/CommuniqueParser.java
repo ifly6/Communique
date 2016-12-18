@@ -88,9 +88,10 @@ public class CommuniqueParser {
 
 	/** This <code>int</code> determines what version of the parser is currently being used. The entire program is build
 	 * around this string for extended compatibility purposes. However, due to the separation between the parser itself
-	 * and the IO system, either of them can trigger a change in the version number. */
-	public static final int version = 7;
-	private static JInfoFetcher fetcher = JInfoFetcher.getInstance();
+	 * and the IO system, either of them can trigger a change in the version number. See {@link Communique7Parser} for
+	 * the version declaration. */
+	public static final int version = Communique7Parser.version;
+	private static JInfoFetcher fetcher = JInfoFetcher.instance();
 
 	/** Determine whether a <code>String</code> is a special tag or not. What strings are tags is determined in the
 	 * documentation on the grammar of the Communiqué syntax.
