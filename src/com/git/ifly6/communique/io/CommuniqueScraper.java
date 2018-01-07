@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 ifly6. All Rights Reserved. */
+/* Copyright (c) 2018 ifly6. All Rights Reserved. */
 package com.git.ifly6.communique.io;
 
 import java.io.BufferedReader;
