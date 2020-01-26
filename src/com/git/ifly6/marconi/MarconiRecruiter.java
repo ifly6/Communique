@@ -56,7 +56,7 @@ public class MarconiRecruiter extends AbstractCommuniqueRecruiter implements JTe
 					foundNext.set(false);
 					
 					// Report information
-					marconi.log(String.format("Attempted dispatch of telegram %d to %s", sentList.size(),
+					marconi.log(String.format("Attempted dispatch of telegram %d to %s", sentList.size() + 1,
 							nextRecipient.get()));
 					
 					Calendar now = Calendar.getInstance();

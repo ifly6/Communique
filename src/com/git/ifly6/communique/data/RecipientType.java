@@ -60,12 +60,27 @@ public enum RecipientType {
 		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
 			String tag = cr.getName();
 			if (tag.equals("recruit")) return Collections.emptyList(); // recruit is handled by Communique logic, not here
+			if (tag.equals("repeat")) return Collections.emptyList(); // repeat last pull and continue
 			if (tag.equals("active")) return HappeningsParser.getActiveNations();  // active
 			return Collections.emptyList();
 		}
 
 		@Override public String toString() {
 			return this.name().toLowerCase();
+		}
+	},
+
+	EMPTY {
+		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
+			String raw = cr.getRaw();
+			throw new JTelegramException("Cannot decompose an empty recipient type" +
+					((raw == null)
+							? "."
+							: ": " + raw));
+		}
+
+		@Override public String toString() {
+			return "";
 		}
 	};
 

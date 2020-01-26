@@ -1,6 +1,7 @@
 /* Copyright (c) 2018 Kevin Wong. All Rights Reserved. */
 package com.git.ifly6.marconi;
 
+import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
 import org.apache.commons.cli.CommandLine;
@@ -17,8 +18,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,7 +56,7 @@ public class MarconiLauncher {
 		try {
 			// Directory is defined as the same directory in which Marconi is run
 			Path logLocation = Paths.get(String.format("marconi-session-%s.log",
-					DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(Instant.now())));
+					CommuniqueUtilities.getCurrentTimeString()));
 			FileHandler handler = new FileHandler(logLocation.toString());
 			handler.setFormatter(new SimpleFormatter());
 			Logger.getLogger("").addHandler(handler); // gets the root logger

@@ -1,6 +1,7 @@
 /* Copyright (c) 2018 Kevin Wong. All Rights Reserved. */
 package com.git.ifly6.communique.ngui;
 
+import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.CommuniqueUtils;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
@@ -66,9 +67,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -168,14 +166,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 		// Make sure we can also log to file, apply this to the root logger
 		try {
-			// must avoid colons in file names because windows doesn't like it apparently
-			String timeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault())
-					.format(Instant.now())
-					.replace(':', '-'); // this is the cheapest way to fix this problem
-
 			Path logFile = appSupport
 					.resolve("log")
-					.resolve(String.format("communique-session-%s.log", timeString));
+					.resolve(String.format("communique-session-%s.log", CommuniqueUtilities.getCurrentTimeString()));
 
 			Files.createDirectories(logFile.getParent()); // make directory
 			loggerFileHandler = new FileHandler(logFile.toString());
@@ -314,7 +307,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			}
 
 			Communique7Parser parser = new Communique7Parser();
-			List<CommuniqueRecipient> tokens = config.getcRecipients();
+			List<CommuniqueRecipient> tokens = exportRecipients();
 
 			// Check if a recruit-flag has been used.
 			boolean rfPresent = tokens.stream()
@@ -337,7 +330,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				}
 				parsedRecipients = config.processingAction.apply(parsedRecipients);
 
-			} catch (JTelegramException jte) {
+			} catch (JTelegramException | IllegalArgumentException jte) {
 				LOGGER.log(Level.SEVERE, "Exception in parsing recipients. Displaying to user", jte);
 				this.showMessageDialog(jte.getMessage(), CommuniqueMessages.ERROR);
 				return;
@@ -786,12 +779,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 	@Override
 	public CommuniqueConfig exportState() {
-
 		config.defaultVersion();
-
 		LOGGER.info("Communiqué config exported");
 		return this.config;
-
 	}
 
 	@Override
