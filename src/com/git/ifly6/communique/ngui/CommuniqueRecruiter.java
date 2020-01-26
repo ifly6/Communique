@@ -13,6 +13,7 @@ import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.javatelegram.JTelegramKeys;
 import com.git.ifly6.javatelegram.JTelegramLogger;
 import com.git.ifly6.javatelegram.JavaTelegram;
+import org.apache.commons.text.WordUtils;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -406,20 +407,25 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 
 	private void sync() {
 
-		JTelegramKeys keys = new JTelegramKeys(clientKeyField.getText(),
+		JTelegramKeys keys = new JTelegramKeys(
+				clientKeyField.getText(),
 				secretKeyField.getText(),
-				telegramIdField.getText());
+				telegramIdField.getText()
+		);
 		CommuniqueConfig config = new CommuniqueConfig(true, CommuniqueProcessingAction.NONE, keys);
 
 		// Create and set recipients and sent-lists
-		List<CommuniqueRecipient> rList = new ArrayList<>(1 + listProscribedRegions().size() + sentList.size());
+		List<CommuniqueRecipient> rList = new ArrayList<>();
+
 		rList.add(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.FLAG, "recruit"));
-		rList.addAll(listProscribedRegions());
-		rList.addAll(sentList);
+		rList.addAll(filterList); // add filtered list
+		rList.addAll(listProscribedRegions()); // add proscribed regions
+		rList.addAll(sentList); // add sent list
 
 		// Sync up with Communique
 		config.setcRecipients(rList);
 		communique.importState(config);
+
 	}
 
 	boolean isDisplayable() {
@@ -464,7 +470,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 				}
 			}
 			if (!found) {
-				model.addElement(element); // add to the list
+				model.addElement(WordUtils.capitalize(element)); // add to the list
 				excludeList.addSelectionInterval(model.size() - 1, model.size() - 1);
 			}
 		}
@@ -477,6 +483,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	public void send() {
 
 		proscribedRegions = listProscribedRegions();
+		// note that filter list is set in cconfig
 
 		Runnable runner = () -> {
 			AtomicReference<String> nextRecipient = new AtomicReference<>(this.getRecipient().getName());
@@ -488,6 +495,9 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 				client.setKeys(clientKeyField.getText(), secretKeyField.getText(), telegramIdField.getText());
 				client.setRecipient(nextRecipient.get());
 				client.connect();
+
+				LOGGER.info(String.format("Attempted dispatch of telegram %d to %s", sentList.size() + 1,
+						nextRecipient.get()));
 
 				Calendar now = Calendar.getInstance();
 				now.add(Calendar.SECOND, 180);

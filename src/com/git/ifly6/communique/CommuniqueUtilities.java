@@ -1,7 +1,9 @@
 /* Copyright (c) 2018 ifly6. All Rights Reserved. */
 package com.git.ifly6.communique;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +72,16 @@ public class CommuniqueUtilities {
 	public static String getCurrentDateAndTime() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getCurrentDateAndTimeFormat());
 		return formatter.format(LocalDateTime.now());
+	}
+
+	/**
+	 * @return Gets a Java ISO local date time formatted with colons replaced for hyphens
+	 */
+	public static String getCurrentTimeString() {
+		// must avoid colons in file names because windows doesn't like it apparently
+		return DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault())
+				.format(Instant.now())
+				.replace(':', '-');
 	}
 
 }

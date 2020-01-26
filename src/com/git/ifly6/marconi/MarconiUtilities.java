@@ -49,7 +49,7 @@ public class MarconiUtilities {
 	 * is the only way the data can be effectively sanitised.
 	 * @param prompt The question posed to the user.
 	 * @param acceptableAnswers A list of valid responses.
-	 * @return the user's answer, which is required to be of the list of valid responses */
+	 * @return the user's answer, which is required to be in the list of valid responses */
 	static String prompt(String prompt, List<String> acceptableAnswers) {
 		String response;
 		while (true) {

@@ -24,17 +24,24 @@ public class CommuniqueRecipient {
 	private FilterType filterType;
 	private RecipientType recipientType;
 	private String name;
+	private String raw;
 
 	/** Creates a <code>CommuniqueRecipient</code> with certain characteristics. */
-	public CommuniqueRecipient(FilterType filterType, RecipientType recipientType, String name) {
-
+	public CommuniqueRecipient(FilterType filterType, RecipientType recipientType, String name, String raw) {
 		this.filterType = filterType;
 		this.recipientType = recipientType;
 		this.name = CommuniqueUtilities.ref(name);    // convert to reference name
+		this.raw = raw;
 
 		// some format checking for the name
 		if (name.contains(":")) throw new IllegalArgumentException("nation name [" + name + "] is invalid");
+	}
 
+	/**
+	 * Creates {@link CommuniqueRecipient} with null <code>raw</code> string
+	 */
+	public CommuniqueRecipient(FilterType filterType, RecipientType recipientType, String name) {
+		this(filterType, recipientType, name, null);
 	}
 
 	/**
@@ -62,13 +69,22 @@ public class CommuniqueRecipient {
 	}
 
 	/**
+	 * @return the original <code>String</code> used to construct this recipient
+	 */
+	public String getRaw() {
+		return this.raw;
+	}
+
+	/**
 	 * Returns a string representation of the recipient, in the same form which is used by the NationStates telegram
 	 * system to specify large numbers of nations. For example, <code>tag:wa</code> or
 	 * <code>nation:imperium_anglorum</code>.
 	 */
 	@Override
 	public String toString() {
-		return getFilterType().toString() + getRecipientType().toString() + ":" + this.getName();
+		if (recipientType != RecipientType.EMPTY)
+			return filterType.toString() + recipientType.toString() + ":" + this.getName();
+		return raw;
 	}
 
 	/**
@@ -93,6 +109,7 @@ public class CommuniqueRecipient {
 	 */
 	public static CommuniqueRecipient parseRecipient(String s) {
 
+		String start = String.valueOf(s); // strings are immutable this is safe
 		s = s.trim();
 
 		FilterType fType = FilterType.NORMAL; // default
@@ -111,8 +128,8 @@ public class CommuniqueRecipient {
 				break;
 			}
 
-		// 2017-03-30 use lastIndexOf to deal with strange name changes
-		return new CommuniqueRecipient(fType, rType, s.substring(s.lastIndexOf(":") + 1));
+		// 2017-03-30 use lastIndexOf to deal with strange name changes, can cause error in name `+region:euro:pe`
+		return new CommuniqueRecipient(fType, rType, s.substring(s.lastIndexOf(":") + 1), start);
 	}
 
 	@Override
@@ -263,4 +280,5 @@ public class CommuniqueRecipient {
 		return "nation:" + oldToken;
 
 	}
+
 }

@@ -129,3 +129,6 @@ any requests for new post-processing options via GitHub.
 9. Version 9 adds the ability to scan nations mentioned in the NS API Happenings for activity and (about 88) and 
 return their names for possible telegram despatch. Implementation of this new command requires a new version number as
 it is not backwards compatible with older versions.
+    - The next version is will phrase out the concept of a separate recruiter and simply permit someone to specify that 
+    the action taken by the program will be looped upon conclusion of the task. Thus, translation of something used in 
+    the recruiter would look something like `flag:repeat; limit:1; tag:new`.
