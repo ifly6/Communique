@@ -1,15 +1,15 @@
 # Communiqué #
 
 ## Summary ##
-Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. It was originally 
-inspired by Auralia's work on the matter and thus, recognised the limitations of writing on a Windows-only platform 
-when most headless servers are Linux boxes. It is directly based on top of 
-[JavaTelegram](https://github.com/iFlyCode/NationStates-JavaTelegram) a iFlyCode Java library designed to interface 
+Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. It is directly based on top of 
+[JavaTelegram](https://github.com/iFlyCode/NationStates-JavaTelegram) a library of mine designed to interface 
 with NationStates itself.
+
+If you want to run headless on a Linux box or just broadly from the command line, you should download the Marconi executable.
 
 It is *your* responsibility to know how the telegram API works. Use of this program is agreement that you understand 
 those limitations and requirements. It also agrees that you cannot claim losses, damages, or other negative effects 
-from the author if action is taken against your NationStates account.
+from the author if action is taken against your NationStates account or from other activity.
 
 ## Documentation ##
 
@@ -126,9 +126,14 @@ list, prioritisation of the Delegates in the recipients, and reversing the order
 the way this is implemented, this requires a new file version; it also means that it can easily be extended. Please make
 any requests for new post-processing options via GitHub.
 
-9. Version 9 adds the ability to scan nations mentioned in the NS API Happenings for activity and (about 88) and 
+9. Version 9 adds the ability to scan nations mentioned in the NS API Happenings for activity and 
 return their names for possible telegram despatch. Implementation of this new command requires a new version number as
 it is not backwards compatible with older versions.
-    - The next version is will phrase out the concept of a separate recruiter and simply permit someone to specify that 
-    the action taken by the program will be looped upon conclusion of the task. Thus, translation of something used in 
-    the recruiter would look something like `flag:repeat; limit:1; tag:new`.
+
+10. Version 10 allows names to be filtered using `+regex:PATTERN` and `-regex:PATTERN` flags that require and omit regex matches, respectively. Obviously, these flags break compatibility with previous versions. If there are further kinds of filters desired, make a feature request on GitHub.
+    - As this operates on the Java `Pattern` library, anything that fails in that library—which I don't expect will be often—will also fail here. There may be issues when using `:` in any regex because of the way that Communique parses names. But `:` doesn't mean anything special, so that should not be much of a problem.
+    - Hint: `-regex:.*[0-9]$` will omit anything that ends with a digit
+    - Hint: `+regex:[a-zA-Z]+` will require only characters
+
+## Road ahead
+In a future version, I intend to phase out the concept of a separate recruiter and simply permit someoneone to specify that some action be taken repeatedly. Some syntax like `flag:repeat; limit:1; tag:new`.
