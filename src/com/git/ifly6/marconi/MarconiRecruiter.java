@@ -23,6 +23,9 @@ public class MarconiRecruiter extends AbstractCommuniqueRecruiter implements JTe
 	
 	private static final Logger LOGGER = Logger.getLogger(MarconiRecruiter.class.getName());
 	private Marconi marconi;
+
+	private static final int RECRUITMENT_DELAY = 180;
+	private static final int FIND_NEXT_TIME = 10;
 	
 	/** @param marconi framework to piggy-back upon to send data */
 	MarconiRecruiter(Marconi marconi) {
@@ -63,7 +66,7 @@ public class MarconiRecruiter extends AbstractCommuniqueRecruiter implements JTe
 					now.add(Calendar.SECOND, 180);
 					String nextTelegramTime = new SimpleDateFormat("HH:mm:ss").format(now.getTime());
 					marconi.log("Next recruitment telegram probably in 180 seconds at " + nextTelegramTime);
-					setX = 1;
+					setX = 0;
 					
 				} catch (RuntimeException e) {    // Catch, if error between recipient retrieval and telegram dispatch
 					// this catch block allows for that extra bit of fault tolerance
@@ -74,7 +77,7 @@ public class MarconiRecruiter extends AbstractCommuniqueRecruiter implements JTe
 					now.add(Calendar.SECOND, 10);
 					String nextTelegramTime = new SimpleDateFormat("HH:mm:ss").format(now.getTime());
 					marconi.log("Next recruitment telegram probably in 10 seconds at " + nextTelegramTime);
-					setX = 170;
+					setX = RECRUITMENT_DELAY - FIND_NEXT_TIME;
 					
 				}
 				
@@ -82,13 +85,13 @@ public class MarconiRecruiter extends AbstractCommuniqueRecruiter implements JTe
 				for (AtomicInteger x = new AtomicInteger(setX);; x.getAndIncrement()) {
 					
 					try {
-						Thread.sleep(1000);    // 1-second intervals, wake to update the progressBar
+						Thread.sleep(1000); // 1-second intervals, wake to update the progressBar
 						LOGGER.finest("Interval " + x.get());
 					} catch (InterruptedException e) {
-						return; // also breaks
+						return; // break out of it all
 					}
 					
-					if (x.get() == 170) {
+					if (x.get() == RECRUITMENT_DELAY - FIND_NEXT_TIME) {
 						Runnable runnable1 = () -> {
 							nextRecipient.set(getRecipient().getName());
 							LOGGER.fine("Found next recipient, " + nextRecipient.get() + ", at " + x.get());
@@ -96,12 +99,14 @@ public class MarconiRecruiter extends AbstractCommuniqueRecruiter implements JTe
 						};
 						LOGGER.fine("Running runnable to find next recipient at " + x.get());
 						new Thread(runnable1).start();
+						// note: this runnable will continue until it finds the next recipient
 					}
 					
-					if (x.get() >= 180 && foundNext.get()) {    // delay until recipient is found by runnable1's thread
-						LOGGER.info(String.format("Starting next loop, delay of %d s for telegram %d", 180 - x.get(),
+					if (x.get() >= RECRUITMENT_DELAY && foundNext.get()) { // delay until recipient is found by runnable1's thread
+						// note: x.get() -> time; time - expected = delay; time - 180 = delay
+						LOGGER.info(String.format("Starting next loop, delay of %d s for telegram %d", x.get() - 180,
 								sentList.size()));
-						break;  // break this loop, and dispatch the next telegram
+						break; // break this loop, and dispatch the next telegram
 					}
 					
 				}

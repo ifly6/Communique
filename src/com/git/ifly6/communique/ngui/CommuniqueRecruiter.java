@@ -512,7 +512,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 						progressBar.setValue(x);
 						Thread.sleep(1000);    // 1-second intervals, wake to update the progressBar
 					} catch (InterruptedException e) {
-						return; // also breaks
+						return; // break all the things
 					}
 
 					if (x == 170) {
