@@ -77,6 +77,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -323,6 +324,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			try {
 				parsedRecipients = parser.apply(tokens).listRecipients();
 				if (!Arrays.asList(CommuniqueProcessingAction.values()).contains(config.processingAction)) {
+					// if config.processingAction not in CommuniqueProcessingAction.values
 					// deal with invalid processing action
 					this.showMessageDialog("Invalid processing action.\n"
 							+ "Select a valid processing action", CommuniqueMessages.ERROR);
@@ -330,7 +332,21 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				}
 				parsedRecipients = config.processingAction.apply(parsedRecipients);
 
+			} catch (PatternSyntaxException pse) {
+				// note 2020-01-27: better that regex errors are shown in monospaced font
+				JLabel label = new JLabel(
+						String.format("<html>Regex pattern syntax error. <br /><pre>%s</pre></html>",
+								pse.getMessage().replace("\n", "<br />"))
+				);
+//				label.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+				// pass to message dialog
+				LOGGER.log(Level.SEVERE, "Exception in parsing recipients. Displaying to user", pse);
+				this.showMessageDialog(label, CommuniqueMessages.ERROR);
+				return;
+
 			} catch (JTelegramException | IllegalArgumentException jte) {
+				// note 2020-01-27: very happy that this also shows regex errors!
 				LOGGER.log(Level.SEVERE, "Exception in parsing recipients. Displaying to user", jte);
 				this.showMessageDialog(jte.getMessage(), CommuniqueMessages.ERROR);
 				return;
@@ -663,7 +679,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			String input = this.showTextInputDialog(message, CommuniqueMessages.TITLE);
 			if (input != null) {
 				input = input.replaceAll("\\(.+?\\)", ""); // get rid of brackets and anything in them
-				Stream.of(input.split(","))
+				Arrays.stream(input.split(","))
 						.map(n -> CommuniqueRecipients.createNation(FilterType.EXCLUDE, n)) // method auto-formats
 						.map(CommuniqueRecipient::toString)
 						.forEach(this::appendCode);
@@ -761,16 +777,21 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	}
 
 	private List<CommuniqueRecipient> exportRecipients() {
-		return Stream.of(txtrCode.getText().split("\n"))
+		return Arrays.stream(txtrCode.getText().split("\n"))
 				.filter(s -> !(s.isEmpty() || s.trim().isEmpty()))
 				.filter(s -> !s.startsWith("#"))
-				.flatMap(s -> Stream.of(s.split(",")))    // flat map the splits
+				.flatMap(s -> Arrays.stream(s.split(",")))    // flat map the splits
 				.map(CommuniqueRecipient::parseRecipient)
 				.collect(Collectors.toList());
 	}
 
 	private void showMessageDialog(String text, String title) {
 		JOptionPane.showMessageDialog(frame, text, title, JOptionPane.PLAIN_MESSAGE, null);
+	}
+
+	private void showMessageDialog(JLabel label, String title) {
+		// new 2020-01-27
+		JOptionPane.showMessageDialog(frame, label, title, JOptionPane.PLAIN_MESSAGE, null);
 	}
 
 	private String showTextInputDialog(String text, String title) {
