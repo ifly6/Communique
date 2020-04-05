@@ -2,7 +2,7 @@
 package com.git.ifly6.communique.data;
 
 import com.git.ifly6.communique.CommuniqueUtils;
-import com.git.ifly6.javatelegram.util.JInfoFetcher;
+import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;

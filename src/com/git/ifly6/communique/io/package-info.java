@@ -8,7 +8,7 @@
  * functionality to scrape data from Internet pages.
  * <p>
  * Note that the majority of data retrieval is done via the API, which is accessed throgh the
- * {@link com.git.ifly6.javatelegram.util.JInfoFetcher} class and the classes contained in
+ * {@link com.git.ifly6.nsapi.telegram.util.JInfoFetcher} class and the classes contained in
  * {@link com.git.ifly6.nsapi} package.
  * </p>
  *

@@ -14,10 +14,10 @@ import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.io.CommuniqueScraper;
 import com.git.ifly6.communique.io.CommuniqueUpdater;
 import com.git.ifly6.communique.io.NoResolutionException;
-import com.git.ifly6.javatelegram.JTelegramException;
-import com.git.ifly6.javatelegram.JTelegramKeys;
-import com.git.ifly6.javatelegram.JTelegramLogger;
-import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.nsapi.telegram.JTelegramException;
+import com.git.ifly6.nsapi.telegram.JTelegramKeys;
+import com.git.ifly6.nsapi.telegram.JTelegramLogger;
+import com.git.ifly6.nsapi.telegram.JavaTelegram;
 import org.apache.commons.io.FilenameUtils;
 
 import javax.swing.BorderFactory;
@@ -659,8 +659,6 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			try {
 				Files.lines(path) // attempt load data
 						.filter(s -> !s.startsWith("#") || !CommuniqueUtils.isEmpty(s))
-						.map(s -> s.split(",")) // split
-						.flatMap(Arrays::stream) // map to single stream
 						.map(s -> s.toLowerCase().trim().replaceAll(" ", "_")) // process
 						.forEach(this::appendCode); // append to text area
 			} catch (IOException e1) {
@@ -780,7 +778,6 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		return Arrays.stream(txtrCode.getText().split("\n"))
 				.filter(s -> !(s.isEmpty() || s.trim().isEmpty()))
 				.filter(s -> !s.startsWith("#"))
-				.flatMap(s -> Arrays.stream(s.split(",")))    // flat map the splits
 				.map(CommuniqueRecipient::parseRecipient)
 				.collect(Collectors.toList());
 	}
@@ -950,7 +947,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	}
 
 	/**
-	 * @see com.git.ifly6.javatelegram.JTelegramLogger#log(java.lang.String)
+	 * @see com.git.ifly6.nsapi.telegram.JTelegramLogger#log(java.lang.String)
 	 */
 	@Override
 	public void log(String input) {
@@ -958,7 +955,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	}
 
 	/**
-	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
+	 * @see com.git.ifly6.nsapi.telegram.JTelegramLogger#sentTo(java.lang.String, int, int)
 	 */
 	@Override
 	public void sentTo(String recipientName, int x, int length) {

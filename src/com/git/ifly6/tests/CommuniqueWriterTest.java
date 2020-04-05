@@ -5,7 +5,7 @@ import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
-import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 
 import java.io.IOException;
 import java.nio.file.Files;

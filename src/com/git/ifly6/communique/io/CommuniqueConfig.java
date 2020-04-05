@@ -4,7 +4,7 @@ package com.git.ifly6.communique.io;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
-import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -2,12 +2,14 @@
 package com.git.ifly6.communique.data;
 
 import com.git.ifly6.communique.io.HappeningsParser;
-import com.git.ifly6.javatelegram.JTelegramException;
-import com.git.ifly6.javatelegram.util.JInfoFetcher;
+import com.git.ifly6.nsapi.telegram.JTelegramException;
+import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /** Defines a number of recipient types and provides methods to decompose those types into lists of
  * <code>CommuniqueRecipient</code>.
@@ -26,11 +28,37 @@ public enum RecipientType {
 		}
 	},
 
+	// This code block must be before the REGION code block otherwise it will get substring matched over :(
+	/** Declares that the recipient is a REGION TAG and that it needs decomposing into a list of regions which then
+	 * is decomposed into the nations therein. */
+	REGION_TAG {
+		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) throws JTelegramException {
+			try {
+				List<String> regions = JInfoFetcher.instance().getRegionTag(cr.getName());
+				LOGGER.info(String.format("Tag %s: %d regions", cr.getName(), regions.size()));
+				return regions.stream()
+						.map(s -> new CommuniqueRecipient(cr.getFilterType(), RecipientType.REGION, s))
+						.map(CommuniqueRecipient::decompose)
+						.flatMap(List::stream)
+						.collect(Collectors.toList());
+
+			} catch (IndexOutOfBoundsException e) {
+				throw new JTelegramException(String.format("Region tag '%s' does not exist", cr.getName()));
+			}
+		}
+
+		@Override public String toString() {
+			return this.name().toLowerCase();
+		}
+	},
+
 	/** Declares the recipient is a region, allowing for decomposition into a list of {@link CommuniqueRecipient}
 	 * nations in the region. */
 	REGION {
 		@Override public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) throws JTelegramException {
-			return newRecipients(JInfoFetcher.instance().getRegion(cr.getName()), cr.getFilterType());
+			List<String> regionMembers = JInfoFetcher.instance().getRegion(cr.getName());
+			LOGGER.info(String.format("Region %s: %d nations", cr.getName(), regionMembers.size()));
+			return newRecipients(regionMembers, cr.getFilterType());
 		}
 
 		@Override public String toString() {
@@ -83,6 +111,8 @@ public enum RecipientType {
 			return "";
 		}
 	};
+
+	private static final Logger LOGGER = Logger.getLogger(RecipientType.class.getName());
 
 	/** Allows for the recipient type to be compatible with the NationStates telegram system by providing the same tag
 	 * nomenclature. */

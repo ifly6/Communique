@@ -16,7 +16,7 @@ package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
-import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.nsapi.telegram.JavaTelegram;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;

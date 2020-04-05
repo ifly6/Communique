@@ -2,8 +2,8 @@
 package com.git.ifly6.communique;
 
 import com.git.ifly6.communique.data.CommuniqueParser;
-import com.git.ifly6.javatelegram.JTelegramException;
-import com.git.ifly6.javatelegram.JTelegramKeys;
+import com.git.ifly6.nsapi.telegram.JTelegramException;
+import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 
 import java.io.File;
 import java.io.FileNotFoundException;

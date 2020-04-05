@@ -1,7 +1,7 @@
 /* Copyright (c) 2018 ifly6. All Rights Reserved. */
 package com.git.ifly6.communique.data;
 
-import com.git.ifly6.javatelegram.JTelegramException;
+import com.git.ifly6.nsapi.telegram.JTelegramException;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -26,7 +26,7 @@ public class Communique7Parser {
 	 * Declares the version of the parser, which is based on two values: (1) the syntax of the Communique recipients
 	 * language and (2) the file syntax in which that information is held.
 	 */
-	public static final int version = 10;
+	public static final int version = 11;
 
 	/** List of recipients changed by various actions and applications called by the parser. */
 	private Set<CommuniqueRecipient> recipients;
