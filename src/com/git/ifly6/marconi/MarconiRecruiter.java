@@ -5,8 +5,8 @@ import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.FilterType;
 import com.git.ifly6.communique.data.RecipientType;
 import com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter;
-import com.git.ifly6.javatelegram.JTelegramLogger;
-import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.nsapi.telegram.JTelegramLogger;
+import com.git.ifly6.nsapi.telegram.JavaTelegram;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -129,14 +129,14 @@ public class MarconiRecruiter extends AbstractCommuniqueRecruiter implements JTe
 		return proscribedRegions;
 	}
 	
-	/** @see com.git.ifly6.javatelegram.JTelegramLogger#log(java.lang.String) */
+	/** @see com.git.ifly6.nsapi.telegram.JTelegramLogger#log(java.lang.String) */
 	@Override public void log(String input) {
 		// Get rid of useless messages
 		if (input.equals("API Queries Complete.")) return;
 		marconi.log(input);
 	}
 	
-	/** @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int) */
+	/** @see com.git.ifly6.nsapi.telegram.JTelegramLogger#sentTo(java.lang.String, int, int) */
 	@Override public void sentTo(String recipient, int recipientNum, int length) {
 		super.sentTo(recipient, recipientNum, length);
 		marconi.sentTo(recipient, recipientNum, length);

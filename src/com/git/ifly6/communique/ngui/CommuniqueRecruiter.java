@@ -10,9 +10,9 @@ import com.git.ifly6.communique.data.RecipientType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
-import com.git.ifly6.javatelegram.JTelegramKeys;
-import com.git.ifly6.javatelegram.JTelegramLogger;
-import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.nsapi.telegram.JTelegramKeys;
+import com.git.ifly6.nsapi.telegram.JTelegramLogger;
+import com.git.ifly6.nsapi.telegram.JavaTelegram;
 import org.apache.commons.text.WordUtils;
 
 import javax.swing.BorderFactory;
@@ -361,7 +361,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	}
 
 	/**
-	 * @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int)
+	 * @see com.git.ifly6.nsapi.telegram.JTelegramLogger#sentTo(java.lang.String, int, int)
 	 */
 	@Override
 	public void sentTo(String recipient, int recipientNum, int length) {

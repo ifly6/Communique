@@ -6,8 +6,8 @@ import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.ngui.AbstractCommunique;
-import com.git.ifly6.javatelegram.JTelegramLogger;
-import com.git.ifly6.javatelegram.JavaTelegram;
+import com.git.ifly6.nsapi.telegram.JTelegramLogger;
+import com.git.ifly6.nsapi.telegram.JavaTelegram;
 
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -123,12 +123,12 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 		this.config = config;
 	}
 	
-	/** @see com.git.ifly6.javatelegram.JTelegramLogger#log(java.lang.String) */
+	/** @see com.git.ifly6.nsapi.telegram.JTelegramLogger#log(java.lang.String) */
 	@Override public void log(String input) {
 		LOGGER.info(input);
 	}
 	
-	/** @see com.git.ifly6.javatelegram.JTelegramLogger#sentTo(java.lang.String, int, int) */
+	/** @see com.git.ifly6.nsapi.telegram.JTelegramLogger#sentTo(java.lang.String, int, int) */
 	@Override public void sentTo(String nationName, int x, int length) {
 		config.addcRecipient(CommuniqueRecipients.createExcludedNation(nationName));
 	}

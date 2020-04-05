@@ -107,8 +107,8 @@ commands `flag:recruit` and `flag:recruit -- region:x` or using the set-up wizar
    Assembly.
 
 7. Version 7 rehashes the entire Communiqué syntax structure to operate in line with the NationStates telegram API 
-system. Thus, a query in the NationStates API like `region:Europe, +tag:WA` will function exactly the same in 
-Communiqué.
+system. ~~Thus, a query in the NationStates API like `region:Europe, +tag:WA` will function exactly the same in 
+Communiqué.~~
    - This version also switches to HTTPS per the recent NationStates update and implements a new update-checker (it 
    will check, at most, once a week). 
    - It also implements a change in how telegram requests are queued. Before, a time delay would commence, and after 
@@ -134,6 +134,11 @@ it is not backwards compatible with older versions.
     - As this operates on the Java `Pattern` library, anything that fails in that library—which I don't expect will be often—will also fail here. There may be issues when using `:` in any regex because of the way that Communique parses names. But `:` doesn't mean anything special, so that should not be much of a problem.
     - Hint: `-regex:.*[0-9]$` will omit anything that ends with a digit
     - Hint: `+regex:[a-zA-Z]+` will require only characters
+    
+11. Version 11 introduces regional tags searches. These will usually take a long time because there are lots of regions and each regions must be polled individually. There is also now greater coverage of the internal parser in the logs: if you use the regional tags and want updates on parsing, open in a command line.
+    - Hint: `region_tag:*,-tiny,-small,-minuscule` will probably remove most of the small regions from your query.
+    - Important note: The program no longer automatically separates items within a single line with commas. This is to facilitate the use of the NS API tag queries. Thus, `region:Europe, +tag:wa` will now throw an error unless on two different lines.
+    - Background note: NS JavaTelegram has now been subsumed into Communique.
 
 ## Road ahead
 In a future version, I intend to phase out the concept of a separate recruiter and simply permit someoneone to specify that some action be taken repeatedly. Some syntax like `flag:repeat; limit:1; tag:new`.

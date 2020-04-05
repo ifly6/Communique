@@ -14,7 +14,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 package com.git.ifly6.communique.io;
 
-import com.git.ifly6.javatelegram.util.JInfoFetcher;
+import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
 
 import java.util.ArrayList;
 import java.util.Collections;
