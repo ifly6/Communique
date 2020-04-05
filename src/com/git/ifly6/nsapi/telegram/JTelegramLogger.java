@@ -29,7 +29,6 @@ public interface JTelegramLogger {
 
 	/**
 	 * Make sure that there is a way of giving the logging information which might be relevant to the reader.
-	 *
 	 * @param input is the <code>String</code> which is to be processed by this function.
 	 */
 	void log(String input);
@@ -37,7 +36,6 @@ public interface JTelegramLogger {
 	/**
 	 * Inform the logger that some <code>recipient</code> was sent to, this is the <i>x</i> of the recipients, which
 	 * total <code>length</code>.
-	 *
 	 * @param recipient    name
 	 * @param recipientNum this is the x-th recipient
 	 * @param length       of the recipients list

@@ -22,8 +22,10 @@ public class MarconiUtilities {
 
 	private static Scanner scan = new Scanner(System.in);
 
-	/** Determines whether there is another instance of Marconi which is already sending.
-	 * @return boolean, whether program is already running */
+	/**
+	 * Determines whether there is another instance of Marconi which is already sending.
+	 * @return boolean, whether program is already running
+	 */
 	static boolean isFileLocked() {
 		try {
 			if (!Files.exists(lockFile)) {
@@ -36,20 +38,24 @@ public class MarconiUtilities {
 		}
 	}
 
-	/** Shorthand for the scanner creation, the posing of the question, and the getting of the response. This version of
+	/**
+	 * Shorthand for the scanner creation, the posing of the question, and the getting of the response. This version of
 	 * the prompt method will not return all responses in lower case.
 	 * @param prompt the string posed to the user.
-	 * @return the user's answer*/
+	 * @return the user's answer
+	 */
 	static String prompt(String prompt) {
 		System.out.print(prompt + "\t");
 		return scan.nextLine();
 	}
 
-	/** Sends data and requests that you sanitise it to avoid stupid errors. All responses will be in lower case. This
-	 * is the only way the data can be effectively sanitised.
-	 * @param prompt The question posed to the user.
+	/**
+	 * Sends data and requests that you sanitise it to avoid stupid errors. All responses will be in lower case. This is
+	 * the only way the data can be effectively sanitised.
+	 * @param prompt            The question posed to the user.
 	 * @param acceptableAnswers A list of valid responses.
-	 * @return the user's answer, which is required to be in the list of valid responses */
+	 * @return the user's answer, which is required to be in the list of valid responses
+	 */
 	static String prompt(String prompt, List<String> acceptableAnswers) {
 		String response;
 		while (true) {
@@ -60,8 +66,10 @@ public class MarconiUtilities {
 		return response;
 	}
 
-	/** @param prompt the question posed to the user.
-	 * @return answer */
+	/**
+	 * @param prompt the question posed to the user.
+	 * @return answer
+	 */
 	static String promptYN(String prompt) {
 		return prompt(prompt, Arrays.asList("yes", "no", "y", "n"));
 	}

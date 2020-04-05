@@ -2,8 +2,8 @@ package com.git.ifly6.communique.io;
 
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.NSConnection;
+import com.git.ifly6.nsapi.telegram.JTelegramException;
 
 import java.io.IOException;
 import java.util.ArrayList;

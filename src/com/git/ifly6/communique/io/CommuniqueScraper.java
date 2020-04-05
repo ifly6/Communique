@@ -19,9 +19,11 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** Provides functionality to Communique to easily scrape pertinent information from the NationStates World Assembly
+/**
+ * Provides functionality to Communique to easily scrape pertinent information from the NationStates World Assembly
  * pages in line with the script rules.
- * @author ifly6 */
+ * @author ifly6
+ */
 public class CommuniqueScraper {
 
 	public static final String GA = "https://www.nationstates.net/page=UN_delegate_votes/council=1";
@@ -43,10 +45,12 @@ public class CommuniqueScraper {
 		}
 	}
 
-	/** Provides pertinent rate-limiting for web-scraping in line with the NationStates scripting rules.
+	/**
+	 * Provides pertinent rate-limiting for web-scraping in line with the NationStates scripting rules.
 	 * @param url at which to scrape HTML
 	 * @return list containing the HTML
-	 * @throws IOException if there is an error in finding the data */
+	 * @throws IOException if there is an error in finding the data
+	 */
 	private static String callUrl(URL url) throws IOException {
 		LOGGER.info("Implementing scraper rate-limit");
 		rateLimit();
@@ -59,10 +63,12 @@ public class CommuniqueScraper {
 		return new BufferedReader(isr).lines().collect(Collectors.joining("\n"));
 	}
 
-	/** Attempts to scrape the list of delegates voting for or against some proposal.
+	/**
+	 * Attempts to scrape the list of delegates voting for or against some proposal.
 	 * @param chamber, either GA or SC
-	 * @param side, either FOR or AGAINST
-	 * @return list of applicable delegate reference names; if failure, empty list. */
+	 * @param side,    either FOR or AGAINST
+	 * @return list of applicable delegate reference names; if failure, empty list.
+	 */
 	public static List<CommuniqueRecipient> importAtVoteDelegates(String chamber, String side) {
 		try {
 			Document doc = Jsoup.parse(callUrl(new URL(chamber)));  // rate-limited call

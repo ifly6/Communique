@@ -15,11 +15,11 @@
 
 package com.git.ifly6.nsapi.telegram.util;
 
-import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.NSConnection;
 import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSRegion;
 import com.git.ifly6.nsapi.NSWorld;
+import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.jcabi.xml.XMLDocument;
 
 import java.io.IOException;
@@ -125,6 +125,8 @@ public class JInfoFetcher {
 			}
 		} catch (IOException e) {
 			throw new JTelegramException("Failed to fetch regions declaring tag " + regionTag, e);
+		} catch (IndexOutOfBoundsException e) {
+			throw new JTelegramException(String.format("Region tag '%s' does not exist", regionTag), e);
 		}
 
 		return regionTags.get(regionTag);

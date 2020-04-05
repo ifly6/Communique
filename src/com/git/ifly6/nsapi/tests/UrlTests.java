@@ -6,14 +6,14 @@ import java.io.IOException;
 
 public class UrlTests {
 
-    public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException {
 
 //        NSNation nation = new NSNation("imperium anglorum");
 //        nation.populateData();
 
-        NSRegion region = new NSRegion("europe");
-        region.populateData();
+		NSRegion region = new NSRegion("europe");
+		region.populateData();
 
-    }
+	}
 
 }

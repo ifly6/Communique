@@ -8,13 +8,13 @@ import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.data.FilterType;
 import com.git.ifly6.communique.data.RecipientType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
-import com.git.ifly6.nsapi.telegram.JTelegramLogger;
-import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
 import com.git.ifly6.marconi.MarconiRecruiter;
 import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.NSNation;
+import com.git.ifly6.nsapi.telegram.JTelegramException;
+import com.git.ifly6.nsapi.telegram.JTelegramLogger;
+import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;

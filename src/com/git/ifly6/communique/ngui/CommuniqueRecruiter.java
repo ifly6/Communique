@@ -372,8 +372,8 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	}
 
 	/**
-	 * @return returns the proscribed regions as defined by the regions selected in the <code>excludeList</code>,
-	 * mapped to <code>CommuniqueRecipient</code>
+	 * @return returns the proscribed regions as defined by the regions selected in the <code>excludeList</code>, mapped
+	 * to <code>CommuniqueRecipient</code>
 	 */
 	private Set<CommuniqueRecipient> listProscribedRegions() {
 		return IntStream.of(excludeList.getSelectedIndices())

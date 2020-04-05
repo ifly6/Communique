@@ -31,7 +31,7 @@ public class NSException extends RuntimeException {
 		super(message);
 	}
 
-    public NSException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
+	public NSException(String message, Throwable throwable) {
+		super(message, throwable);
+	}
 }
