@@ -56,11 +56,11 @@ public class Communique7ParserTranslateTest {
 		scan.close();
 
 	}
+
 	/**
 	 * This method is syntactical sugar for the translation process in {@link CommuniqueRecipient#translateTokens(List)}.
-	 * That method is applied on lists because some of the old tokens, e.g. <code>region:europe -> wa:members</code>
-	 * now translates to <code>region:europe, +tag:wa</code>, which is technically two statements.
-	 *
+	 * That method is applied on lists because some of the old tokens, e.g. <code>region:europe -> wa:members</code> now
+	 * translates to <code>region:europe, +tag:wa</code>, which is technically two statements.
 	 * @param s is a <code>String</code> in the old style to translate
 	 * @return the {@link CommuniqueRecipient} that is translated
 	 */

@@ -73,14 +73,13 @@ public class JavaTelegram {
 	private boolean isRecruitment = true;   // Defaults to 'true' to keep on the safe side.
 
 	/**
-	 * A list of tests to run on each recipient. A <code>NSNation</code> is created for each recipient in
-	 * {@link JavaTelegram#connect()} and populated before it is tested by the predicate. If any predicate returns
-	 * false, the recipient will be skipped. A default predicate, which cannot be removed, is statically initialised to
-	 * prevent telegrams from being sent based on this algorithm:
+	 * A list of tests to run on each recipient. A <code>NSNation</code> is created for each recipient in {@link
+	 * JavaTelegram#connect()} and populated before it is tested by the predicate. If any predicate returns false, the
+	 * recipient will be skipped. A default predicate, which cannot be removed, is statically initialised to prevent
+	 * telegrams from being sent based on this algorithm:
 	 * <p>
 	 * <code>if we are recruiting and nation is not recruitable -> false
-	 * <br />
-	 * else (we are campaigning) and nation is not campaignable -> false</code>
+	 * <br /> else (we are campaigning) and nation is not campaignable -> false</code>
 	 * </p>
 	 */
 	private List<Predicate<NSNation>> predicates = new ArrayList<>();  // additional predicates here
@@ -97,7 +96,6 @@ public class JavaTelegram {
 	/**
 	 * Creates a JavaTelegram function with a way of returning information and status reports as well as immediate
 	 * initialisation of the keys, and the immediate setting of the isRecruitment flag.
-	 *
 	 * @param providedLogger is a <code>JTelegramLogger</code> which replaces the old logger for the output of
 	 *                       information
 	 * @param inputKeys      is a <code>JTelegramKeys</code> containing the keys to directly initialise
@@ -111,7 +109,6 @@ public class JavaTelegram {
 	/**
 	 * Creates a JavaTelegram function with a way of returning information and status reports. All other variables will
 	 * have to be set manually later if one uses this constructor.
-	 *
 	 * @param logger is a <code>JTelegramLogger</code> which replaces the old logger for the output of information
 	 */
 	public JavaTelegram(JTelegramLogger logger) {
@@ -119,10 +116,9 @@ public class JavaTelegram {
 	}
 
 	/**
-	 * Returns the amount of time which the program waits between sending telegrams. Note that in
-	 * {@link JavaTelegram#connect()}, the program automatically deducts the amount of time necessary to populate
+	 * Returns the amount of time which the program waits between sending telegrams. Note that in {@link
+	 * JavaTelegram#connect()}, the program automatically deducts the amount of time necessary to populate
 	 * <code>NSNation</code> data and check provided predicates.
-	 *
 	 * @return the time, in milliseconds, to wait between telegram queries
 	 */
 	public int getWaitTime() {
@@ -130,10 +126,9 @@ public class JavaTelegram {
 	}
 
 	/**
-	 * Sets the time between telegrams which the program is set to wait. Note that this is implemented in
-	 * {@link JavaTelegram#connect()} to automatically deduct the time necessary to populate <code>NSNation</code> data
-	 * and check the provided predicates.
-	 *
+	 * Sets the time between telegrams which the program is set to wait. Note that this is implemented in {@link
+	 * JavaTelegram#connect()} to automatically deduct the time necessary to populate <code>NSNation</code> data and
+	 * check the provided predicates.
 	 * @param waitTime is the time to wait between telegrams, in milliseconds
 	 */
 	public void setWaitTime(int waitTime) {
@@ -148,7 +143,6 @@ public class JavaTelegram {
 
 	/**
 	 * Changes the keys which the instance will use.
-	 *
 	 * @param inputKeys are the keys which will be set contained in a <code>JTelegramKeys</code>
 	 */
 	public void setKeys(JTelegramKeys inputKeys) {
@@ -157,7 +151,6 @@ public class JavaTelegram {
 
 	/**
 	 * Sets the keys which the telegram instance will use
-	 *
 	 * @param clientKey  on which to send telegrams
 	 * @param secretKey  to authorise dispatch
 	 * @param telegramId to specify the telegram
@@ -168,7 +161,6 @@ public class JavaTelegram {
 
 	/**
 	 * Changes or sets the recipients who will be used in the connect() method.
-	 *
 	 * @param list is an array of all the recipients, each one for each index
 	 */
 	public void setRecipients(List<String> list) {
@@ -182,7 +174,6 @@ public class JavaTelegram {
 	/**
 	 * Sets the <code>isRecruitment</code> flag inside the client. This flag defaults to <code>true</code>. When it is
 	 * set, it overwrites {@link JavaTelegram#waitTime} to the default constants for recruitment and campaign delays.
-	 *
 	 * @param isRecruitment tells the client if we are recruiting
 	 */
 	public void setRecruitment(boolean isRecruitment) {
@@ -192,7 +183,6 @@ public class JavaTelegram {
 
 	/**
 	 * Finds out the current status of the <code>killThread</code> boolean.
-	 *
 	 * @return boolean killThread
 	 */
 	public boolean isKillThread() {
@@ -202,7 +192,6 @@ public class JavaTelegram {
 	/**
 	 * Shuts down the connect method, if <code>killThread</code> is set to <code>true</code>. The client, if running,
 	 * should terminate by the next cycle.
-	 *
 	 * @param killNow is the <code>boolean</code> to which <code>killThread</code> will be set
 	 */
 	public void setKillThread(boolean killNow) {
@@ -218,15 +207,14 @@ public class JavaTelegram {
 	 * Connects to the NationStates API and starts sending telegrams to the provided recipients with the provided keys.
 	 * Note that checks are made in this method ({@link JavaTelegram#predicates}) to make sure that telegrams are sent
 	 * to nations which do not opt-out of those telegrams. All output is logged using {@link JTelegramLogger}.
-	 *
 	 * @see JTelegramConnection
 	 * @see com.git.ifly6.nsapi.telegram.util.JInfoFetcher JInfoFetcher
 	 */
 	public void connect() {
 
 		// Do some null-checks to make sure we can actually send things
-        if (keys.anyEmpty()) {
-            util.log("Check your keys, one of them is null or empty");
+		if (keys.anyEmpty()) {
+			util.log("Check your keys, one of them is null or empty");
 			return;
 		}
 

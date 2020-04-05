@@ -40,7 +40,6 @@ public class CommuniqueMessages {
 
 	/**
 	 * Gives the licence information that is saved in the file 'licences' in this source directory.
-	 *
 	 * @return licence information
 	 */
 	public static String getLicence() {

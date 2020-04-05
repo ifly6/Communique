@@ -10,29 +10,33 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 class CommuniqueWriter {
-	
+
 	private Path path;
 	private CommuniqueConfig config;
-	
-	/** Creates <code>CommuniqueWriter</code> pointing to some path with some loaded configuration data.
-	 * @param path on which to write
-	 * @param config data */
+
+	/**
+	 * Creates <code>CommuniqueWriter</code> pointing to some path with some loaded configuration data.
+	 * @param path   on which to write
+	 * @param config data
+	 */
 	CommuniqueWriter(Path path, CommuniqueConfig config) {
 		this.path = path;
 		this.config = config;
 	}
-	
-	/** Writes the configuration data to the path specified in the constructor.
-	 * @throws IOException if there is an error in writing the file */
+
+	/**
+	 * Writes the configuration data to the path specified in the constructor.
+	 * @throws IOException if there is an error in writing the file
+	 */
 	void write() throws IOException {
-		
+
 		// Have configuration clean itself
 		config.clean();
-		
+
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String response = gson.toJson(config);
-		
+
 		Files.write(path, Arrays.asList(response.split("\n")));
 	}
-	
+
 }

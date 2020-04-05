@@ -98,8 +98,8 @@ public class CommuniqueFileWriter {
 	}
 
 	/**
-	 * This is an old method to set the keys inside the new <code>JTelegramKeys</code> object which will then be
-	 * written to disc. It was written to keep compatibility with API version 1.
+	 * This is an old method to set the keys inside the new <code>JTelegramKeys</code> object which will then be written
+	 * to disc. It was written to keep compatibility with API version 1.
 	 * @param inputKeys a String array containing the keys in this order: <code>{ clientKey, secretKey, telegramId
 	 *                  }</code>
 	 */

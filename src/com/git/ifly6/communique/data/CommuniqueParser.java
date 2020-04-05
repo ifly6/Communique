@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
  * <tr>
  * <td><code>wa:members</code></td>
  * <td>this tag inserts every World Assembly member into the recipients list. It is best to use this on a regional
- * basis
- * with the <code>-></code> operator to filter out the World Assembly members inside a certain region or to use the
+ * basis with the <code>-></code> operator to filter out the World Assembly members inside a certain region or to use
+ * the
  * <code>--</code> operator to remove WA members as necessary.</td>
  * </tr>
  * <tr>
@@ -62,9 +62,8 @@ import java.util.stream.Collectors;
  * <td>--</td>
  * <td>tells the parser to remove any nations listed in the second tag from the first tag, for example,
  * <code>region:europe -- wa:members</code> would leave all nations of Europe who are not WA members. This tag
- * functions
- * much like the <code>/</code> tag, but this negation is not a global negation, as the slash uses, but rather, a local
- * negation for that tag only.</td>
+ * functions much like the <code>/</code> tag, but this negation is not a global negation, as the slash uses, but
+ * rather, a local negation for that tag only.</td>
  * </tr>
  * </table>
  * </strike>
