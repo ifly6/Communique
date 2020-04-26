@@ -1,4 +1,4 @@
-/* Copyright (c) 2018 Kevin Wong. All Rights Reserved. */
+/* Copyright (c) 2020 Imperium Anglorum aka Transilia All Rights Reserved. */
 package com.git.ifly6.marconi;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
