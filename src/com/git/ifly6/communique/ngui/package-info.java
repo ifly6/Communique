@@ -1,4 +1,4 @@
-/* Copyright (c) 2020 Imperium Anglorum aka Transilia All Rights Reserved. */
+/* Copyright (c) 2020 Imperium Anglorum aka Transilia. All Rights Reserved. */
 
 /**
  * Classes in this package provide the framework and functionality for the Communique and Marconi interfaces. The
