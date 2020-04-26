@@ -1,4 +1,4 @@
-/* Copyright (c) 2018 ifly6. All Rights Reserved. */
+/* Copyright (c) 2020 Imperium Anglorum aka Transilia All Rights Reserved. */
 
 /**
  * Classes which used to be the centre of the Communique system. Much of the classes, due to the need for

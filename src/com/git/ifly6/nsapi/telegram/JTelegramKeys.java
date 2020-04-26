@@ -50,9 +50,12 @@ public class JTelegramKeys {
 	}
 
 	/**
-	 * Creates an empty <code>JTelegramKeys</code>.
+	 * Creates a purposely invalid "empty" <code>JTelegramKeys</code>.
 	 */
 	public JTelegramKeys() {
+		clientKey = "CLIENT_KEY";
+		secretKey = "SECRET_KEY";
+		telegramId = "TELEGRAM_ID";
 	}
 
 	/**

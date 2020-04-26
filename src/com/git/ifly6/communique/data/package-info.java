@@ -1,4 +1,4 @@
-/* Copyright (c) 2018 ifly6. All Rights Reserved. */
+/* Copyright (c) 2020 Imperium Anglorum aka Transilia All Rights Reserved. */
 
 /**
  * This package manages parsing for the Communique system. Each recipient is contained in a {@link

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018 ifly6. All Rights Reserved. */
+/* Copyright (c) 2020 Imperium Anglorum aka Transilia All Rights Reserved. */
 package com.git.ifly6.communique.io;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
@@ -27,7 +27,7 @@ public class CommuniqueConfig implements java.io.Serializable {
 	public int version;
 
 	public boolean isRecruitment;
-	public CommuniqueProcessingAction processingAction = CommuniqueProcessingAction.NONE;
+	public CommuniqueProcessingAction processingAction;
 
 	public JTelegramKeys keys;
 
@@ -48,7 +48,9 @@ public class CommuniqueConfig implements java.io.Serializable {
 	 * Empty constructor for {@link CommuniqueConfig}
 	 */
 	public CommuniqueConfig() {
+		this.keys = new JTelegramKeys(); // empty keys
 		this.version = defaultVersion(); // default version to current version
+		this.processingAction = CommuniqueProcessingAction.NONE; // no processing action
 	}
 
 	/**

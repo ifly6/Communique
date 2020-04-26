@@ -52,11 +52,5 @@
 			<artifactId>commons-text</artifactId>
 			<version>1.8</version>
 		</dependency>
-		<dependency>
-			<groupId>JavaTelegram</groupId>
-			<artifactId>JavaTelegram</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
 	</dependencies>
 </project>
