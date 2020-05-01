@@ -1,4 +1,3 @@
-/* Copyright (c) 2020 Imperium Anglorum aka Transilia. All Rights Reserved. */
 
 /**
  * Classes in this package manage the loading of information for Communique. This falls into two general categories,
