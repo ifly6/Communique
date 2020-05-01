@@ -275,25 +275,28 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		progressLabel = new JLabel("? / ?");
 
 		txtClientKey = new JTextField();
-		txtClientKey.setToolTipText("Put your client key here");
+		txtClientKey.setToolTipText("Put your client key here. Spaces not allowed.");
 		txtClientKey.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		txtClientKey.setText(CommuniqueLoader.getClientKey());
 		txtClientKey.getDocument().addDocumentListener(new CommuniqueDocumentListener(event -> {
-			config.keys.setClientKey(txtClientKey.getText()); // dynamic update config
+			txtClientKey.setText(txtClientKey.getText().trim());
+			config.keys.setClientKey(txtClientKey.getText().trim()); // dynamic update config
 		}));
 
 		txtSecretKey = new JTextField();
-		txtSecretKey.setToolTipText("Put your telegram's secret key here");
+		txtSecretKey.setToolTipText("Put your telegram's secret key here. Spaces not allowed.");
 		txtSecretKey.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		txtSecretKey.getDocument().addDocumentListener(new CommuniqueDocumentListener(event -> {
-			config.keys.setSecretKey(txtSecretKey.getText()); // dynamic update config
+			txtSecretKey.setText(txtSecretKey.getText().trim());
+			config.keys.setSecretKey(txtSecretKey.getText().trim()); // dynamic update config
 		}));
 
 		txtTelegramId = new JTextField();
-		txtTelegramId.setToolTipText("Put your telegram's ID, a long multidigit integer, here");
+		txtTelegramId.setToolTipText("Put your telegram's ID, a long multi-digit integer, here. Spaces not allowed.");
 		txtTelegramId.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		txtTelegramId.getDocument().addDocumentListener(new CommuniqueDocumentListener(event -> {
-			config.keys.setTelegramId(txtTelegramId.getText()); // dynamic update config
+			txtTelegramId.setText(txtTelegramId.getText().trim());
+			config.keys.setTelegramId(txtTelegramId.getText().trim()); // dynamic update config
 		}));
 
 		btnParse = new JButton("Parse");
@@ -907,7 +910,11 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			Runnable runner = () -> {
 
 				client.setRecipients(parsedRecipients);    // Set recipients
-				client.setKeys(new JTelegramKeys(txtClientKey.getText(), txtSecretKey.getText(), txtTelegramId.getText()));
+				client.setKeys(new JTelegramKeys(
+						txtClientKey.getText().trim(),
+						txtSecretKey.getText().trim(),
+						txtTelegramId.getText().trim()
+				));
 
 				// Set recruitment Status, JavaTelegram defaults to true
 				client.setRecruitment(chckbxRecruitment.isSelected());

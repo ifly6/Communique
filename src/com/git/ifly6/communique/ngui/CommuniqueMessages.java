@@ -34,7 +34,7 @@ public class CommuniqueMessages {
 	}
 
 	public static final String acknowledgement =
-			"Developed by Kevin Wong (username: ifly6), contributing to the repository at "
+			"Developed by ifly6, contributing to the repository at "
 					+ "[github.com/iflycode/communique], also known as the nation Imperium Anglorum on "
 					+ "NationStates.\n\nMy thanks to bug-testers Tinfect, Krypton Nova, Separatist Peoples, and Wallenburg.";
 
