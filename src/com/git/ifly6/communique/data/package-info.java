@@ -1,4 +1,3 @@
-/* Copyright (c) 2020 Imperium Anglorum aka Transilia. All Rights Reserved. */
 
 /**
  * This package manages parsing for the Communique system. Each recipient is contained in a {@link
