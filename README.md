@@ -59,9 +59,8 @@ file was already sent. Do not share this file. You can load these files from dis
 
 ### Technical Information ####
 This program reports its UserAgent to the NationStates API as follows:
-	* `NationStates JavaTelegram (maintained by Imperium Anglorum, used by <client key>)` when sending telegrams and
-	* `NS API request; maintained by Imperium Anglorum, email: cyrilparsons.london@gmail.com; see IP` when requesting 
-	information from the API
+* `NationStates JavaTelegram (maintained by Imperium Anglorum, used by <client key>)` when sending telegrams and
+* `NS API request; maintained by Imperium Anglorum, email: cyrilparsons.london@gmail.com; see IP.` when requesting information from the API
 	
 
 ## Changelog ##
