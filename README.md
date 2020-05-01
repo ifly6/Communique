@@ -138,7 +138,7 @@ it is not backwards compatible with older versions.
 11. Version 11 introduces regional tags searches. These will usually take a long time because there are lots of regions and each regions must be polled individually. There is also now greater coverage of the internal parser in the logs: if you use the regional tags and want updates on parsing, open in a command line.
     - Hint: `region_tag:*,-tiny,-small,-minuscule` will probably remove most of the small regions from your query.
     - Important note: The program no longer automatically separates items within a single line with commas. This is to facilitate the use of the NS API tag queries. Thus, `region:Europe, +tag:wa` will now throw an error unless on two different lines.
-    - Background note: NS JavaTelegram has now been subsumed into Communique.
+    - Back-end note: NS JavaTelegram has now been subsumed into Communique.
 
 ## Road ahead
 In a future version, I intend to phase out the concept of a separate recruiter and simply permit someoneone to specify that some action be taken repeatedly. Some syntax like `flag:repeat; limit:1; tag:new`.

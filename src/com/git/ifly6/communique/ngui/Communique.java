@@ -274,27 +274,24 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		progressLabel = new JLabel("? / ?");
 
 		txtClientKey = new JTextField();
-		txtClientKey.setToolTipText("Put your client key here. Spaces not allowed.");
+		txtClientKey.setToolTipText("Put your client key here. Spaces stripped.");
 		txtClientKey.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		txtClientKey.setText(CommuniqueLoader.getClientKey());
 		txtClientKey.getDocument().addDocumentListener(new CommuniqueDocumentListener(event -> {
-			txtClientKey.setText(txtClientKey.getText().trim());
 			config.keys.setClientKey(txtClientKey.getText().trim()); // dynamic update config
 		}));
 
 		txtSecretKey = new JTextField();
-		txtSecretKey.setToolTipText("Put your telegram's secret key here. Spaces not allowed.");
+		txtSecretKey.setToolTipText("Put your telegram's secret key here. Spaces stripped.");
 		txtSecretKey.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		txtSecretKey.getDocument().addDocumentListener(new CommuniqueDocumentListener(event -> {
-			txtSecretKey.setText(txtSecretKey.getText().trim());
 			config.keys.setSecretKey(txtSecretKey.getText().trim()); // dynamic update config
 		}));
 
 		txtTelegramId = new JTextField();
-		txtTelegramId.setToolTipText("Put your telegram's ID, a long multi-digit integer, here. Spaces not allowed.");
+		txtTelegramId.setToolTipText("Put your telegram's ID, a long multi-digit integer, here. Spaces stripped.");
 		txtTelegramId.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		txtTelegramId.getDocument().addDocumentListener(new CommuniqueDocumentListener(event -> {
-			txtTelegramId.setText(txtTelegramId.getText().trim());
 			config.keys.setTelegramId(txtTelegramId.getText().trim()); // dynamic update config
 		}));
 

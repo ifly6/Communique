@@ -81,9 +81,7 @@ public class CommuniqueRecipient {
 	 */
 	@Override
 	public String toString() {
-		if (recipientType != RecipientType.EMPTY)
-			return filterType.toString() + recipientType.toString() + ":" + this.getName();
-		return raw;
+		return filterType.toString() + recipientType.toString() + ":" + this.getName();
 	}
 
 	/**

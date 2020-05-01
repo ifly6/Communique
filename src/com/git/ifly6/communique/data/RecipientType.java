@@ -111,23 +111,11 @@ public enum RecipientType {
 		public String toString() {
 			return this.name().toLowerCase();
 		}
-	},
-
-	EMPTY {
-		@Override
-		public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
-			String raw = cr.getRaw();
-			throw new JTelegramException("Cannot decompose an empty recipient type" +
-					((raw == null)
-							? "."
-							: ": " + raw));
-		}
-
-		@Override
-		public String toString() {
-			return "";
-		}
 	};
+
+	// TODO figure out whether there actually ought to be an "EMPTY" recipient type here.
+	// seems like it's unnecessary but something may have broken when it was removed.
+	// want to keep it out to maintain compliance with standard NS telegram syntax
 
 	private static final Logger LOGGER = Logger.getLogger(RecipientType.class.getName());
 
