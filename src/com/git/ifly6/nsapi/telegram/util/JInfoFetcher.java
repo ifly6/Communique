@@ -100,10 +100,11 @@ public class JInfoFetcher {
 	 */
 	public List<String> getRegion(String region) throws JTelegramException {
 		try {
-			NSRegion nsRegion = new NSRegion(region).populateData();
-			if (regionList.get(region) == null || !regionList.containsKey(region))
+			if (!regionList.containsKey(region) || regionList.get(region) == null) {
+				NSRegion nsRegion = new NSRegion(region).populateData();
 				regionList.put(region, nsRegion.getRegionMembers());
-		} catch (NSException e) {    // non-existent -> throw NSException
+			}
+		} catch (NSException e) { // non-existent -> throw NSException
 			throw new JTelegramException("Region \"" + region + "\" does not exist", e);
 
 		} catch (IOException e) {
@@ -120,7 +121,7 @@ public class JInfoFetcher {
 	 */
 	public List<String> getRegionTag(String regionTag) throws JTelegramException {
 		try {
-			if (!regionTags.containsKey(regionTag)) {
+			if (!regionTags.containsKey(regionTag) || regionTags.get(regionTag) == null) {
 				regionTags.put(regionTag, NSWorld.getRegionTag(regionTag));
 			}
 		} catch (IOException e) {

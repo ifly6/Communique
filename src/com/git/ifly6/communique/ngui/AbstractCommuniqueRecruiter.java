@@ -45,7 +45,7 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 
 		// then get extra filter list things
-		RecipientType[] goodRecipientTypes = {RecipientType.EMPTY, RecipientType.NATION};
+		RecipientType[] goodRecipientTypes = {RecipientType.NATION};
 		filterList = config.getcRecipients().stream()
 				.filter(r -> r.getFilterType() != FilterType.NORMAL) // exclude all additions
 				.filter(r -> Arrays.asList(goodRecipientTypes).contains(r.getRecipientType()))
