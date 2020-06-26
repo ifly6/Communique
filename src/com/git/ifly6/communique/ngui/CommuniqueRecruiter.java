@@ -9,6 +9,9 @@ import com.git.ifly6.communique.data.RecipientType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
+import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
+import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
+import com.git.ifly6.communique.ngui.components.CommuniqueNativisation;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 import com.git.ifly6.nsapi.telegram.JavaTelegram;
@@ -70,7 +73,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	private static final Logger LOGGER = Logger.getLogger(CommuniqueRecruiter.class.getName());
 
 	static {
-		LOGGER.addHandler(Communique.loggerFileHandler);
+		LOGGER.addHandler(CommuniqueLAF.loggerFileHandler);
 	}
 
 	private Communique communique;
@@ -157,7 +160,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 			} else {    // SHUTTING DOWN
 
 				thread.interrupt();
-				Path savePath = communique.showFileChooser(frame, FileDialog.SAVE);
+				Path savePath = CommuniqueNativisation.showFileChooser(frame, FileDialog.SAVE);
 
 				// Cancel saving if null
 				if (savePath == null) return;
@@ -337,7 +340,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		menuBar.add(mnWindow);
 
 		JMenuItem mntmClose = new JMenuItem("Close");
-		mntmClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, Communique.COMMAND_KEY));
+		mntmClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, CommuniqueConstants.COMMAND_KEY));
 		mntmClose.addActionListener(e -> {
 			if (thread != null) thread.interrupt();
 			frame.setVisible(false);
@@ -346,7 +349,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		mnWindow.add(mntmClose);
 
 		JMenuItem mntmMinimise = new JMenuItem("Minimise");
-		mntmClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, Communique.COMMAND_KEY));
+		mntmClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, CommuniqueConstants.COMMAND_KEY));
 		mntmMinimise.addActionListener(e -> {
 			if (frame.getState() == Frame.NORMAL) frame.setState(Frame.ICONIFIED);
 		});
