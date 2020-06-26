@@ -63,8 +63,10 @@ class CommuniqueReader {
 						.map(String::trim)
 						.collect(Collectors.toList());
 				for (String line : lines)
-					if (line.equals("\"isRandomised\": true,"))
+					if (line.trim().equals("\"isRandomised\": true,")) {
 						config.processingAction = CommuniqueProcessingAction.RANDOMISE;
+						break;
+					}
 			}
 
 		} catch (JsonSyntaxException | JsonIOException e) {
@@ -94,7 +96,7 @@ class CommuniqueReader {
 		// Those files need to be translated too, which is problematic due to the creation of an explicit difference
 		// in those version between the standard recipients list and the sent-list.
 		if (config.version < 7)
-			config = unifySendList(config);
+			unifySendList(config);
 
 		return config;
 	}
@@ -106,10 +108,11 @@ class CommuniqueReader {
 	 * CommuniqueConfig} was turned into a serialised JSON file. In that period, strings in the old recipients format
 	 * were stored in the two (now-deprecated) <code>recipients</code> and <code>sentList</code> fields. Since it is
 	 * necessary to turn those all into the standard <code>CommuniqueRecipient</code>, keep this method.</p>
+	 *
+	 * <p>This acts in place.</p>
 	 * @param config holding {@link CommuniqueConfig#recipients} and {@link CommuniqueConfig#sentList}
-	 * @return a translated configuration with a unified list from the two old lists
 	 */
-	private CommuniqueConfig unifySendList(CommuniqueConfig config) {
+	private void unifySendList(CommuniqueConfig config) {
 		if (config.getcRecipients() == null) { // only if null is this necessary
 			List<CommuniqueRecipient> list = new ArrayList<>();
 
@@ -133,8 +136,6 @@ class CommuniqueReader {
 
 			config.setcRecipients(list);
 		}
-
-		return config;
 	}
 
 }

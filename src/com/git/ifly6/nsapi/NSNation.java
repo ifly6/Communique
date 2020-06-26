@@ -46,7 +46,7 @@ public class NSNation {
 	}
 
 	// Nation identifiers
-	private String nationName = "";
+	private String nationName;
 	private boolean isPopulated;
 	private Date datePopulated;
 
@@ -76,8 +76,7 @@ public class NSNation {
 	 * Fetches the endorsement and influence counts at the same time. Calling the <code>getInfluenceCount()</code> or
 	 * <code>getEndoCount()</code> only provides information already loaded. This method also updates the influence
 	 * count and information.
-	 * @throws IOException from {@link NSConnection}, itself from {@link java.net.URLConnection}
-	 * @returns <code>boolean</code> referring to whether the nation in question exists
+	 * @return <code>boolean</code> referring to whether the nation in question exists
 	 */
 	public NSNation populateData() {
 		try {
@@ -178,7 +177,6 @@ public class NSNation {
 	/**
 	 * Allows for the number of endorsements to be set.
 	 * @param endos which the nation has
-	 * @return
 	 */
 	public NSNation setEndoCount(int endos) {
 		endoCount = endos;

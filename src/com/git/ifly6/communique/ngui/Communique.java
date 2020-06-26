@@ -217,9 +217,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		progressLabel = new JLabel("? / ?");
 
 		btnParse = new JButton("Parse");
-		btnParse.addActionListener(ae -> {
-			setupSend();
-		});
+		btnParse.addActionListener(ae -> setupSend());
 
 		chckbxRecruitment = new JCheckBox("Recruitment rate-limit");
 		chckbxRecruitment.setToolTipText("The recruitment rate-limit is 180 seconds per telegram. The rate-limit "
@@ -228,7 +226,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		chckbxRecruitment.addActionListener(evt -> {
 			config.isRecruitment = chckbxRecruitment.isSelected();
 			LOGGER.info(String.format("Set config recruitment to %s",
-					String.valueOf(chckbxRecruitment.isSelected())));
+					chckbxRecruitment.isSelected()));
 		});
 
 		specialAction = new JComboBox<>();

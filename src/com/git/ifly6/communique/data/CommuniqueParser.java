@@ -68,6 +68,7 @@ import java.util.stream.Collectors;
  * </strike>
  * </p>
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated
 public class CommuniqueParser {
 
@@ -135,7 +136,7 @@ public class CommuniqueParser {
 				// Remove leading and trailing underscores.
 				for (int i = 0; i < bothArr.length; i++) {
 					bothArr[i] = bothArr[i].trim();
-					if (bothArr[i].startsWith("_")) bothArr[i] = bothArr[i].substring(1, bothArr[i].length());
+					if (bothArr[i].startsWith("_")) bothArr[i] = bothArr[i].substring(1);
 					if (bothArr[i].endsWith("_")) bothArr[i] = bothArr[i].substring(0, bothArr[i].length() - 1);
 				}
 
@@ -171,7 +172,7 @@ public class CommuniqueParser {
 	}
 
 	public String[] filterAndParse(List<String> input) {
-		return filterAndParse(input.stream().toArray(String[]::new));
+		return filterAndParse(input.toArray(new String[0]));
 	}
 
 	/**
