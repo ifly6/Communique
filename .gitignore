@@ -25,6 +25,7 @@ Communique.eml
 # IDEA files
 Communique.iml
 /.idea/
+/classes/
 
 # used for IDEA artefact export
 /marconi-meta/

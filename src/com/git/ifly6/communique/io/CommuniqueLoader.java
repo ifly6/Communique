@@ -1,7 +1,6 @@
 package com.git.ifly6.communique.io;
 
 import com.git.ifly6.communique.CommuniqueUtils;
-import com.git.ifly6.communique.ngui.Communique;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 
 import java.io.FileInputStream;
@@ -9,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Properties;
+
+import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.appSupport;
 
 /**
  * {@link CommuniqueLoader} is a class allowing the easy abstraction of access to a single point and simplifying the
@@ -64,7 +65,7 @@ public class CommuniqueLoader {
 		try {
 			Properties prop = new Properties();
 			prop.setProperty("clientKey", clientKey);
-			FileOutputStream output = new FileOutputStream(Communique.appSupport.resolve("config.properties").toFile());
+			FileOutputStream output = new FileOutputStream(appSupport.resolve("config.properties").toFile());
 			prop.store(output, "Communique Properties");
 			output.close();
 		} catch (IOException e) {
@@ -79,7 +80,7 @@ public class CommuniqueLoader {
 	public static String getClientKey() {
 		try {
 			Properties prop = new Properties();
-			prop.load(new FileInputStream(Communique.appSupport.resolve("config.properties").toFile()));
+			prop.load(new FileInputStream(appSupport.resolve("config.properties").toFile()));
 			String clientKey = prop.getProperty("clientKey");
 			return CommuniqueUtils.isEmpty(clientKey) ? "Client Key" : clientKey;
 		} catch (IOException e) {

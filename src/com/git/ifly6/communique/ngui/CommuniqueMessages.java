@@ -44,7 +44,7 @@ public class CommuniqueMessages {
 	 */
 	public static String getLicence() {
 		if (licence == null) {
-			InputStream resourceInputStream = CommuniqueMessages.class.getResourceAsStream("licences");
+			InputStream resourceInputStream = CommuniqueMessages.class.getResourceAsStream("licence");
 			try (Scanner s = new Scanner(resourceInputStream)) {
 				licence = s.useDelimiter("\\A").hasNext() ? s.next() : "";
 			}
