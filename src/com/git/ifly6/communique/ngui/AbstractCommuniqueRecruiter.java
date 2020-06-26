@@ -1,6 +1,7 @@
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.communique.CommuniqueUtils;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
@@ -16,7 +17,6 @@ import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +48,7 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 		RecipientType[] goodRecipientTypes = {RecipientType.NATION};
 		filterList = config.getcRecipients().stream()
 				.filter(r -> r.getFilterType() != FilterType.NORMAL) // exclude all additions
-				.filter(r -> Arrays.asList(goodRecipientTypes).contains(r.getRecipientType()))
+				.filter(r -> CommuniqueUtils.contains(goodRecipientTypes, r.getRecipientType()))
 				.filter(r -> !sentList.contains(r))
 				.collect(Collectors.toList());
 	}

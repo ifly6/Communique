@@ -1,4 +1,3 @@
-
 /**
  * Classes in this package provide the framework and functionality for the Communique and Marconi interfaces. The
  * abstract classes provide framework and shared functionality while the implementations are dealt with in the
