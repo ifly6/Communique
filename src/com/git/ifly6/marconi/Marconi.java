@@ -49,8 +49,11 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 
 		System.out.println();
 		System.out.println(String.format("This will take %s to send %d telegrams",
-				CommuniqueUtilities.time(Math.round(expandedRecipients.size()
-						* (config.isRecruitment ? JavaTelegram.RECRUIT_TIME / 1000 : JavaTelegram.CAMPAIGN_TIME / 1000))),
+				CommuniqueUtilities.time(Math.round(expandedRecipients.size() * (
+						config.isRecruitment
+						? (float) JavaTelegram.RECRUIT_TIME / 1000
+						: (float) JavaTelegram.CAMPAIGN_TIME / 1000
+				))),
 				expandedRecipients.size()));
 
 		if (!skipChecks) {
@@ -89,7 +92,7 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 				while (true) {
 					String recruitResponse = MarconiUtilities.promptYN(String
 							.format("Is the recruitment flag (%s) set correctly? [Yes] or [No]?",
-									String.valueOf(config.isRecruitment)));
+									config.isRecruitment));
 					if (recruitResponse.startsWith("n")) config.isRecruitment = !config.isRecruitment;
 					else if (recruitResponse.startsWith("y")) break;
 				}
@@ -98,7 +101,7 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 				while (true) {
 					String randomResponse = MarconiUtilities.promptYN(String
 							.format("Do you want to apply the %s processing action?",
-									String.valueOf(config.processingAction)));
+									config.processingAction));
 					if (randomResponse.startsWith("n")) return;
 					else if (randomResponse.startsWith("y")) break;
 				}

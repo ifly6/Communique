@@ -23,11 +23,8 @@ public class NSRegionQueryBuilder {
 	 * @return the builder
 	 */
 	public NSRegionQueryBuilder addQuery(NSRegionShard query) {
-		if (builder.toString().endsWith("+")) builder.append(query.toString());
-		else {
-			builder.append("+");
-			builder.append(query.toString());
-		}
+		if (!builder.toString().endsWith("+")) builder.append("+");
+		builder.append(query.toString());
 		return this;
 	}
 

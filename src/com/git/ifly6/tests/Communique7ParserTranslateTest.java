@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class Communique7ParserTranslateTest {
 
@@ -21,17 +20,16 @@ public class Communique7ParserTranslateTest {
 		System.out.print("[translate], [parser]?\t");
 		String input = scan.nextLine();
 
-		assert translate("wa:members") == CommuniqueRecipients.createTag(FilterType.NORMAL, "wa");
-		assert translate("region:Europe") == CommuniqueRecipients.createRegion(FilterType.NORMAL, "Europe");
-		assert translate("/region:Europe") == CommuniqueRecipients.createRegion(FilterType.EXCLUDE, "Europe");
-		assert translate("/wa:delegates") == CommuniqueRecipients.createTag(FilterType.EXCLUDE, "delegates");
+		assert translate("wa:members").equals(CommuniqueRecipients.createTag(FilterType.NORMAL, "wa"));
+		assert translate("region:Europe").equals(CommuniqueRecipients.createRegion(FilterType.NORMAL, "Europe"));
+		assert translate("/region:Europe").equals(CommuniqueRecipients.createRegion(FilterType.EXCLUDE, "Europe"));
+		assert translate("/wa:delegates").equals(CommuniqueRecipients.createTag(FilterType.EXCLUDE, "delegates"));
 
 		if ("translate".equals(input)) {
 
 			List<String> list = Arrays.asList("wa:members", "tag:wa", "region:Europe -> wa:members", "wa:delegates",
 					"tag:new", "world:new", "imperium anglorum", "/imperium anglorum", "region:Europe -- wa:members");
-			System.out.println(CommuniqueRecipient.translateTokens(list).stream()
-					.collect(Collectors.joining("\n")));
+			System.out.println(String.join("\n", CommuniqueRecipient.translateTokens(list)));
 
 			System.out.println();
 

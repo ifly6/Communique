@@ -55,7 +55,6 @@ public class CommuniqueSendDialog extends JDialog {
 	private int returnValue = 0;
 
 	private JButton sendButton;
-	private JButton cancelButton;
 
 	public CommuniqueSendDialog(JFrame parent, List<String> parsedRecipients, boolean isRecruitment) {
 		super(parent, true);
@@ -81,7 +80,7 @@ public class CommuniqueSendDialog extends JDialog {
 		textPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		textPane.setEditable(false);
-		textPane.setText(parsedRecipients.stream().collect(Collectors.joining("\n")));
+		textPane.setText(String.join("\n", parsedRecipients));
 
 		JLabel lblConfirmSendTo = new JLabel(String.format("Confirm send to %d recipients?",
 				parsedRecipients.size()));
@@ -107,7 +106,7 @@ public class CommuniqueSendDialog extends JDialog {
 		gbc_lblThisWillTake.gridy = 0;
 		buttonPane.add(lblThisWillTake, gbc_lblThisWillTake);
 
-		cancelButton = new JButton("Cancel");
+		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener((ae) -> {
 			// no need to set, default is cancel
 			LOGGER.info("User cancelled send request");
@@ -166,8 +165,8 @@ public class CommuniqueSendDialog extends JDialog {
 	private String estimateTime(int count, boolean isRecruitment) {
 		int seconds = Math.round(count *
 				(isRecruitment
-						? JavaTelegram.RECRUIT_TIME / 1000
-						: JavaTelegram.CAMPAIGN_TIME / 1000));
+						? (float) JavaTelegram.RECRUIT_TIME / 1000
+						: (float) JavaTelegram.CAMPAIGN_TIME / 1000));
 		return CommuniqueUtilities.time(seconds);
 	}
 
