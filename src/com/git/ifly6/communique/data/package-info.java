@@ -1,4 +1,3 @@
-
 /**
  * This package manages parsing for the Communique system. Each recipient is contained in a {@link
  * com.git.ifly6.communique.data.CommuniqueRecipient CommuniqueRecipient} object, which can then be applied via the

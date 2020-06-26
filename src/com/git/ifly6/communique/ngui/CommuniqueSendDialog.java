@@ -38,7 +38,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * <code>CommuniqueSendDialog</code> shows the user the results of the parsing of the recipients and an estimate of how
