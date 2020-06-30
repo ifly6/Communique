@@ -1,7 +1,6 @@
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
-import com.git.ifly6.communique.CommuniqueUtils;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
@@ -9,6 +8,7 @@ import com.git.ifly6.communique.data.FilterType;
 import com.git.ifly6.communique.data.RecipientType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.marconi.MarconiRecruiter;
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.NSNation;
@@ -48,7 +48,7 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 		RecipientType[] goodRecipientTypes = {RecipientType.NATION};
 		filterList = config.getcRecipients().stream()
 				.filter(r -> r.getFilterType() != FilterType.NORMAL) // exclude all additions
-				.filter(r -> CommuniqueUtils.contains(goodRecipientTypes, r.getRecipientType()))
+				.filter(r -> CommuniqueUtilities.contains(goodRecipientTypes, r.getRecipientType()))
 				.filter(r -> !sentList.contains(r))
 				.collect(Collectors.toList());
 	}
@@ -69,7 +69,7 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 	public CommuniqueRecipient getRecipient() {
 		try {
 			try {
-				List<String> possibleRecipients = CommuniqueUtilities.ref(fetcher.getNew());
+				List<String> possibleRecipients = ApiUtils.ref(fetcher.getNew());
 				for (String element : possibleRecipients) {
 
 					// if in sent list, next
@@ -138,10 +138,10 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 		if (!nation.hasData()) nation.populateData();
 
 		// API gives region names, can only do this by converting to ref names and then comparing
-		String nRegion = CommuniqueUtilities.ref(nation.getRegion());
+		String nRegion = ApiUtils.ref(nation.getRegion());
 		return proscribedRegions.stream()
 				.map(CommuniqueRecipient::getName)
-				.map(CommuniqueUtilities::ref)
+				.map(ApiUtils::ref)
 				.anyMatch(regionName -> regionName.equals(nRegion));
 
 	}

@@ -28,31 +28,27 @@ public class NSRegion {
 	private List<String> waMembers = new ArrayList<>();
 
 	public NSRegion(String name) {
-
-		name = name.toLowerCase().replace("\\s", "_").trim();
-		regionName = name;
-
-		// populate world data
-		if (worldWAMembers == null || worldWAMembers.isEmpty()) try {
-			worldWAMembers = new HashSet<>(NSWorld.getWAMembers());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		regionName = ApiUtils.ref(name);
+		if (worldWAMembers == null || worldWAMembers.isEmpty()) // populate world data
+			try {
+				worldWAMembers = new HashSet<>(NSWorld.getWAMembers());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	}
 
 	/**
 	 * Populates data for all variables
 	 * @return the regions which was populated
 	 */
-	public NSRegion populateData() throws IOException {
+	public NSRegion populateData() {
 		try {
 			// build the query
-			NSRegionQueryBuilder builder = new NSRegionQueryBuilder(this.regionName);
-			builder.addQuery(NSRegionShard.PROPER_NAME);
-			builder.addQuery(NSRegionShard.FOUNDER);
-			builder.addQuery(NSRegionShard.DELEGATE);
-			builder.addQuery(NSRegionShard.NATIONS_LIST);
+			NSRegionQueryBuilder builder = new NSRegionQueryBuilder(this.regionName)
+					.addQuery(NSRegionShard.PROPER_NAME)
+					.addQuery(NSRegionShard.FOUNDER)
+					.addQuery(NSRegionShard.DELEGATE)
+					.addQuery(NSRegionShard.NATIONS_LIST);
 			NSConnection apiConnect = new NSConnection(builder.toString());
 
 			// check existence
@@ -68,12 +64,13 @@ public class NSRegion {
 			String regionMemberString = "";
 			try {
 				regionMemberString = xml.xpath("/REGION/NATIONS/text()").get(0);
-			} catch (IndexOutOfBoundsException ignored) {  // catches com.jcabi.xml.ListWrapper$NodeNotFoundException
+			} catch (IndexOutOfBoundsException ignored) {
+				// catches com.jcabi.xml.ListWrapper$NodeNotFoundException
 				// pass, do nothing and keep default
 			}
 			regionMembers = Stream.of(regionMemberString.split(":"))
-					.filter(s -> s.trim().length() != 0)
-					.map(s -> s.trim().toLowerCase().replace("\\s", "_"))
+					.filter(ApiUtils::isNotEmpty)
+					.map(ApiUtils::ref)
 					.collect(Collectors.toList());
 
 		} catch (FileNotFoundException e) {
@@ -90,9 +87,8 @@ public class NSRegion {
 	 * Uses the NSWorld object to get the list of World Assembly members. Should a nation appear on both the list of
 	 * World Assembly members and the region list, it will be put on the WA members list.
 	 * @return the list of WA members in a region
-	 * @throws IOException if there is an issue with getting the WA members
 	 */
-	public List<String> getWAMembers() throws IOException {
+	public List<String> getWAMembers() {
 		if (waMembers.isEmpty()) {
 			waMembers = regionMembers.stream()
 					.filter(n -> worldWAMembers.contains(n))
@@ -104,9 +100,8 @@ public class NSRegion {
 	/**
 	 * Queries the NationStates API for a listing of all the members of a region.
 	 * @return <code>List&lt;String&gt;</code> with the recipients inside
-	 * @throws IOException in case the NationStates API is unreachable for some reason
 	 */
-	public List<String> getRegionMembers() throws IOException {
+	public List<String> getRegionMembers() {
 		return regionMembers;
 	}
 
@@ -117,9 +112,8 @@ public class NSRegion {
 	/**
 	 * Queries the NationStates API for a the reference name of the Delegate.
 	 * @return a <code>String</code> with the name of the Delegate
-	 * @throws IOException in case the NationStates API is unreachable for some reason
 	 */
-	public String getDelegateName() throws IOException {
+	public String getDelegateName() {
 		return delegateName;
 	}
 
@@ -127,18 +121,16 @@ public class NSRegion {
 	 * Queries the NationStates API for the Delegate, loads that into a <code>NSNation</code> and populates the data for
 	 * that nation.
 	 * @return a <code>NSNation</code> with the name of the Delegate and populated data.
-	 * @throws IOException in case the NationStates API is unreachable for some reason
 	 */
-	public NSNation getDelegate() throws IOException {
+	public NSNation getDelegate() {
 		return new NSNation(delegateName).populateData();
 	}
 
 	/**
 	 * Queries the NationStates API for a the reference name of the Founder.
 	 * @return a <code>String</code> with the name of the Founder
-	 * @throws IOException in case the NationStates API is unreachable for some reason
 	 */
-	public String getFounderName() throws IOException {
+	public String getFounderName() {
 		return founderName;
 	}
 
@@ -146,9 +138,8 @@ public class NSRegion {
 	 * Queries the NationStates API for the founder, loads that into a <code>NSNation</code> and populates the data for
 	 * that nation.
 	 * @return a <code>NSNation</code> with the name of the Founder and populated data.
-	 * @throws IOException in case the NationStates API is unreachable for some reason
 	 */
-	public NSNation getFounder() throws IOException {
+	public NSNation getFounder() {
 		return new NSNation(founderName);
 	}
 

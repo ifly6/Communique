@@ -3,9 +3,9 @@ package com.git.ifly6.nsapi;
 import com.jcabi.xml.XMLDocument;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /* There is only one World, so this is going to be static. */
 public class NSWorld {
@@ -63,9 +63,9 @@ public class NSWorld {
 	 * @return list of strings in NationStates reference name form
 	 */
 	private static List<String> processArray(String[] input) {
-		return Arrays.stream(input)
-				.filter(s -> s.trim().length() != 0)
-				.map(s -> s.trim().toLowerCase().replace("\\s", "_"))
+		return Stream.of(input)
+				.filter(ApiUtils::isNotEmpty)
+				.map(ApiUtils::ref)
 				.collect(Collectors.toList());
 	}
 

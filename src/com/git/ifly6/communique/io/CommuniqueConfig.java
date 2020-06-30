@@ -21,7 +21,7 @@ public class CommuniqueConfig implements java.io.Serializable {
 	private static final long serialVersionUID = Communique7Parser.version;
 
 	public static final String HEADER = "Communiqué Configuration File. Do not edit by hand. Produced at: "
-			+ CommuniqueUtilities.getCurrentDateAndTime() + ". Produced by version " + Communique7Parser.version;
+			+ CommuniqueUtilities.getDate() + ". Produced by version " + Communique7Parser.version;
 
 	public int version;
 
@@ -123,7 +123,6 @@ public class CommuniqueConfig implements java.io.Serializable {
 	 * one in the header, to the version of the program on which it was saved.
 	 */
 	void clean() {
-
 		version = this.defaultVersion(); // updates version
 
 		// proceeds to clean all of the fields
@@ -150,14 +149,7 @@ public class CommuniqueConfig implements java.io.Serializable {
 	 * @return the same with all the extra 'nation:'s removed.
 	 */
 	private static String cleanNation(String recipientString) {
-		int lastColon = recipientString.lastIndexOf(":");
-		if (lastColon > 1)
-			// nation:nation:blah
-			// >>> ^ ^-------^ ^ (where '-' means it is removed)
-			return recipientString.substring(0,
-					recipientString.indexOf(":") + 1) + recipientString.substring(lastColon + 1);
-		return recipientString;
+		return recipientString.replace(":(nation:)*", ":");
 	}
-
 
 }

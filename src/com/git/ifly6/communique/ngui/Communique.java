@@ -15,7 +15,7 @@
 
 package com.git.ifly6.communique.ngui;
 
-import com.git.ifly6.communique.CommuniqueUtils;
+import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
@@ -29,6 +29,7 @@ import com.git.ifly6.communique.io.NoResolutionException;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
 import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
@@ -160,7 +161,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	private void initialise() {
 
 		frame = new JFrame();
-		if (!CommuniqueUtils.IS_OS_MAC)
+		if (!CommuniqueUtilities.IS_OS_MAC)
 			frame.setIconImage(new ImageIcon(getClass().getResource("/icon.png")).getImage());
 
 		Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
@@ -377,7 +378,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		mnFile.add(mntmShowDirectory);
 
 		// Only add the Quit menu item if the OS is not Mac
-		if (!CommuniqueUtils.IS_OS_MAC) {
+		if (!CommuniqueUtilities.IS_OS_MAC) {
 			mnFile.addSeparator();
 			JMenuItem mntmExit = new JMenuItem("Exit");
 			mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, COMMAND_KEY));
@@ -463,9 +464,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 					(String) JOptionPane.showInputDialog(frame, "Select which chamber and side you want to address:",
 							"Select Chamber and Side", JOptionPane.PLAIN_MESSAGE, null, possibilities, "GA For");
 
-			if (!CommuniqueUtils.isEmpty(selection)) {
+			if (!ApiUtils.isEmpty(selection)) {
 				LOGGER.info("Starting scrape of NS WA voting page, " + selection);
-				String[] elements = selection.split(" ");
+				String[] elements = selection.split("\\s*?");
 				String chamber = elements[0].equals("GA") ? CommuniqueScraper.GA : CommuniqueScraper.SC;
 				String side = elements[1].equals("For") ? CommuniqueScraper.FOR : CommuniqueScraper.AGAINST;
 
@@ -496,8 +497,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			if (path != null) {
 				try {
 					Files.lines(path) // attempt load data
-							.filter(s -> !s.startsWith("#") || !CommuniqueUtils.isEmpty(s))
-							.map(s -> s.toLowerCase().trim().replaceAll(" ", "_")) // process
+							.filter(s -> !s.startsWith("#") || !ApiUtils.isEmpty(s))
+							.map(ApiUtils::ref) // process
 							.forEach(this::appendCode); // append to text area
 				} catch (IOException e1) {
 					LOGGER.log(Level.WARNING, "Cannot read file, IOException", e1);
@@ -636,7 +637,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		Communique7Parser parser = new Communique7Parser();
 		try {
 			parsedRecipients = parser.apply(tokens).listRecipients();
-			if (!CommuniqueUtils.contains(CommuniqueProcessingAction.values(), config.processingAction)) {
+			if (!CommuniqueUtilities.contains(CommuniqueProcessingAction.values(), config.processingAction)) {
 				// if config.processingAction not in CommuniqueProcessingAction.values
 				// deal with invalid processing action
 				this.showMessageDialog("Invalid processing action.\n"
@@ -858,7 +859,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 	private List<CommuniqueRecipient> exportRecipients() {
 		return Arrays.stream(txtrCode.getText().split("\n"))
-				.filter(s -> !(s.isEmpty() || s.trim().isEmpty()))
+				.filter(ApiUtils::isNotEmpty)
 				.filter(s -> !s.startsWith("#"))
 				.map(CommuniqueRecipient::parseRecipient)
 				.collect(Collectors.toList());

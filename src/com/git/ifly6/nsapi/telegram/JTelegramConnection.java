@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -94,15 +93,6 @@ public class JTelegramConnection {
 		Logger.getLogger(this.getClass().getName()).warning(String.format("Unknown error at code (%d):\n%s",
 				apiConnection.getResponseCode(), response));
 		return UNKNOWN_ERROR;
-	}
-
-	/**
-	 * Gets and returns the <code>URLConnection></code> which is the basis for the <code>JTelegramConnection</code> if
-	 * wanted for further processing.
-	 * @return the <code>URLConnection></code> upon which this function is based
-	 */
-	public URLConnection getURLConnection() {
-		return this.apiConnection;
 	}
 
 }

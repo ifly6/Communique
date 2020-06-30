@@ -86,29 +86,6 @@ public class CommuniqueFileWriter {
 
 	/**
 	 * Sets the keys inside a <code>JTelegramKeys</code> object which will then be written to disc.
-	 * @param clientKey  is the client key used when sending telegrams
-	 * @param secretKey  is the secret key used when sending telegrams
-	 * @param telegramId is the key of the telegram sent to recipients
-	 */
-	public void setKeys(String clientKey, String secretKey, String telegramId) {
-		keys.setClientKey(clientKey);
-		keys.setSecretKey(secretKey);
-		keys.setTelegramId(telegramId);
-	}
-
-	/**
-	 * This is an old method to set the keys inside the new <code>JTelegramKeys</code> object which will then be written
-	 * to disc. It was written to keep compatibility with API version 1.
-	 * @param inputKeys a String array containing the keys in this order: <code>{ clientKey, secretKey, telegramId
-	 *                  }</code>
-	 */
-	@Deprecated
-	public void setKeys(String[] inputKeys) {
-		keys.setKeys(inputKeys);
-	}
-
-	/**
-	 * Sets the keys inside a <code>JTelegramKeys</code> object which will then be written to disc.
 	 * @param inputKeys is a <code>JTelegramKeys</code> object
 	 */
 	public void setKeys(JTelegramKeys inputKeys) {

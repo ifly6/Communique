@@ -1,6 +1,6 @@
 package com.git.ifly6.communique.ngui.components;
 
-import com.git.ifly6.communique.CommuniqueUtils;
+import com.git.ifly6.communique.CommuniqueUtilities;
 
 import javax.swing.JFileChooser;
 import java.awt.FileDialog;
@@ -26,7 +26,7 @@ public class CommuniqueNativisation {
 		Path savePath;
 
 		// Due to a problem in Windows and the AWT FileDialog, this will show a JFileChooser on Windows systems.
-		if (CommuniqueUtils.IS_OS_MAC) {
+		if (CommuniqueUtilities.IS_OS_MAC) {
 
 			FileDialog fDialog = new FileDialog(parent, "Choose file...", type);
 			if (type == FileDialog.SAVE) fDialog.setTitle("Save session as...");

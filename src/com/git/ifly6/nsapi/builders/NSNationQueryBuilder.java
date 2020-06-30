@@ -27,13 +27,10 @@ public class NSNationQueryBuilder {
 	}
 
 	public NSNationQueryBuilder addQuery(NSNationShard query, int censusId) {
-
-		if (query == NSNationShard.CENSUS && censusId != -1) {
+		// for non-census shards, ignore censusId
+		if (query == NSNationShard.CENSUS && censusId != -1)
 			censusShards.add(new AbstractMap.SimpleEntry<>(query, censusId));
-		} else {    // for non-census shards, ignore censusId
-			queryShards.add(query);
-		}
-
+		else queryShards.add(query);
 		return this;
 	}
 
@@ -64,7 +61,6 @@ public class NSNationQueryBuilder {
 
 		String outString = output.toString();
 		return outString.endsWith("+") ? outString.substring(0, outString.length() - 1) : outString;
-
 	}
 
 }

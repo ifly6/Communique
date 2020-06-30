@@ -55,7 +55,6 @@ public class NSConnection {
 	}
 
 	public NSConnection connect() throws IOException {
-
 		// Implement the rate limit
 		rateLimit();
 
@@ -71,13 +70,11 @@ public class NSConnection {
 		hasConnected = true; // update API
 
 		if (apiConnection.getResponseCode() == 200) { // if normal
-
 			BufferedReader reader = new BufferedReader(new InputStreamReader(apiConnection.getInputStream()));
 			xml_raw = reader.lines().collect(Collectors.joining("\n"));
 			reader.close();
 
 		} else { // otherwise, read error stream
-
 			BufferedReader reader = new BufferedReader(new InputStreamReader(apiConnection.getErrorStream()));
 			xml_raw = reader.lines().collect(Collectors.joining("\n"));
 			reader.close();
@@ -88,9 +85,9 @@ public class NSConnection {
 			if (xml_raw.contains("Unknown nation"))
 				throw new NSException("Nation does not exist");
 
-			System.err.println(String.format("[JT] API called URL:\t%s", url.toString()));
-			throw new JTelegramException("Cannot get data from the API,\n" +
-					"HTTP response code " + apiConnection.getResponseCode());
+			System.err.println(String.format("API called URL:\t%s", url.toString()));
+			throw new JTelegramException(String.format("Cannot get data from the API,\nHTTP response code %d",
+					apiConnection.getResponseCode()));
 		}
 
 		return this;

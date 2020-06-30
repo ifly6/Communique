@@ -1,6 +1,6 @@
 package com.git.ifly6.communique.io;
 
-import com.git.ifly6.communique.CommuniqueUtils;
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 
 import java.io.FileInputStream;
@@ -82,7 +82,7 @@ public class CommuniqueLoader {
 			Properties prop = new Properties();
 			prop.load(new FileInputStream(appSupport.resolve("config.properties").toFile()));
 			String clientKey = prop.getProperty("clientKey");
-			return CommuniqueUtils.isEmpty(clientKey) ? "Client Key" : clientKey;
+			return ApiUtils.isEmpty(clientKey) ? "Client Key" : clientKey;
 		} catch (IOException e) {
 			return "";
 		}

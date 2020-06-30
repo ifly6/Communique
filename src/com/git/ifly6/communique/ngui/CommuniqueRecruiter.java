@@ -1,7 +1,6 @@
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
-import com.git.ifly6.communique.CommuniqueUtils;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.FilterType;
@@ -12,6 +11,7 @@ import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
 import com.git.ifly6.communique.ngui.components.CommuniqueNativisation;
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 import com.git.ifly6.nsapi.telegram.JavaTelegram;
@@ -202,9 +202,9 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 
 		progressBar = new JProgressBar();
 		progressBar.setMaximum(180);
-		if (CommuniqueUtils.IS_OS_MAC) // Mac, make progress bar around the same length as the button
+		if (CommuniqueUtilities.IS_OS_MAC) // Mac, make progress bar around the same length as the button
 			progressBar.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
-		else if (CommuniqueUtils.IS_OS_WINDOWS) progressBar.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
+		else if (CommuniqueUtilities.IS_OS_WINDOWS) progressBar.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
 
 		JButton btnAdd = new JButton("+");
 		btnAdd.setPreferredSize(new Dimension(25, 20));
@@ -212,7 +212,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 			String rName =
 					(String) JOptionPane.showInputDialog(frame, "Input the name of the region you want to exclude.",
 							"Exclude region", JOptionPane.PLAIN_MESSAGE, null, null, "");
-			if (!CommuniqueUtils.isEmpty(rName)) exListModel.addElement(rName);
+			if (!ApiUtils.isEmpty(rName)) exListModel.addElement(rName);
 		});
 
 		JButton btnRemove = new JButton("—");
@@ -220,7 +220,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		btnRemove.addActionListener(al -> {
 			int[] selectedIndices = excludeList.getSelectedIndices();
 			for (int i = selectedIndices.length - 1; i >= 0; i--)
-				if (!CommuniqueUtils.contains(protectedRegions, exListModel.get(selectedIndices[i])))
+				if (!CommuniqueUtilities.contains(protectedRegions, exListModel.get(selectedIndices[i])))
 					exListModel.remove(selectedIndices[i]);
 			this.sync();
 		});
@@ -367,7 +367,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	public void sentTo(String recipient, int recipientNum, int length) {
 		super.sentTo(recipient, recipientNum, length);
 		lblNationsCount.setText(sentList.size() + (sentList.size() == 1 ? " nation" : " nations"));
-		if (!CommuniqueUtils.isEmpty(sentListArea.getText())) sentListArea.append("\n" + recipient);
+		if (!ApiUtils.isEmpty(sentListArea.getText())) sentListArea.append("\n" + recipient);
 		else sentListArea.setText(recipient);
 	}
 
@@ -460,10 +460,10 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 				.collect(Collectors.toList());
 
 		for (String element : excludeRegions) {
+			final String elementRef = ApiUtils.ref(element);
 			boolean found = false;
 			for (int i = 0; i < model.getSize(); i++) {
-				String modelName = CommuniqueUtilities.ref(model.getElementAt(i));
-				if (modelName.equals(CommuniqueUtilities.ref(element))) {
+				if (ApiUtils.ref(model.getElementAt(i)).equals(elementRef)) {
 					excludeList.addSelectionInterval(i, i);
 					found = true;
 					break;

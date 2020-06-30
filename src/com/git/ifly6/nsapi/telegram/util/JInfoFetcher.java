@@ -1,5 +1,6 @@
 package com.git.ifly6.nsapi.telegram.util;
 
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.NSConnection;
 import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSRegion;
@@ -71,7 +72,7 @@ public class JInfoFetcher {
 			String newNations = new XMLDocument(response).xpath("/WORLD/NEWNATIONS/text()").get(0);
 			return Stream.of(newNations.split(","))
 					.map(String::trim)
-					.filter(s -> s.trim().length() != 0)
+					.filter(ApiUtils::isNotEmpty)
 					.collect(Collectors.toList());
 		} catch (IOException e) {
 			throw new JTelegramException("Failed to get new nations", e);
@@ -90,10 +91,7 @@ public class JInfoFetcher {
 				regionList.put(region, nsRegion.getRegionMembers());
 			}
 		} catch (NSException e) { // non-existent -> throw NSException
-			throw new JTelegramException("Region \"" + region + "\" does not exist", e);
-
-		} catch (IOException e) {
-			throw new JTelegramException("Failed to fetch region members for " + region, e);
+			throw new JTelegramException(String.format("Failed to load data for region %s", region), e);
 		}
 		return regionList.get(region);
 	}
