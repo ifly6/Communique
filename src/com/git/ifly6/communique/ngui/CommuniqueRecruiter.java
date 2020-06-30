@@ -438,8 +438,8 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	}
 
 	@Override
-	public void setWithCConfig(CommuniqueConfig config) {
-		super.setWithCConfig(config);
+	public void setConfig(CommuniqueConfig config) {
+		super.setConfig(config);
 		LOGGER.info("Imported configuration from Communique");
 
 		// Client, Secret, and Telegram Keys

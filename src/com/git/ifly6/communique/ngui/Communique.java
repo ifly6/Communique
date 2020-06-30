@@ -194,17 +194,18 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		txtClientKey = CommuniqueFactory.createField("Client key",
 				new CommuniqueDocumentListener(e -> {
 					config.keys.setClientKey(txtClientKey.getText().trim()); // dynamic update config
-				}));
-
+				})
+		);
 		txtSecretKey = CommuniqueFactory.createField("Secret key",
 				new CommuniqueDocumentListener(e -> {
 					config.keys.setSecretKey(txtSecretKey.getText().trim()); // dynamic update config
-				}));
-
+				})
+		);
 		txtTelegramId = CommuniqueFactory.createField("Telegram ID",
 				new CommuniqueDocumentListener(e -> {
 					config.keys.setTelegramId(txtTelegramId.getText().trim()); // dynamic update config
-				}));
+				})
+		);
 
 		progressBar = new JProgressBar();
 		progressBar.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
@@ -497,7 +498,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			if (path != null) {
 				try {
 					Files.lines(path) // attempt load data
-							.filter(s -> !s.startsWith("#") || !ApiUtils.isEmpty(s))
+							.filter(s -> !s.startsWith("#"))
+							.filter(ApiUtils::isNotEmpty)
 							.map(ApiUtils::ref) // process
 							.forEach(this::appendCode); // append to text area
 				} catch (IOException e1) {
@@ -547,7 +549,11 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 		JMenuItem mntmAbout = new JMenuItem("About");
 		mntmAbout.addActionListener(
-				e -> CommuniqueTextDialog.createDialog(frame, "About", CommuniqueMessages.acknowledgement));
+				e -> CommuniqueTextDialog.createMonospacedDialog(
+						frame,
+						"About",
+						CommuniqueMessages.acknowledgement,
+						true));
 		mnHelp.add(mntmAbout);
 
 		mnHelp.addSeparator();
@@ -603,7 +609,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				// do nothing if it fails to load
 			}
 		}
-		LOGGER.info("Autosave loaded");
+		LOGGER.info("Auto-save loaded");
 
 	}
 
@@ -809,7 +815,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	private void showRecruiter() {
 		if (recruiter == null || !recruiter.isDisplayable()) {
 			recruiter = new CommuniqueRecruiter(this);
-			recruiter.setWithCConfig(this.exportState());
+			recruiter.setConfig(this.exportState());
 		} else recruiter.toFront();
 	}
 

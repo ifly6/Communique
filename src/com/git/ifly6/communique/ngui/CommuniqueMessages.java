@@ -36,8 +36,8 @@ public class CommuniqueMessages {
 	public static final String acknowledgement =
 			"Developed by ifly6, contributing to the repository at "
 					+ "[github.com/iflycode/communique], also known as the nation Imperium Anglorum on "
-					+ "NationStates.\n\nMy thanks to bug-reporters Tinfect, Krypton Nova, Separatist Peoples, " +
-					"Wallenburg, and Tinhampton.";
+					+ "NationStates.\n\nMy thanks to bug-reporters Tinfect, Krypton Nova, Separatist Peoples, "
+					+ "Wallenburg, and Tinhampton.";
 
 	/**
 	 * Gives the licence information that is saved in the file 'licences' in this source directory.
@@ -47,7 +47,7 @@ public class CommuniqueMessages {
 		if (licence == null) {
 			InputStream resourceInputStream = CommuniqueMessages.class.getResourceAsStream("licence");
 			try (Scanner s = new Scanner(resourceInputStream)) {
-				licence = s.useDelimiter("\\A").hasNext() ? s.next() : "";
+				licence = s.useDelimiter("\\A").hasNext() ? s.next() : "Could not load licence.";
 			}
 		}
 		return licence;

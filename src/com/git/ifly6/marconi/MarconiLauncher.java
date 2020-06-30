@@ -139,7 +139,7 @@ public class MarconiLauncher {
 
 		if (recruiting) {
 			MarconiRecruiter recruiter = new MarconiRecruiter(marconi);
-			recruiter.setWithCConfig(marconi.exportState());
+			recruiter.setConfig(marconi.exportState());
 			recruiter.send();
 			// Indefinite ending point, use ShutdownHook to save
 

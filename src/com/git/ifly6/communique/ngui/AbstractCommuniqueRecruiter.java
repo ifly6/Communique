@@ -36,7 +36,7 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 	protected LinkedHashSet<CommuniqueRecipient> sentList;
 	protected Set<CommuniqueRecipient> proscribedRegions;
 
-	public void setWithCConfig(CommuniqueConfig config) {
+	public void setConfig(CommuniqueConfig config) {
 		// get the sent list first
 		sentList = config.getcRecipients().stream()
 				.filter(r -> r.getRecipientType() == RecipientType.NATION)
