@@ -113,10 +113,6 @@ public enum RecipientType {
 		}
 	};
 
-	// TODO figure out whether there actually ought to be an "EMPTY" recipient type here.
-	// seems like it's unnecessary but something may have broken when it was removed.
-	// want to keep it out to maintain compliance with standard NS telegram syntax
-
 	private static final Logger LOGGER = Logger.getLogger(RecipientType.class.getName());
 
 	/**
