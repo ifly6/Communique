@@ -1,6 +1,7 @@
 package com.git.ifly6.communique;
 
 import com.git.ifly6.communique.data.CommuniqueParser;
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
  * @see CommuniqueParser
  * @see com.git.ifly6.communique.io.CommuniqueLoader CLoader
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated
 public class CommuniqueFileReader {
 
@@ -134,7 +136,7 @@ public class CommuniqueFileReader {
 				randomised = Boolean.parseBoolean(element.replace("randomSort=", ""));
 
 			} else if (!element.startsWith("#") && !element.isEmpty() && !element.contains("=")) {
-				recipientsList.add(element.toLowerCase().trim().replace(" ", "_"));
+				recipientsList.add(ApiUtils.ref(element));
 			}
 		}
 
@@ -184,7 +186,7 @@ public class CommuniqueFileReader {
 	 */
 	public String[] getHeader() {
 		ArrayList<String> header = new ArrayList<>();
-		String[] filteredContents = fileContents.stream().filter(s -> s.trim().length() != 0).toArray(String[]::new);
+		String[] filteredContents = fileContents.stream().filter(ApiUtils::isNotEmpty).toArray(String[]::new);
 
 		for (String filteredContent : filteredContents) {
 			if (!filteredContent.startsWith("#")) {
@@ -207,7 +209,7 @@ public class CommuniqueFileReader {
 		ArrayList<String> header = new ArrayList<>();
 		String[] tempContents = fileContents.toArray(new String[0]);
 		String[] filteredContents = Stream.of(tempContents)
-				.filter(s -> s.trim().length() != 0)
+				.filter(ApiUtils::isNotEmpty)
 				.toArray(String[]::new);
 
 		for (int i = filteredContents.length - 1; i >= 0; i--) {

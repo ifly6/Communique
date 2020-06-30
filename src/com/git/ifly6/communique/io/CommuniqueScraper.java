@@ -56,7 +56,10 @@ public class CommuniqueScraper {
 
 		LOGGER.info(String.format("Calling url: %s", url));
 		URLConnection connection = url.openConnection();
-		connection.setRequestProperty("User-Agent", "Communique, maintained by Imperium Anglorum, ifly6@me.com");
+		connection.setRequestProperty(
+				"User-Agent",
+				"Communique, maintained by Imperium Anglorum, cyrilparsons.london@gmail.com"
+		);
 
 		InputStreamReader isr = new InputStreamReader(connection.getInputStream());
 		return new BufferedReader(isr).lines().collect(Collectors.joining("\n"));
@@ -89,7 +92,7 @@ public class CommuniqueScraper {
 					s = s.substring(s.indexOf(":") + 1, s.indexOf(" , and  individual member nations."));
 					System.out.println("data3:\t" + s);
 
-					return Stream.of(s.split(","))
+					return Stream.of(s.split(",\\s*?"))
 							.map(String::trim)
 							.filter(str -> !str.isEmpty())
 							.map(CommuniqueRecipients::createNation)

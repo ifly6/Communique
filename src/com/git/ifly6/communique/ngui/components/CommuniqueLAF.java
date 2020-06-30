@@ -23,7 +23,6 @@
 package com.git.ifly6.communique.ngui.components;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
-import com.git.ifly6.communique.CommuniqueUtils;
 import com.git.ifly6.communique.data.Communique7Parser;
 
 import javax.swing.UIManager;
@@ -52,8 +51,8 @@ public class CommuniqueLAF {
 	static {
 		// Do this static initialisation block when LAF is called
 		// Find or create the application support directory
-		if (CommuniqueUtils.IS_OS_WINDOWS) appSupport = Paths.get(System.getenv("LOCALAPPDATA"), "Communique");
-		else if (CommuniqueUtils.IS_OS_MAC) {
+		if (CommuniqueUtilities.IS_OS_WINDOWS) appSupport = Paths.get(System.getenv("LOCALAPPDATA"), "Communique");
+		else if (CommuniqueUtilities.IS_OS_MAC) {
 			appSupport = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Communique");
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Communiqué " + Communique7Parser.version);
@@ -75,7 +74,7 @@ public class CommuniqueLAF {
 		try {
 			Path logFile = appSupport
 					.resolve("log")
-					.resolve(String.format("communique-session-%s.log", CommuniqueUtilities.getCurrentTimeString()));
+					.resolve(String.format("communique-session-%s.log", CommuniqueUtilities.getTime()));
 
 			Files.createDirectories(logFile.getParent()); // make directory
 			loggerFileHandler = new FileHandler(logFile.toString());

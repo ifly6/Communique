@@ -7,8 +7,8 @@ import com.jcabi.xml.XMLDocument;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -68,8 +68,7 @@ public class NSNation {
 	 * @param name of the nation
 	 */
 	public NSNation(String name) {
-		name = name.toLowerCase().replace(' ', '_').trim();
-		nationName = name;
+		nationName = ApiUtils.ref(name);
 	}
 
 	/**
@@ -80,14 +79,14 @@ public class NSNation {
 	 */
 	public NSNation populateData() {
 		try {
-			NSNationQueryBuilder queryBuilder = new NSNationQueryBuilder(nationName);
-			queryBuilder.addQuery(NSNationShard.PROPER_NAME);
-			queryBuilder.addQuery(NSNationShard.ENDORSEMENT_LIST);
-			queryBuilder.addQuery(NSNationShard.REGION);
-			queryBuilder.addQuery(NSNationShard.CATEGORY);
-			queryBuilder.addQuery(NSNationShard.CAN_RECRUIT);
-			queryBuilder.addQuery(NSNationShard.CAN_CAMPAIGN);
-			queryBuilder.addQuery(NSNationShard.CENSUS, 65);
+			NSNationQueryBuilder queryBuilder = new NSNationQueryBuilder(nationName)
+					.addQuery(NSNationShard.PROPER_NAME)
+					.addQuery(NSNationShard.ENDORSEMENT_LIST)
+					.addQuery(NSNationShard.REGION)
+					.addQuery(NSNationShard.CATEGORY)
+					.addQuery(NSNationShard.CAN_RECRUIT)
+					.addQuery(NSNationShard.CAN_CAMPAIGN)
+					.addQuery(NSNationShard.CENSUS, 65);
 
 			// Do the query
 			NSConnection apiConnect = new NSConnection(queryBuilder.toString());
@@ -102,7 +101,7 @@ public class NSNation {
 
 			} catch (RuntimeException e) {
 				// If that endorsements string does not exist, load default data for 0
-				endorsingNations = new ArrayList<>();
+				endorsingNations = Collections.emptyList();
 				endoCount = 0;
 			}
 
@@ -175,50 +174,12 @@ public class NSNation {
 	}
 
 	/**
-	 * Allows for the number of endorsements to be set.
-	 * @param endos which the nation has
-	 */
-	public NSNation setEndoCount(int endos) {
-		endoCount = endos;
-		return this;
-	}
-
-	/**
-	 * Allows for influence to be set.
-	 * @param influence which the nation has
-	 */
-	public NSNation setInfuCount(double influence) {
-		infuCount = influence;
-		return this;
-	}
-
-	/**
-	 * Allows for the endorsements list to be set.
-	 * @param endoList is the list of nations in a <code>String[]</code> which are endorsing the nation
-	 */
-	public NSNation setEndoList(List<String> endoList) {
-		endorsingNations = endoList;
-		return this;
-	}
-
-	/**
 	 * Gets the proper name of the nation. If the nation data has not yet been populated (and therefore, the proper name
 	 * queried from the NationStates servers), it will return <code>null</code>.
 	 * @return the proper name of the nation
 	 */
 	public String getNationName() {
 		return properName;
-	}
-
-	/**
-	 * Returns the reference name of the nation in computer form, that is, in lower case and with underscores. This is
-	 * the same as the method to return the nation reference name. It is kept here because of a merger between the fork
-	 * conducted on the ifly Region Protection code and the Communique code.
-	 * @return the computerised name of the nation
-	 */
-	@Deprecated
-	public String getNationComputerisedName() {
-		return getRefName();
 	}
 
 	/**

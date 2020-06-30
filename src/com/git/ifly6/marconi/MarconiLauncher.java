@@ -55,7 +55,7 @@ public class MarconiLauncher {
 		try {
 			// Directory is defined as the same directory in which Marconi is run
 			Path logLocation = Paths.get(String.format("marconi-session-%s.log",
-					CommuniqueUtilities.getCurrentTimeString()));
+					CommuniqueUtilities.getTime()));
 			FileHandler handler = new FileHandler(logLocation.toString());
 			handler.setFormatter(new SimpleFormatter());
 			Logger.getLogger("").addHandler(handler); // gets the root logger

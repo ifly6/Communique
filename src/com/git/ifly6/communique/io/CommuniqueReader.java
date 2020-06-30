@@ -85,7 +85,8 @@ class CommuniqueReader {
 			config.isRecruitment = reader.isRecruitment();
 			config.keys = reader.getKeys();
 
-			List<CommuniqueRecipient> recipients = CommuniqueRecipient.translateTokens(asList(reader.getRecipients())).stream()
+			List<CommuniqueRecipient> recipients = CommuniqueRecipient
+					.translateTokens(asList(reader.getRecipients())).stream()
 					.map(CommuniqueRecipient::parseRecipient)
 					.collect(Collectors.toList());
 			config.setcRecipients(recipients);

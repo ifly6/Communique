@@ -1,6 +1,6 @@
 package com.git.ifly6.communique.data;
 
-import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class CommuniqueRecipient {
 	public CommuniqueRecipient(FilterType filterType, RecipientType recipientType, String name, String raw) {
 		this.filterType = filterType;
 		this.recipientType = recipientType;
-		this.name = CommuniqueUtilities.ref(name);    // convert to reference name
+		this.name = ApiUtils.ref(name);    // convert to reference name
 		this.raw = raw;
 
 		// some format checking for the name
@@ -235,9 +235,9 @@ public class CommuniqueRecipient {
 			if (oldToken.contains(OLD_EXCLUDE)) {
 				String[] split = oldToken.split(OLD_EXCLUDE);
 				if (split.length == 2) {
-					if (!split[0].trim().isEmpty())
+					if (ApiUtils.isNotEmpty(split[0]))
 						tokens.add(translateToken(split[0].trim()));
-					if (!split[1].trim().isEmpty())
+					if (ApiUtils.isNotEmpty(split[1]))
 						tokens.add(translateToken(OLD_EXCLUDE + split[1].trim()));
 					continue;    // to next!
 				}

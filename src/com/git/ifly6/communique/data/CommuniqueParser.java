@@ -1,6 +1,6 @@
 package com.git.ifly6.communique.data;
 
-import com.git.ifly6.communique.CommuniqueUtils;
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
 
 import java.util.ArrayList;
@@ -192,19 +192,19 @@ public class CommuniqueParser {
 
 		// Filter out comments and empty lines
 		input = Arrays.stream(input)
-				.filter(s -> !s.startsWith("#") && !CommuniqueUtils.isEmpty(s))
+				.filter(s -> !s.startsWith("#") && !ApiUtils.isEmpty(s))
 				.toArray(String[]::new);
 
 		// Form a list of all the nation we want in this list.
 		List<String> recipients = Arrays.stream(input)
 				.filter(s -> !s.startsWith("/"))
-				.map(s -> s.toLowerCase().trim().replace(" ", "_"))
+				.map(ApiUtils::ref)
 				.collect(Collectors.toList());
 
 		// Form a list of all nations we can't have in this list.
 		List<String> sentList = Arrays.stream(input)
 				.filter(s -> s.startsWith("/"))
-				.map(s -> s.replaceFirst("/", "").toLowerCase().trim().replace(" ", "_"))
+				.map(s -> ApiUtils.ref(s.replaceFirst("/", "")))
 				.collect(Collectors.toList());
 
 		List<String> list = recipientsParse(recipients, sentList);

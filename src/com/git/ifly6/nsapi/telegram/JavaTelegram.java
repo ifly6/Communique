@@ -68,7 +68,6 @@ public class JavaTelegram {
 	 * </p>
 	 */
 	private List<Predicate<NSNation>> predicates = new ArrayList<>();  // additional predicates here
-
 	{
 		predicates.add(n -> {   // default predicate for basic filtering
 			// if we are recruiting and nation is not recruitable -> false

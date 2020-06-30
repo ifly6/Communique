@@ -52,17 +52,6 @@ public class JTelegramKeys {
 	}
 
 	/**
-	 * Sets the keys using a <code>String[]</code> which contains all of the keys in the order <code>clientKey</code>,
-	 * <code>secretKey</code>, <code>telegramId</code>.
-	 * @param input <code>String[]</code> in the form <code>{ clientKey, secretKey, telegramId }</code>.
-	 */
-	public void setKeys(String[] input) {
-		clientKey = input[0];
-		secretKey = input[1];
-		telegramId = input[2];
-	}
-
-	/**
 	 * Gets all keys as a <code>String[]</code>. This method is the same as <code>toArray()</code>.
 	 * @return <code>String[]</code> containing all the keys in the form
 	 * <code>{ clientKey, secretKey, telegramId }</code>

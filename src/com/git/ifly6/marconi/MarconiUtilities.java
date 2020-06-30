@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class MarconiUtilities {
 
 	private static final Logger LOGGER = Logger.getLogger(MarconiUtilities.class.getName());
 
 	static Path lockFile = Paths.get(System.getProperty("user.dir"), "marconi.lock");
-
 	private static Scanner scan = new Scanner(System.in);
 
 	/**
@@ -28,7 +28,7 @@ public class MarconiUtilities {
 	static boolean isFileLocked() {
 		try {
 			if (!Files.exists(lockFile)) {
-				Files.write(lockFile, Collections.singletonList(CommuniqueUtilities.getCurrentDateAndTime()));
+				Files.write(lockFile, Collections.singletonList(CommuniqueUtilities.getDate()));
 				return false;
 			} else return true;
 		} catch (IOException exc) {
@@ -51,15 +51,22 @@ public class MarconiUtilities {
 	/**
 	 * Sends data and requests that you sanitise it to avoid stupid errors. All responses will be in lower case. This is
 	 * the only way the data can be effectively sanitised.
-	 * @param prompt            The question posed to the user.
-	 * @param acceptableAnswers A list of valid responses.
+	 * @param prompt            the question posed to the user.
+	 * @param acceptableAnswers list of valid responses.
 	 * @return the user's answer, which is required to be in the list of valid responses
 	 */
 	static String prompt(String prompt, List<String> acceptableAnswers) {
+		if (acceptableAnswers.size() == 0)
+			throw new UnsupportedOperationException("Must provide some acceptable answers");
+		final List<String> accepted = acceptableAnswers
+				.stream()
+				.map(String::toLowerCase)
+				.collect(Collectors.toList());
+
 		String response;
 		while (true) {
 			response = prompt(prompt).toLowerCase();
-			if (acceptableAnswers.contains(response)) break;
+			if (accepted.contains(response)) break;
 			else System.out.println("Please provide an acceptable answer.");
 		}
 		return response;
