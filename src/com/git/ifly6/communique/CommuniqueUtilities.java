@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,8 +94,9 @@ public class CommuniqueUtilities {
 	public static String getCurrentTimeString() {
 		// must avoid colons in file names because windows doesn't like it apparently
 		return DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault())
-				.format(Instant.now())
-				.replace(':', '-');
+				.format(Instant.now().truncatedTo(ChronoUnit.SECONDS)) // truncate to seconds to ignore decimals
+				.replace(':', '-') // hacky, whatever
+				.replace('T', ' ');
 	}
 
 }

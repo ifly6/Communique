@@ -29,13 +29,19 @@ import com.git.ifly6.communique.data.Communique7Parser;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
+
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 public class CommuniqueLAF {
 
@@ -44,7 +50,8 @@ public class CommuniqueLAF {
 	public static FileHandler loggerFileHandler = null; // Save logs to file, if null... uh stuff
 
 	static {
-		// Find the application support directory
+		// Do this static initialisation block when LAF is called
+		// Find or create the application support directory
 		if (CommuniqueUtils.IS_OS_WINDOWS) appSupport = Paths.get(System.getenv("LOCALAPPDATA"), "Communique");
 		else if (CommuniqueUtils.IS_OS_MAC) {
 			appSupport = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Communique");
@@ -99,4 +106,38 @@ public class CommuniqueLAF {
 			lfE.printStackTrace();
 		}
 	}
+
+	/**
+	 * Compresses logs present in the application support <code>log</code> sub-folder if they are older than a day.
+	 * Uses G-ZIP compression. Should be called on execution.
+	 */
+	public static void compressLogs() {
+		try {
+			DirectoryStream<Path> stream = Files.newDirectoryStream(appSupport.resolve("log"), "*.log");
+			final Instant yesterday = Instant.now().minus(1, ChronoUnit.DAYS);
+			for (Path p : stream) {
+				try {
+					Instant fileModified = Files.getLastModifiedTime(p).toInstant();
+					boolean earlier = fileModified.compareTo(yesterday) < 0;
+					if (earlier) {
+						// write new compressed file
+						Path newPath = p.resolveSibling(p.getFileName() + ".gz");
+						GZIPOutputStream zipStream = new GZIPOutputStream(Files.newOutputStream(newPath, CREATE_NEW));
+						zipStream.write(Files.readAllBytes(p));
+						zipStream.close();
+
+						// delete old file
+						Files.deleteIfExists(p);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.err.println(String.format("Failed to compress %s", p));
+					break; // better safe than sorry
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

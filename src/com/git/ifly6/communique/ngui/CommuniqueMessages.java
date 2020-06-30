@@ -36,7 +36,8 @@ public class CommuniqueMessages {
 	public static final String acknowledgement =
 			"Developed by ifly6, contributing to the repository at "
 					+ "[github.com/iflycode/communique], also known as the nation Imperium Anglorum on "
-					+ "NationStates.\n\nMy thanks to bug-testers Tinfect, Krypton Nova, Separatist Peoples, and Wallenburg.";
+					+ "NationStates.\n\nMy thanks to bug-reporters Tinfect, Krypton Nova, Separatist Peoples, " +
+					"Wallenburg, and Tinhampton.";
 
 	/**
 	 * Gives the licence information that is saved in the file 'licences' in this source directory.

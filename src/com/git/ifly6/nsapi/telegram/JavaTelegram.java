@@ -135,16 +135,6 @@ public class JavaTelegram {
 	}
 
 	/**
-	 * Sets the keys which the telegram instance will use
-	 * @param clientKey  on which to send telegrams
-	 * @param secretKey  to authorise dispatch
-	 * @param telegramId to specify the telegram
-	 */
-	public void setKeys(String clientKey, String secretKey, String telegramId) {
-		this.keys = new JTelegramKeys(clientKey, secretKey, telegramId);
-	}
-
-	/**
 	 * Changes or sets the recipients who will be used in the connect() method.
 	 * @param list is an array of all the recipients, each one for each index
 	 */

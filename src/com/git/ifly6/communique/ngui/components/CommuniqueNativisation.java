@@ -1,7 +1,6 @@
 package com.git.ifly6.communique.ngui.components;
 
 import com.git.ifly6.communique.CommuniqueUtils;
-import org.apache.commons.io.FilenameUtils;
 
 import javax.swing.JFileChooser;
 import java.awt.FileDialog;
@@ -63,7 +62,7 @@ public class CommuniqueNativisation {
 		}
 
 		// Make it end in txt if saving
-		if (type == FileDialog.SAVE && !FilenameUtils.getExtension(savePath.toString()).equals("txt")) {
+		if (type == FileDialog.SAVE && !savePath.toString().endsWith("txt")) {
 			LOGGER.info("Append txt to savePath");
 			savePath = savePath.resolveSibling(savePath.getFileName() + ".txt");
 		}

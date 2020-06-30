@@ -1,24 +1,17 @@
-/*
- * Copyright (c) 2020 ifly6
+/* Copyright (c) 2020 ifly6
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+ * Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 package com.git.ifly6.communique.ngui;
 
@@ -131,6 +124,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 	public static void main(String[] args) {
 		CommuniqueLAF.setLAF(); // note that this line will also set up the static initialisation for appSupport etc
+		CommuniqueLAF.compressLogs(); // compresses logs one day older than this initialisation
+
 		EventQueue.invokeLater(() -> {
 			try {
 				Communique window = new Communique();
@@ -153,8 +148,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 		// Make sure user is connected to the Internet
 		try {
-			URL nsUrl = new URL("http://www.nationstates.net");
-			nsUrl.openConnection().connect();
+			new URL("https://www.nationstates.net").openConnection().connect();
 		} catch (IOException e) {
 			this.showMessageDialog(CommuniqueConstants.INTERNET_ERROR, CommuniqueMessages.ERROR);
 		}
@@ -246,41 +240,42 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		gl_dataPanel.setHorizontalGroup(
 				gl_dataPanel.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_dataPanel.createSequentialGroup()
-								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 677, Short.MAX_VALUE)
-								.addGroup(gl_dataPanel.createParallelGroup(Alignment.TRAILING)
-										.addGroup(Alignment.LEADING, gl_dataPanel.createSequentialGroup()
+								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 744, Short.MAX_VALUE)
+								.addGroup(gl_dataPanel.createParallelGroup(Alignment.LEADING)
+										.addGroup(gl_dataPanel.createSequentialGroup()
 												.addPreferredGap(ComponentPlacement.RELATED)
 												.addGroup(gl_dataPanel.createParallelGroup(Alignment.TRAILING)
 														.addGroup(gl_dataPanel.createSequentialGroup()
-																.addComponent(progressBar, GroupLayout.DEFAULT_SIZE, 224,
+																.addComponent(progressBar, GroupLayout.DEFAULT_SIZE, 317,
 																		Short.MAX_VALUE)
 																.addPreferredGap(ComponentPlacement.RELATED)
 																.addComponent(progressLabel)
 																.addGap(6))
 														.addGroup(gl_dataPanel.createSequentialGroup()
-																.addGroup(gl_dataPanel.createParallelGroup(Alignment.LEADING)
-																		.addComponent(lblSecretKey)
-																		.addComponent(lblTelegramId)
-																		.addComponent(lblClientKey))
-																.addGap(12)
+																.addGroup(
+																		gl_dataPanel.createParallelGroup(Alignment.TRAILING)
+																				.addComponent(lblTelegramId)
+																				.addComponent(lblSecretKey)
+																				.addComponent(lblClientKey))
+																.addPreferredGap(ComponentPlacement.RELATED)
 																.addGroup(gl_dataPanel.createParallelGroup(Alignment.LEADING)
 																		.addComponent(txtClientKey, GroupLayout.DEFAULT_SIZE,
-																				173, Short.MAX_VALUE)
+																				266, Short.MAX_VALUE)
 																		.addComponent(txtSecretKey, Alignment.TRAILING,
-																				GroupLayout.DEFAULT_SIZE, 173,
+																				GroupLayout.DEFAULT_SIZE, 266,
 																				Short.MAX_VALUE)
 																		.addComponent(txtTelegramId,
-																				GroupLayout.DEFAULT_SIZE, 173,
+																				GroupLayout.DEFAULT_SIZE, 266,
 																				Short.MAX_VALUE)))
-														.addComponent(btnParse, GroupLayout.DEFAULT_SIZE, 261,
+														.addComponent(btnParse, GroupLayout.DEFAULT_SIZE, 354,
 																Short.MAX_VALUE)
-														.addComponent(chckbxRecruitment, GroupLayout.DEFAULT_SIZE, 261,
+														.addComponent(chckbxRecruitment, GroupLayout.DEFAULT_SIZE, 354,
 																Short.MAX_VALUE)))
-										.addGroup(Alignment.LEADING, gl_dataPanel.createSequentialGroup()
+										.addGroup(gl_dataPanel.createSequentialGroup()
 												.addGap(14)
 												.addComponent(lblProcessingAction)
 												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(specialAction, 0, 161, Short.MAX_VALUE)))
+												.addComponent(specialAction, 0, 229, Short.MAX_VALUE)))
 								.addContainerGap()));
 		gl_dataPanel.setVerticalGroup(
 				gl_dataPanel.createParallelGroup(Alignment.TRAILING)
@@ -292,15 +287,15 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 										.addComponent(lblClientKey))
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_dataPanel.createParallelGroup(Alignment.BASELINE)
-										.addComponent(lblSecretKey)
 										.addComponent(txtSecretKey, GroupLayout.PREFERRED_SIZE, 29,
-												GroupLayout.PREFERRED_SIZE))
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(lblSecretKey))
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_dataPanel.createParallelGroup(Alignment.BASELINE)
-										.addComponent(lblTelegramId)
 										.addComponent(txtTelegramId, GroupLayout.PREFERRED_SIZE, 29,
-												GroupLayout.PREFERRED_SIZE))
-								.addPreferredGap(ComponentPlacement.RELATED, 313, Short.MAX_VALUE)
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(lblTelegramId))
+								.addPreferredGap(ComponentPlacement.RELATED, 413, Short.MAX_VALUE)
 								.addComponent(chckbxRecruitment, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_dataPanel.createParallelGroup(Alignment.BASELINE)
@@ -314,7 +309,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 										.addComponent(progressBar, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
 										.addComponent(progressLabel, GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE))
 								.addContainerGap())
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE));
+						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE));
 		dataPanel.setLayout(gl_dataPanel);
 
 		JMenuBar menuBar = new JMenuBar();
