@@ -54,11 +54,37 @@ public class ApiUtils {
 	}
 
 	/**
+	 * Determines whether a given array is empty.
+	 * @param a array
+	 * @return true if empty
+	 */
+	public static boolean isEmpty(Object[] a) {
+		return a == null || a.length == 0;
+	}
+
+	/**
 	 * @param s to check for empty-ness
 	 * @return inverted {@link #isEmpty(String)}
 	 */
 	public static boolean isNotEmpty(String s) {
 		return !ApiUtils.isEmpty(s);
+	}
+
+	/**
+	 * Determines whether an array contains some value, utilising the standard <code>Object</code> equals method. This
+	 * method does not do type-checking.
+	 * @param array  to check in
+	 * @param needle to check for
+	 * @return whether array contains needle
+	 */
+	public static boolean contains(Object[] array, Object needle) {
+		if (isEmpty(array)) return false;
+		if (needle == null) return false;
+		for (Object element : array)
+			if (element.equals(needle))
+				return true;
+
+		return false;
 	}
 
 }

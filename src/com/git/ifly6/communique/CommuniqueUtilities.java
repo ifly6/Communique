@@ -31,32 +31,6 @@ public class CommuniqueUtilities {
 	}
 
 	/**
-	 * Determines whether an array is empty.
-	 * @param a array
-	 * @return <code>boolean</code> answering that question
-	 */
-	public static boolean isEmpty(Object[] a) {
-		return a == null || a.length == 0;
-	}
-
-	/**
-	 * Determines whether an array contains some value, utilising the standard <code>Object</code> equals method. This
-	 * method does not do type-checking.
-	 * @param array  to check in
-	 * @param needle to check for
-	 * @return whether array contains needle
-	 */
-	public static boolean contains(Object[] array, Object needle) {
-		if (isEmpty(array)) return false;
-		if (needle == null) return false;
-		for (Object element : array)
-			if (element.equals(needle))
-				return true;
-
-		return false;
-	}
-
-	/**
 	 * This changes raw seconds directly into days, hours, minutes, and seconds. Very helpful for creating a system of
 	 * information which humans can use.
 	 * @param seconds elapsed
