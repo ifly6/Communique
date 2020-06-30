@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2020 ifly6
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
@@ -50,6 +67,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -58,8 +76,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Implements the sending functions required in {@link AbstractCommuniqueRecruiter} and the window objects and
@@ -171,7 +187,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		});
 
 		DefaultListModel<String> exListModel = new DefaultListModel<>();
-		Stream.of(protectedRegions).forEach(exListModel::addElement);
+		Arrays.stream(protectedRegions).forEach(exListModel::addElement);
 
 		excludeList = new JList<>(exListModel);
 		excludeList.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -376,7 +392,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 	 * to <code>CommuniqueRecipient</code>
 	 */
 	private Set<CommuniqueRecipient> listProscribedRegions() {
-		return IntStream.of(excludeList.getSelectedIndices())
+		return Arrays.stream(excludeList.getSelectedIndices())
 				.mapToObj(x -> excludeList.getModel().getElementAt(x))
 				.map(s -> new CommuniqueRecipient(FilterType.EXCLUDE, RecipientType.REGION, s))
 				.collect(Collectors.toCollection(HashSet::new));

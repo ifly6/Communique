@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2020 ifly6
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.git.ifly6.communique.io;
 
 import com.git.ifly6.communique.data.CommuniqueRecipient;
@@ -12,11 +29,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Provides functionality to Communique to easily scrape pertinent information from the NationStates World Assembly
@@ -92,7 +109,7 @@ public class CommuniqueScraper {
 					s = s.substring(s.indexOf(":") + 1, s.indexOf(" , and  individual member nations."));
 					System.out.println("data3:\t" + s);
 
-					return Stream.of(s.split(",\\s*?"))
+					return Arrays.stream(s.split(",\\s*?"))
 							.map(String::trim)
 							.filter(str -> !str.isEmpty())
 							.map(CommuniqueRecipients::createNation)

@@ -1,23 +1,18 @@
 /*
  * Copyright (c) 2020 ifly6
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.git.ifly6.communique.ngui.components;
@@ -34,10 +29,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
@@ -94,9 +89,13 @@ public class CommuniqueLAF {
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException lfE) {
 			try {
-				UIManager.setLookAndFeel(Stream.of(UIManager.getInstalledLookAndFeels())
-						.filter(laf -> laf.getName().equals("Nimbus"))
-						.findFirst().orElseThrow(ClassNotFoundException::new).getClassName());
+				UIManager.setLookAndFeel(
+						Arrays.stream(UIManager.getInstalledLookAndFeels())
+								.filter(laf -> laf.getName().equals("Nimbus"))
+								.findFirst()
+								.orElseThrow(ClassNotFoundException::new)
+								.getClassName()
+				);
 			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 					| UnsupportedLookAndFeelException e) {
 				LOGGER.severe("Cannot initialise? Cannot find basic Nimbus look and feel.");
@@ -107,8 +106,8 @@ public class CommuniqueLAF {
 	}
 
 	/**
-	 * Compresses logs present in the application support <code>log</code> sub-folder if they are older than a day.
-	 * Uses G-ZIP compression. Should be called on execution.
+	 * Compresses logs present in the application support <code>log</code> sub-folder if they are older than a day. Uses
+	 * G-ZIP compression. Should be called on execution.
 	 */
 	public static void compressLogs() {
 		try {
