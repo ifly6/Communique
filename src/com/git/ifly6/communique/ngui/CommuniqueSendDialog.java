@@ -112,7 +112,6 @@ public class CommuniqueSendDialog extends JDialog {
 			closeDialog();
 		});
 
-
 		sendButton = new JButton("Send");
 		sendButton.addActionListener((ae) -> {
 			LOGGER.info("User called send request");

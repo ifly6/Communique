@@ -152,13 +152,11 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 
 		JButton btnSendButton = new JButton("Send");
 		btnSendButton.addActionListener(e -> {
-
-			if (btnSendButton.getText().equals("Send")) {        // STARTING UP
+			if (btnSendButton.getText().equals("Send")) { // STARTING UP
 				btnSendButton.setText("Stop");
 				send();
 
-			} else {    // SHUTTING DOWN
-
+			} else { // SHUTTING DOWN
 				thread.interrupt();
 				Path savePath = CommuniqueNativisation.showFileChooser(frame, FileDialog.SAVE);
 
@@ -494,7 +492,11 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 			while (true) {
 
 				JavaTelegram client = new JavaTelegram(CommuniqueRecruiter.this);
-				client.setKeys(clientKeyField.getText(), secretKeyField.getText(), telegramIdField.getText());
+				client.setKeys(new JTelegramKeys(
+						clientKeyField.getText().trim(),
+						secretKeyField.getText().trim(),
+						telegramIdField.getText().trim()
+				));
 				client.setRecipient(nextRecipient.get());
 				client.connect();
 
