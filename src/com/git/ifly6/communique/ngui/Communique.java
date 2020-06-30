@@ -637,7 +637,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		Communique7Parser parser = new Communique7Parser();
 		try {
 			parsedRecipients = parser.apply(tokens).listRecipients();
-			if (!CommuniqueUtilities.contains(CommuniqueProcessingAction.values(), config.processingAction)) {
+			if (!ApiUtils.contains(CommuniqueProcessingAction.values(), config.processingAction)) {
 				// if config.processingAction not in CommuniqueProcessingAction.values
 				// deal with invalid processing action
 				this.showMessageDialog("Invalid processing action.\n"

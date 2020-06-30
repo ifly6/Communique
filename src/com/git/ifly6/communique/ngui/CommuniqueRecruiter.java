@@ -220,7 +220,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 		btnRemove.addActionListener(al -> {
 			int[] selectedIndices = excludeList.getSelectedIndices();
 			for (int i = selectedIndices.length - 1; i >= 0; i--)
-				if (!CommuniqueUtilities.contains(protectedRegions, exListModel.get(selectedIndices[i])))
+				if (!ApiUtils.contains(protectedRegions, exListModel.get(selectedIndices[i])))
 					exListModel.remove(selectedIndices[i]);
 			this.sync();
 		});
