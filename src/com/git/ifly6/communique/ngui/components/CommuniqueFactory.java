@@ -1,7 +1,5 @@
 package com.git.ifly6.communique.ngui.components;
 
-import com.git.ifly6.communique.io.CommuniqueLoader;
-
 import javax.swing.BorderFactory;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -12,11 +10,18 @@ import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.CODE_
 
 public class CommuniqueFactory {
 
-	public static JTextField createField(String name, DocumentListener listener) {
+	/**
+	 * Creates a {@link JTextField} with tooltip text and document listener, pre-loaded with monospaced font setting.
+	 * @param text to initialise with
+	 * @param tooltip to give
+	 * @param listener to execute
+	 * @return constructed <code>JTextField</code>
+	 */
+	public static JTextField createField(String text, String tooltip, DocumentListener listener) {
 		JTextField field = new JTextField();
-		field.setToolTipText(name);
+		field.setToolTipText(tooltip);
 		field.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
-		field.setText(CommuniqueLoader.getClientKey());
+		field.setText(text);
 		field.getDocument().addDocumentListener(listener);
 		return field;
 	}

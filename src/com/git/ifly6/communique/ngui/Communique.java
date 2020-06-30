@@ -191,17 +191,22 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		JLabel lblClientKey = new JLabel("Client key", SwingConstants.RIGHT);
 		JLabel lblSecretKey = new JLabel("Secret key", SwingConstants.RIGHT);
 		JLabel lblTelegramId = new JLabel("Telegram ID", SwingConstants.RIGHT);
-		txtClientKey = CommuniqueFactory.createField("Client key",
+		txtClientKey = CommuniqueFactory.createField(
+				CommuniqueLoader.getClientKey(),"Client key",
 				new CommuniqueDocumentListener(e -> {
 					config.keys.setClientKey(txtClientKey.getText().trim()); // dynamic update config
 				})
 		);
-		txtSecretKey = CommuniqueFactory.createField("Secret key",
+		txtSecretKey = CommuniqueFactory.createField(
+				"",
+				"Secret key",
 				new CommuniqueDocumentListener(e -> {
 					config.keys.setSecretKey(txtSecretKey.getText().trim()); // dynamic update config
 				})
 		);
-		txtTelegramId = CommuniqueFactory.createField("Telegram ID",
+		txtTelegramId = CommuniqueFactory.createField(
+				"",
+				"Telegram ID",
 				new CommuniqueDocumentListener(e -> {
 					config.keys.setTelegramId(txtTelegramId.getText().trim()); // dynamic update config
 				})
