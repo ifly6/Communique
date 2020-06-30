@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2020 ifly6
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.git.ifly6.communique;
 
 import com.git.ifly6.communique.data.CommuniqueParser;
@@ -9,10 +26,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 /**
  * This class has been deprecated. Please see {@link com.git.ifly6.communique.io.CommuniqueLoader CLoader}. Note that
@@ -24,7 +39,6 @@ import java.util.stream.Stream;
  * class will automatically load and process any documents you give it when it is created. If you want that behaviour to
  * change, extend the class and write a new constructor.</strike>
  * </p>
- * @see CommuniqueFileWriter
  * @see CommuniqueParser
  * @see com.git.ifly6.communique.io.CommuniqueLoader CLoader
  */
@@ -37,7 +51,6 @@ public class CommuniqueFileReader {
 	private boolean recruitment;
 	private boolean randomised;
 
-	/** <code>information</code> encapsulates the returning information of the JTelegramKeys and the recipients. */
 	Object[] information = {new JTelegramKeys(), new String[]{}};
 
 	/**
@@ -48,14 +61,11 @@ public class CommuniqueFileReader {
 	 * @throws JTelegramException    if the version is incorrect
 	 */
 	public CommuniqueFileReader(File file) throws FileNotFoundException, JTelegramException {
-
 		// Immediately load the file into memory.
-		FileReader configRead = new FileReader(file);
-		Scanner scan = new Scanner(configRead);
-
-		while (scan.hasNextLine()) {
+		Scanner scan = new Scanner(new FileReader(file));
+		while (scan.hasNextLine())
 			fileContents.add(scan.nextLine().trim());
-		}
+
 		scan.close();
 
 		if (isCompatible()) {
@@ -160,71 +170,17 @@ public class CommuniqueFileReader {
 	 * @return <code>String</code> containing the ending of the commented version line
 	 */
 	public int getFileVersion() {
-
 		// Look for version tag first
-		for (String element : fileContents) {
-			if (element.startsWith("version")) {
+		for (String element : fileContents)
+			if (element.startsWith("version"))
 				return Integer.parseInt(element.replace("version=", ""));
-			}
-		}
 
 		// If the version tag does not yet exist, look for header version tag
-		for (String element : fileContents) {
-			if (element.startsWith(
-					"# Produced by version ")) {
+		for (String element : fileContents)
+			if (element.startsWith("# Produced by version "))
 				return Integer.parseInt(element.replace("# Produced by version ", ""));
-			}
-		}
 
 		return 0;
 	}
 
-	/**
-	 * Gets the header of the entire file (that is, all comments before the first real entry) and returns it in a String
-	 * array.
-	 * @return the header of the file in <code>String[]</code> format
-	 */
-	public String[] getHeader() {
-		ArrayList<String> header = new ArrayList<>();
-		String[] filteredContents = fileContents.stream().filter(ApiUtils::isNotEmpty).toArray(String[]::new);
-
-		for (String filteredContent : filteredContents) {
-			if (!filteredContent.startsWith("#")) {
-				// When comments end, break.
-				break;
-			} else {
-				header.add(filteredContent);
-			}
-		}
-
-		return header.toArray(new String[0]);
-	}
-
-	/**
-	 * Gets the footer sections of the file (that is, all comments after the last real entry) and returns it in a String
-	 * array.
-	 * @return the footer of the file in <code>String[]</code> format
-	 */
-	public String[] getFooter() {
-		ArrayList<String> header = new ArrayList<>();
-		String[] tempContents = fileContents.toArray(new String[0]);
-		String[] filteredContents = Stream.of(tempContents)
-				.filter(ApiUtils::isNotEmpty)
-				.toArray(String[]::new);
-
-		for (int i = filteredContents.length - 1; i >= 0; i--) {
-			// Start from the bottom and read commented lines.
-
-			if (!filteredContents[i].startsWith("#")) {
-				// When those commented lines terminate, break.
-				break;
-			} else {
-				header.add(filteredContents[i]);
-			}
-		}
-
-		Collections.reverse(header);
-
-		return header.toArray(new String[0]);
-	}
 }
