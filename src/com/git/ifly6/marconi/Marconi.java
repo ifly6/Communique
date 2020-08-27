@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2020 ifly6
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.git.ifly6.marconi;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
@@ -24,8 +41,7 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 	private boolean skipChecks;
 	private boolean recruiting;
 
-	public Marconi(boolean skipChecks, boolean recruiting) {
-		this.skipChecks = skipChecks;
+	public Marconi(boolean recruiting) {
 		this.recruiting = recruiting;
 	}
 
@@ -48,12 +64,9 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 			}
 
 		System.out.println();
+		//noinspection IntegerDivisionInFloatingPointContext
 		System.out.println(String.format("This will take %s to send %d telegrams",
-				CommuniqueUtilities.time(Math.round(expandedRecipients.size() * (
-						config.isRecruitment
-						? (float) JavaTelegram.RECRUIT_TIME / 1000
-						: (float) JavaTelegram.CAMPAIGN_TIME / 1000
-				))),
+				CommuniqueUtilities.time(Math.round(expandedRecipients.size() * (config.telegramType.getDefaultTime() / 1000))),
 				expandedRecipients.size()));
 
 		if (!skipChecks) {
@@ -65,49 +78,13 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 
 		// Set the client up and go.
 		client.setKeys(config.keys);
-		client.setRecruitment(config.isRecruitment);
+		client.setTelegramType(config.telegramType);
 		client.setRecipients(expandedRecipients);
 
 		// Check for file lock
 		if (!MarconiUtilities.isFileLocked()) client.connect();
 		else throw new RuntimeException("Cannot send, as another instance of Marconi is already sending.");
 
-	}
-
-	/**
-	 * Should the problem be prompted to manually check all flags, this method does so, retrieving the flags and asking
-	 * for the user to reconfirm them.
-	 */
-	public void manualFlagCheck() {
-
-		if (!skipChecks) {
-			// Give a chance to check the keys.
-			String keysResponse = MarconiUtilities.promptYN(String
-					.format("Are these keys correct? %s, %s, %s [Yes] or [No]", config.keys.getClientKey(),
-							config.keys.getSecretKey(), config.keys.getTelegramId()));
-			if (!keysResponse.startsWith("y")) return;
-
-			if (!recruiting) {
-				// Confirm the recruitment flag.
-				while (true) {
-					String recruitResponse = MarconiUtilities.promptYN(String
-							.format("Is the recruitment flag (%s) set correctly? [Yes] or [No]?",
-									config.isRecruitment));
-					if (recruitResponse.startsWith("n")) config.isRecruitment = !config.isRecruitment;
-					else if (recruitResponse.startsWith("y")) break;
-				}
-
-				// Confirm the randomisation flag.
-				while (true) {
-					String randomResponse = MarconiUtilities.promptYN(String
-							.format("Do you want to apply the %s processing action?",
-									config.processingAction));
-					if (randomResponse.startsWith("n")) return;
-					else if (randomResponse.startsWith("y")) break;
-				}
-			}
-
-		}
 	}
 
 	/**

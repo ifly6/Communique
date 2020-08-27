@@ -1,9 +1,27 @@
+/*
+ * Copyright (c) 2020 ifly6
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.git.ifly6.communique.io;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
+import com.git.ifly6.nsapi.telegram.JTelegramType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,10 +43,12 @@ public class CommuniqueConfig implements java.io.Serializable {
 
 	public int version;
 
-	public boolean isRecruitment;
+	protected boolean isRecruitment;
 	public CommuniqueProcessingAction processingAction;
 
 	public JTelegramKeys keys;
+	public JTelegramType telegramType;
+	public String waitString;
 
 	/**
 	 * Holds all of the Communique recipients in <code>String</code>s so that it can be edited by hand and not as {@link
@@ -55,16 +75,18 @@ public class CommuniqueConfig implements java.io.Serializable {
 	/**
 	 * Constructor for <code>{@link CommuniqueConfig}</code>s. All the
 	 * <code>{@link CommuniqueRecipient}</code>s should be specified after the fact.
-	 * @param isRecruitment    is whether this is a recruitment configuration
+	 * @param t                the type of telegrams configured to be sent
 	 * @param processingAction is the applicable processing action
 	 * @param keys             are the keys
+	 * @param s                for the wait string
 	 */
-	public CommuniqueConfig(boolean isRecruitment, CommuniqueProcessingAction processingAction,
-	                        JTelegramKeys keys) {
+	public CommuniqueConfig(JTelegramType t, CommuniqueProcessingAction processingAction,
+	                        JTelegramKeys keys, String s) {
 		this();
-		this.isRecruitment = isRecruitment;
+		this.telegramType = t;
 		this.processingAction = processingAction;
 		this.keys = keys;
+		this.waitString = s;
 	}
 
 	/**
