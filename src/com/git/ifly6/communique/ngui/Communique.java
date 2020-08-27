@@ -35,6 +35,7 @@ import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
+import com.git.ifly6.nsapi.telegram.JTelegramType;
 import com.git.ifly6.nsapi.telegram.JavaTelegram;
 
 import javax.swing.BorderFactory;
@@ -42,7 +43,6 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -98,6 +98,7 @@ import static com.git.ifly6.communique.ngui.components.CommuniqueNativisation.sh
  * <code>Communiqué</code> is the main class of the Communiqué system. It handles the GUI aspect of the entire program
  * and other actions.
  */
+@SuppressWarnings("ALL")
 public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 	private static final Logger LOGGER = Logger.getLogger(Communique.class.getName());
@@ -111,8 +112,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	private JTextField txtClientKey;
 	private JTextField txtSecretKey;
 	private JTextField txtTelegramId;
-	private JCheckBox chckbxRecruitment;
+	private JTextField txtWaitTime;
 	private JComboBox<CommuniqueProcessingAction> specialAction;
+	private JComboBox<JTelegramType> telegramType;
 	private JButton btnParse;
 
 	private List<String> parsedRecipients;
@@ -193,7 +195,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		JLabel lblSecretKey = new JLabel("Secret key", SwingConstants.RIGHT);
 		JLabel lblTelegramId = new JLabel("Telegram ID", SwingConstants.RIGHT);
 		txtClientKey = CommuniqueFactory.createField(
-				CommuniqueLoader.getClientKey(),"Client key",
+				CommuniqueLoader.getClientKey(), "Client key",
 				new CommuniqueDocumentListener(e -> {
 					config.keys.setClientKey(txtClientKey.getText().trim()); // dynamic update config
 				})
@@ -221,19 +223,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		btnParse = new JButton("Parse");
 		btnParse.addActionListener(ae -> setupSend());
 
-		chckbxRecruitment = new JCheckBox("Recruitment rate-limit");
-		chckbxRecruitment.setToolTipText("The recruitment rate-limit is 180 seconds per telegram. The rate-limit "
-				+ "for all other telegrams is 30 seconds. Communiqué puts in an extra 0.05 seconds as a buffer "
-				+ "against latency.");
-		chckbxRecruitment.addActionListener(evt -> {
-			config.isRecruitment = chckbxRecruitment.isSelected();
-			LOGGER.info(String.format("Set config recruitment to %s",
-					chckbxRecruitment.isSelected()));
-		});
-
 		specialAction = new JComboBox<>();
-		for (CommuniqueProcessingAction action : CommuniqueProcessingAction.values()) // populate enum selector
-			specialAction.addItem(action);
+		Arrays.stream(CommuniqueProcessingAction.values()).forEach(specialAction::addItem); // populate selector
 		specialAction.setToolTipText("Processing actions can be applied to the list of recipients after they "
 				+ "are parsed. Select a processing action here");
 		specialAction.addActionListener(evt -> {
@@ -243,6 +234,29 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		});
 
 		JLabel lblProcessingAction = new JLabel("Processing action");
+
+		JLabel lblTelegramType = new JLabel("Telegram type");
+
+		telegramType = new JComboBox<>();
+		Arrays.stream(JTelegramType.values()).forEach(telegramType::addItem);
+		telegramType.setSelectedItem(JTelegramType.RECRUIT); // default to recruitment
+		telegramType.setToolTipText("Telegram types are declared in the telegram itself");
+		telegramType.addActionListener(evt -> {
+			config.telegramType = currentTelegramType();
+			LOGGER.info(String.format("Set telegram type to %s", currentTelegramType()));
+		});
+
+		JLabel lblWaitTime = new JLabel("Wait time");
+		lblWaitTime.setToolTipText("Wait time must be in milliseconds.");
+
+		txtWaitTime = CommuniqueFactory.createField(
+				"",
+				"Leave as blank, 'default', or '-' to accept defaults. Must be in milliseconds.",
+				new CommuniqueDocumentListener(e -> {
+					config.waitString = txtWaitTime.getText().trim(); // dynamic update config
+				})
+		);
+		txtWaitTime.setColumns(10);
 
 		GroupLayout gl_dataPanel = new GroupLayout(dataPanel);
 		gl_dataPanel.setHorizontalGroup(
@@ -254,61 +268,61 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 												.addPreferredGap(ComponentPlacement.RELATED)
 												.addGroup(gl_dataPanel.createParallelGroup(Alignment.TRAILING)
 														.addGroup(gl_dataPanel.createSequentialGroup()
-																.addComponent(progressBar, GroupLayout.DEFAULT_SIZE, 317,
-																		Short.MAX_VALUE)
+																.addComponent(progressBar, GroupLayout.DEFAULT_SIZE, 317, Short.MAX_VALUE)
 																.addPreferredGap(ComponentPlacement.RELATED)
 																.addComponent(progressLabel)
 																.addGap(6))
 														.addGroup(gl_dataPanel.createSequentialGroup()
-																.addGroup(
-																		gl_dataPanel.createParallelGroup(Alignment.TRAILING)
-																				.addComponent(lblTelegramId)
-																				.addComponent(lblSecretKey)
-																				.addComponent(lblClientKey))
+																.addGroup(gl_dataPanel.createParallelGroup(Alignment.TRAILING)
+																		.addComponent(lblTelegramId)
+																		.addComponent(lblSecretKey)
+																		.addComponent(lblClientKey)
+																		.addComponent(lblWaitTime))
 																.addPreferredGap(ComponentPlacement.RELATED)
 																.addGroup(gl_dataPanel.createParallelGroup(Alignment.LEADING)
-																		.addComponent(txtClientKey, GroupLayout.DEFAULT_SIZE,
-																				266, Short.MAX_VALUE)
-																		.addComponent(txtSecretKey, Alignment.TRAILING,
-																				GroupLayout.DEFAULT_SIZE, 266,
-																				Short.MAX_VALUE)
-																		.addComponent(txtTelegramId,
-																				GroupLayout.DEFAULT_SIZE, 266,
-																				Short.MAX_VALUE)))
-														.addComponent(btnParse, GroupLayout.DEFAULT_SIZE, 354,
-																Short.MAX_VALUE)
-														.addComponent(chckbxRecruitment, GroupLayout.DEFAULT_SIZE, 354,
-																Short.MAX_VALUE)))
+																		.addComponent(txtClientKey, GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
+																		.addComponent(txtSecretKey, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
+																		.addComponent(txtTelegramId, GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
+																		.addComponent(txtWaitTime, GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)))
+														.addComponent(btnParse, GroupLayout.DEFAULT_SIZE, 354, Short.MAX_VALUE)))
 										.addGroup(gl_dataPanel.createSequentialGroup()
 												.addGap(14)
 												.addComponent(lblProcessingAction)
 												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(specialAction, 0, 229, Short.MAX_VALUE)))
-								.addContainerGap()));
+												.addComponent(specialAction, 0, 229, Short.MAX_VALUE))
+										.addGroup(Alignment.TRAILING, gl_dataPanel.createSequentialGroup()
+												.addPreferredGap(ComponentPlacement.UNRELATED)
+												.addComponent(lblTelegramType, GroupLayout.PREFERRED_SIZE, 111, GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+												.addComponent(telegramType, 0, 229, Short.MAX_VALUE)))
+								.addContainerGap())
+		);
 		gl_dataPanel.setVerticalGroup(
 				gl_dataPanel.createParallelGroup(Alignment.TRAILING)
 						.addGroup(gl_dataPanel.createSequentialGroup()
 								.addContainerGap()
 								.addGroup(gl_dataPanel.createParallelGroup(Alignment.BASELINE)
-										.addComponent(txtClientKey, GroupLayout.PREFERRED_SIZE, 29,
-												GroupLayout.PREFERRED_SIZE)
+										.addComponent(txtClientKey, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
 										.addComponent(lblClientKey))
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_dataPanel.createParallelGroup(Alignment.BASELINE)
-										.addComponent(txtSecretKey, GroupLayout.PREFERRED_SIZE, 29,
-												GroupLayout.PREFERRED_SIZE)
+										.addComponent(txtSecretKey, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
 										.addComponent(lblSecretKey))
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_dataPanel.createParallelGroup(Alignment.BASELINE)
-										.addComponent(txtTelegramId, GroupLayout.PREFERRED_SIZE, 29,
-												GroupLayout.PREFERRED_SIZE)
+										.addComponent(txtTelegramId, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
 										.addComponent(lblTelegramId))
-								.addPreferredGap(ComponentPlacement.RELATED, 413, Short.MAX_VALUE)
-								.addComponent(chckbxRecruitment, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_dataPanel.createParallelGroup(Alignment.BASELINE)
-										.addComponent(specialAction, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-												GroupLayout.PREFERRED_SIZE)
+										.addComponent(lblWaitTime)
+										.addComponent(txtWaitTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addPreferredGap(ComponentPlacement.RELATED, 387, Short.MAX_VALUE)
+								.addGroup(gl_dataPanel.createParallelGroup(Alignment.BASELINE)
+										.addComponent(telegramType, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addComponent(lblTelegramType))
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(gl_dataPanel.createParallelGroup(Alignment.BASELINE)
+										.addComponent(specialAction, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 										.addComponent(lblProcessingAction))
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addComponent(btnParse)
@@ -317,7 +331,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 										.addComponent(progressBar, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
 										.addComponent(progressLabel, GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE))
 								.addContainerGap())
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE));
+						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE)
+		);
 		dataPanel.setLayout(gl_dataPanel);
 
 		JMenuBar menuBar = new JMenuBar();
@@ -686,7 +701,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		}
 
 		// Ask for confirmation
-		CommuniqueSendDialog sendDialog = new CommuniqueSendDialog(frame, parsedRecipients, config.isRecruitment);
+		CommuniqueSendDialog sendDialog = new CommuniqueSendDialog(frame, parsedRecipients, currentWaitTime());
 		LOGGER.info("Displayed CommuniqueSendDialog");
 		LOGGER.info("CommuniqueSendDialog " + (sendDialog.getValue() == 0
 				? "cancelled"
@@ -712,8 +727,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 						txtTelegramId.getText().trim()
 				));
 
-				// Set recruitment Status, JavaTelegram defaults to true
-				client.setRecruitment(chckbxRecruitment.isSelected());
+				// Set recruitment status, JavaTelegram defaults to true
+				client.setTelegramType(this.currentTelegramType());
 
 				// Save client key
 				try {
@@ -725,6 +740,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 					LOGGER.severe("Exception in writing autosave or properties file");
 					e.printStackTrace();
 				}
+
+				// set wait time
+				client.setWaitTime(this.currentWaitTime());
 
 				// Create tracker, initialise success tracking HashMap
 				rSuccessTracker = new LinkedHashMap<>();
@@ -789,12 +807,14 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		this.config = config;   // import to state config object
 
 		// manually sync them up
-		chckbxRecruitment.setSelected(config.isRecruitment);
+		telegramType.setSelectedItem(config.telegramType);
 		specialAction.setSelectedItem(config.processingAction);
 
 		txtClientKey.setText(config.keys.getClientKey());   // set keys
 		txtSecretKey.setText(config.keys.getSecretKey());
 		txtTelegramId.setText(config.keys.getTelegramId());
+
+		txtWaitTime.setText(config.waitString); // get wait string
 
 		// set text from cRecipients
 		txtrCode.setText(CODE_HEADER + String.join("\n", config.getcRecipientsString()));
@@ -811,6 +831,32 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 	private void appendCode(Object input) {
 		txtrCode.append("\n" + input.toString());
+	}
+
+	/**
+	 * @return currently selected telegram mode
+	 */
+	private JTelegramType currentTelegramType() {
+		return telegramType.getItemAt(telegramType.getSelectedIndex());
+	}
+
+	/**
+	 * @return currently selected wait time if present, otherwise, defualt wait time
+	 */
+	private int currentWaitTime() {
+		if (txtWaitTime.getText().trim().isEmpty()
+				|| txtWaitTime.getText().equals("-")
+				|| txtWaitTime.getText().equalsIgnoreCase("default")
+				|| txtWaitTime.getText().equalsIgnoreCase("defaults"))
+			return currentTelegramType().getDefaultTime();
+
+		try {
+			return Integer.parseInt(txtWaitTime.getText());
+		} catch (NumberFormatException e) {
+			String message = String.format("Invalid integer %s", txtWaitTime.getText());
+			Communique.this.showMessageDialog(message, CommuniqueMessages.ERROR);
+			throw new JTelegramException(message, e);
+		}
 	}
 
 	/**
@@ -848,9 +894,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			progressBar.setValue(0);    // reset progress bar
 		}
 
-		final int ups = 20;    // ups = updates per second
-		int totalTime = ups * (chckbxRecruitment.isSelected() ? 180 : 30);    // est delay
-		progressBar.setMaximum(totalTime);    // max = est delay
+		final int ups = 20; // ups = updates per second
+		int totalTime = ups * currentWaitTime(); // est delay
+		progressBar.setMaximum(totalTime); // max = est delay
 
 		timer = new Timer(1000 / ups, new ActionListener() {
 			int elapsedSteps = 0;    // start at zero

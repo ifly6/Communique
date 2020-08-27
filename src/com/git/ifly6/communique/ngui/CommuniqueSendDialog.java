@@ -1,22 +1,23 @@
-/* Copyright (c) 2018 ifly6
+/*
+ * Copyright (c) 2020 ifly6
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
-import com.git.ifly6.nsapi.telegram.JavaTelegram;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -55,7 +56,7 @@ public class CommuniqueSendDialog extends JDialog {
 
 	private JButton sendButton;
 
-	public CommuniqueSendDialog(JFrame parent, List<String> parsedRecipients, boolean isRecruitment) {
+	public CommuniqueSendDialog(JFrame parent, List<String> parsedRecipients, int delay) {
 		super(parent, true);
 
 		Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
@@ -96,7 +97,7 @@ public class CommuniqueSendDialog extends JDialog {
 		gbl_buttonPane.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		buttonPane.setLayout(gbl_buttonPane);
 		JLabel lblThisWillTake = new JLabel(String.format("Estimated sending time: %s",
-				estimateTime(parsedRecipients.size(), isRecruitment)));
+				estimateTime(parsedRecipients.size(), delay)));
 		lblThisWillTake.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 		GridBagConstraints gbc_lblThisWillTake = new GridBagConstraints();
 		gbc_lblThisWillTake.fill = GridBagConstraints.HORIZONTAL;
@@ -160,11 +161,8 @@ public class CommuniqueSendDialog extends JDialog {
 		return returnValue;
 	}
 
-	private String estimateTime(int count, boolean isRecruitment) {
-		int seconds = Math.round(count *
-				(isRecruitment
-						? (float) JavaTelegram.RECRUIT_TIME / 1000
-						: (float) JavaTelegram.CAMPAIGN_TIME / 1000));
+	private String estimateTime(int count, int delay) {
+		int seconds = Math.round(count * (int) (delay / 1000));
 		return CommuniqueUtilities.time(seconds);
 	}
 

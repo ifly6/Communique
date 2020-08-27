@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2020 ifly6
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.git.ifly6.nsapi.telegram;
 
 import com.git.ifly6.nsapi.NSConnection;
@@ -34,19 +51,7 @@ import java.util.function.Predicate;
  */
 public class JavaTelegram {
 
-	/**
-	 * Time between dispatch for a normal campaign, in milliseconds
-	 */
-	public static final int CAMPAIGN_TIME = (int) (30.05 * 1000);
-
-	/**
-	 * Time between dispatch for recruitment telegrams, in milliseconds
-	 */
-	public static final int RECRUIT_TIME = (int) (180.05 * 1000);
-
 	private static volatile boolean killThread = false;
-
-	private int waitTime = RECRUIT_TIME;
 
 	protected JTelegramKeys keys = new JTelegramKeys();
 
@@ -55,7 +60,8 @@ public class JavaTelegram {
 
 	private JTelegramLogger util;
 
-	private boolean isRecruitment = true;   // Defaults to 'true' to keep on the safe side.
+	private JTelegramType telegramType = JTelegramType.RECRUIT;   // Defaults to 'true' to keep on the safe side.
+	private int waitTime = telegramType.getDefaultTime();
 
 	/**
 	 * A list of tests to run on each recipient. A <code>NSNation</code> is created for each recipient in {@link
@@ -68,12 +74,15 @@ public class JavaTelegram {
 	 * </p>
 	 */
 	private List<Predicate<NSNation>> predicates = new ArrayList<>();  // additional predicates here
+
 	{
-		predicates.add(n -> {   // default predicate for basic filtering
+		predicates.add(n -> {
 			// if we are recruiting and nation is not recruitable -> false
-			// else (we are campaigning) and nation is not campaignable -> false
-			if (isRecruitment) return n.isRecruitable();
-			else return true;
+			// if campaigning and nation is not campaignable -> false
+			// otherwise return true
+			if (telegramType == JTelegramType.RECRUIT) return n.isRecruitable();
+			if (telegramType == JTelegramType.CAMPAIGN) return n.isCampaignable();
+			return true;
 		});
 	}
 
@@ -83,11 +92,12 @@ public class JavaTelegram {
 	 * @param providedLogger is a <code>JTelegramLogger</code> which replaces the old logger for the output of
 	 *                       information
 	 * @param inputKeys      is a <code>JTelegramKeys</code> containing the keys to directly initialise
+	 * @param m is the mode
 	 */
-	public JavaTelegram(JTelegramLogger providedLogger, JTelegramKeys inputKeys, boolean isRecruitment) {
+	public JavaTelegram(JTelegramLogger providedLogger, JTelegramKeys inputKeys, JTelegramType m) {
 		util = providedLogger;    // to avoid creating a new method for no reason
 		this.setKeys(inputKeys);
-		this.setRecruitment(isRecruitment);
+		this.setTelegramType(m);
 	}
 
 	/**
@@ -100,16 +110,6 @@ public class JavaTelegram {
 	}
 
 	/**
-	 * Returns the amount of time which the program waits between sending telegrams. Note that in {@link
-	 * JavaTelegram#connect()}, the program automatically deducts the amount of time necessary to populate
-	 * <code>NSNation</code> data and check provided predicates.
-	 * @return the time, in milliseconds, to wait between telegram queries
-	 */
-	public int getWaitTime() {
-		return waitTime;
-	}
-
-	/**
 	 * Sets the time between telegrams which the program is set to wait. Note that this is implemented in {@link
 	 * JavaTelegram#connect()} to automatically deduct the time necessary to populate <code>NSNation</code> data and
 	 * check the provided predicates.
@@ -119,9 +119,6 @@ public class JavaTelegram {
 		if (waitTime < NSConnection.WAIT_TIME)
 			throw new JTelegramException("Telegram wait time, " + waitTime + " ms, cannot be less than " +
 					NSConnection.WAIT_TIME + " milliseconds");
-		if (waitTime < CAMPAIGN_TIME)
-			throw new JTelegramException("Telegram wait time, " + waitTime + " ms, cannot be less than " +
-					CAMPAIGN_TIME + " milliseconds");
 		this.waitTime = waitTime;
 	}
 
@@ -148,19 +145,11 @@ public class JavaTelegram {
 	/**
 	 * Sets the <code>isRecruitment</code> flag inside the client. This flag defaults to <code>true</code>. When it is
 	 * set, it overwrites {@link JavaTelegram#waitTime} to the default constants for recruitment and campaign delays.
-	 * @param isRecruitment tells the client if we are recruiting
+	 * @param m is the mode we are using, modes declare their own default times
 	 */
-	public void setRecruitment(boolean isRecruitment) {
-		this.isRecruitment = isRecruitment;
-		this.waitTime = isRecruitment ? RECRUIT_TIME : CAMPAIGN_TIME;
-	}
-
-	/**
-	 * Finds out the current status of the <code>killThread</code> boolean.
-	 * @return boolean killThread
-	 */
-	public boolean isKillThread() {
-		return killThread;
+	public void setTelegramType(JTelegramType m) {
+		this.telegramType = m;
+		this.setWaitTime(m.getDefaultTime());
 	}
 
 	/**

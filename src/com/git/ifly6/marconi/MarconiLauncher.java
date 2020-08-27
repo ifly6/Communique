@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2020 ifly6
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.git.ifly6.marconi;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
@@ -27,19 +44,15 @@ import java.util.logging.SimpleFormatter;
  */
 public class MarconiLauncher {
 
-	private static final Logger LOGGER = Logger.getLogger(Marconi.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(MarconiLauncher.class.getName());
 
 	// Deal with command line options
 	private static final Options COMMAND_LINE_OPTIONS;
-
-	private static boolean skipChecks = false;
 	private static boolean recruiting = false;
 
 	static {
 		Options options = new Options();
 		options.addOption("h", "help", false, "Displays this message");
-		options.addOption("S", "skip", false,
-				"Skips all checks for confirmation such that the configuration immediately executes");
 		options.addOption("R", false, "Uses input data as configuration to call a recruiter that sends infinitely");
 		options.addOption("v", "version", false, "Prints version");
 
@@ -95,7 +108,6 @@ public class MarconiLauncher {
 				System.out.println();
 				return;
 			}
-			if (commandLine.hasOption("S")) skipChecks = true;
 			if (commandLine.hasOption("R")) recruiting = true;
 			if (commandLine.hasOption("v")) {
 				System.out.println("Marconi version " + Communique7Parser.version + "\n"
@@ -118,7 +130,7 @@ public class MarconiLauncher {
 
 	private static void initSend(Path configPath) throws IOException {
 
-		Marconi marconi = new Marconi(skipChecks, recruiting);
+		Marconi marconi = new Marconi(recruiting);
 		marconi.load(configPath);
 
 		// If there is a recruit flag, set it to true

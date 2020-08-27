@@ -31,6 +31,7 @@ import com.git.ifly6.communique.ngui.components.CommuniqueNativisation;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
+import com.git.ifly6.nsapi.telegram.JTelegramType;
 import com.git.ifly6.nsapi.telegram.JavaTelegram;
 import org.apache.commons.text.WordUtils;
 
@@ -428,7 +429,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 				secretKeyField.getText(),
 				telegramIdField.getText()
 		);
-		CommuniqueConfig config = new CommuniqueConfig(true, CommuniqueProcessingAction.NONE, keys);
+		CommuniqueConfig config = new CommuniqueConfig(JTelegramType.NONE, CommuniqueProcessingAction.NONE, keys, "");
 
 		// Create and set recipients and sent-lists
 		List<CommuniqueRecipient> rList = new ArrayList<>();
