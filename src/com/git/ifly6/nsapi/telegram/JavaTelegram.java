@@ -92,7 +92,7 @@ public class JavaTelegram {
 	 * @param providedLogger is a <code>JTelegramLogger</code> which replaces the old logger for the output of
 	 *                       information
 	 * @param inputKeys      is a <code>JTelegramKeys</code> containing the keys to directly initialise
-	 * @param m is the mode
+	 * @param m              is the mode
 	 */
 	public JavaTelegram(JTelegramLogger providedLogger, JTelegramKeys inputKeys, JTelegramType m) {
 		util = providedLogger;    // to avoid creating a new method for no reason
@@ -117,8 +117,17 @@ public class JavaTelegram {
 	 */
 	public void setWaitTime(int waitTime) {
 		if (waitTime < NSConnection.WAIT_TIME)
-			throw new JTelegramException("Telegram wait time, " + waitTime + " ms, cannot be less than " +
-					NSConnection.WAIT_TIME + " milliseconds");
+			throw new JTelegramException(
+					String.format("Telegram wait time, %d ms, cannot be less API rate-limit %d milliseconds",
+							waitTime, NSConnection.WAIT_TIME));
+		if (waitTime < 1000)
+			throw new JTelegramException(
+					String.format("Telegram wait time less than 1000! Is input %d not in milliseconds?",
+							waitTime));
+		if (waitTime < JTelegramType.NONE.getDefaultTime())
+			throw new JTelegramException(
+					String.format("Telegram wait time %d ms must exceed API rate limit minimum %d",
+							waitTime, JTelegramType.NONE.getDefaultTime()));
 		this.waitTime = waitTime;
 	}
 
