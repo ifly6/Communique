@@ -45,7 +45,7 @@ public class CommuniqueConstants {
 
 	static {
 		try {
-			FORUM_THREAD = new URI("http://forum.nationstates.net/viewtopic.php?f=15&t=352065");
+			FORUM_THREAD = new URI("https://forum.nationstates.net/viewtopic.php?f=15&t=352065");
 			GITHUB_URI = new URL("https://github.com/iFlyCode/Communique").toURI();
 		} catch (URISyntaxException | MalformedURLException ignored) {
 		}

@@ -15,9 +15,9 @@ from the author if action is taken against your NationStates account or from oth
 
 ### System Requirements ###
 * Java JRE 8 (https://java.com/en/download/)
-* A [NationStates](http://www.nationstates.net) nation
-* A NationStates [API client key](http://www.nationstates.net/pages/api.html#telegrams)
-* A NationStates [telegram ID and secret key](http://www.nationstates.net/pages/api.html#telegrams)
+* A [NationStates](https://www.nationstates.net) nation
+* A NationStates [API client key](https://www.nationstates.net/pages/api.html#telegrams)
+* A NationStates [telegram ID and secret key](https://www.nationstates.net/pages/api.html#telegrams)
 
 ### Readme ###
 1. Acquire an API client key. You will need to contact the NationStates moderators with a GHR (Getting Help Request) 
