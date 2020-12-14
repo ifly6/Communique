@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-/** @author Kevin */
+/** @author ifly6 */
 public class MarconiRecruiter extends AbstractCommuniqueRecruiter implements JTelegramLogger {
 
 	private static final Logger LOGGER = Logger.getLogger(MarconiRecruiter.class.getName());

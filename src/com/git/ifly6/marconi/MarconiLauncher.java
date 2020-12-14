@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 /**
- * @author Kevin
+ * @author ifly6
  */
 public class MarconiLauncher {
 
@@ -103,7 +103,7 @@ public class MarconiLauncher {
 						"Send telegrams on NationStates from the command line",
 						COMMAND_LINE_OPTIONS,
 						"Please report issues to the NationStates nation Imperium Anglorum via telegram or to "
-								+ "http://forum.nationstates.net/viewtopic.php?f=15&t=352065.",
+								+ "https://forum.nationstates.net/viewtopic.php?f=15&t=352065.",
 						true);
 				System.out.println();
 				return;
