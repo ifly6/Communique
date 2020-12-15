@@ -17,11 +17,23 @@
 
 package com.git.ifly6.nsapi.telegram;
 
+/**
+ * Specifies different types of telegrams to be sending and their default timings and names.
+ */
 public enum JTelegramType {
+
+	/**
+	 * Timing for campaign telegrams with {@link #DEFAULT_TIMING} delay.
+	 */
 	CAMPAIGN {
 		@Override
-		public int getDefaultTime() {
-			return (int) (30.05 * 1000);
+		public int getWaitTime() {
+			return DEFAULT_TIMING;
+		}
+
+		@Override
+		public void setDefaultTime(int i) {
+			throw new UnsupportedOperationException("Cannot set time on immutable setting");
 		}
 
 		@Override
@@ -29,10 +41,20 @@ public enum JTelegramType {
 			return "Campaign";
 		}
 
-	}, RECRUIT {
+	},
+
+	/**
+	 * Timing for recruitment telegrams with wait timing at 180.05 seconds.
+	 */
+	RECRUIT {
 		@Override
-		public int getDefaultTime() {
+		public int getWaitTime() {
 			return (int) (180.05 * 1000);
+		}
+
+		@Override
+		public void setDefaultTime(int i) {
+			throw new UnsupportedOperationException("Cannot set time on immutable setting");
 		}
 
 		@Override
@@ -40,10 +62,43 @@ public enum JTelegramType {
 			return "Recruitment";
 		}
 
-	}, NONE {
+	},
+
+	/**
+	 * Custom telegram type with custom timing. Default timing is still {@link #DEFAULT_TIMING} but can be set to any
+	 * desired value.
+	 */
+	CUSTOM {
+		private int time = DEFAULT_TIMING;
+
 		@Override
-		public int getDefaultTime() {
-			return JTelegramType.CAMPAIGN.getDefaultTime();
+		public int getWaitTime() {
+			return time;
+		}
+
+		@Override
+		public void setDefaultTime(int i) {
+			time = i;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("Custom timing (%d ms)", time);
+		}
+	},
+
+	/**
+	 * Timing for unmarked telegrams with {@link #DEFAULT_TIMING} delay.
+	 */
+	NONE {
+		@Override
+		public int getWaitTime() {
+			return DEFAULT_TIMING;
+		}
+
+		@Override
+		public void setDefaultTime(int i) {
+			throw new UnsupportedOperationException("Cannot set time on immutable setting");
 		}
 
 		@Override
@@ -53,7 +108,11 @@ public enum JTelegramType {
 
 	};
 
-	public abstract int getDefaultTime();
+	public static final int DEFAULT_TIMING = (int) (30.05 * 1000);
+
+	public abstract int getWaitTime();
+
+	public abstract void setDefaultTime(int i);
 
 	public abstract String toString();
 

@@ -65,9 +65,9 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 
 		System.out.println();
 		//noinspection IntegerDivisionInFloatingPointContext
-		System.out.println(String.format("This will take %s to send %d telegrams",
-				CommuniqueUtilities.time(Math.round(expandedRecipients.size() * (config.telegramType.getDefaultTime() / 1000))),
-				expandedRecipients.size()));
+		System.out.printf("This will take %s to send %d telegrams%n",
+				CommuniqueUtilities.time(Math.round(expandedRecipients.size() * (config.telegramType.getWaitTime() / 1000))),
+				expandedRecipients.size());
 
 		if (!skipChecks) {
 			// Give a chance to check the recipients.
