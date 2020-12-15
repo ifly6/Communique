@@ -844,7 +844,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				|| txtWaitTime.getText().equals("-")
 				|| txtWaitTime.getText().equalsIgnoreCase("default")
 				|| txtWaitTime.getText().equalsIgnoreCase("defaults"))
-			return currentTelegramType().getDefaultTime();
+			return currentTelegramType().getWaitTime();
 
 		try {
 			return Integer.parseInt(txtWaitTime.getText());

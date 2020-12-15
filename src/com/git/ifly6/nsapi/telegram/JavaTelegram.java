@@ -58,10 +58,10 @@ public class JavaTelegram {
 	private List<String> recipients = new ArrayList<>();
 	private List<String> sentList = new ArrayList<>();
 
-	private JTelegramLogger util;
+	private final JTelegramLogger util;
 
 	private JTelegramType telegramType = JTelegramType.RECRUIT;   // Defaults to 'true' to keep on the safe side.
-	private int waitTime = telegramType.getDefaultTime();
+	private int waitTime = telegramType.getWaitTime();
 
 	/**
 	 * A list of tests to run on each recipient. A <code>NSNation</code> is created for each recipient in {@link
@@ -124,10 +124,10 @@ public class JavaTelegram {
 			throw new JTelegramException(
 					String.format("Telegram wait time less than 1000! Is input %d not in milliseconds?",
 							waitTime));
-		if (waitTime < JTelegramType.NONE.getDefaultTime())
+		if (waitTime < JTelegramType.NONE.getWaitTime())
 			throw new JTelegramException(
 					String.format("Telegram wait time %d ms must exceed API rate limit minimum %d",
-							waitTime, JTelegramType.NONE.getDefaultTime()));
+							waitTime, JTelegramType.NONE.getWaitTime()));
 		this.waitTime = waitTime;
 	}
 
@@ -158,7 +158,7 @@ public class JavaTelegram {
 	 */
 	public void setTelegramType(JTelegramType m) {
 		this.telegramType = m;
-		this.setWaitTime(m.getDefaultTime());
+		this.setWaitTime(m.getWaitTime());
 	}
 
 	/**
@@ -173,6 +173,10 @@ public class JavaTelegram {
 
 	public void addFilter(Predicate<NSNation> p) {
 		this.predicates.add(p);
+	}
+
+	public List<String> getSentList() {
+		return sentList;
 	}
 
 	/**
