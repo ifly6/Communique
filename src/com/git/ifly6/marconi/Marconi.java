@@ -52,7 +52,7 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 		List<String> expandedRecipients = parser.apply(config.getcRecipients()).listRecipients();
 
 		// Apply processing action
-		expandedRecipients = config.processingAction.apply(expandedRecipients);
+		expandedRecipients = config.getProcessingAction().apply(expandedRecipients);
 
 		// Show the recipients in the order we are to send the telegrams.
 		System.out.println();
@@ -66,7 +66,8 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 		System.out.println();
 		//noinspection IntegerDivisionInFloatingPointContext
 		System.out.printf("This will take %s to send %d telegrams%n",
-				CommuniqueUtilities.time(Math.round(expandedRecipients.size() * (config.telegramType.getWaitTime() / 1000))),
+				CommuniqueUtilities.time(Math.round(expandedRecipients.size()
+						* (config.getTelegramType().getWaitTime() / 1000))),
 				expandedRecipients.size());
 
 		if (!skipChecks) {
@@ -78,7 +79,7 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 
 		// Set the client up and go.
 		client.setKeys(config.keys);
-		client.setTelegramType(config.telegramType);
+		client.setTelegramType(config.getTelegramType());
 		client.setRecipients(expandedRecipients);
 
 		// Check for file lock
