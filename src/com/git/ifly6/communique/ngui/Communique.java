@@ -223,8 +223,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		btnParse = new JButton("Parse");
 		btnParse.addActionListener(ae -> setupSend());
 
-		specialAction = new JComboBox<>();
-		Arrays.stream(CommuniqueProcessingAction.values()).forEach(specialAction::addItem); // populate selector
+		specialAction = new JComboBox<>(CommuniqueProcessingAction.values());
+		specialAction.setSelectedItem(CommuniqueProcessingAction.NONE);
 		specialAction.setToolTipText("Processing actions can be applied to the list of recipients after they "
 				+ "are parsed. Select a processing action here");
 		specialAction.addActionListener(evt -> {
@@ -237,8 +237,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 		JLabel lblTelegramType = new JLabel("Telegram type");
 
-		telegramType = new JComboBox<>();
-		Arrays.stream(JTelegramType.values()).forEach(telegramType::addItem);
+		telegramType = new JComboBox<>(JTelegramType.values());
 		telegramType.setSelectedItem(JTelegramType.RECRUIT); // default to recruitment
 		telegramType.setToolTipText("Telegram types are declared in the telegram itself");
 		telegramType.addActionListener(evt -> {
@@ -803,8 +802,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		this.config = config;   // import to state config object
 
 		// manually sync them up
-		telegramType.setSelectedItem(config.telegramType);
-		specialAction.setSelectedItem(config.processingAction);
+		telegramType.setSelectedItem(config.getTelegramType());
+		specialAction.setSelectedItem(config.getProcessingAction());
 
 		txtClientKey.setText(config.keys.getClientKey());   // set keys
 		txtSecretKey.setText(config.keys.getSecretKey());
