@@ -483,10 +483,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 			if (!ApiUtils.isEmpty(selection)) {
 				LOGGER.info("Starting scrape of NS WA voting page, " + selection);
-				String[] elements = selection.split("\\s*?");
-				String chamber = elements[0].equals("GA") ? CommuniqueScraper.GA : CommuniqueScraper.SC;
-				String side = elements[1].equals("For") ? CommuniqueScraper.FOR : CommuniqueScraper.AGAINST;
-
+				String[] elements = selection.toLowerCase().split("\\s+?");
+				final String chamber = elements[0].equals("ga") ? CommuniqueScraper.GA : CommuniqueScraper.SC;
+				final String side = elements[1].equals("for") ? CommuniqueScraper.FOR : CommuniqueScraper.AGAINST;
 				try {
 					CommuniqueScraper.importAtVoteDelegates(chamber, side).stream()
 							.map(CommuniqueRecipient::toString)
