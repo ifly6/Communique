@@ -43,7 +43,7 @@ NOT tag.
      - For example, `region:Europe, +tag:WA` would find all members of Europe, and then return the list of nations 
      which are also WA members.
      - `region:Europe, -tag:WA` does the opposite, where it finds all member of Europe and then removes all WA members.
-     - While we strongly recommend putting each recipient on each line, it is possible to use commas as well.
+     - You must put each tag on separate lines, commas are used here only for illustrative purposes.
    - This format system should be identical with the vanilla recipients system used in NationStates 
    - In version `6`, a Recruitment wizard was added. Simply use `flag:recruit` (or go into the menu) as your recipient
    to bring it up. Note that `flag:recruit` is not compatible with sending a telegram to any other nations. You can also
