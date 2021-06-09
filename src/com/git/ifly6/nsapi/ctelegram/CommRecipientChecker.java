@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,8 +17,8 @@
 
 package com.git.ifly6.nsapi.ctelegram;
 
-import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.NSNation;
+import com.git.ifly6.nsapi.NSNation.NSNoSuchNationException;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommNationCache;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
@@ -38,14 +38,12 @@ public class CommRecipientChecker {
      * @param r recipient to check
      * @param t type to check against
      * @return true if recipient accepts telegram
+     * @throws NSNoSuchNationException if recipient does not exist
      */
     public static boolean doesRecipientAccept(String r, JTelegramType t) {
-        if (ApiUtils.contains(CHECKING_TYPES, t)) {
-            NSNation n = CommNationCache.getInstance().lookupObject(r); // only load if we need to check
-            if (t == JTelegramType.RECRUIT) return n.isRecruitable();
-            if (t == JTelegramType.CAMPAIGN) return n.isCampaignable();
-        }
-
+        NSNation n = CommNationCache.getInstance().lookupObject(r); // always load, helps to deal with CTE nations
+        if (t == JTelegramType.RECRUIT) return n.isRecruitable();
+        if (t == JTelegramType.CAMPAIGN) return n.isCampaignable();
         return true; // default
     }
 }
