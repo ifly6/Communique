@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -20,6 +20,7 @@ package com.git.ifly6.nsapi;
 import com.google.common.util.concurrent.RateLimiter;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -77,9 +78,10 @@ public class NSConnection {
     /**
      * Connects instantiated {@code NSConnection}.
      * @return this
-     * @throws IOException   if connection fails
-     * @throws NSIOException if rate limit exceeded
-     * @throws NSException   if queried element does not exist or no data can be got
+     * @throws FileNotFoundException if nation does not exist
+     * @throws IOException           if connection otherwise fails
+     * @throws NSIOException         if rate limit exceeded
+     * @throws NSException           if other error
      */
     public NSConnection connect() throws IOException {
         // Implement the rate limit
@@ -112,7 +114,7 @@ public class NSConnection {
 
             if (xml_raw.contains("Unknown nation")
                     || apiConnection.getResponseCode() == 404)
-                throw new NSException(String.format("No results for url %s", url.toString()));
+                throw new FileNotFoundException(String.format("No result for url %s", url.toString()));
 
             throw new NSException(String.format("Cannot get data from the API at url %s"
                             + "\nHTTP response code %d",

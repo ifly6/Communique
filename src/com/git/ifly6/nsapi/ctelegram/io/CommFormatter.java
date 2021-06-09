@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -32,11 +32,15 @@ public class CommFormatter {
         variablesWithMessages = Arrays.asList(messages);
     }
 
+    /**
+     * Formats the entries provided. Messages is shown only if it is attached with a {@code true} key.
+     * @return a string joining the messages with a comma, with messages only included if attached with a true key.
+     */
     public String format() {
         return variablesWithMessages.stream()
                 .filter(Map.Entry::getKey) // if key is true, keep
                 .map(Map.Entry::getValue)  // chain together messages
-                .collect(Collectors.joining(","));
+                .collect(Collectors.joining(", "));
     }
 
     public static <K, V> Map.Entry<K, V> entry(K k, V v) {
