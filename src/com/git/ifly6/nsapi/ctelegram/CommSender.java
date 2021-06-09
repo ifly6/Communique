@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -18,6 +18,7 @@
 package com.git.ifly6.nsapi.ctelegram;
 
 import com.git.ifly6.nsapi.NSIOException;
+import com.git.ifly6.nsapi.NSNation;
 import com.git.ifly6.nsapi.ctelegram.io.CommFormatter;
 import com.git.ifly6.nsapi.ctelegram.io.NSTGSettingsException;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
@@ -156,23 +157,32 @@ public class CommSender {
 
         // if we have a recipient...
         LOGGER.info(String.format("Got recipient '%s' from queue", recipient));
-        boolean acceptsType = CommRecipientChecker.doesRecipientAccept(recipient, telegramType);
-        boolean alreadyProcessed = processListsContain(recipient);
-        if (!acceptsType || alreadyProcessed)
-            try {
-                LOGGER.info(String.format("Recipient '%s' invalid (%s); trying next in queue",
-                        new CommFormatter(
-                                entry(!acceptsType, String.format("%s_refused", telegramType.toString())),
-                                entry(alreadyProcessed, "duplicate")).format(),
-                        recipient));
-                this.reportProcessed(recipient, SendingAction.SKIPPED);
-                executeSend(); // try again
-                return; // do not execute further!
+        boolean acceptsType;
+        try {
+            acceptsType = CommRecipientChecker.doesRecipientAccept(recipient, telegramType);
+            boolean alreadyProcessed = processListsContain(recipient);
+            if (!acceptsType || alreadyProcessed)
+                try {
+                    LOGGER.info(String.format("Recipient '%s' invalid (%s); trying next in queue",
+                            new CommFormatter(
+                                    entry(!acceptsType, String.format("%s_refused", telegramType.toString())),
+                                    entry(alreadyProcessed, "duplicate")).format(),
+                            recipient));
+                    this.reportProcessed(recipient, SendingAction.SKIPPED);
+                    executeSend(); // try again
+                    return; // end
 
-            } catch (StackOverflowError error) {
-                // might happen if cannot get recipients over and over again?
-                throw new NSIOException("Encountered stack overflow error");
-            }
+                } catch (StackOverflowError error) {
+                    // might happen if cannot get recipients over and over again?
+                    throw new NSIOException("Encountered stack overflow error");
+                }
+
+        } catch (NSNation.NSNoSuchNationException e) {
+            LOGGER.info(String.format("Recipient '%s' does not exist; trying next in queue",
+                    recipient));
+            this.reportProcessed(recipient, SendingAction.SKIPPED);
+            return;
+        }
 
         // if the recipient will accept our telegram...
         JTelegramConnection connection;
@@ -202,7 +212,8 @@ public class CommSender {
     }
 
     private void reportProcessed(String recipient, SendingAction action) {
-        sentList.add(recipient);
+        if (action == SendingAction.SENT) sentList.add(recipient);
+        else if (action == SendingAction.SKIPPED) skipList.add(recipient);
         outputInterface.processed(recipient, sentList.size() + skipList.size(), action);
     }
 
@@ -287,7 +298,7 @@ public class CommSender {
     }
 
     /** Thrown if no recipient is found in the queue */
-    public static class EmptyQueueException extends NoSuchElementException { }
+    public static class EmptyQueueException extends NoSuchElementException {}
 
     /** Indicates whether something was sent or skipped. */
     public enum SendingAction {

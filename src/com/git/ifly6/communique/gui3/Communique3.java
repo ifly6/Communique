@@ -627,9 +627,14 @@ public class Communique3 implements CommSenderInterface {
             Duration duration = Duration.between(Instant.now(), client.nextAt());
             progressBar.setMaximum((int) duration.toMillis());
             Timer timer = new Timer((int) Duration.ofMillis(15).toMillis(), e -> {
-                int timeElapsed = progressBar.getMaximum()
-                        - (int) Duration.between(Instant.now(), client.nextAt()).toMillis();
-                progressBar.setValue(timeElapsed);
+                try {
+                    int timeElapsed = progressBar.getMaximum()
+                            - (int) Duration.between(Instant.now(), client.nextAt()).toMillis();
+                    progressBar.setValue(timeElapsed);
+
+                } catch (UnsupportedOperationException exception) {
+                    progressBar.setValue(0); // if there is no duration to the next telegram...
+                }
             });
             timer.start();
         });
