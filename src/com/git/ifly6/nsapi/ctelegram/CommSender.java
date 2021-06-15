@@ -164,10 +164,12 @@ public class CommSender {
             if (!acceptsType || alreadyProcessed)
                 try {
                     LOGGER.info(String.format("Recipient '%s' invalid (%s); trying next in queue",
+                            recipient,
                             new CommFormatter(
-                                    entry(!acceptsType, String.format("%s_refused", telegramType.toString())),
-                                    entry(alreadyProcessed, "duplicate")).format(),
-                            recipient));
+                                    entry(!acceptsType,
+                                            String.format("%s_refused", telegramType.toString().toLowerCase())),
+                                    entry(alreadyProcessed, "duplicate")).format()
+                    ));
                     this.reportProcessed(recipient, SendingAction.SKIPPED);
                     executeSend(); // try again
                     return; // end
