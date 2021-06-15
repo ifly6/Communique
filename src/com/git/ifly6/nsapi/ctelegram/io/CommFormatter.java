@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Prints entries if the entry is provided with a {@code true} key. Joins everything with commas.
+ */
 public class CommFormatter {
 
     private final List<Map.Entry<Boolean, String>> variablesWithMessages;
