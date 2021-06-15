@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -238,6 +238,7 @@ public class Communique3 implements CommSenderInterface {
             if (client != null) {
                 LOGGER.info("Stopping client");
                 client.stopSend();
+                onManualTerminate(); // call this to show final list
             }
 
             sendButton.setEnabled(true);
@@ -618,7 +619,7 @@ public class Communique3 implements CommSenderInterface {
             appendLine(textArea, CommuniqueRecipients.createExcludedNation(recipient));
             if (finishCondition.isPresent()) {
                 final String text = String.format("%d of %d", numberProcessed, finishCondition.getAsLong())
-                                + (config.repeats ? " (est)" : "");
+                        + (config.repeats ? " (est)" : "");
                 progressLabel.setText(text);
             } else
                 progressLabel.setText(String.format("%d sent", numberProcessed));
@@ -647,9 +648,17 @@ public class Communique3 implements CommSenderInterface {
         stopButton.doClick();
     }
 
+    /** Terminates sending gracefully. Should be entry point to termination by graceful automatic processes. */
     @Override
     public void onTerminate() {
-        LOGGER.info("Termination passed to Communique");
+        LOGGER.info("Termination passed gracefully to Communique");
+        onManualTerminate();
+        stopButton.doClick();
+    }
+
+    /** Terminates sending. Can be called by manual action. */
+    public void onManualTerminate() {
+        LOGGER.info("Termination request received by Communique");
         client.stopSend();
 
         Set<String> sentTo = client.getSentList();
@@ -668,7 +677,6 @@ public class Communique3 implements CommSenderInterface {
 
         CommuniqueTextDialog.createMonospacedDialog(frame, "Results",
                 String.join("\n", messages), true);
-        stopButton.doClick();
     }
 
 }
