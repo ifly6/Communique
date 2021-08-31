@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -25,7 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import java.awt.FileDialog;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -207,11 +206,10 @@ public class Communique3DialogHandler {
             newMessage = MessageFormat.format("<html><div style=\"width:{0} px;\">{1}</div></html>",
                     MAX_DIALOG_WIDTH, message);
 
-        else newMessage = MessageFormat.format("<html><div>{0}</div></html>",
-                message);
+        else newMessage = MessageFormat.format("<html><div>{0}</div></html>", message);
 
         JLabel resLabel = new JLabel(newMessage);
-        resLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+//        resLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
         return resLabel;
     }
 

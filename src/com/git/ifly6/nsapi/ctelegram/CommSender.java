@@ -128,6 +128,11 @@ public class CommSender {
         LOGGER.finer("Send starting");
         if (dryRun) LOGGER.warning("SENDING AS DRY RUN!");
 
+        if (Thread.currentThread().isInterrupted()){
+            LOGGER.info("Send thread received cancellation request; complying.");
+            return;
+        }
+
         // if no recipient in queue, try to get some
         // if monitor is exhausted, it will automatically throw an exhausted exception
         if (sendQueue.peek() == null) {
@@ -254,7 +259,7 @@ public class CommSender {
     public void stopSend() {
         LOGGER.fine("Stopping send thread");
         if (job != null && !job.isDone()) {
-            job.cancel(false); // must allow completion!!
+            job.cancel(true);
             if (monitor instanceof CommUpdatingMonitor)
                 ((CommUpdatingMonitor) monitor).stop();
         }
@@ -296,6 +301,7 @@ public class CommSender {
         if (isRunning())
             return Instant.now().plus(job.getDelay(TimeUnit.MILLISECONDS), ChronoUnit.MILLIS);
 
+        stopSend(); // attempt to stop??
         throw new UnsupportedOperationException("No duration to next telegram; no telegrams are being sent");
     }
 

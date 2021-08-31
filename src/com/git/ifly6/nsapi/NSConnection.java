@@ -43,7 +43,7 @@ public class NSConnection {
 
     private static final Logger LOGGER = Logger.getLogger(NSConnection.class.getName());
 
-    private static final double PERMITS_PER_SECOND = 50 / (double) 30; // 50 requests per 30 seconds
+    private static final double PERMITS_PER_SECOND = 40 / (double) 30; // 50 requests per 30 seconds
     private static final RateLimiter limiter = RateLimiter.create(PERMITS_PER_SECOND);
 
     /** API delay in milliseconds. */
@@ -109,8 +109,13 @@ public class NSConnection {
             xml_raw = reader.lines().collect(Collectors.joining("\n"));
             reader.close();
 
-            if (apiConnection.getResponseCode() == 429)
-                throw new NSIOException("Api ratelimit exceeded");
+            if (apiConnection.getResponseCode() == 429) {
+                String retryAfter = apiConnection.getHeaderField("X-Retry-After");
+                throw new NSIOException(
+                        String.format("API rate limit exceeded! Retry after %s seconds (%.2f minutes).",
+                                retryAfter,
+                                (double) Integer.parseInt(retryAfter) / 60));
+            }
 
             if (xml_raw.contains("Unknown nation")
                     || apiConnection.getResponseCode() == 404)
