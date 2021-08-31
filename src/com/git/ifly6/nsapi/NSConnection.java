@@ -17,6 +17,7 @@
 
 package com.git.ifly6.nsapi;
 
+import com.git.ifly6.commons.CommuniqueUtilities;
 import com.google.common.util.concurrent.RateLimiter;
 
 import java.io.BufferedReader;
@@ -112,9 +113,8 @@ public class NSConnection {
             if (apiConnection.getResponseCode() == 429) {
                 String retryAfter = apiConnection.getHeaderField("X-Retry-After");
                 throw new NSIOException(
-                        String.format("API rate limit exceeded! Retry after %s seconds (%.2f minutes).",
-                                retryAfter,
-                                (double) Integer.parseInt(retryAfter) / 60));
+                        String.format("API rate limit exceeded! Retry after %s.",
+                                CommuniqueUtilities.time(Integer.parseInt(retryAfter))));
             }
 
             if (xml_raw.contains("Unknown nation")

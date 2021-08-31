@@ -251,7 +251,7 @@
             <constraints/>
             <properties>
               <font name="Monospaced" size="12"/>
-              <lineWrap value="true"/>
+              <lineWrap value="false"/>
               <wrapStyleWord value="true"/>
             </properties>
           </component>

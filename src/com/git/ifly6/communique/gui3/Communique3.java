@@ -136,8 +136,8 @@ public class Communique3 implements CommSenderInterface {
         configHandler = new Communique3ConfigHandler(this);
 
         Communique3Utils.setupDimensions(frame,
-                new Dimension(900, 500),
                 new Dimension(600, 400),
+                new Dimension(700, 600),
                 false);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setContentPane(this.panel);
@@ -199,10 +199,9 @@ public class Communique3 implements CommSenderInterface {
                 }));
 
         // mouse listeners to explain these fields
-        fieldAutoStop.addMouseListener(new CommuniqueMouseAdapter(e -> {
-            Communique3Utils.createBalloonTip((JComponent) e.getComponent(),
-                    "Automatically stops sending after specified minutes");
-        }));
+        fieldAutoStop.addMouseListener(new CommuniqueMouseAdapter(e ->
+                Communique3Utils.createBalloonTip((JComponent) e.getComponent(),
+                "Automatically stops sending after specified minutes")));
         fieldTelegramDelay.addMouseListener(new CommuniqueMouseAdapter(e -> {
             if (!e.getComponent().isEnabled()) {
                 Communique3Utils.createBalloonTip((JComponent) e.getComponent(),
@@ -217,9 +216,8 @@ public class Communique3 implements CommSenderInterface {
         }
 
         // update configuration enums
-        fieldProcessingAction.addActionListener(e -> {
-            config.processingAction = getComboBoxSelection(fieldProcessingAction);
-        });
+        fieldProcessingAction.addActionListener(e ->
+                config.processingAction = getComboBoxSelection(fieldProcessingAction));
         fieldTelegramType.addActionListener(e -> {
             config.telegramType = getComboBoxSelection(fieldTelegramType);
             fieldTelegramDelay.setEnabled(config.telegramType == JTelegramType.CUSTOM);
