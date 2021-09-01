@@ -1,14 +1,10 @@
 # Communiqué #
 
 ## Summary ##
-Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. It is directly based on top of 
-[JavaTelegram](https://github.com/iFlyCode/NationStates-JavaTelegram) a library of mine designed to interface 
-with NationStates itself.
-
-If you want to run headless on a Linux box or just broadly from the command line, you should download the Marconi executable.
+Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. If you want to run headless on a Linux box or just broadly from the command line, you should download the Marconi executable.
 
 It is *your* responsibility to know how the telegram API works. Use of this program is agreement that you understand 
-those limitations and requirements. It also agrees that you cannot claim losses, damages, or other negative effects 
+those limitations and requirements. Use also implies agreement that you cannot claim losses, damages, or other negative effects 
 from the author if action is taken against your NationStates account or from other activity.
 
 ## Documentation ##
@@ -43,22 +39,18 @@ NOT tag.
      - For example, `region:Europe, +tag:WA` would find all members of Europe, and then return the list of nations 
      which are also WA members.
      - `region:Europe, -tag:WA` does the opposite, where it finds all member of Europe and then removes all WA members.
+     - Note that in both cases above, substitute `,` with a new line.
      - While we strongly recommend putting each recipient on each line, it is possible to use commas as well.
-   - This format system should be identical with the vanilla recipients system used in NationStates 
-   - In build `6`, a Recruitment wizard was added. Simply use `flag:recruit` (or go into the menu) as your recipient
-   to bring it up. Note that `flag:recruit` is not compatible with sending a telegram to any other nations. You can also
-   specify regions to exclude from recruitment using the `-region:[name]` syntax.
+   - This format system should be similar to the vanilla recipients system used in NationStates. Use new lines to separate instead of `,` or `;`, as both are used in the extended recipients syntax.
 
-5. Click the 'Parse' button to see a list of all your recipients. When ready, click the 'Send' button to send the 
-telegrams.
+5. Click the 'Send' button to get a preview and confirmation for your recipients. Approve the confirmation to send.
 
 6. You can save all the keys and all your recipients to a file. The file (if your calls completed without any errors) 
 will include your client, secret, and telegram keys; as well as the recipients of the file, and the people to which the 
-file was already sent. Do not share this file. You can load these files from disc to restore a previous configuration 
-(or, create them by hand and skip manual configuration).
+file was already sent. Do not share this file. You can load these files from disc to restore a previous configuration.
 
 ### Technical Information ####
-This program reports its UserAgent to the NationStates API as follows:
+This program reports its `UserAgent` to the NationStates API as follows:
 * `NationStates JavaTelegram (maintained by Imperium Anglorum, used by <client key>)` when sending telegrams and
 * `NS API request; maintained by Imperium Anglorum, email: cyrilparsons.london@gmail.com; see IP.` when requesting information from the API
 	
