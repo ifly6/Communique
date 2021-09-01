@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -27,7 +27,7 @@ import com.git.ifly6.nsapi.ctelegram.io.cache.CommMembersCache;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommRegionCache;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommRegionTagCache;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.CommWaitingMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommWaitingMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalRaidMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor;

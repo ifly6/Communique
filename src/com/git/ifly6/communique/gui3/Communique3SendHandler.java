@@ -17,15 +17,17 @@
 
 package com.git.ifly6.communique.gui3;
 
+import com.git.ifly6.commons.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Monitor;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.nsapi.ctelegram.CommSender;
-import com.git.ifly6.nsapi.ctelegram.monitors.CommExhaustiveMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommExhaustiveMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommLimitedMonitor;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -37,27 +39,44 @@ import static java.lang.Thread.sleep;
 /**
  * Creates a separate thread on which Communique can repeat sending.
  */
-public class CommuniqueSendHandler {
+public class Communique3SendHandler {
 
-    public static final Logger LOGGER = Logger.getLogger(CommuniqueSendHandler.class.getName());
+    public static final Logger LOGGER = Logger.getLogger(Communique3SendHandler.class.getName());
     private static final Duration MIN_DURATION = Duration.of(5, ChronoUnit.MINUTES);
+    private static final int ON_REPEAT_LIMIT = 10;
+
     private ExecutorService managementExecutor = Executors.newSingleThreadExecutor();
 
-    private CommMonitor exhaustiveMonitor;
-
     private CommuniqueConfig config;
-    private Communique3 communique3;
+    private Communique7Monitor monitor;
+    private Communique3 app;
 
+    private Communique3ProgressBarHandler progressHandler;
     private Runnable onAutoStop;
 
-    public CommuniqueSendHandler(Communique7Monitor monitor, CommuniqueConfig config, Communique3 communique3) {
-        this.exhaustiveMonitor = new CommExhaustiveMonitor(monitor);
+    public Communique3SendHandler(CommuniqueConfig config, Communique3 communique3) {
         this.config = config;
-        this.communique3 = communique3;
+        this.monitor = newInPlaceMonitor();
+        this.app = communique3;
     }
 
-    public void onAutoStop(Runnable r) {
+    public Communique7Monitor newInPlaceMonitor() {
+        monitor = new Communique7Monitor(this.config);
+        return monitor;
+    }
+
+    public List<String> getPreview() {
+        return monitor.preview();
+    }
+
+    public Communique3SendHandler setProgressHandler(Communique3ProgressBarHandler handler) {
+        progressHandler = handler;
+        return this;
+    }
+
+    public Communique3SendHandler onAutoStop(Runnable r) {
         onAutoStop = r;
+        return this;
     }
 
     /**
@@ -76,7 +95,7 @@ public class CommuniqueSendHandler {
         if (config.getAutoStop().isPresent())
             Executors.newSingleThreadScheduledExecutor().schedule(() -> {
                 stopping.set(true);
-                if (communique3.client != null) this.stopSend();
+                if (app.client != null) this.stopSend();
                 if (onAutoStop != null) onAutoStop.run();
 
             }, config.getAutoStop().get().toMillis(), TimeUnit.MILLISECONDS);
@@ -93,19 +112,30 @@ public class CommuniqueSendHandler {
             if (config.repeats)
                 LOGGER.info("Repeating script execution");
 
+            // use exhaustive monitor to track all changes
+            CommExhaustiveMonitor exhaustiveMonitor = new CommExhaustiveMonitor(
+                    config.repeats
+                            ? new CommLimitedMonitor(monitor, ON_REPEAT_LIMIT)
+                            : monitor);
+
             // if not repeating, still execute; if repeating, continue doing so
             // do-whiles are so rare... it's actually useful here!
             do {
-                if (config.repeats && execCount > 0)
+                if (config.repeats && execCount > 0) {
                     LOGGER.info(String.format("Send restart on loop %d", execCount));
+                    exhaustiveMonitor = exhaustiveMonitor.with(
+                            new CommLimitedMonitor(newInPlaceMonitor(), ON_REPEAT_LIMIT));
+                }
 
                 try {
                     final Instant start = Instant.now();
-                    communique3.client = new CommSender(config.keys, exhaustiveMonitor, config.getTelegramType(), communique3);
-                    communique3.client.startSend();
+                    app.client = new CommSender(
+                            config.keys, exhaustiveMonitor,
+                            config.getTelegramType(), app);
+                    app.client.startSend();
 
                     LOGGER.fine("Awaiting send client termination");
-                    boolean timedOut = !communique3.client
+                    boolean timedOut = !app.client
                             .getScheduler()
                             .awaitTermination(365, TimeUnit.DAYS); // totally unrealistic max time
 
@@ -123,8 +153,12 @@ public class CommuniqueSendHandler {
                         // do not start the next iteration until MIN_DURATION has passed
                         long waitMillis = Duration.between(Instant.now(), start.plus(MIN_DURATION)).toMillis();
                         LOGGER.info(String.format(
-                                "Client finished sending before min duration, starting wait for %d ms",
-                                waitMillis));
+                                "Client finished sending before min duration, starting wait for %s",
+                                CommuniqueUtilities.time(waitMillis / 1000)));
+                        if (progressHandler != null)
+                            progressHandler.progressIntervalUntil(
+                                    start.plus(MIN_DURATION),
+                                    "Waiting for client reparse");
                         sleep(waitMillis);
                     }
 
@@ -143,8 +177,8 @@ public class CommuniqueSendHandler {
     /** Defines tasks to be taken on send stop. Should be followed with {@code return;}. */
     private void stopSendTasks() {
         LOGGER.info("Executing stop send tasks");
-        communique3.client.stopSend();
-        communique3.onTerminate();
+        app.client.stopSend();
+        app.onTerminate();
     }
 
     /**
@@ -160,7 +194,7 @@ public class CommuniqueSendHandler {
      */
     public boolean isShutdown() {
         boolean executorDown = managementExecutor.isShutdown() || managementExecutor.isTerminated();
-        boolean clientDown = !communique3.client.isRunning();
+        boolean clientDown = !app.client.isRunning();
         return executorDown && clientDown;
     }
 }

@@ -19,6 +19,7 @@ package com.git.ifly6.nsapi.ctelegram.monitors;
 
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.NSConnection;
+import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommWaitingMonitor;
 
 import java.time.Duration;
 import java.time.Instant;

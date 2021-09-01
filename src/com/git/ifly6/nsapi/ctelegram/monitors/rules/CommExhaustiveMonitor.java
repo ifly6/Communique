@@ -15,7 +15,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.nsapi.ctelegram.monitors;
+package com.git.ifly6.nsapi.ctelegram.monitors.rules;
+
+import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
 
 import java.util.HashSet;
 import java.util.List;
@@ -27,11 +29,20 @@ import java.util.Set;
  */
 public class CommExhaustiveMonitor implements CommMonitor {
 
-    CommMonitor monitor;
-    Set<String> passed = new HashSet<>();
+    private final CommMonitor monitor;
+    private final Set<String> passed;
+
+    private CommExhaustiveMonitor(Set<String> passCache, CommMonitor monitor) {
+        this.passed = passCache;
+        this.monitor = monitor;
+    }
 
     public CommExhaustiveMonitor(CommMonitor monitor) {
-        this.monitor = monitor;
+        this(new HashSet<>(), monitor);
+    }
+
+    public CommExhaustiveMonitor with(CommMonitor newMonitor) {
+        return new CommExhaustiveMonitor(passed, newMonitor);
     }
 
     /**
@@ -40,7 +51,7 @@ public class CommExhaustiveMonitor implements CommMonitor {
     @Override
     public List<String> getRecipients() {
         List<String> result = monitor.getRecipients();
-        result.removeIf(s -> passed.contains(s));
+        result.removeIf(passed::contains);
 
         passed.addAll(result);
         return result;
