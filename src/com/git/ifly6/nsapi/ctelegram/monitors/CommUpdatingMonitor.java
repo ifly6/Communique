@@ -116,7 +116,8 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
 
         } else
             try {
-                LOGGER.info("Triggering update");
+                LOGGER.info(String.format("Triggering update for monitor %s",
+                        this.getClass().getSimpleName()));
                 updateAction();
 
                 // trigger notifications about our update
