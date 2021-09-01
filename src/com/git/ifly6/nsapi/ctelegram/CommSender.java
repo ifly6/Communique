@@ -128,7 +128,7 @@ public class CommSender {
         LOGGER.finer("Send starting");
         if (dryRun) LOGGER.warning("SENDING AS DRY RUN!");
 
-        if (Thread.currentThread().isInterrupted()){
+        if (Thread.currentThread().isInterrupted()) {
             LOGGER.info("Send thread received cancellation request; complying.");
             return;
         }
@@ -140,9 +140,6 @@ public class CommSender {
             if (monitor.recipientsExhausted()) {
                 LOGGER.info("No recipients in queue; cannot feed as monitor is exhausted");
                 this.stopSend();
-
-                LOGGER.info("Calling interface onTerminate action");
-                this.outputInterface.onTerminate();
                 return; // end
 
             } else {
@@ -232,19 +229,19 @@ public class CommSender {
         if (monitor instanceof CommUpdatingMonitor)
             ((CommUpdatingMonitor) monitor).start();
 
+        if (scheduler.isShutdown() || scheduler.isTerminated()) {
+            LOGGER.info("Initialising new scheduller, old schedule facility is closed");
+            scheduler = Executors.newSingleThreadScheduledExecutor();
+        }
+
         job = scheduler.scheduleWithFixedDelay(() -> {
+            if (Thread.currentThread().isInterrupted()) return;
             try {
                 executeSend();
-
-            } catch (CommMonitor.ExhaustedException e) {
-                LOGGER.info("Recipients exhausted; shutting down sending facility");
-                this.outputInterface.onTerminate();
-                this.stopSend();
 
             } catch (Throwable e) {
                 final String m = "Client sending thread encountered exception! Shutting down sending thread!";
                 LOGGER.log(Level.SEVERE, m + "\n" + Throwables.getStackTraceAsString(e), e);
-                this.outputInterface.onTerminate();
                 this.outputInterface.onError(m, e);
                 this.stopSend();
                 e.printStackTrace();
@@ -257,11 +254,15 @@ public class CommSender {
     }
 
     public void stopSend() {
-        LOGGER.fine("Stopping send thread");
+        LOGGER.info("Stopping comm sender sending thread");
         if (job != null && !job.isDone()) {
             job.cancel(true);
             if (monitor instanceof CommUpdatingMonitor)
                 ((CommUpdatingMonitor) monitor).stop();
+        }
+        if (!scheduler.isShutdown()) {
+            List<Runnable> incomplete = scheduler.shutdownNow();
+            LOGGER.info(String.format("Shutdown left %d incomplete tasks", incomplete.size()));
         }
     }
 
@@ -292,16 +293,20 @@ public class CommSender {
     public boolean isRunning() {
         if (job == null) return false;
         if (job.isDone() || job.isCancelled()) return false;
-        if (scheduler.isShutdown() || scheduler.isTerminated()) return false;
-        return true;
+        return !scheduler.isShutdown() && !scheduler.isTerminated();
     }
 
-    /** @return {@link Duration} until next telegram is sent; {@code null} if not running. */
+    public ScheduledExecutorService getScheduler() throws InterruptedException {
+        return scheduler;
+    }
+
+    /**
+     * @return {@link Duration} until next telegram is sent, if available
+     * @throws UnsupportedOperationException if client is not running, does not attempt to stop
+     */
     public Instant nextAt() {
         if (isRunning())
             return Instant.now().plus(job.getDelay(TimeUnit.MILLISECONDS), ChronoUnit.MILLIS);
-
-        stopSend(); // attempt to stop??
         throw new UnsupportedOperationException("No duration to next telegram; no telegrams are being sent");
     }
 

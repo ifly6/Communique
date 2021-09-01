@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -41,6 +41,7 @@ public class Communique7Monitor implements CommMonitor {
 
     private Set<String> alreadyPassed = new HashSet<>();
     private List<String> lastParseResults;
+    private List<String> lastPassed;
 
     public Communique7Monitor(CommuniqueConfig communiqueConfig) {
         this.theConfig = communiqueConfig;
@@ -63,12 +64,12 @@ public class Communique7Monitor implements CommMonitor {
                 : filtered(parseRecipients()); // otherwise generate for yourself
 
         this.state = State.RUNNING;
-        List<String> result = theConfig.repeats
+        lastPassed = theConfig.repeats
                 ? recipients.stream().limit(TRUNCATION_LIMIT).collect(Collectors.toList())
                 : recipients;
-        alreadyPassed.addAll(result);
+        alreadyPassed.addAll(lastPassed);
 
-        return result;
+        return lastPassed;
     }
 
     /**
@@ -119,7 +120,8 @@ public class Communique7Monitor implements CommMonitor {
     /** @return false if {@link CommuniqueConfig#repeats}; true otherwise. */
     @Override
     public boolean recipientsExhausted() {
-        return this.state == State.RUNNING && !theConfig.repeats;
+        if (this.state == State.INIT) return false;
+        return lastPassed.isEmpty();
     }
 
     /**
