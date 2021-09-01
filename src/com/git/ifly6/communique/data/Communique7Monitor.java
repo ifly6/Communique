@@ -131,7 +131,9 @@ public class Communique7Monitor implements CommMonitor {
      */
     @Override
     public OptionalLong recipientsCountIfKnown() {
-        return OptionalLong.of(lastParseResults.size());
+        if (!theConfig.repeats)
+            return OptionalLong.of(lastParseResults.size());
+        return OptionalLong.empty();
     }
 
     /** Expresses the state – {@link #INIT} or {@link #RUNNING} – of the monitor. */

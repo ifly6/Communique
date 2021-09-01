@@ -20,7 +20,6 @@ package com.git.ifly6.communique.gui3;
 import com.apple.eawt.Application;
 import com.git.ifly6.commons.CommuniqueApplication;
 import com.git.ifly6.commons.CommuniqueUtilities;
-import com.git.ifly6.communique.data.Communique7Monitor;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
@@ -54,7 +53,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.PlainDocument;
@@ -102,7 +100,8 @@ public class Communique3 implements CommSenderInterface {
 
     private Communique3DialogHandler dialogHandler;
     private Communique3ConfigHandler configHandler;
-    private CommuniqueSendHandler clientHandler;
+    private Communique3SendHandler clientHandler;
+    private Communique3ProgressBarHandler progressHandler;
     CommSender client;
 
     CommuniqueConfig config;
@@ -126,7 +125,6 @@ public class Communique3 implements CommSenderInterface {
     private OptionalLong finishCondition;
 
     private JProgressBar progressBar;
-    private Timer progressTimer;
     private JLabel progressLabel;
     JCheckBox repeatBox;
 
@@ -135,6 +133,7 @@ public class Communique3 implements CommSenderInterface {
         frame = new JFrame(CommuniqueApplication.COMMUNIQUE.generateName(false));
         dialogHandler = new Communique3DialogHandler(frame, LOGGER);
         configHandler = new Communique3ConfigHandler(this);
+        progressHandler = new Communique3ProgressBarHandler(this, progressBar);
 
         Communique3Utils.setupDimensions(frame,
                 new Dimension(600, 400),
@@ -238,35 +237,33 @@ public class Communique3 implements CommSenderInterface {
                 LOGGER.info("Stopping client");
                 onManualTerminate(); // call this to show final list
             }
-
-            sendButton.setEnabled(true);
-            stopButton.setEnabled(false);
         });
     }
 
     private void initialiseClient() {
         try {
-            // Parser and expand recipients
-            Communique7Monitor communique7Monitor = new Communique7Monitor(config);
-            List<String> parsedRecipients = communique7Monitor.preview();
+            // send it over to the send handler
+            clientHandler = new Communique3SendHandler(config, this)
+                    .setProgressHandler(this.progressHandler);
 
+            // get preview, display it, await confirmation
+            List<String> parsedRecipients = clientHandler.getPreview();
             CommuniqueSendDialog sendDialog = new CommuniqueSendDialog(frame, parsedRecipients, config.getTelegramDelay());
             LOGGER.info("CommuniqueSendDialog " + (sendDialog.getValue() == 0
                     ? "cancelled"
                     : "accepted with " + sendDialog.getValue()));
 
+            // if confirmed, execute
             if (sendDialog.getValue() == CommuniqueSendDialog.SEND) {
                 final Instant start = Instant.now();
-                clientHandler = new CommuniqueSendHandler(communique7Monitor, config, this);
                 clientHandler.onAutoStop(() -> dialogHandler.showMessageDialog(
-                        String.format("Communiqué stopped automatically after %s.",
-                                CommuniqueUtilities.time(config
-                                        .getAutoStop()
-                                        .orElseGet(() -> Duration.between(start, Instant.now()))
-                                        .getSeconds())), // time auto-formats
-                        CommuniqueConstants.TITLE));
-
-                clientHandler.execute();
+                                String.format("Communiqué stopped automatically after %s.",
+                                        CommuniqueUtilities.time(config
+                                                .getAutoStop()
+                                                .orElseGet(() -> Duration.between(start, Instant.now()))
+                                                .getSeconds())), // time auto-formats
+                                CommuniqueConstants.TITLE))
+                        .execute();
 
                 stopButton.setEnabled(true);
                 sendButton.setEnabled(false);
@@ -359,7 +356,7 @@ public class Communique3 implements CommSenderInterface {
         // Only add the Quit menu item if the OS is not Mac
         if (!IS_OS_MAC) {
             mnFile.addSeparator();
-            JMenuItem mntmExit = new JMenuItem("Exit");
+            JMenuItem mntmExit = new JMenuItem("Quit");
             mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, COMMAND_KEY));
             mntmExit.addActionListener(e -> mntmClose.getActionListeners()[0].actionPerformed(e));
             mnFile.add(mntmExit);
@@ -620,20 +617,7 @@ public class Communique3 implements CommSenderInterface {
             } else
                 progressLabel.setText(String.format("%d sent", numberProcessed));
 
-            // draw timer changes
-            Duration duration = Duration.between(Instant.now(), client.nextAt());
-            progressBar.setMaximum((int) duration.toMillis());
-            progressTimer = new Timer((int) Duration.ofMillis(15).toMillis(), e -> {
-                try {
-                    int timeElapsed = progressBar.getMaximum()
-                            - (int) Duration.between(Instant.now(), client.nextAt()).toMillis();
-                    progressBar.setValue(timeElapsed);
-
-                } catch (UnsupportedOperationException exception) {
-                    progressBar.setValue(0); // if there is no duration to the next telegram...
-                }
-            });
-            progressTimer.start();
+            progressHandler.progressInterval(this.client);
         });
     }
 
@@ -650,8 +634,11 @@ public class Communique3 implements CommSenderInterface {
         LOGGER.info("Graceful termination signal passed to Communique");
 
         // stop progress bar
-        progressBar.setValue(0);
-        progressTimer.stop(); // should never be null
+        progressHandler.reset();
+
+        // reset buttons
+        sendButton.setEnabled(true);
+        stopButton.setEnabled(false);
 
         // get sent and skip lists
         Set<String> sentTo = client.getSentList();

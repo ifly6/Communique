@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -51,7 +51,7 @@ public class CommuniqueRecipient {
         this.filterType = Objects.requireNonNull(filterType);
         this.recipientType = Objects.requireNonNull(recipientType);
 
-        name = name.trim(); // always trim
+        name = name.trim().replace(" ", "_"); // always trim and replace spaces
         this.name = this.filterType.isCaseSensitive() // force lower case if not case-sensitive
                 ? Objects.requireNonNull(name)
                 : Objects.requireNonNull(name.toLowerCase());

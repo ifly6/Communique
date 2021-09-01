@@ -30,6 +30,7 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
@@ -53,6 +54,8 @@ public class Communique3DialogHandler {
 
     @SuppressWarnings("NonConstantLogger")
     private final Logger frameLogger;
+
+    private Path cachedSavePath = null;
 
     /**
      * Construct dialog handler
@@ -138,7 +141,7 @@ public class Communique3DialogHandler {
      * @return null if cancelled, path of choice otherwise
      */
     public Optional<Path> showFileChooser(ChooserMode type, String title, FileFilter filter) {
-        return showFileChooser(type, title, Paths.get(System.getProperty("user.home")), filter);
+        return showFileChooser(type, title, getCachedPath(), filter);
     }
 
     /**
@@ -185,12 +188,26 @@ public class Communique3DialogHandler {
             choicePath = choicePath.resolveSibling(choicePath.getFileName() + ".txt");
         }
 
+        // do logging
         LOGGER.info(String.format("%s file at %s",
                 type == ChooserMode.SAVE ? "Saved" : "Opened",
                 choicePath.toAbsolutePath().toString()));
+
+        // cache the save directory and return
+        setCachedPath(choicePath);
         return Optional.of(choicePath);
     }
 
+    private Path getCachedPath() {
+        return cachedSavePath == null
+                ? Paths.get(System.getProperty("user.home"))
+                : cachedSavePath;
+    }
+
+    private void setCachedPath(Path p) {
+        cachedSavePath = Files.isDirectory(p)
+                ? p : p.getParent().toAbsolutePath();
+    }
 
     /**
      * Formats message with maximum width.
