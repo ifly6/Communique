@@ -47,10 +47,9 @@ public class Communique3ProgressBarHandler {
 
     public void progressIntervalUntil(Instant future, String description) {
         // provide description
-        if (description != null) {
-            bar.setStringPainted(true);
-            bar.setString(description);
-        }
+        bar.setStringPainted(description != null);
+        bar.setString(description);
+
 
         // draw timer changes
         Duration duration = Duration.between(Instant.now(), future);

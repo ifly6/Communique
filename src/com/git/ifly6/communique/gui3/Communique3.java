@@ -96,12 +96,11 @@ public class Communique3 implements CommSenderInterface {
 
     public static final Logger LOGGER = Logger.getLogger(Communique3.class.getName());
     public static String jarName = "Communique_" + Communique7Parser.BUILD + ".jar";
-    private static Communique3Settings settings;
 
     private Communique3DialogHandler dialogHandler;
     private Communique3ConfigHandler configHandler;
     private Communique3SendHandler clientHandler;
-    private Communique3ProgressBarHandler progressHandler;
+    private Communique3ProgressBarHandler pbarHandler;
     CommSender client;
 
     CommuniqueConfig config;
@@ -133,7 +132,7 @@ public class Communique3 implements CommSenderInterface {
         frame = new JFrame(CommuniqueApplication.COMMUNIQUE.generateName(false));
         dialogHandler = new Communique3DialogHandler(frame, LOGGER);
         configHandler = new Communique3ConfigHandler(this);
-        progressHandler = new Communique3ProgressBarHandler(this, progressBar);
+        pbarHandler = new Communique3ProgressBarHandler(this, progressBar);
 
         Communique3Utils.setupDimensions(frame,
                 new Dimension(600, 400),
@@ -244,7 +243,7 @@ public class Communique3 implements CommSenderInterface {
         try {
             // send it over to the send handler
             clientHandler = new Communique3SendHandler(config, this)
-                    .setProgressHandler(this.progressHandler);
+                    .setProgressHandler(this.pbarHandler);
 
             // get preview, display it, await confirmation
             List<String> parsedRecipients = clientHandler.getPreview();
@@ -279,12 +278,12 @@ public class Communique3 implements CommSenderInterface {
      * Communique3Utils#saveAutoSave(CommuniqueConfig)}.
      */
     private void initialiseAutoSaves() {
-        settings = Communique3Settings.load(config);
-        CommuniqueApplication.setLogLevel(settings.loggingLevel);
+        Communique3Settings s = Communique3Settings.getInstance();
+        CommuniqueApplication.setLogLevel(s.getLoggingLevel());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                settings.save();
+                s.save();
             } catch (IOException ignored) { }
             Communique3Utils.saveAutoSave(this.config);
         }));
@@ -570,15 +569,13 @@ public class Communique3 implements CommSenderInterface {
 
         { // handle preferences, also the object in the correct native location
             // everything is handled by this dialog, just run it
-            Runnable prefrencesRunnable = () -> {
-                Optional<Communique3Settings> s = new Communique3SettingsDialog(this.frame, settings).getFinalSettings();
-                settings = s.orElse(settings);
-            };
+            Communique3Settings settings = Communique3Settings.getInstance();
+            Runnable prefrencesRunnable = () -> new Communique3SettingsDialog(this.frame, settings);
             if (IS_OS_MAC) {
                 Application app = Application.getApplication();
-                app.setPreferencesHandler(event -> prefrencesRunnable.run());
-                app.setQuitHandler((event, response) -> System.exit(0));
-                app.setAboutHandler(event -> aboutRunnable.run());
+                app.setPreferencesHandler(e -> prefrencesRunnable.run());
+                app.setQuitHandler((e, r) -> System.exit(0));
+                app.setAboutHandler(e -> aboutRunnable.run());
 
             } else {
                 JMenuItem preferences = new JMenuItem("Preferences...");
@@ -617,7 +614,7 @@ public class Communique3 implements CommSenderInterface {
             } else
                 progressLabel.setText(String.format("%d sent", numberProcessed));
 
-            progressHandler.progressInterval(this.client);
+            pbarHandler.progressInterval(this.client);
         });
     }
 
@@ -634,7 +631,7 @@ public class Communique3 implements CommSenderInterface {
         LOGGER.info("Graceful termination signal passed to Communique");
 
         // stop progress bar
-        progressHandler.reset();
+        pbarHandler.reset();
 
         // reset buttons
         sendButton.setEnabled(true);

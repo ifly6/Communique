@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -86,7 +86,7 @@ public class CommMovementMonitor extends CommUpdatingMonitor implements CommMoni
     @Override
     protected void updateAction() {
         if (Objects.isNull(regions) || regions.isEmpty())
-            throw new NullPointerException("job started without specifying region");
+            throw new IllegalArgumentException("job started without specifying region");
 
         inhabitantsBefore = inhabitantsNow;
         Set<String> newInhabitants = new HashSet<>();

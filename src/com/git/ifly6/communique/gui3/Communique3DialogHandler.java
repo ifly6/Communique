@@ -55,8 +55,6 @@ public class Communique3DialogHandler {
     @SuppressWarnings("NonConstantLogger")
     private final Logger frameLogger;
 
-    private Path cachedSavePath = null;
-
     /**
      * Construct dialog handler
      * @param frame  is root frame for modality
@@ -199,14 +197,13 @@ public class Communique3DialogHandler {
     }
 
     private Path getCachedPath() {
-        return cachedSavePath == null
-                ? Paths.get(System.getProperty("user.home"))
-                : cachedSavePath;
+        return Communique3Settings.getInstance().getLastSavedPath();
     }
 
     private void setCachedPath(Path p) {
-        cachedSavePath = Files.isDirectory(p)
+        Path path = Files.isDirectory(p)
                 ? p : p.getParent().toAbsolutePath();
+        Communique3Settings.getInstance().setLastSavedPath(path);
     }
 
     /**

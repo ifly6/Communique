@@ -22,6 +22,7 @@ import com.git.ifly6.nsapi.NSNation;
 import com.git.ifly6.nsapi.ctelegram.io.CommFormatter;
 import com.git.ifly6.nsapi.ctelegram.io.NSTGSettingsException;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor.ExhaustedException;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatingMonitor;
 import com.git.ifly6.nsapi.telegram.JTelegramConnection;
 import com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode;
@@ -239,12 +240,17 @@ public class CommSender {
             try {
                 executeSend();
 
+            } catch (ExhaustedException e) {
+                LOGGER.info("Recipients exhausted; shutting down sending facility");
+                this.stopSend();
+                // graceful stop required
+
             } catch (Throwable e) {
-                final String m = "Client sending thread encountered exception! Shutting down sending thread!";
+                final String m = "Client sending thread encountered error! Shutting down sending thread.";
                 LOGGER.log(Level.SEVERE, m + "\n" + Throwables.getStackTraceAsString(e), e);
                 this.outputInterface.onError(m, e);
                 this.stopSend();
-                e.printStackTrace();
+                // loud stop
             }
         }, 0, telegramType.getWaitDuration().toMillis(), TimeUnit.MILLISECONDS);
 

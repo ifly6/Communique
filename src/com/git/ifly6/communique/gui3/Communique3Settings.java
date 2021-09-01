@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -20,94 +20,73 @@ package com.git.ifly6.communique.gui3;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.javatuples.Pair;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 
 import static com.git.ifly6.commons.CommuniqueApplication.APP_SUPPORT;
 
 /**
- * Holds settings information for Communique3. This is an initialisation class.
+ * Holds settings information for Communique3. Class should be started at initialisation.
  * @since version 3.0 (build 13)
  */
-@SuppressWarnings("unused")
 public class Communique3Settings {
-    private static final Path SETTINGS_PATH = APP_SUPPORT.resolve("client_settings.properties");
 
-    public Level loggingLevel; // these are technically unused; but used by reflection
+    private transient static final Path SETTINGS_PATH = APP_SUPPORT.resolve("client_settings.properties");
+    private transient static Communique3Settings instance;
 
-    public Communique3Settings(Level loggingLevel) {
+    private File lastSavedPath; // muse use file, path doesn't serialise properly
+    private Level loggingLevel;
+
+    private Communique3Settings() {
+        lastSavedPath = Paths.get(System.getProperty("user.home")).toFile();
+        loggingLevel = Level.INFO;
+    }
+
+    public static Communique3Settings getInstance() {
+        if (instance == null) instance = Communique3Settings.load();
+        return instance;
+    }
+
+    public Path getLastSavedPath() {
+        return lastSavedPath.toPath();
+    }
+
+    public void setLastSavedPath(Path lastSavedPath) {
+        this.lastSavedPath = lastSavedPath.toFile();
+    }
+
+    public Level getLoggingLevel() {
+        return loggingLevel;
+    }
+
+    public void setLoggingLevel(Level loggingLevel) {
         this.loggingLevel = loggingLevel;
     }
 
     public void save() throws IOException {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Pair<Boolean, String> returnedInfo = this.noNulls();
-
-        boolean noNulls = returnedInfo.getValue0();
-        String nullName = returnedInfo.getValue1();
-
-        if (noNulls) { // if have no nulls!
-            String response = gson.toJson(this);
-            Files.write(SETTINGS_PATH, Arrays.asList(response.split("\n")));
-
-        } else throw new Communique3SettingsException(String.format("Value %s is null!",
-                nullName));
-    }
-
-    /** Loads settings from file if present. Puts defaults if not. */
-    public static Communique3Settings load() {
-        return load(null);
+        BufferedWriter bw = Files.newBufferedWriter(SETTINGS_PATH);
+        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+        gson.toJson(this, bw);
+        bw.close();
     }
 
     /**
      * Loads settings from file if present, puts defaults if not, but substitutes client key from {@link
      * CommuniqueConfig}.
-     * @param config to load from
      * @return settings
      */
-    public static Communique3Settings load(CommuniqueConfig config) {
+    public static Communique3Settings load() {
         try {
             Gson gson = new Gson();
             return gson.fromJson(Files.newBufferedReader(SETTINGS_PATH), Communique3Settings.class);
         } catch (IOException e) {
-            return new Communique3Settings(Level.INFO);
+            return new Communique3Settings();
         }
-    }
-
-    /**
-     * @return tuple of {@code false} with the name of the field; otherwise if no nulls true and null
-     */
-    private Pair<Boolean, String> noNulls() {
-        Field[] fields = this.getClass().getFields();
-        try {
-            for (Field f : fields) {
-                if (Modifier.isStatic(f.getModifiers())
-                        || !Modifier.isPublic(f.getModifiers()))
-                    continue;
-                if (f.get(this) == null)
-                    return new Pair<>(false, f.getName());
-            }
-        } catch (IllegalAccessException e) {
-            throw new CommReflectException("Cannot check for null fields in settings!");
-        }
-
-        return new Pair<>(true, null);
-    }
-
-    /** Thrown if there is a validity issue with Communique3's settings. */
-    public static class Communique3SettingsException extends RuntimeException {
-        public Communique3SettingsException(String message) { super(message); }
-    }
-
-    /** Thrown if error occurs in reflection. */
-    private static class CommReflectException extends RuntimeException {
-        public CommReflectException(String s) { super(s); }
     }
 }
