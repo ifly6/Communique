@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -29,7 +29,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,12 +93,14 @@ public class Communique3SettingsDialog extends JDialog {
 
     /** Imports settings from {@link Communique3Settings} object. */
     private void importSettings(Communique3Settings s) {
-        this.loggingBox.setSelectedItem(s.loggingLevel);
+        this.loggingBox.setSelectedItem(s.getLoggingLevel());
     }
 
     /** Exporting settings to {@link Communique3Settings} object. */
     private Communique3Settings exportSettings() {
-        return new Communique3Settings(loggingBox.getItemAt(loggingBox.getSelectedIndex()));
+        Communique3Settings settings = Communique3Settings.getInstance();
+        settings.setLoggingLevel(loggingBox.getItemAt(loggingBox.getSelectedIndex()));
+        return settings;
     }
 
     private void onOK() {
@@ -114,14 +115,6 @@ public class Communique3SettingsDialog extends JDialog {
     private void onCancel() {
         finalSettings = null;
         dispose();
-    }
-
-    /**
-     * Returns final settings for the settings dialog.
-     * @return {@code Optional<Settings>} present if applied; absent if cancelled
-     */
-    public Optional<Communique3Settings> getFinalSettings() {
-        return Optional.ofNullable(this.finalSettings);
     }
 
     /** Handles exceptions by creating error dialog. */

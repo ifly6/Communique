@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -168,7 +168,12 @@ public enum CommuniqueApplication {
     public static void setLogLevel(Level level) {
         Logger rootLogger = Logger.getLogger("");
         rootLogger.setLevel(level);
-        for (Handler handler : rootLogger.getHandlers())
+
+        Handler[] handlers = rootLogger.getHandlers();
+        if (handlers.length == 0)
+            LOGGER.severe("No handlers for root logger!");
+
+        for (Handler handler : handlers)
             handler.setLevel(level);
     }
 

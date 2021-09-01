@@ -20,9 +20,9 @@ import com.git.ifly6.nsapi.NSNation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -47,10 +47,9 @@ public class CommNationCache extends CommCache<NSNation> {
     private CommNationCache() {
         super(CACHE_DURATION);
         this.setFinaliser(() -> {
-            try {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                String s = gson.toJson(this);
-                Files.write(LOCATION, s.getBytes(StandardCharsets.UTF_8));
+            try (BufferedWriter bw = Files.newBufferedWriter(LOCATION);) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+                gson.toJson(this, bw);
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Unable to save nation cache!", e);
             }

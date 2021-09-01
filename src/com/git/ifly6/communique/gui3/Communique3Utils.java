@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -51,6 +52,7 @@ public class Communique3Utils {
     private static final Path AUTOSAVE_PATH = APP_SUPPORT.resolve("autosave.txt");
 
     private static final Dimension SCREEN_DIMENSIONS = Toolkit.getDefaultToolkit().getScreenSize();
+    private static final ScheduledExecutorService BALLOON_SCHEDULER = Executors.newScheduledThreadPool(2);
 
     /**
      * Appends line to {@link JTextArea}. Automatically moves the caret to the bottom. If there is already a double line
@@ -142,7 +144,7 @@ public class Communique3Utils {
                     false);
 
             // schedule its doing away after 2 seconds
-            Executors.newSingleThreadScheduledExecutor().schedule(() ->
+            BALLOON_SCHEDULER.schedule(() ->
                             EventQueue.invokeLater(t::closeBalloon),
                     2, TimeUnit.SECONDS);
         });
