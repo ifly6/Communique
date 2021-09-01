@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -59,7 +59,7 @@ public class CommWaitingMonitor implements CommMonitor {
     }
 
     /**
-     * Waits for defined seconds, then calls supplier.
+     * Waits for completed initialisation, then calls supplier.
      * @param supplier thing that actually provides what we want
      * @param <T>      return type
      * @return output of supplier after waiting (if necessary)

@@ -77,7 +77,6 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -103,6 +102,7 @@ public class Communique3 implements CommSenderInterface {
 
     private Communique3DialogHandler dialogHandler;
     private Communique3ConfigHandler configHandler;
+    private CommuniqueSendHandler clientHandler;
     CommSender client;
 
     CommuniqueConfig config;
@@ -126,6 +126,7 @@ public class Communique3 implements CommSenderInterface {
     private OptionalLong finishCondition;
 
     private JProgressBar progressBar;
+    private Timer progressTimer;
     private JLabel progressLabel;
     JCheckBox repeatBox;
 
@@ -201,7 +202,7 @@ public class Communique3 implements CommSenderInterface {
         // mouse listeners to explain these fields
         fieldAutoStop.addMouseListener(new CommuniqueMouseAdapter(e ->
                 Communique3Utils.createBalloonTip((JComponent) e.getComponent(),
-                "Automatically stops sending after specified minutes")));
+                        "Automatically stops sending after specified minutes")));
         fieldTelegramDelay.addMouseListener(new CommuniqueMouseAdapter(e -> {
             if (!e.getComponent().isEnabled()) {
                 Communique3Utils.createBalloonTip((JComponent) e.getComponent(),
@@ -235,7 +236,6 @@ public class Communique3 implements CommSenderInterface {
         stopButton.addActionListener(e -> {
             if (client != null) {
                 LOGGER.info("Stopping client");
-                client.stopSend();
                 onManualTerminate(); // call this to show final list
             }
 
@@ -256,26 +256,24 @@ public class Communique3 implements CommSenderInterface {
                     : "accepted with " + sendDialog.getValue()));
 
             if (sendDialog.getValue() == CommuniqueSendDialog.SEND) {
-                client = new CommSender(config.keys, communique7Monitor, config.getTelegramType(), this);
-                client.startSend();
+                final Instant start = Instant.now();
+                clientHandler = new CommuniqueSendHandler(communique7Monitor, config, this);
+                clientHandler.onAutoStop(() -> dialogHandler.showMessageDialog(
+                        String.format("Communiqué stopped automatically after %s.",
+                                CommuniqueUtilities.time(config
+                                        .getAutoStop()
+                                        .orElseGet(() -> Duration.between(start, Instant.now()))
+                                        .getSeconds())), // time auto-formats
+                        CommuniqueConstants.TITLE));
 
-                final Optional<Duration> autoStop = config.getAutoStop();
-                autoStop.ifPresent(
-                        duration -> Executors.newSingleThreadScheduledExecutor().schedule(() -> {
-                            client.stopSend();
-                            dialogHandler.showMessageDialog(
-                                    String.format("Communiqué stopped automatically after %s.",
-                                            CommuniqueUtilities.time(duration.getSeconds())), // time auto-formats
-                                    CommuniqueConstants.TITLE);
-
-                        }, duration.toMillis(), TimeUnit.MILLISECONDS));
+                clientHandler.execute();
 
                 stopButton.setEnabled(true);
                 sendButton.setEnabled(false);
             }
 
         } catch (Throwable e) {
-            dialogHandler.showErrorDialog("Encountered error during initialisation!", e);
+            dialogHandler.showErrorDialog("Encountered error during send initialisation!", e);
         }
     }
 
@@ -625,7 +623,7 @@ public class Communique3 implements CommSenderInterface {
             // draw timer changes
             Duration duration = Duration.between(Instant.now(), client.nextAt());
             progressBar.setMaximum((int) duration.toMillis());
-            Timer timer = new Timer((int) Duration.ofMillis(15).toMillis(), e -> {
+            progressTimer = new Timer((int) Duration.ofMillis(15).toMillis(), e -> {
                 try {
                     int timeElapsed = progressBar.getMaximum()
                             - (int) Duration.between(Instant.now(), client.nextAt()).toMillis();
@@ -635,7 +633,7 @@ public class Communique3 implements CommSenderInterface {
                     progressBar.setValue(0); // if there is no duration to the next telegram...
                 }
             });
-            timer.start();
+            progressTimer.start();
         });
     }
 
@@ -649,16 +647,13 @@ public class Communique3 implements CommSenderInterface {
     /** Terminates sending gracefully. Should be entry point to termination by graceful automatic processes. */
     @Override
     public void onTerminate() {
-        LOGGER.info("Termination passed gracefully to Communique");
-        onManualTerminate();
-        stopButton.doClick();
-    }
+        LOGGER.info("Graceful termination signal passed to Communique");
 
-    /** Terminates sending. Can be called by manual action. */
-    public void onManualTerminate() {
-        LOGGER.info("Termination request received by Communique");
-        client.stopSend();
+        // stop progress bar
+        progressBar.setValue(0);
+        progressTimer.stop(); // should never be null
 
+        // get sent and skip lists
         Set<String> sentTo = client.getSentList();
         Set<String> skipped = client.getSkipList();
 
@@ -666,7 +661,7 @@ public class Communique3 implements CommSenderInterface {
         messages.add(String.format("Successful queries to %d nations.\n", sentTo.size()));
 
         if (skipped.size() != 0) { // if there was a failure to connect,
-            messages.add("Failure to dispatch to the following nations, not auto-excluded:\n");  // add formatting,
+            messages.add("Failure to dispatch to the following nations:\n");  // add formatting,
             skipped.forEach(s -> messages.add("- " + s));
         }
 
@@ -675,6 +670,14 @@ public class Communique3 implements CommSenderInterface {
 
         CommuniqueTextDialog.createMonospacedDialog(frame, "Results",
                 String.join("\n", messages), true);
+
+        // verify handler scheduler is shut down
+        LOGGER.info(String.format("Client handler shutdown == %s", clientHandler.isShutdown()));
     }
 
+    /** Terminates sending. Can be called by manual action. */
+    public void onManualTerminate() {
+        LOGGER.info("User termination request received by Communique");
+        clientHandler.stopSend();
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -73,7 +73,7 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
      * @param updateInterval replacing {@link #DEFAULT_UPDATE_INTERVAL}
      */
     public CommUpdatingMonitor(final Duration updateInterval) {
-        final int minimumWaitMillis = NSConnection.WAIT_TIME * 2;
+        final long minimumWaitMillis = NSConnection.WAIT_TIME * 2;
         if (updateInterval.toMillis() < minimumWaitMillis)
             throw new IllegalArgumentException(
                     String.format("Cannot construct monitor with update interval less than %d ms",
@@ -169,7 +169,7 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
     }
 
     /** @return optional {@link Instant} of predicted next update trigger. */
-    public Optional<Instant> getNextUpdate() {
+    public Optional<Instant> getNextUpdateTime() {
         if (job == null) {
             // there is no next update
             LOGGER.info("Asked for next update time, but there is no scheduled future update");
