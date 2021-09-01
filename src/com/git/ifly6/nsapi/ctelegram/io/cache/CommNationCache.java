@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,6 +17,20 @@
 package com.git.ifly6.nsapi.ctelegram.io.cache;
 
 import com.git.ifly6.nsapi.NSNation;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.git.ifly6.commons.CommuniqueApplication.APP_SUPPORT;
 
 /**
  * Caches information about nations. Expiration duration is {@link CommCache#DEFAULT_EXPIRATION_DURATION}.
@@ -24,12 +38,44 @@ import com.git.ifly6.nsapi.NSNation;
  */
 public class CommNationCache extends CommCache<NSNation> {
 
+    private static final Path LOCATION = APP_SUPPORT.resolve("nation_cache.json");
+    private static final Logger LOGGER = Logger.getLogger(CommNationCache.class.getName());
+    private static final Duration CACHE_DURATION = Duration.of(10, ChronoUnit.DAYS);
+
     private static CommNationCache instance;
 
-    private CommNationCache() {}
+    private CommNationCache() {
+        super(CACHE_DURATION);
+        this.setFinaliser(() -> {
+            try {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String s = gson.toJson(this);
+                Files.write(LOCATION, s.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Unable to save nation cache!", e);
+            }
+        });
+    }
+
+    private static CommNationCache makeInstance() {
+        if (!Files.exists(LOCATION))
+            return new CommNationCache();
+
+        try {
+            Reader reader = Files.newBufferedReader(LOCATION);
+            CommNationCache cache = new Gson().fromJson(reader, CommNationCache.class);
+            if (!cache.hasFinaliser())
+                LOGGER.log(Level.SEVERE, "Serialised version of CommNationCache lacks save finaliser!");
+            return cache;
+
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Unable to load persist version of nation cache!", e);
+            return new CommNationCache();
+        }
+    }
 
     public static CommNationCache getInstance() {
-        if (instance == null) instance = new CommNationCache();
+        if (instance == null) instance = makeInstance();
         return instance;
     }
 

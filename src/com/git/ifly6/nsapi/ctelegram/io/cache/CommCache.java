@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -38,6 +38,12 @@ public abstract class CommCache<T extends NSTimeStamped> {
 
     private final Map<String, T> cache = new ConcurrentHashMap<>();
     private final Duration expirationIn;
+
+    /**
+     * Runnable to be executed at the end of every {@link #lookupObject(String)}. This is a transient variable and is
+     * not passed in serialisation.
+     */
+    private transient Runnable finaliser = null;
 
     /** Creates empty cache with cache expiration in 10 minutes. */
     public CommCache() {
@@ -80,6 +86,19 @@ public abstract class CommCache<T extends NSTimeStamped> {
             LOGGER.fine(String.format("overwrote cache for element <%s>", s));
     }
 
+    /** @returns {@code true} if {@link #finaliser} is not null */
+    public boolean hasFinaliser() {
+        return finaliser != null;
+    }
+
+    /**
+     * Sets a finaliser to execute at the end of {@link #lookupObject(String)}. Entirely optional.
+     * @param finaliser is the {@link Runnable} to execute
+     */
+    public void setFinaliser(Runnable finaliser) {
+        this.finaliser = finaliser;
+    }
+
     /**
      * Gets information for an object. If it does not exist, adds that object to the cache. If the cached information is
      * older than {@link #expirationIn}, it updates the cache.
@@ -95,6 +114,7 @@ public abstract class CommCache<T extends NSTimeStamped> {
         if (expired)
             cacheObject(s); // update cache
 
+        if (hasFinaliser()) finaliser.run();
         return getOrCacheObject(s);
     }
 }
