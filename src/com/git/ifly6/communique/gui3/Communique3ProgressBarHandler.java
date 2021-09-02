@@ -48,11 +48,11 @@ public class Communique3ProgressBarHandler {
     public void progressIntervalUntil(Instant future, String description) {
         // provide description
         bar.setStringPainted(description != null);
-        bar.setString(description);
+        if (description != null)
+            bar.setString(description);
 
         // reset timer if already present
-        if (timer != null && timer.isRunning())
-            timer.stop();
+        resetTimer();
 
         // draw timer changes
         Duration duration = Duration.between(Instant.now(), future);
@@ -72,8 +72,13 @@ public class Communique3ProgressBarHandler {
     }
 
     public void reset() {
+        bar.setStringPainted(false);
         bar.setValue(0);
-        if (timer != null)
-            timer.stop(); // should never be null
+        resetTimer();
+    }
+
+    private void resetTimer() {
+        if (timer != null && timer.isRunning())
+            timer.stop();
     }
 }
