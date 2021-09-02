@@ -113,10 +113,7 @@ public class Communique3SendHandler {
                 LOGGER.info("Repeating script execution");
 
             // use exhaustive monitor to track all changes
-            CommExhaustiveMonitor exhaustiveMonitor = new CommExhaustiveMonitor(
-                    config.repeats
-                            ? new CommLimitedMonitor(monitor, ON_REPEAT_LIMIT)
-                            : monitor);
+            CommExhaustiveMonitor exhaustiveMonitor = new CommExhaustiveMonitor(monitor);
 
             // if not repeating, still execute; if repeating, continue doing so
             // do-whiles are so rare... it's actually useful here!
