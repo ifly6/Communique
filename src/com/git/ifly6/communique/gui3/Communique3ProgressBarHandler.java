@@ -50,6 +50,9 @@ public class Communique3ProgressBarHandler {
         bar.setStringPainted(description != null);
         bar.setString(description);
 
+        // reset timer if already present
+        if (timer != null && timer.isRunning())
+            timer.stop();
 
         // draw timer changes
         Duration duration = Duration.between(Instant.now(), future);

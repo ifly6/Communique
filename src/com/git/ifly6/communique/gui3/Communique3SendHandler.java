@@ -129,9 +129,7 @@ public class Communique3SendHandler {
 
                 try {
                     final Instant start = Instant.now();
-                    app.client = new CommSender(
-                            config.keys, exhaustiveMonitor,
-                            config.getTelegramType(), app);
+                    app.client = new CommSender(config.keys, exhaustiveMonitor, config.getTelegramType(), app);
                     app.client.startSend();
 
                     LOGGER.fine("Awaiting send client termination");
@@ -177,6 +175,7 @@ public class Communique3SendHandler {
     /** Defines tasks to be taken on send stop. Should be followed with {@code return;}. */
     private void stopSendTasks() {
         LOGGER.info("Executing stop send tasks");
+        progressHandler.reset();
         app.client.stopSend();
         app.onTerminate();
     }
