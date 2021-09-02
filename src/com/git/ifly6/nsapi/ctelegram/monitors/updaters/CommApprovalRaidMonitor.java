@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -34,7 +34,8 @@ import static com.git.ifly6.nsapi.ctelegram.io.cache.CommProposalCache.searchPro
 
 /**
  * Monitors for approval raids; returns list of recipients who are no longer approving a proposal, whose delegate status
- * changed (ie were bumped), who are currently delegates, whose approval was removed from an existing proposal.
+ * changed (ie were bumped), who are currently delegates, whose approval was removed from an existing proposal. This
+ * applies against <b>all</b> proposals, not just one.
  * @since version 3.0 (build 13)
  */
 public class CommApprovalRaidMonitor extends CommUpdatingMonitor {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -15,14 +15,19 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.io;
+package com.git.ifly6.commons;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-class CommuniqueReaderTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class CommuniqueSplitterTest {
+
     @Test
-    void read() {
-        
+    void split() {
+        CommuniqueSplitter splitter = new CommuniqueSplitter("CommuniqueTest", 2);
+        assertEquals(splitter.split("alpha;beta"), new String[] {"alpha", "beta"});
+        assertThrows(IllegalArgumentException.class, () -> splitter.split("alpha;beta;gamma"));
     }
 }
