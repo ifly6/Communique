@@ -30,7 +30,7 @@ public class CommuniqueSplitter {
 
     /**
      * Constructs splitter. Splitters are immutable.
-     * @param name              of associated parsing algorithm (eg 'Communique')
+     * @param name              of parsing application (eg 'Communique')
      * @param requiredArguments number thereof, from the split
      */
     public CommuniqueSplitter(String name, int requiredArguments) {

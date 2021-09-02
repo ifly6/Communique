@@ -40,7 +40,7 @@ public class Communique3Settings {
     private transient static final Path SETTINGS_PATH = APP_SUPPORT.resolve("client_settings.properties");
     private transient static Communique3Settings instance;
 
-    private File lastSavedPath; // muse use file, path doesn't serialise properly
+    private File lastSavedPath; // must use file, path doesn't serialise properly
     private Level loggingLevel;
 
     private Communique3Settings() {

@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Prints entries if the entry is provided with a {@code true} key. Joins everything with commas.
+ * Prints entries if the entry is attached to a {@code true} key. Joins everything with commas. Anything which is passed
+ * <i>without</i> a {@code true} key is not displayed. Handles filtering automatically. Formatters are immutable.
  */
 public class CommFormatter {
 

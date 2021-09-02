@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2021 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -100,8 +100,7 @@ class CommuniqueRecipientTest {
     @Test
     void testToString() {
         List<Map.Entry<String, CommuniqueRecipient>> entries = new ArrayList<>(reversible.entrySet());
-        for (int i = 0; i < entries.size(); i++) {
-            Map.Entry<String, CommuniqueRecipient> entry = entries.get(i);
+        for (Map.Entry<String, CommuniqueRecipient> entry : entries) {
             if (!entry.getKey().contains(":"))
                 continue;
 
