@@ -110,13 +110,19 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
 
     /** Things to do before calling {@link #updateAction()}. */
     private void preUpdateAction() {
-        if (this.recipientsExhausted()) {
-            LOGGER.info("Recipients are exhausted; cannot update. Stopping monitor");
+        if (Thread.currentThread().isInterrupted()) {
+            LOGGER.info(String.format("Monitor %s interrupted", this.getClass().getSimpleName()));
+
+        } else if (this.recipientsExhausted()) {
+            LOGGER.info(String.format(
+                    "Recipients are exhausted; cannot update. Stopping monitor %s",
+                    this.getClass().getSimpleName()));
             this.stop();
 
         } else
             try {
-                LOGGER.info(String.format("Triggering update for monitor %s",
+                LOGGER.info(String.format(
+                        "Triggering update for monitor %s",
                         this.getClass().getSimpleName()));
                 updateAction();
 

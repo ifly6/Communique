@@ -21,6 +21,7 @@ import com.git.ifly6.nsapi.NSTimeStamped;
 import com.git.ifly6.nsapi.NSWorld;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -80,6 +81,9 @@ public class CommDelegatesCache extends CommCache<CommDelegatesCache.Delegates> 
             try {
                 delegates = NSWorld.getDelegates();
                 timestamp = Instant.now();
+
+            } catch (UnknownHostException e) {
+                throw new NSIOException("No connection to NationStates", e);
             } catch (IOException e) {
                 throw new NSIOException("Could not get delegates from NationStates", e);
             }
