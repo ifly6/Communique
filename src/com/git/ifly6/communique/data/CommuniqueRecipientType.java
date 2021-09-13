@@ -21,13 +21,13 @@ import com.git.ifly6.commons.CommuniqueSplitter;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.NSRegion;
 import com.git.ifly6.nsapi.NSWorld;
-import com.git.ifly6.nsapi.ctelegram.io.CommHappenings;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommDelegatesCache;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommMembersCache;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommRegionCache;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommRegionTagCache;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommWaitingMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommActiveMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalRaidMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor;
@@ -127,8 +127,11 @@ public enum CommuniqueRecipientType {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             String tag = cr.getName();
-            if (tag.equals("active")) // active nations
-                return newRecipients(CommHappenings.getActiveNations(), cr.getFilterType());
+            if (tag.equals("active")) { // active nations
+                return newRecipients(
+                        CommActiveMonitor.getInstance().getRecipients(),
+                        cr.getFilterType());
+            }
 
             throw createIllegalArgumentException(cr);
         }
