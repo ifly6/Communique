@@ -79,7 +79,6 @@ public class Communique3SendHandler {
      * <p>While the scheduler is let to run, there is a time-out. That time-out is at 365 days. The program should
      * never be running that long, but it will auto-stop after a year without any intervention.</p>
      */
-    @SuppressWarnings("BusyWait")
     public void execute() {
         // preset the auto-stop
         AtomicBoolean stopping = new AtomicBoolean(false);
@@ -106,9 +105,8 @@ public class Communique3SendHandler {
             // if not repeating, still execute; if repeating, continue doing so
             // do-whiles are rare... it's actually useful here
             do {
-                if (config.repeats && execCount > 0) {
+                if (config.repeats && execCount > 0)
                     LOGGER.info(String.format("Restarting send; loop %d", execCount));
-                }
 
                 try {
                     final Instant start = Instant.now();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -100,6 +100,14 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
         return regions;
     }
 
+    /**
+     * Updating monitors have no defined number of recipients. There might be no new nations. See {@link
+     * com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommRecruitMonitor CommRecruitMonitor}. There might be many.
+     * There might be no movement in or out of a region. See {@link com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor
+     * CommMovementMonitor}. But then there might be. See the {@link com.git.ifly6.communique.gui3.Communique3SendHandler
+     * Communique3SendHandler} for details on time-outs.
+     * @return empty {@link OptionalLong}
+     */
     @Override
     public OptionalLong recipientsCountIfKnown() {
         return OptionalLong.empty();

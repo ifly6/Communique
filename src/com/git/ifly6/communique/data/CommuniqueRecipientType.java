@@ -133,7 +133,7 @@ public enum CommuniqueRecipientType {
             String tag = cr.getName();
             try {
                 int limit = Integer.parseInt(tag);
-                CommMonitor nnm = new CommWaitingMonitor(CommRecruitMonitor.getInstance().setBatch(limit));
+                CommMonitor nnm = new CommWaitingMonitor(CommRecruitMonitor.getInstance().setBatchLimit(limit));
                 return newRecipients(nnm.getRecipients(), cr.getFilterType());
 
             } catch (NumberFormatException e) {

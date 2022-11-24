@@ -23,7 +23,7 @@ import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommRecruitMonitor;
 
 public class NewNationsTest {
     public static void main(String[] args) throws InterruptedException {
-        CommMonitor m = new CommWaitingMonitor(CommRecruitMonitor.getInstance().setBatch(3));
+        CommMonitor m = new CommWaitingMonitor(CommRecruitMonitor.getInstance().setBatchLimit(3));
 
         // print current
         System.out.println(m.getRecipients().toString());

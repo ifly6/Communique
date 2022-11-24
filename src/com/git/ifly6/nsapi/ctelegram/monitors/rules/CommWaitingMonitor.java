@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -43,13 +43,13 @@ public class CommWaitingMonitor implements CommMonitor {
         this.monitor = monitor;
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritDoc} Waits until monitor has initialised. */
     @Override
     public List<String> getRecipients() {
         return wait(monitor::getRecipients);
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritDoc} Only determines exhaustion after monitor has initialised. */
     @Override
     public boolean recipientsExhausted() {
         return wait(monitor::recipientsExhausted);
