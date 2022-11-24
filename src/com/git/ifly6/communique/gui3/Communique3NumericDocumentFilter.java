@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -24,8 +24,8 @@ import javax.swing.text.Document;
 import javax.swing.text.DocumentFilter;
 
 /**
- * Filters out numeric documents. Adapted from this StackOverflow <a href="https://stackoverflow.com/a/11093360/2741091">
- * answer</a>.
+ * Filters numeric documents. Adapted from this StackOverflow <a href="https://stackoverflow.com/a/11093360/2741091">
+ * answer</a>. The filter, when added to a {@link JTextField}, prevents inputting non-numeric characters.
  * @since version 3.0 (build 13)
  */
 public class Communique3NumericDocumentFilter extends DocumentFilter {
@@ -37,7 +37,13 @@ public class Communique3NumericDocumentFilter extends DocumentFilter {
         this.textField = textField;
     }
 
-    private boolean isStringValid(String text) {
+    /**
+     * Determines whether the input string is a validly-formed number. Numbers should take the form {@code 1234.56}.
+     * Omit all thousands separators (spaces or commas). Use only English-style decimals.
+     * @param text to validate
+     * @return validity
+     */
+    private boolean isNumericallyValid(String text) {
         return text.matches("^[0-9.]*$"); // apparently \\. is redundant
     }
 
@@ -53,7 +59,7 @@ public class Communique3NumericDocumentFilter extends DocumentFilter {
         sb.append(doc.getText(0, doc.getLength()));
         sb.insert(offset, string);
 
-        if (isStringValid(sb.toString()))
+        if (isNumericallyValid(sb.toString()))
             super.insertString(fb, offset, string, attr);
         else showErrorMessage();
     }
@@ -66,7 +72,7 @@ public class Communique3NumericDocumentFilter extends DocumentFilter {
         sb.append(doc.getText(0, doc.getLength()));
         sb.replace(offset, offset + length, text);
 
-        if (isStringValid(sb.toString()))
+        if (isNumericallyValid(sb.toString()))
             super.replace(fb, offset, length, text, attrs);
         else showErrorMessage();
     }
@@ -79,7 +85,7 @@ public class Communique3NumericDocumentFilter extends DocumentFilter {
         sb.append(doc.getText(0, doc.getLength()));
         sb.delete(offset, offset + length);
 
-        if (isStringValid(sb.toString()))
+        if (isNumericallyValid(sb.toString()))
             super.remove(fb, offset, length);
         else showErrorMessage();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -22,7 +22,7 @@ import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
 /**
- * Consumes mouse events and only applies to {@link #mouseClicked(MouseEvent)}.
+ * Consumes mouse events and only applies to {@link #mouseClicked(MouseEvent)}. This also should really be in stock.
  * @since version 3.0 (build 13)
  */
 class CommuniqueMouseAdapter extends MouseAdapter {

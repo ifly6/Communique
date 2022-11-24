@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -56,7 +56,7 @@ public class Communique3DialogHandler {
     private final Logger frameLogger;
 
     /**
-     * Construct dialog handler
+     * Construct dialog handler.
      * @param frame  is root frame for modality
      * @param logger logger for the root frame
      */
@@ -121,7 +121,7 @@ public class Communique3DialogHandler {
     }
 
     /**
-     * Shows nativised file chooser pointing to user home director.
+     * Shows nativised file chooser pointing to user home directory.
      * @param type  of file chooser {@link ChooserMode}
      * @param title to display
      * @return null if cancelled, path of choice otherwise
@@ -133,9 +133,10 @@ public class Communique3DialogHandler {
     }
 
     /**
-     * Shows nativised file chooser pointing to user home director.
-     * @param type  of file chooser {@link ChooserMode}
-     * @param title to display
+     * Shows nativised file chooser pointing to user home directory.
+     * @param type   of file chooser {@link ChooserMode}
+     * @param title  to display
+     * @param filter to filter file display
      * @return null if cancelled, path of choice otherwise
      */
     public Optional<Path> showFileChooser(ChooserMode type, String title, FileFilter filter) {
@@ -147,13 +148,14 @@ public class Communique3DialogHandler {
      * @param type     of file chooser {@link ChooserMode}
      * @param title    to display
      * @param initPath initial location
+     * @param filter   to filter file display
      * @return null if cancelled, path of choice otherwise
      */
     public Optional<Path> showFileChooser(ChooserMode type, String title, Path initPath,
                                           FileFilter filter) {
         Path choicePath;
 
-        // Due to a problem in Windows and their AWT FileDialog, this will show a JFileChooser on Windows systems.
+        // due to a problem in Windows and their AWT FileDialog, this will show a JFileChooser on Windows
         if (CommuniqueUtilities.IS_OS_MAC) {
             FileDialog fDialog = new FileDialog(this.frame, "Choose file...", type.map());
             fDialog.setTitle(title);
