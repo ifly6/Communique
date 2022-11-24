@@ -17,11 +17,14 @@
 
 package com.git.ifly6.nsapi.ctelegram.monitors.updaters;
 
+import com.git.ifly6.nsapi.NSNation;
 import com.git.ifly6.nsapi.NSWorld;
+import com.git.ifly6.nsapi.ctelegram.io.cache.CommNationCache;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatingMonitor;
 
-import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,41 +37,47 @@ import java.util.stream.Collectors;
  * Creates an updating monitor for the NationStates Happenings API. Delivers, non-exhaustively, the last ten recently
  * created nations.
  */
-public class CommNewNationMonitor extends CommUpdatingMonitor {
+public class CommRecruitMonitor extends CommUpdatingMonitor {
 
-    private static CommNewNationMonitor instance;
+    private static CommRecruitMonitor instance;
 
     private long returnLimit;
     private Map<String, Instant> cache; // k : v == nation name : observation time
     private Set<String> passed;
 
-    public CommNewNationMonitor() {
+    public CommRecruitMonitor() {
         this.returnLimit = 10;
         this.cache = new HashMap<>();
         this.passed = new HashSet<>();
     }
 
     /** @returns instance; there is only one feed of new nations to be monitoring */
-    public static CommNewNationMonitor getInstance() {
-        if (instance == null){
-            instance = new CommNewNationMonitor();
-            instance.setUpdateInterval(Duration.ofSeconds(180 - 10)); // 170 seconds
-        }
+    public static CommRecruitMonitor getInstance() {
+        if (instance == null)
+            instance = new CommRecruitMonitor();
         return instance;
     }
 
-    public CommNewNationMonitor setBatch(long i) {
+    public CommRecruitMonitor setBatch(long i) {
         this.returnLimit = i;
         return this;
     }
 
     @Override
     public List<String> getRecipients() {
+        // 1st. sort to get newest nations in the list, return only
         List<String> toReturn = cache.entrySet().stream()
-                .sorted(Entry.comparingByValue()) // sort the entry set, newest first
-                .filter(e -> !passed.contains(e.getKey())) // remove if already passed
-                .limit(returnLimit) // get the N nations most recently observed
+                .sorted(Entry.comparingByValue(Comparator.reverseOrder())) // sort the entry set, newest first
                 .map(Entry::getKey)
+                .filter(s -> !passed.contains(s)) // remove if already passed
+                .collect(Collectors.toList()); // should still pass all instantly-available values
+
+        // 2nd. sort out the ones which can be recruited until you get to the recruit limit
+        toReturn = toReturn.stream()
+                .map(s -> CommNationCache.getInstance().lookupObject(s))
+                .filter(NSNation::isRecruitable) // filter is lazy
+                .limit(returnLimit) // get the N nations most recently observed; limit works with lazy filter
+                .map(NSNation::getRefName)
                 .collect(Collectors.toList());
 
         passed.addAll(toReturn);
@@ -84,7 +93,8 @@ public class CommNewNationMonitor extends CommUpdatingMonitor {
     @Override
     protected void updateAction() {
         List<String> newNations = NSWorld.getNew();
+        Collections.reverse(newNations); // acts in-place
         for (String s : newNations)
-            cache.put(s, Instant.now());  // preserve encounter order, ns still pass
+            cache.put(s, Instant.now());  // preserve encounter order, nanoseconds still pass
     }
 }

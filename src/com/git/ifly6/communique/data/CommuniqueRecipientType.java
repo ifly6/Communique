@@ -31,7 +31,7 @@ import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommActiveMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalRaidMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommNewNationMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommRecruitMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommVoteMonitor;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 
@@ -122,8 +122,8 @@ public enum CommuniqueRecipientType {
     },
 
     /**
-     * Provides from {@link CommNewNationMonitor} new nations. See {@link CommNewNationMonitor#setUpdateInterval(Duration)}
-     * and {@link CommNewNationMonitor#getInstance()}. The number of nations returned should be specified as in {@code
+     * Provides from {@link CommRecruitMonitor} new nations. See {@link CommRecruitMonitor#setUpdateInterval(Duration)}
+     * and {@link CommRecruitMonitor#getInstance()}. The number of nations returned should be specified as in {@code
      * _new:5}. This monitor never returns the same nation twice; it does not exhaust.
      * @since version 3.0 (build 13)
      */
@@ -133,7 +133,7 @@ public enum CommuniqueRecipientType {
             String tag = cr.getName();
             try {
                 int limit = Integer.parseInt(tag);
-                CommMonitor nnm = new CommWaitingMonitor(CommNewNationMonitor.getInstance().setBatch(limit));
+                CommMonitor nnm = new CommWaitingMonitor(CommRecruitMonitor.getInstance().setBatch(limit));
                 return newRecipients(nnm.getRecipients(), cr.getFilterType());
 
             } catch (NumberFormatException e) {
