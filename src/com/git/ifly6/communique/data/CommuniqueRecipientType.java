@@ -124,7 +124,7 @@ public enum CommuniqueRecipientType {
     /**
      * Provides from {@link CommNewNationMonitor} new nations. See {@link CommNewNationMonitor#setUpdateInterval(Duration)}
      * and {@link CommNewNationMonitor#getInstance()}. The number of nations returned should be specified as in {@code
-     * _new:5}. This monitor is exhausting; it never returns the same nation twice.
+     * _new:5}. This monitor never returns the same nation twice; it does not exhaust.
      * @since version 3.0 (build 13)
      */
     _NEW {
@@ -133,17 +133,8 @@ public enum CommuniqueRecipientType {
             String tag = cr.getName();
             try {
                 int limit = Integer.parseInt(tag);
-
-                // await initalisation
-                CommNewNationMonitor nnm = CommNewNationMonitor.getInstance().setBatch(limit);
-                try {
-                    nnm.getLatch().await();
-                    return newRecipients(nnm.getRecipients(), cr.getFilterType());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(
-                            "Interrupted while awaiting CommNewNationMonitor init; should never happen",
-                            e);
-                }
+                CommMonitor nnm = new CommWaitingMonitor(CommNewNationMonitor.getInstance().setBatch(limit));
+                return newRecipients(nnm.getRecipients(), cr.getFilterType());
 
             } catch (NumberFormatException e) {
                 throw newException(cr);
@@ -202,7 +193,10 @@ public enum CommuniqueRecipientType {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             if (cr.getName().equalsIgnoreCase("__raids__"))
-                return newRecipients(CommApprovalRaidMonitor.getInstance().getRecipients(), cr.getFilterType());
+                return newRecipients(
+                        new CommWaitingMonitor(
+                                CommApprovalRaidMonitor.getInstance()).getRecipients(),
+                        cr.getFilterType());
 
             String[] tags = splitter.split(cr.getName());
             String givenOrRemoved = tags[0];
@@ -213,7 +207,7 @@ public enum CommuniqueRecipientType {
     },
 
     /**
-     * Persons voting on a proposal. Eg, {@code _voting:ga; for}.
+     * Persons voting on a proposal. Eg {@code _voting:ga; for}.
      * @since version 3.0 (build 13)
      */
     _VOTING {
