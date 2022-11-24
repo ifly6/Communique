@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -31,9 +31,11 @@ import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommActiveMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalRaidMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommNewNationMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommVoteMonitor;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -115,12 +117,46 @@ public enum CommuniqueRecipientType {
                     return Collections.emptyList();
                 }
 
-            throw createIllegalArgumentException(cr);
+            throw newException(cr);
         }
     },
 
     /**
-     * Happenings flags.
+     * Provides from {@link CommNewNationMonitor} new nations. See {@link CommNewNationMonitor#setUpdateInterval(Duration)}
+     * and {@link CommNewNationMonitor#getInstance()}. The number of nations returned should be specified as in {@code
+     * _new:5}. This monitor is exhausting; it never returns the same nation twice.
+     * @since version 3.0 (build 13)
+     */
+    _NEW {
+        @Override
+        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
+            String tag = cr.getName();
+            try {
+                int limit = Integer.parseInt(tag);
+
+                // await initalisation
+                CommNewNationMonitor nnm = CommNewNationMonitor.getInstance().setBatch(limit);
+                try {
+                    nnm.getLatch().await();
+                    return newRecipients(nnm.getRecipients(), cr.getFilterType());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(
+                            "Interrupted while awaiting CommNewNationMonitor init; should never happen",
+                            e);
+                }
+
+            } catch (NumberFormatException e) {
+                throw newException(cr);
+            }
+        }
+    },
+
+    /**
+     * Yields filters related to the NationStates Happenings. Valid input includes the following.
+     * <ul>
+     *     <li>{@code _happenings:active} (see {@link CommActiveMonitor}) returning nations active in the last
+     *     10 minutes.</li>
+     * </ul>
      * @since version 3.0 (build 13)
      */
     _HAPPENINGS {
@@ -133,7 +169,7 @@ public enum CommuniqueRecipientType {
                         cr.getFilterType());
             }
 
-            throw createIllegalArgumentException(cr);
+            throw newException(cr);
         }
     },
 
@@ -230,7 +266,7 @@ public enum CommuniqueRecipientType {
     }
 
     /** Creates illegal argument exception with preformatted string. */
-    private static IllegalArgumentException createIllegalArgumentException(CommuniqueRecipient s) {
+    private static IllegalArgumentException newException(CommuniqueRecipient s) {
         return new IllegalArgumentException(String.format("Invalid tag string \"%s\"", s));
     }
 }
