@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -63,8 +63,11 @@ public class CommNationCache extends CommCache<NSNation> {
         try {
             Reader reader = Files.newBufferedReader(LOCATION);
             CommNationCache cache = new Gson().fromJson(reader, CommNationCache.class);
-            if (!cache.hasFinaliser())
-                LOGGER.log(Level.SEVERE, "Serialised version of CommNationCache lacks save finaliser!");
+
+            // should be irrelevant... the finaliser is a transient runnable and should never be serialised
+//            if (!cache.hasFinaliser())
+//                LOGGER.log(Level.SEVERE, "Serialised version of CommNationCache lacks save finaliser!");
+
             return cache;
 
         } catch (IOException e) {
