@@ -27,16 +27,13 @@ import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
-import com.git.ifly6.communique.io.CommuniqueScraper;
 import com.git.ifly6.communique.ngui.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.CommuniqueDocumentListener;
 import com.git.ifly6.communique.ngui.CommuniqueSendDialog;
 import com.git.ifly6.communique.ngui.CommuniqueTextDialog;
 import com.git.ifly6.nsapi.ApiUtils;
-import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.ctelegram.CommSender;
 import com.git.ifly6.nsapi.ctelegram.CommSenderInterface;
-import com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
 import javax.swing.JButton;
@@ -438,42 +435,8 @@ public class Communique3 implements CommSenderInterface {
         });
         mnImportRecipients.add(mntmAsCommaSeparated);
 
-        JMenuItem mntmFromAtVote = new JMenuItem("From At Vote Screen");
-        mntmFromAtVote.addActionListener(e -> {
-            Object[] possibilities = {"GA For", "GA Against", "SC For", "SC Against"};
-            Optional<Object> response = dialogHandler.showChoiceSelector(
-                    "Select chamber and side", CommuniqueConstants.TITLE,
-                    possibilities, possibilities[0]);
-            if (response.isPresent()) {
-                String selection = (String) response.get();
-
-                if (!ApiUtils.isEmpty(selection)) {
-                    LOGGER.info("Starting scrape of NS WA voting page: " + selection);
-                    String[] elements = selection.toLowerCase().split("\\s+?");
-                    try {
-                        final String chamber = elements[0].trim().equals("ga") ? CommuniqueScraper.GA : CommuniqueScraper.SC;
-                        final String side = elements[1].trim().equals("for") ? CommuniqueScraper.FOR : CommuniqueScraper.AGAINST;
-                        CommuniqueScraper.importAtVoteDelegates(chamber, side).stream()
-                                .map(CommuniqueRecipient::toString)
-                                .forEach(s -> appendLine(textArea, s));
-
-                    } catch (CommWorldAssembly.NoSuchProposalException nre) {
-                        dialogHandler.showMessageDialog("No resolution is at vote in that chamber, cannot import data",
-                                CommuniqueConstants.ERROR);
-
-                    } catch (NSIOException exc) {
-                        LOGGER.log(Level.WARNING, "Cannot import data.", exc);
-                        dialogHandler.showMessageDialog("Cannot import data from NationStates website",
-                                CommuniqueConstants.ERROR);
-                        exc.printStackTrace();
-                    }
-                }
-            }
-        });
-        mnImportRecipients.add(mntmFromAtVote);
-
         JMenuItem mntmFromTextFile = new JMenuItem("From Text File");
-        mntmFromAtVote.setToolTipText("Reads line in file and appends them to the text screen");
+        mntmFromTextFile.setToolTipText("Reads line in file and appends them to the text screen");
         mntmFromTextFile.addActionListener(event -> {
             Optional<Path> response = dialogHandler.showFileChooser(
                     Communique3DialogHandler.ChooserMode.OPEN,
