@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -41,6 +41,11 @@ public class CommExhaustiveMonitor implements CommMonitor {
         this(new HashSet<>(), monitor);
     }
 
+    /**
+     * "Updates" the existing monitor such that the list of sent nations is retained.
+     * @param newMonitor to use for future data calls
+     * @return new {@code CommExhaustiveMonitor} with retained {@code passed} set
+     */
     public CommExhaustiveMonitor with(CommMonitor newMonitor) {
         return new CommExhaustiveMonitor(passed, newMonitor);
     }

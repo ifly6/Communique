@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,16 +17,11 @@
 
 package com.git.ifly6.communique.gui3;
 
-import com.git.ifly6.commons.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Monitor;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.nsapi.ctelegram.CommSender;
-import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommExhaustiveMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommLimitedMonitor;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,16 +29,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
-import static java.lang.Thread.sleep;
-
 /**
  * Creates a separate thread on which Communique can repeat sending.
  */
 public class Communique3SendHandler {
 
     public static final Logger LOGGER = Logger.getLogger(Communique3SendHandler.class.getName());
-    private static final Duration MIN_DURATION = Duration.of(5, ChronoUnit.MINUTES);
-    private static final int ON_REPEAT_LIMIT = 10;
 
     private ExecutorService managementExecutor = Executors.newSingleThreadExecutor();
 
@@ -61,6 +52,7 @@ public class Communique3SendHandler {
     }
 
     public Communique7Monitor newInPlaceMonitor() {
+        // ifly6. wtf is an "in-place" monitor??
         monitor = new Communique7Monitor(this.config);
         return monitor;
     }
@@ -83,8 +75,7 @@ public class Communique3SendHandler {
      * Starts sending. Control flow: (1) an auto-stop is configured to stop sending at a certain time, if the auto-stop
      * is defined, (2) in the other thread, a new {@link CommSender} is defined and assigned to {@link
      * Communique3#client}. This is let to run, blocking further action until it completes or is stopped. If config
-     * defines a repeat loop, then execute again, but do not execute any loop more frequently than {@link
-     * #MIN_DURATION}.
+     * defines a repeat loop, then execute again.
      * <p>While the scheduler is let to run, there is a time-out. That time-out is at 365 days. The program should
      * never be running that long, but it will auto-stop after a year without any intervention.</p>
      */
@@ -112,21 +103,16 @@ public class Communique3SendHandler {
             if (config.repeats)
                 LOGGER.info("Repeating script execution");
 
-            // use exhaustive monitor to track all changes
-            CommExhaustiveMonitor exhaustiveMonitor = new CommExhaustiveMonitor(monitor);
-
             // if not repeating, still execute; if repeating, continue doing so
-            // do-whiles are so rare... it's actually useful here!
+            // do-whiles are rare... it's actually useful here
             do {
                 if (config.repeats && execCount > 0) {
-                    LOGGER.info(String.format("Send restart on loop %d", execCount));
-                    exhaustiveMonitor = exhaustiveMonitor.with(
-                            new CommLimitedMonitor(newInPlaceMonitor(), ON_REPEAT_LIMIT));
+                    LOGGER.info(String.format("Restarting send; loop %d", execCount));
                 }
 
                 try {
                     final Instant start = Instant.now();
-                    app.client = new CommSender(config.keys, exhaustiveMonitor, config.getTelegramType(), app);
+                    app.client = new CommSender(config.keys, monitor, config.getTelegramType(), app);
                     app.client.startSend();
 
                     LOGGER.fine("Awaiting send client termination");
@@ -142,20 +128,22 @@ public class Communique3SendHandler {
                     } else if (!config.repeats) {
                         // if config does not repeat, immediately break loop
                         break;
-
-                    } else if (Instant.now().isBefore(start.plus(MIN_DURATION))) {
-                        // if repeating...
-                        // do not start the next iteration until MIN_DURATION has passed
-                        long waitMillis = Duration.between(Instant.now(), start.plus(MIN_DURATION)).toMillis();
-                        LOGGER.info(String.format(
-                                "Client finished sending before min duration, starting wait for %s",
-                                CommuniqueUtilities.time(waitMillis / 1000)));
-                        if (progressHandler != null)
-                            progressHandler.progressIntervalUntil(
-                                    start.plus(MIN_DURATION),
-                                    "Waiting for client reparse");
-                        sleep(waitMillis);
                     }
+
+                    // ifly6. 2022-11-23. removed this section; why would you set a min duration??
+//                    else if (Instant.now().isBefore(start.plus(MIN_DURATION))) {
+//                        // if repeating...
+//                        // do not start the next iteration until MIN_DURATION has passed
+//                        long waitMillis = Duration.between(Instant.now(), start.plus(MIN_DURATION)).toMillis();
+//                        LOGGER.info(String.format(
+//                                "Client finished sending before min duration, starting wait for %s",
+//                                CommuniqueUtilities.time(waitMillis / 1000)));
+//                        if (progressHandler != null)
+//                            progressHandler.progressIntervalUntil(
+//                                    start.plus(MIN_DURATION),
+//                                    "Waiting for client reparse");
+//                        sleep(waitMillis);
+//                    }
 
                 } catch (InterruptedException e) {
                     LOGGER.info("Interrupted while awaiting client termination");
@@ -164,7 +152,7 @@ public class Communique3SendHandler {
                 }
                 execCount++;
 
-            } while (config.repeats && !stopping.get());
+            } while (!stopping.get());
             stopSendTasks();
         });
     }

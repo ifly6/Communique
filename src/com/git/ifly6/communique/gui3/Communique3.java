@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -161,13 +161,15 @@ public class Communique3 implements CommSenderInterface {
         // text fields and areas document listeners
         textArea.getDocument().addDocumentListener(
                 new CommuniqueDocumentListener(e -> {
-                    List<CommuniqueRecipient> recipients =
-                            Arrays.stream(textArea.getText().split("\n"))
-                                    .filter(ApiUtils::isNotEmpty)
-                                    .filter(CommuniqueUtilities.NO_COMMENTS)
-                                    .map(CommuniqueRecipient::parseRecipient)
-                                    .collect(Collectors.toList());
-                    config.setcRecipients(recipients);
+                    try {
+                        List<CommuniqueRecipient> recipients =
+                                Arrays.stream(textArea.getText().split("\n"))
+                                        .filter(ApiUtils::isNotEmpty)
+                                        .filter(CommuniqueUtilities.NO_COMMENTS)
+                                        .map(CommuniqueRecipient::parseRecipient)
+                                        .collect(Collectors.toList());
+                        config.setcRecipients(recipients);
+                    } catch (IllegalArgumentException ignored) { }
                 }));
         fieldClient.getDocument().addDocumentListener(
                 new CommuniqueDocumentListener(e -> config.keys.setClientKey(fieldClient.getText())));
@@ -256,12 +258,12 @@ public class Communique3 implements CommSenderInterface {
             if (sendDialog.getValue() == CommuniqueSendDialog.SEND) {
                 final Instant start = Instant.now();
                 clientHandler.onAutoStop(() -> dialogHandler.showMessageDialog(
-                                String.format("Communiqué stopped automatically after %s.",
-                                        CommuniqueUtilities.time(config
-                                                .getAutoStop()
-                                                .orElseGet(() -> Duration.between(start, Instant.now()))
-                                                .getSeconds())), // time auto-formats
-                                CommuniqueConstants.TITLE))
+                        String.format("Communiqué stopped automatically after %s.",
+                                CommuniqueUtilities.time(config
+                                        .getAutoStop()
+                                        .orElseGet(() -> Duration.between(start, Instant.now()))
+                                        .getSeconds())), // time auto-formats
+                        CommuniqueConstants.TITLE))
                         .execute();
 
                 stopButton.setEnabled(true);
