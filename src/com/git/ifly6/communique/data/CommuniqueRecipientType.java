@@ -43,8 +43,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Defines a number of recipient types and provides methods to decompose those types into lists of
- * <code>CommuniqueRecipient</code>.
+ * Defines a number of recipient types and provides methods to decompose those types {@link CommuniqueRecipient}s. The
+ * <b>order</b> of the {@code enum}s matters because the code is parsed in their "natural" order.
  * @author ifly6
  * @since version 2.0 (build 7)
  */
@@ -98,7 +98,16 @@ public enum CommuniqueRecipientType {
 
     /**
      * Declares the recipient is one of various tags, which can be used to get the members of the World Assembly,
-     * delegates thereof, or new nations.
+     * delegates thereof, or new nations. These tags should be consistent with the standard NationStates telegram tags:
+     * <ul>
+     *     <li><strike>{@code tag:all}: all nations</strike> NOT SUPPORTED</li>
+     *     <li>{@code tag:wa}: all WA nations</li>
+     *     <li>{@code tag:delegates}: all WA delegates</li>
+     *     <li>
+     *         {@code tag:new}: new nations (but see the <a href="https://www.nationstates.net/cgi-bin/api.cgi?q=newnations">
+     *             raw call</a>)
+     *     </li>
+     * </ul>
      * @since version 2.0 (build 7)
      */
     TAG {
@@ -122,9 +131,9 @@ public enum CommuniqueRecipientType {
     },
 
     /**
-     * Provides from {@link CommRecruitMonitor} new nations. See {@link CommRecruitMonitor#setUpdateInterval(Duration)}
-     * and {@link CommRecruitMonitor#getInstance()}. The number of nations returned should be specified as in {@code
-     * _new:5}. This monitor never returns the same nation twice; it does not exhaust.
+     * Provides from {@link CommRecruitMonitor} new nations up to a certain limit. The number of nations returned should
+     * be specified as in {@code _new:5}. This monitor never returns the same nation twice; it does not exhaust.
+     * @see CommRecruitMonitor#setUpdateInterval(Duration)
      * @since version 3.0 (build 13)
      */
     _NEW {
@@ -154,11 +163,10 @@ public enum CommuniqueRecipientType {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             String tag = cr.getName();
-            if (tag.equals("active")) { // active nations
+            if (tag.equals("active")) // active nations
                 return newRecipients(
                         CommActiveMonitor.getInstance().getRecipients(),
                         cr.getFilterType());
-            }
 
             throw newException(cr);
         }
@@ -168,6 +176,7 @@ public enum CommuniqueRecipientType {
      * Nations moving into or out of a list of regions. Eg, {@code _movement:into;europe,the_north_pacific} or {@code
      * _movement:out_of;europe}.
      * @since version 3.0 (build 13)
+     * @see CommMovementMonitor.Direction
      */
     _MOVEMENT {
         private final CommuniqueSplitter splitter = new CommuniqueSplitter(this.toString(), 2);
@@ -186,6 +195,7 @@ public enum CommuniqueRecipientType {
      * Delegates approving a proposal. Eg, {@code _approval:__raids__} for all approval raids, {@code
      * _approval:given_to; PROPOSAL_ID}, or {@code _approval:removed_from; PROPOSAL_ID}.
      * @since version 3.0 (build 13)
+     * @see CommApprovalMonitor.Action
      */
     _APPROVAL {
         private final CommuniqueSplitter splitter = new CommuniqueSplitter(this.toString(), 2);

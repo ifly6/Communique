@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -65,7 +65,8 @@ public class CommApprovalMonitor extends CommUpdatingMonitor implements CommMoni
             action = Action.valueOf(actionString.toUpperCase());
         } catch (IllegalArgumentException e) { throw CommParseException.make(actionString, Action.values(), e); }
 
-        return cache.getOrCreate(createKey(proposalID, actionString),
+        return cache.getOrCreate(
+                createKey(proposalID, actionString),
                 () -> new CommApprovalMonitor(proposalID, action));
     }
 
@@ -108,16 +109,18 @@ public class CommApprovalMonitor extends CommUpdatingMonitor implements CommMoni
             @Override
             public Set<String> find(Set<String> current, Set<String> allApproversEver) {
                 return current;
-                // // elements in after that are were not in before
+                // elements in after that are were not in before
                 // return new ArrayList<>(Sets.difference(new HashSet<>(after), new HashSet<>(before)));
             }
-        }, REMOVED_FROM {
+        },
+
+        REMOVED_FROM {
             @Override
             public Set<String> find(Set<String> current, Set<String> allApproversEver) {
                 return allApproversEver.stream()
                         .filter(s -> !current.contains(s)) // every approver ever who is not in current are removed
                         .collect(Collectors.toSet());
-                // // elements in before that are not in afterSet
+                // elements in before that are not in afterSet
                 // return new ArrayList<>(Sets.difference(new HashSet<>(before), new HashSet<>(after)));
             }
         };
