@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2022 ifly6
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.data.Communique7Parser;
@@ -9,9 +26,7 @@ import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.marconi.MarconiRecruiter;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.NSException;
-import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.NSNation;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
 
@@ -19,6 +34,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -64,65 +80,78 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 	 * that any issues or problems are dealt with my defaulting to the newest nation, ignoring the proscription filter.
 	 * It also filters by whether the nation is recruitable.
 	 * @return a <code>String</code> with the name of the recipient
+	 * @see #getRecipient2()
 	 */
 	public CommuniqueRecipient getRecipient() {
-		try {
+		while (true) {
 			try {
-				List<String> possibleRecipients = ApiUtils.ref(fetcher.getNew());
-				for (String element : possibleRecipients) {
-
-					// if in sent list, next
-					// if otherwise prohibited by other filter rules, next
-					// if not recruitable, next
-					// otherwise, return
-
-					LOGGER.info(String.format("Checking %s", element));
-					Communique7Parser parser = new Communique7Parser().apply(CommuniqueRecipients.createNation(element))
-							.apply(new ArrayList<>(sentList)) // sent list filter
-							.apply(filterList); // other filters
-					if (!parser.listRecipients().contains(element)) continue;
-
-					try {
-						NSNation prNation = new NSNation(element).populateData();
-						if (!prNation.isRecruitable()) continue; // if not recruitable yeet
-						if (isProscribed(prNation)) continue; // if proscribed yeet
-
-					} catch (NSException e) {
-						// if it doesn't exist or otherwise fails, ignore this one
-						continue;
-					}
-
-					// 2017-03-18 proscription and recruit checks are now performed by JavaTelegram#predicates
-					// 2020-01-26 disregard above, they're just not done by JavaTelegram#predicates
-					LOGGER.info(String.format("Returning match %s", element));
-					return CommuniqueRecipients.createNation(element);
-				}
-
-				// if the filtering failed entirely, then simply just return the newest nation.
-				LOGGER.info(String.format("Could not find match; returning default match %s", possibleRecipients.get(0)));
-				return CommuniqueRecipients.createNation(possibleRecipients.get(0));
-
-			} catch (JTelegramException e) {
-				LOGGER.warning("Cannot fetch new nations. Retrying. Sleep one second.");
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException ignored) {
-				}
-				return getRecipient();  // retry
-
-			} catch (NSIOException e) {
-				LOGGER.warning("NS API threw error when loading new nation data. Retrying.");
-				return getRecipient();  // retry
-
+				return getRecipient2();
 			} catch (RuntimeException e) {
-				LOGGER.warning("Unclear reason why we cannot load new nation data. Retrying.");
-				return getRecipient();  // retry
+				LOGGER.log(Level.WARNING, "Could not load recipients.", e);
+				try {
+					Thread.sleep(60 * 1000);
+				} catch (InterruptedException ignored) { }
+			}
+		}
+	}
+
+	private CommuniqueRecipient getRecipient2() {
+		List<String> possibleRecipients = ApiUtils.ref(fetcher.getNew());
+		for (String element : possibleRecipients) {
+
+			// if in sent list, next
+			// if otherwise prohibited by other filter rules, next
+			// if not recruitable, next
+			// otherwise, return
+
+			LOGGER.info(String.format("Checking %s", element));
+			Communique7Parser parser = new Communique7Parser().apply(CommuniqueRecipients.createNation(element))
+					.apply(new ArrayList<>(sentList)) // sent list filter
+					.apply(filterList); // other filters
+			if (!parser.listRecipients().contains(element)) continue;
+
+			try {
+				NSNation prNation = new NSNation(element).populateData();
+				if (!prNation.isRecruitable()) continue; // if not recruitable yeet
+				if (isProscribed(prNation)) continue; // if proscribed yeet
+
+			} catch (NSException e) {
+				// if it doesn't exist or otherwise fails, ignore this one
+				continue;
 			}
 
-		} catch (StackOverflowError stackOverflow) {
-			LOGGER.severe("Too many attempts to load nation data. Check your internet connection.");
-			throw new NSIOException("Stack overflow error!");
+			// 2017-03-18 proscription and recruit checks are now performed by JavaTelegram#predicates
+			// 2020-01-26 disregard above, they're just not done by JavaTelegram#predicates
+			LOGGER.info(String.format("Returning match %s", element));
+			return CommuniqueRecipients.createNation(element);
 		}
+
+		// if the filtering failed entirely, then simply just return the newest nation.
+		LOGGER.info(String.format("Could not find match; returning default match %s", possibleRecipients.get(0)));
+		return CommuniqueRecipients.createNation(possibleRecipients.get(0));
+
+//			} catch (JTelegramException e) {
+//				LOGGER.warning("Cannot fetch new nations. Retrying. Sleep one second.");
+//				try {
+//					Thread.sleep(1000);
+//				} catch (InterruptedException ignored) {
+//				}
+//				return getRecipient();  // retry
+//
+//			} catch (NSIOException e) {
+//				LOGGER.warning("NS API threw error when loading new nation data. Retrying.");
+//				return getRecipient();  // retry
+//
+//			} catch (RuntimeException e) {
+//				LOGGER.warning("Unclear reason why we cannot load new nation data. Retrying.");
+//				return getRecipient();  // retry
+//			}
+//
+//		} catch (StackOverflowError stackOverflow) {
+//			LOGGER.severe("Too many attempts to load nation data. Check your internet connection.");
+//			throw new NSIOException("Stack overflow error!");
+//		}
+
 	}
 
 	/**
