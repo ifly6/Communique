@@ -17,19 +17,23 @@
 
 package com.git.ifly6.nsapi.manualtests;
 
-import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommWaitingMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommRecruitMonitor;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-public class NewNationsTest {
-    public static void main(String[] args) throws InterruptedException {
-        CommMonitor m = new CommWaitingMonitor(CommRecruitMonitor.getInstance().setBatch(3));
+public class TimeSortTest {
+    public static void main(String[] args) {
+        Instant i = Instant.now();
 
-        // print current
-        System.out.println(m.getRecipients().toString());
+        List<Instant> list = new ArrayList<>();
+        for (int j = 0; j < 10; j++) {
+            Instant newInstant = i.minus(Duration.ofSeconds(j * 100));
+            list.add(newInstant);
+        }
 
-        // sleep and see next
-        Thread.sleep((long) 121 * 1000);
-        System.out.println(m.getRecipients().toString());
+        list.sort(Comparator.reverseOrder());
+        System.out.println(list);
     }
 }
