@@ -83,7 +83,7 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 	 * @see #getRecipient2()
 	 */
 	public CommuniqueRecipient getRecipient() {
-		while (true) {
+		while (true)
 			try {
 				return getRecipient2();
 			} catch (RuntimeException e) {
@@ -92,7 +92,6 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 					Thread.sleep(60 * 1000);
 				} catch (InterruptedException ignored) { }
 			}
-		}
 	}
 
 	private CommuniqueRecipient getRecipient2() {
