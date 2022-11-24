@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -59,8 +59,7 @@ public class Communique7Parser {
     public Communique7Parser() { }
 
     /**
-     * Applies the tokens, specified in the <code>CommuniqueRecipient</code> object, to the recipients list in the
-     * parser.
+     * Applies the tokens, specified in the {@link CommuniqueRecipient} object, to the recipients list in the parser.
      * <p>Because everything has a filter, there is no sorting code necessary to tell everything what to do, it simply
      * does it on its own accord, unlike the old parser. This greatly simplifies the linking logic.</p>
      * @param cRecipient a {@link CommuniqueRecipient}

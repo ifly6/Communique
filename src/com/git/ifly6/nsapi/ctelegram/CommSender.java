@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -231,7 +231,7 @@ public class CommSender {
             ((CommUpdatingMonitor) monitor).start();
 
         if (scheduler.isShutdown() || scheduler.isTerminated()) {
-            LOGGER.info("Initialising new scheduller, old schedule facility is closed");
+            LOGGER.info("Initialising new scheduler, old schedule facility is closed");
             scheduler = Executors.newSingleThreadScheduledExecutor();
         }
 

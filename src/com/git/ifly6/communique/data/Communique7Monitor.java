@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Packages the recipients into a single for reproducibility.
+ * Packages the recipients into a single monitor for reproducibility.
  * @since version 3.0 (build 13)
  */
 public class Communique7Monitor implements CommMonitor {
@@ -56,7 +56,9 @@ public class Communique7Monitor implements CommMonitor {
      * #lastParseResults} is not null – it will use the cached last parse results and filter them.</p>
      */
     public List<String> getRecipients() {
-        if (recipientsExhausted()) // we've already passed recipients and we do not repeat
+        if (recipientsExhausted())
+            // we've already passed recipients and we do not repeat
+            // 2022-11-24. is the above comment true??
             throw new ExhaustedException("Recipients exhausted!");
 
         List<String> recipients = this.state == State.INIT && lastParseResults != null
@@ -70,6 +72,8 @@ public class Communique7Monitor implements CommMonitor {
         alreadyPassed.addAll(lastPassed);
 
         return lastPassed;
+        // 2022-11-24. it seems this "lastPassed" var should really be called "toPass"
+        // id. it keeps track of the recipients that were LAST passed for dispatch
     }
 
     /**
@@ -109,7 +113,7 @@ public class Communique7Monitor implements CommMonitor {
     /**
      * Parses recipients based on the current configuration setting. Caches this information in {@link
      * #lastParseResults}. Automatically filters out elements already passed.
-     * @return parsed recipients
+     * @return {@link #lastParseResults} after updating it from {@link Communique7Parser}
      */
     private List<String> parseRecipients() {
         this.lastParseResults = new Communique7Parser().apply(theConfig.getcRecipients()).listRecipients();
@@ -120,6 +124,7 @@ public class Communique7Monitor implements CommMonitor {
     /** @return false if {@link CommuniqueConfig#repeats}; true otherwise. */
     @Override
     public boolean recipientsExhausted() {
+        // ifly6. 2022-11-24. shouldn't this never exhaust if we are repeating??
         if (this.state == State.INIT) return false;
         return lastPassed.isEmpty();
     }
@@ -127,13 +132,12 @@ public class Communique7Monitor implements CommMonitor {
     /**
      * {@inheritDoc} For Communique7Monitor, returns the size of {@link #lastParseResults}, ie all known possible
      * recipients. This number can change over time if repeating.
-     * @return estimated number of remaining recipients
+     * @return estimated number of remaining recipients; {@link OptionalLong#empty()} if repeating.
      */
     @Override
     public OptionalLong recipientsCountIfKnown() {
-        if (!theConfig.repeats)
-            return OptionalLong.of(lastParseResults.size());
-        return OptionalLong.empty();
+        if (theConfig.repeats) return OptionalLong.empty();
+        return OptionalLong.of(lastParseResults.size());
     }
 
     /** Expresses the state – {@link #INIT} or {@link #RUNNING} – of the monitor. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -118,7 +118,7 @@ public class CommWorldAssembly {
      * descending; ties broken by name.
      * @param chamber to look in
      * @param voting  position
-     * @return names of delegates
+     * @return list of {@link Delegate}s
      * @throws NoSuchProposalException if no proposal at vote
      */
     public static List<Delegate> getDelegates(Chamber chamber, Vote voting) {
@@ -152,8 +152,10 @@ public class CommWorldAssembly {
     }
 
     /**
-     * Gets people who approved the specified proposal.
-     * <p>This takes two API calls to query for each chamber.</p>
+     * Gets people who approved the specified proposal. It first enumerates all proposals in both chambers. Then it
+     * yields the proposal specified. The API does not permit querying only one proposal; and to get any possible
+     * proposal we need to check both chambers.
+     * @return list of delegate approvers
      * @throws NoSuchProposalException if proposal does not exist
      */
     public static List<String> getApprovers(String proposalID) {
@@ -167,7 +169,7 @@ public class CommWorldAssembly {
 
     /**
      * Queries for current approvals on all proposals.
-     * @returns proposal ID as key, {@code List<String>} of approvers as value.
+     * @returns list of {@link Proposal}s
      */
     public static List<Proposal> getAllProposals() {
         try {
@@ -188,7 +190,7 @@ public class CommWorldAssembly {
         }
     }
 
-
+    /** Record for delegate names and weights. */
     public static class Delegate {
         public final String name;
         public final Integer weight;
@@ -210,7 +212,7 @@ public class CommWorldAssembly {
     /** Enumerates voting positions. */
     public enum Vote {
         FOR("VOTES_FOR"),
-        AGAINST("VOTES_AGAINST") ;
+        AGAINST("VOTES_AGAINST");
 
         private String nationXMLTag;
 
