@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -18,6 +18,7 @@
 package com.git.ifly6.nsapi.ctelegram.io.cache;
 
 import com.git.ifly6.nsapi.NSTimeStamped;
+import com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,7 +27,6 @@ import java.util.stream.Collectors;
 
 import static com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly.NoSuchProposalException;
 import static com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly.Proposal;
-import static com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly.getAllProposals;
 
 /**
  * Caches proposals. Cache duration is {@link #PROPOSAL_CACHE_DURATION}.
@@ -116,7 +116,7 @@ public class CommProposalCache extends CommCache<CommProposalCache.ProposalList>
         private final Instant timestamp = Instant.now();
 
         public ProposalList() {
-            this.proposalList = getAllProposals();
+            this.proposalList = CommWorldAssembly.getAllProposals();
         }
 
         public List<Proposal> getProposalList() {
