@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -61,14 +61,14 @@ public class Communique3Utils {
      * @param object string representation thereof to append
      */
     public static void appendLine(JTextArea area, Object object) {
-        boolean doubleBreaked = area.getText().endsWith("\n\n");
-        area.append((doubleBreaked ? "" : "\n") + object.toString());
+        boolean hasNewLines = area.getText().endsWith("\n\n");
+        area.append((hasNewLines ? "" : "\n") + object.toString());
         area.setCaretPosition(area.getDocument().getLength());
     }
 
     /**
      * Loads {@link CommuniqueConfig} from autosave location.
-     * @return autosaved configuration file
+     * @return auto-saved configuration file
      */
     public static CommuniqueConfig loadAutoSave() {
         if (Files.exists(APP_SUPPORT.resolve("autosave.txt"))) {
@@ -131,8 +131,8 @@ public class Communique3Utils {
     /**
      * Creates balloon tip with the specified message, emanating from the provided component. Tip has auto-scheduled
      * destruction after two seconds.
-     * @param component to attach to
-     * @param message   to give
+     * @param component to attach tool-tip to
+     * @param message   to display
      */
     public static void createBalloonTip(JComponent component, String message) {
         EventQueue.invokeLater(() -> {
