@@ -22,6 +22,7 @@ import com.git.ifly6.nsapi.NSWorld;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommNationCache;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatingMonitor;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -39,10 +41,11 @@ import java.util.stream.Collectors;
  */
 public class CommRecruitMonitor extends CommUpdatingMonitor {
 
+    private static final Logger LOGGER = Logger.getLogger(CommRecruitMonitor.class.getName());
     private static CommRecruitMonitor instance;
 
     private long returnLimit;
-    private Map<String, Instant> cache; // k : v == nation name : observation time
+    private Map<String, Instant> cache; // k : v => nation name : observation time
     private Set<String> passed;
 
     public CommRecruitMonitor() {
@@ -58,11 +61,21 @@ public class CommRecruitMonitor extends CommUpdatingMonitor {
         return instance;
     }
 
-    public CommRecruitMonitor setBatch(long i) {
+    /**
+     * Sets the batch return limit and returns this monitor after that limit is set.
+     * @param i is the limit to set
+     * @return this
+     */
+    public CommRecruitMonitor setBatchLimit(long i) {
         this.returnLimit = i;
         return this;
     }
 
+    /**
+     * {@inheritDoc} If you want to limit the number of recipients, use {@link #setBatchLimit(long)} first before
+     * calling {@link #getRecipients()}
+     * @return list of new nations, up to the {@link #returnLimit}
+     */
     @Override
     public List<String> getRecipients() {
         // 1st. sort to get newest nations in the list, return only
@@ -71,6 +84,7 @@ public class CommRecruitMonitor extends CommUpdatingMonitor {
                 .map(Entry::getKey)
                 .filter(s -> !passed.contains(s)) // remove if already passed
                 .collect(Collectors.toList()); // should still pass all instantly-available values
+        LOGGER.info(String.format("Found %d un-passed new nations; passing %d", toReturn.size(), returnLimit));
 
         // 2nd. sort out the ones which can be recruited until you get to the recruit limit
         toReturn = toReturn.stream()
@@ -94,7 +108,13 @@ public class CommRecruitMonitor extends CommUpdatingMonitor {
     protected void updateAction() {
         List<String> newNations = NSWorld.getNew();
         Collections.reverse(newNations); // acts in-place
-        for (String s : newNations)
-            cache.put(s, Instant.now());  // preserve encounter order, nanoseconds still pass
+
+        // force the "instant" at which something was added to the cache to be different
+        Instant now = Instant.now();
+        for (int i = 0; i < newNations.size(); i++)
+            cache.put(
+                    newNations.get(i),
+                    now.plus(Duration.ofMillis(i)) // adds 1 ms to the "now" time without taking actual time
+            );
     }
 }
