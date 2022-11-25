@@ -62,13 +62,10 @@ public class CommNationCache extends CommCache<NSNation> {
 
         try {
             Reader reader = Files.newBufferedReader(LOCATION);
-            CommNationCache cache = new Gson().fromJson(reader, CommNationCache.class);
-
             // should be irrelevant... the finaliser is a transient runnable and should never be serialised
 //            if (!cache.hasFinaliser())
 //                LOGGER.log(Level.SEVERE, "Serialised version of CommNationCache lacks save finaliser!");
-
-            return cache;
+            return new Gson().fromJson(reader, CommNationCache.class);
 
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Unable to load persist version of nation cache!", e);
@@ -81,6 +78,18 @@ public class CommNationCache extends CommCache<NSNation> {
         return instance;
     }
 
+    /**
+     * {@inheritDoc} Here applies to {@link NSNation}s.
+     * @param s name of nation
+     * @return cached data-populated corresponding {@link NSNation}
+     * @throws NSNation.NSNoSuchNationException if attempting to load non-existent nation
+     */
+    @Override
+    public NSNation lookupObject(String s) {
+        return super.lookupObject(s);
+    }
+
+    /** @throws NSNation.NSNoSuchNationException from {@link NSNation#populateData()} */
     @Override
     protected NSNation createNewObject(String s) {
         return new NSNation(s).populateData();

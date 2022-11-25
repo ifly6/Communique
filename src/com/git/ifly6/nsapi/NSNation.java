@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -80,8 +80,8 @@ public class NSNation implements NSTimeStamped {
     private String category;
 
     /**
-     * Constructs the nation. You must provide the name of the nation.
-     * @param name of the nation
+     * Constructs nation object. Call {@link #populateData()} to populate data.
+     * @param name of the nation (auto-refs)
      */
     public NSNation(String name) {
         nationName = ApiUtils.ref(name);
