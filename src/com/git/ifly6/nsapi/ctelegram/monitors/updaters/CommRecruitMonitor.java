@@ -17,10 +17,10 @@
 
 package com.git.ifly6.nsapi.ctelegram.monitors.updaters;
 
-import com.git.ifly6.nsapi.NSNation;
 import com.git.ifly6.nsapi.NSWorld;
-import com.git.ifly6.nsapi.ctelegram.io.cache.CommNationCache;
+import com.git.ifly6.nsapi.ctelegram.CommRecipientChecker;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatingMonitor;
+import com.git.ifly6.nsapi.telegram.JTelegramType;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -88,10 +88,8 @@ public class CommRecruitMonitor extends CommUpdatingMonitor {
 
         // 2nd. sort out the ones which can be recruited until you get to the recruit limit
         toReturn = toReturn.stream()
-                .map(s -> CommNationCache.getInstance().lookupObject(s))
-                .filter(NSNation::isRecruitable) // filter is lazy
+                .filter(s -> CommRecipientChecker.doesRecipientAccept(s, JTelegramType.RECRUIT))
                 .limit(returnLimit) // get the N nations most recently observed; limit works with lazy filter
-                .map(NSNation::getRefName)
                 .collect(Collectors.toList());
 
         passed.addAll(toReturn);
