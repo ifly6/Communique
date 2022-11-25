@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -35,8 +35,7 @@ import java.util.logging.Logger;
 public class MarconiUtilities {
 
     private static final Logger LOGGER = Logger.getLogger(MarconiUtilities.class.getName());
-
-    static Path lockFile = CommuniqueApplication.APP_SUPPORT.resolve("marconi.lock");
+    private static final Path lockFile = CommuniqueApplication.APP_SUPPORT.resolve("marconi.lock");
 
     /**
      * Creates two column string, each column is 30 characters wide.
@@ -45,7 +44,7 @@ public class MarconiUtilities {
      */
     protected static String twoColumn(List<String> items) {
         List<String> lines = new ArrayList<>();
-        for (int x = 0; x < items.size(); x = x + 2)
+        for (int x = 0; x < items.size(); x = x + 2) // iterate two-by-two
             try {
                 lines.add(String.format("%-30.30s  %-30.30s", items.get(x), items.get(x + 1)));
             } catch (IndexOutOfBoundsException e) {

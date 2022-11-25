@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -138,9 +138,13 @@ public class Marconi implements CommSenderInterface {
         }
     }
 
-    /** Sets up checks, client, and sends telegrams. */
+    /**
+     * Displays to the user relevant information, awaits user input, sets up client (see {@link CommSender}), and sends
+     * telegrams. Also creates a file lock to prevent multiple instances of Marconi from running at the same time.
+     */
     private void send() {
-        // Parser and expand recipients
+        // set up monitor
+        // preview recipients
         Communique7Monitor communique7Monitor = new Communique7Monitor(config);
         List<String> expandedRecipients = communique7Monitor.preview();
 
@@ -180,14 +184,13 @@ public class Marconi implements CommSenderInterface {
     }
 
     @Override
-    @SuppressWarnings("RedundantStringFormatCall")
     public void processed(String recipient, int numberSent, CommSender.SendingAction action) {
         config.addcRecipient(CommuniqueRecipients.createExcludedNation(recipient));
         if (action == CommSender.SendingAction.SENT)
-            System.out.println(String.format("Sent telegram %s to recipient %s", numberSent, recipient));
+            System.out.printf("Sent telegram %s to recipient %s%n", numberSent, recipient);
 
         if (action == CommSender.SendingAction.SKIPPED)
-            System.out.println(String.format("Skipped recipient %s", recipient));
+            System.out.printf("Skipped recipient %s%n", recipient);
     }
 
     @Override
