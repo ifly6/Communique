@@ -52,8 +52,10 @@ public class Communique7Monitor implements CommMonitor {
      * {@inheritDoc} All recipients are those defined by the appropriate input of {@link CommuniqueRecipient}s. It only
      * passes a given recipient once. If {@link CommuniqueConfig#repeats} is true, it will truncate to providing the
      * first {@value #TRUNCATION_LIMIT} recipients.
-     * <p>If {@link #peek()} is called before this method is first run – ie we are still initialising but {@link
+     * <p>If {@link #preview()} is called before this method is first run – ie we are still initialising but {@link
      * #lastParseResults} is not null – it will use the cached last parse results and filter them.</p>
+     * <p>See {@link #parseRecipients()} for application of
+     * {@link com.git.ifly6.communique.io.CommuniqueProcessingAction CommuniqueProcessingAction}s.</p>
      */
     public List<String> getRecipients() {
         if (recipientsExhausted())
@@ -70,7 +72,6 @@ public class Communique7Monitor implements CommMonitor {
                 ? recipients.stream().limit(TRUNCATION_LIMIT).collect(Collectors.toList())
                 : recipients;
         alreadyPassed.addAll(lastPassed);
-
         return lastPassed;
         // 2022-11-24. it seems this "lastPassed" var should really be called "toPass"
         // id. it keeps track of the recipients that were LAST passed for dispatch
@@ -111,12 +112,14 @@ public class Communique7Monitor implements CommMonitor {
     }
 
     /**
-     * Parses recipients based on the current configuration setting. Caches this information in {@link
-     * #lastParseResults}. Automatically filters out elements already passed.
+     * Parses recipients based on the current configuration setting. Caches this information in
+     * {@link #lastParseResults}. Automatically filters out elements already passed.
      * @return {@link #lastParseResults} after updating it from {@link Communique7Parser}
      */
     private List<String> parseRecipients() {
-        this.lastParseResults = new Communique7Parser().apply(theConfig.getcRecipients()).listRecipients();
+        this.lastParseResults = theConfig.processingAction.apply(
+                new Communique7Parser().apply(theConfig.getcRecipients()).listRecipients());
+
         LOGGER.finer(String.format("Monitor parsed %d recipients", lastParseResults.size()));
         return this.lastParseResults;
     }
