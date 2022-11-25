@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -119,10 +119,12 @@ public class ApiUtils {
     }
 
     /**
-     * Shuffles array and returns it.
+     * Shuffles array and returns it. Always shuffles with the same {@link Random} source: {@link #RANDOM}.
+     * @param list to shuffle
+     * @returns shuffled list; can be ignored because {@link Collections#shuffle(List, Random)} acts in-place
      * @since version 3.0 (build 13)
      */
-    public static <T> List<T> shuffled(List<T> list) {
+    public static <T> List<T> shuffle(List<T> list) {
         Collections.shuffle(list, RANDOM);
         return list;
     }

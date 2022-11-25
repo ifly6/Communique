@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,6 +17,7 @@
 
 package com.git.ifly6.nsapi.ctelegram.monitors;
 
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.ctelegram.io.CommParseException;
 import com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly;
 import com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly.Chamber;
@@ -33,8 +34,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static com.git.ifly6.nsapi.ApiUtils.shuffled;
 
 /**
  * Framework for monitoring World Assembly actions.
@@ -75,7 +74,7 @@ public abstract class CommAssemblyMonitor extends CommUpdatingMonitor implements
         exhausted = determineIfExhausted();
         if (!exhausted) {
             Set<String> currentVoters = getMonitoredRecipients();
-            List<String> currentVoterList = shuffled(new ArrayList<>(currentVoters));
+            List<String> currentVoterList = ApiUtils.shuffle(new ArrayList<>(currentVoters));
 
             // update old voters by adding new voters
             currentVoterList.stream()

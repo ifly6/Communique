@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2022 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -16,18 +16,15 @@
  */
 package com.git.ifly6.communique.io;
 
+import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommDelegatesCache;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-
-import static com.git.ifly6.nsapi.ApiUtils.RANDOM;
-import static com.git.ifly6.nsapi.ApiUtils.shuffled;
 
 /**
  * This implements post-processing actions on the recipient list as a whole for Communique and Marconi clients. It has
@@ -35,11 +32,11 @@ import static com.git.ifly6.nsapi.ApiUtils.shuffled;
  */
 public enum CommuniqueProcessingAction implements Function<List<String>, List<String>> {
 
-    /** Randomises the order of recipients */
+    /** Randomises the order of recipients. */
     RANDOMISE {
         @Override
         public List<String> apply(List<String> input) {
-            return shuffled(input);
+            return ApiUtils.shuffle(input);
         }
 
         @Override
@@ -48,7 +45,7 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
         }
     },
 
-    /** Reverses the initial order of recipients */
+    /** Reverses the initial order of recipients. */
     REVERSE {
         @Override
         public List<String> apply(List<String> input) {
@@ -78,11 +75,13 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
                 if (delegates.contains(s)) listDelegates.add(s); // see docs on this algorithm
                 else nonDelegate.add(s);
 
-            Collections.shuffle(listDelegates, RANDOM);
-            Collections.shuffle(nonDelegate, RANDOM);
+            ApiUtils.shuffle(listDelegates);
+            ApiUtils.shuffle(nonDelegate);
 
-            listDelegates.addAll(nonDelegate);
-            return listDelegates;
+            List<String> newList = new ArrayList<>(listDelegates.size() + nonDelegate.size());
+            newList.addAll(listDelegates);
+            newList.addAll(nonDelegate);
+            return newList;
         }
 
         @Override
@@ -106,7 +105,7 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
     /** Applies the processing action to the provided list, which should be of raw NationStates reference names */
     public abstract List<String> apply(List<String> input);
 
-    /** Should always return the name of the <code>CommuiniqueProcessingAction</code> in the code */
+    /** Should always return the name of the {@link CommuniqueProcessingAction} in the code */
     @Override
     public abstract String toString();
 }
