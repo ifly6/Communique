@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -201,14 +201,14 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				})
 		);
 		txtSecretKey = CommuniqueFactory.createField(
-				"",
+				"SECRET_KEY",
 				"Secret key",
 				new CommuniqueDocumentListener(e -> {
 					config.keys.setSecretKey(txtSecretKey.getText().trim()); // dynamic update config
 				})
 		);
 		txtTelegramId = CommuniqueFactory.createField(
-				"",
+				"TELEGRAM_ID",
 				"Telegram ID",
 				new CommuniqueDocumentListener(e -> {
 					config.keys.setTelegramId(txtTelegramId.getText().trim()); // dynamic update config
@@ -620,11 +620,12 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			try {
 				CommuniqueConfig configuration = loader.load();
 				this.importState(configuration);
-			} catch (IOException e1) {
-				// do nothing if it fails to load
+				LOGGER.info("Autosave loaded");
+
+			} catch (IOException ioe) {
+				LOGGER.log(Level.WARNING, "Autosave failed to load", ioe);
 			}
 		}
-		LOGGER.info("Auto-save loaded");
 
 	}
 
