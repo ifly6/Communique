@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -71,58 +71,65 @@ class CommuniqueReader {
 
 		CommuniqueConfig config;
 
-		try { // note, this will handle future version of the class by ignoring the now-irrelevant fields
-			Gson gson = new Gson();
-			config = gson.fromJson(Files.newBufferedReader(path), CommuniqueConfig.class);
+		try {
+			try { // note, this will handle future version of the class by ignoring the now-irrelevant fields
+				Gson gson = new Gson();
+				config = gson.fromJson(Files.newBufferedReader(path), CommuniqueConfig.class);
 
-			// convert from randomise flag to new enums
-			if (config.version == 7) {
-				List<String> lines = Files.readAllLines(path).stream()
-						.map(String::trim)
+				// convert from randomise flag to new enums
+				if (config.version == 7) {
+					List<String> lines = Files.readAllLines(path).stream()
+							.map(String::trim)
+							.collect(Collectors.toList());
+					for (String line : lines)
+						if (line.trim().equals("\"isRandomised\": true,")) {
+							config.processingAction = CommuniqueProcessingAction.RANDOMISE;
+							break;
+						}
+				}
+
+				// correct for introduction of recruitment enum instead of boolean flag
+				if (config.version <= 11)
+					if (config.isRecruitment)
+						config.telegramType = JTelegramType.RECRUIT;
+
+				// defaults for wait string are not necessary: blank accepts hard-coded defaults already. A+
+
+			} catch (JsonSyntaxException | JsonIOException e) {
+
+				// If we are reading one of the old files, which would throw some RuntimeExceptions,
+				// try the old reader.
+
+				logger.log(Level.INFO, "Json exception thrown. Attempting read with old file reader.", e);
+				CommuniqueFileReader reader = new CommuniqueFileReader(path.toFile());
+
+				config = new CommuniqueConfig();
+				config.version = reader.getFileVersion();
+				config.processingAction = reader.isRandomised() // translate old boolean flag
+						? CommuniqueProcessingAction.RANDOMISE
+						: CommuniqueProcessingAction.NONE;
+				config.isRecruitment = reader.isRecruitment();
+				config.keys = reader.getKeys();
+
+				List<CommuniqueRecipient> recipients = CommuniqueRecipient
+						.translateTokens(asList(reader.getRecipients())).stream()
+						.map(CommuniqueRecipient::parseRecipient)
 						.collect(Collectors.toList());
-				for (String line : lines)
-					if (line.trim().equals("\"isRandomised\": true,")) {
-						config.processingAction = CommuniqueProcessingAction.RANDOMISE;
-						break;
-					}
+				config.setcRecipients(recipients);
+
 			}
 
-			// correct for introduction of recruitment enum instead of boolean flag
-			if (config.version <= 11)
-				if (config.isRecruitment)
-					config.telegramType = JTelegramType.RECRUIT;
+			// There can be old files in Json which predate the introduction of CommuniqueRecipient in version 7
+			// Those files need to be translated too, which is problematic due to the creation of an explicit difference
+			// in those version between the standard recipients list and the sent-list.
+			if (config.version < 7)
+				unifySendList(config);
 
-			// defaults for wait string are not necessary: blank accepts hard-coded defaults already. A+
-
-		} catch (JsonSyntaxException | JsonIOException e) {
-
-			// If we are reading one of the old files, which would throw some RuntimeExceptions,
-			// try the old reader.
-
-			logger.log(Level.INFO, "Json exception thrown. Attempting read with old file reader.", e);
-			CommuniqueFileReader reader = new CommuniqueFileReader(path.toFile());
-
+		} catch (NullPointerException npe) {
+			logger.log(Level.SEVERE, "Found null pointer exception when reading file; returning default " +
+					"configuation", npe);
 			config = new CommuniqueConfig();
-			config.version = reader.getFileVersion();
-			config.processingAction = reader.isRandomised() // translate old boolean flag
-					? CommuniqueProcessingAction.RANDOMISE
-					: CommuniqueProcessingAction.NONE;
-			config.isRecruitment = reader.isRecruitment();
-			config.keys = reader.getKeys();
-
-			List<CommuniqueRecipient> recipients = CommuniqueRecipient
-					.translateTokens(asList(reader.getRecipients())).stream()
-					.map(CommuniqueRecipient::parseRecipient)
-					.collect(Collectors.toList());
-			config.setcRecipients(recipients);
-
 		}
-
-		// There can be old files in Json which predate the introduction of CommuniqueRecipient in version 7
-		// Those files need to be translated too, which is problematic due to the creation of an explicit difference
-		// in those version between the standard recipients list and the sent-list.
-		if (config.version < 7)
-			unifySendList(config);
 
 		return config;
 	}
