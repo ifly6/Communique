@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -60,7 +60,10 @@ public class CommuniqueConfig implements java.io.Serializable {
 	private ArrayList<String> cRecipients; // must be mutable, use ArrayList
 
 	// These should be deprecated, but are kept for backward compatibility
+	@Deprecated
 	public String[] recipients; // consider removing
+
+	@Deprecated
 	public String[] sentList;   // consider removing
 
 	/**
@@ -156,17 +159,19 @@ public class CommuniqueConfig implements java.io.Serializable {
 
 	/**
 	 * Checks all the data kept in {@link CommuniqueConfig#cRecipients} and makes they are distinct and applicable to
-	 * save to the program. For backward compatibility, it also applies these changes to the old <code>recipients</code>
-	 * and the <code>sentList</code>. It also updates the <code>CommuniqueConfig</code> version <i>field</i>, not the
+	 * save to the program. For backward compatibility, it also applies these changes to the old {@code recipients}
+	 * and the {@code sentList}. It also updates the {@code CommuniqueConfig} version <i>field</i>, not the
 	 * one in the header, to the version of the program on which it was saved.
 	 */
 	void clean() {
 		version = this.defaultVersion(); // updates version
 
-		// proceeds to clean all of the fields
-		cRecipients = cRecipients.stream().distinct()
-				.map(CommuniqueConfig::cleanNation)
-				.collect(Collectors.toCollection(ArrayList::new));
+		if (Objects.nonNull(cRecipients) && !cRecipients.isEmpty()) // apparently cRecipients is nullable
+			cRecipients = cRecipients.stream().distinct()
+					.map(CommuniqueConfig::cleanNation)
+					.collect(Collectors.toCollection(ArrayList::new));
+		else
+			cRecipients = new ArrayList<>();
 
 		if (Objects.nonNull(recipients) && recipients.length > 0)
 			recipients = Arrays.stream(recipients)
