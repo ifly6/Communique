@@ -836,7 +836,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	}
 
 	/**
-	 * @return currently selected wait time if present, otherwise, defualt wait time
+	 * @return currently selected wait time if present, otherwise, defualt wait time (in milliseconds)
 	 */
 	private int currentWaitTime() {
 		if (txtWaitTime.getText().trim().isEmpty()
@@ -889,20 +889,24 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 			progressBar.setValue(0);    // reset progress bar
 		}
 
-		final int ups = 20; // ups = updates per second
-		int totalTime = ups * currentWaitTime(); // est delay
-		progressBar.setMaximum(totalTime); // max = est delay
+        final long startTime = System.currentTimeMillis();
+        final long endTime = startTime + currentWaitTime();
 
-		timer = new Timer(1000 / ups, new ActionListener() {
-			int elapsedSteps = 0;    // start at zero
-
-			@Override
-			public void actionPerformed(ActionEvent ae) {
-				progressBar.setValue(elapsedSteps++);    // iterate through
-				if (elapsedSteps >= totalTime || sendingThread.isInterrupted()) timer.stop();
-			}
-		});
-		timer.start();
+        timer = new Timer(
+                1000 / 20, // time between updates in ms
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        progressBar.setMaximum(currentWaitTime());
+                        progressBar.setValue((int) (System.currentTimeMillis() - startTime));
+                        progressBar.setToolTipText(String.format("%.2f seconds until next telegram",
+								(double) (endTime - System.currentTimeMillis()) / 1000
+						));
+                        if (System.currentTimeMillis() > endTime || sendingThread.isInterrupted())
+                            timer.stop();
+                    }
+                });
+        timer.start();
 
 		// Update the label and log successes as relevant
 		progressLabel.setText(String.format("%d / %d", x + 1, length));
