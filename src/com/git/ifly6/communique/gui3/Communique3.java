@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,7 +17,6 @@
 
 package com.git.ifly6.communique.gui3;
 
-import com.apple.eawt.Application;
 import com.git.ifly6.commons.CommuniqueApplication;
 import com.git.ifly6.commons.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
@@ -36,28 +35,11 @@ import com.git.ifly6.nsapi.ctelegram.CommSender;
 import com.git.ifly6.nsapi.ctelegram.CommSenderInterface;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.PlainDocument;
 import javax.swing.undo.UndoManager;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Frame;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -536,13 +518,14 @@ public class Communique3 implements CommSenderInterface {
             // everything is handled by this dialog, just run it
             Communique3Settings settings = Communique3Settings.getInstance();
             Runnable prefrencesRunnable = () -> new Communique3SettingsDialog(this.frame, settings);
-            if (IS_OS_MAC) {
-                Application app = Application.getApplication();
-                app.setPreferencesHandler(e -> prefrencesRunnable.run());
-                app.setQuitHandler((e, r) -> System.exit(0));
-                app.setAboutHandler(e -> aboutRunnable.run());
-
-            } else {
+//            if (IS_OS_MAC) {
+//                Application app = Application.getApplication();
+//                app.setPreferencesHandler(e -> prefrencesRunnable.run());
+//                app.setQuitHandler((e, r) -> System.exit(0));
+//                app.setAboutHandler(e -> aboutRunnable.run());
+//
+//            } else
+            {
                 JMenuItem preferences = new JMenuItem("Preferences...");
                 preferences.addActionListener(e -> prefrencesRunnable.run());
                 mnFile.add(preferences);
