@@ -52,6 +52,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -109,6 +110,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 	private JFrame frame;
 	private JTextArea txtrCode;
+	private JScrollPane txtrCodeScrollPane;
 	private JTextField txtClientKey;
 	private JTextField txtSecretKey;
 	private JTextField txtTelegramId;
@@ -188,7 +190,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		txtrCode = CommuniqueFactory.createArea(CODE_HEADER, new CommuniqueDocumentListener(e -> {
 			Communique.this.config.setcRecipients(exportRecipients()); // dynamic update config
 		}));
-		JScrollPane scrollPane = new JScrollPane(txtrCode);
+		txtrCodeScrollPane = new JScrollPane(txtrCode);
 
 		// create key fields
 		JLabel lblClientKey = new JLabel("Client key", SwingConstants.RIGHT);
@@ -261,7 +263,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		gl_dataPanel.setHorizontalGroup(
 				gl_dataPanel.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_dataPanel.createSequentialGroup()
-								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 725, Short.MAX_VALUE)
+								.addComponent(txtrCodeScrollPane, GroupLayout.DEFAULT_SIZE, 725, Short.MAX_VALUE)
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_dataPanel.createParallelGroup(Alignment.TRAILING)
 										.addGroup(Alignment.LEADING, gl_dataPanel.createSequentialGroup()
@@ -326,7 +328,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 										.addComponent(progressBar, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
 										.addComponent(progressLabel, GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE))
 								.addContainerGap())
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE)
+						.addComponent(txtrCodeScrollPane, GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE)
 		);
 		dataPanel.setLayout(gl_dataPanel);
 
@@ -626,6 +628,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				LOGGER.log(Level.WARNING, "Autosave failed to load", ioe);
 			}
 		}
+        scrollBottom();
 
 	}
 
@@ -897,13 +900,15 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent ae) {
-                        progressBar.setMaximum(currentWaitTime());
-                        progressBar.setValue((int) (System.currentTimeMillis() - startTime));
-                        progressBar.setToolTipText(String.format("%.2f seconds until next telegram",
-								(double) (endTime - System.currentTimeMillis()) / 1000
-						));
-                        if (System.currentTimeMillis() > endTime || sendingThread.isInterrupted())
-                            timer.stop();
+                        EventQueue.invokeLater(() -> {
+                            progressBar.setMaximum(currentWaitTime());
+                            progressBar.setValue((int) (System.currentTimeMillis() - startTime));
+                            progressBar.setToolTipText(String.format("%.2f seconds until next telegram",
+                                    (double) (endTime - System.currentTimeMillis()) / 1000
+                            ));
+                            if (System.currentTimeMillis() > endTime || sendingThread.isInterrupted())
+                                timer.stop();
+                        });
                     }
                 });
         timer.start();
@@ -912,9 +917,16 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		progressLabel.setText(String.format("%d / %d", x + 1, length));
 		rSuccessTracker.put(recipientName, true);
 
-	}
+        scrollBottom();
+    }
 
-	private List<CommuniqueRecipient> exportRecipients() {
+    private void scrollBottom() {
+        // scroll the text area to the bottom
+        JScrollBar sb = txtrCodeScrollPane.getVerticalScrollBar();
+        EventQueue.invokeLater(() -> sb.setValue(sb.getMaximum() - 1));
+    }
+
+    private List<CommuniqueRecipient> exportRecipients() {
 		return Arrays.stream(txtrCode.getText().split("\n"))
 				.filter(ApiUtils::isNotEmpty)
 				.filter(s -> !s.startsWith("#"))
