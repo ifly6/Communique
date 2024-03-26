@@ -29,8 +29,11 @@ import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.io.CommuniqueScraper;
 import com.git.ifly6.communique.io.NoResolutionException;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
+import com.git.ifly6.communique.ngui.components.CommuniqueDocumentListener;
 import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
 import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
+import com.git.ifly6.communique.ngui.components.CommuniqueScrollableTextArea;
+import com.git.ifly6.communique.ngui.components.CommuniqueTimerBar;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
@@ -51,18 +54,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.undo.UndoManager;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
@@ -71,8 +68,6 @@ import java.awt.EventQueue;
 import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -84,7 +79,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.PatternSyntaxException;
@@ -109,8 +103,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	private Thread sendingThread = new Thread(); // The one sending thread
 
 	private JFrame frame;
-	private JTextArea txtrCode;
-	private JScrollPane txtrCodeScrollPane;
+	private CommuniqueScrollableTextArea txtrCode;
 	private JTextField txtClientKey;
 	private JTextField txtSecretKey;
 	private JTextField txtTelegramId;
@@ -124,7 +117,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 	private CommuniqueRecruiter recruiter;
 
-	private JProgressBar progressBar;
+	private CommuniqueTimerBar progressBar;
 	private JLabel progressLabel;
 	private Timer timer;
 
@@ -187,10 +180,14 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		JPanel dataPanel = new JPanel();
 		contentPane.add(dataPanel, BorderLayout.CENTER);
 
-		txtrCode = CommuniqueFactory.createArea(CODE_HEADER, new CommuniqueDocumentListener(e -> {
-			Communique.this.config.setcRecipients(exportRecipients()); // dynamic update config
-		}));
-		txtrCodeScrollPane = new JScrollPane(txtrCode);
+		txtrCode = new CommuniqueScrollableTextArea(
+				CommuniqueFactory.createArea(
+						CODE_HEADER,
+						new CommuniqueDocumentListener(e2 -> {
+							this.config.setcRecipients(exportRecipients()); // dynamic update config
+						})
+				)
+		);
 
 		// create key fields
 		JLabel lblClientKey = new JLabel("Client key", SwingConstants.RIGHT);
@@ -217,7 +214,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				})
 		);
 
-		progressBar = new JProgressBar();
+		progressBar = new CommuniqueTimerBar();
 		progressBar.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
 		progressLabel = new JLabel("? / ?");
@@ -263,7 +260,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		gl_dataPanel.setHorizontalGroup(
 				gl_dataPanel.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_dataPanel.createSequentialGroup()
-								.addComponent(txtrCodeScrollPane, GroupLayout.DEFAULT_SIZE, 725, Short.MAX_VALUE)
+								.addComponent(txtrCode, GroupLayout.DEFAULT_SIZE, 725, Short.MAX_VALUE)
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_dataPanel.createParallelGroup(Alignment.TRAILING)
 										.addGroup(Alignment.LEADING, gl_dataPanel.createSequentialGroup()
@@ -328,7 +325,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 										.addComponent(progressBar, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
 										.addComponent(progressLabel, GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE))
 								.addContainerGap())
-						.addComponent(txtrCodeScrollPane, GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE)
+						.addComponent(txtrCode, GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE)
 		);
 		dataPanel.setLayout(gl_dataPanel);
 
@@ -457,7 +454,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		mnEdit.add(mnImportRecipients);
 
 		JMenuItem mntmFromWaDelegate = new JMenuItem("From WA Delegate List");
-		mntmFromWaDelegate.addActionListener(e -> appendCode(CommuniqueRecipient.DELEGATES));
+		mntmFromWaDelegate.addActionListener(e -> txtrCode.appendLine(CommuniqueRecipient.DELEGATES));
 		mnImportRecipients.add(mntmFromWaDelegate);
 
 		JMenuItem mntmAsCommaSeparated = new JMenuItem("As Comma Separated List");
@@ -470,7 +467,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				Arrays.stream(input.split(",\\s*?"))
 						.map(CommuniqueRecipients::createNation) // createNation auto-trims
 						.map(CommuniqueRecipient::toString)
-						.forEach(this::appendCode);
+						.forEach(txtrCode::appendLine);
 			}
 		});
 		mnImportRecipients.add(mntmAsCommaSeparated);
@@ -491,7 +488,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				try {
 					CommuniqueScraper.importAtVoteDelegates(chamber, side).stream()
 							.map(CommuniqueRecipient::toString)
-							.forEach(this::appendCode);
+							.forEach(txtrCode::appendLine);
 
 				} catch (NoResolutionException nre) {
 					this.showMessageDialog("No resolution is at vote in that chamber, cannot import data",
@@ -518,7 +515,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 							.filter(s -> !s.startsWith("#"))
 							.filter(ApiUtils::isNotEmpty)
 							.map(ApiUtils::ref) // process
-							.forEach(this::appendCode); // append to text area
+							.forEach(txtrCode::appendLine); // append to text area
 				} catch (IOException e1) {
 					LOGGER.log(Level.WARNING, "Cannot read file, IOException", e1);
 					this.showMessageDialog("Cannot read file at " + path.toString(), CommuniqueMessages.ERROR);
@@ -539,7 +536,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				Arrays.stream(input.split(","))
 						.map(n -> CommuniqueRecipients.createNation(FilterType.EXCLUDE, n)) // method auto-formats
 						.map(CommuniqueRecipient::toString)
-						.forEach(this::appendCode);
+						.forEach(txtrCode::appendLine);
 			}
 		});
 		mnEdit.add(mntmAddExcludedNations);
@@ -628,8 +625,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 				LOGGER.log(Level.WARNING, "Autosave failed to load", ioe);
 			}
 		}
-        scrollBottom();
 
+		// scroll to the bottom
+		txtrCode.scrollBottom();
 	}
 
 	/**
@@ -642,7 +640,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		if (sendingThread.isAlive() && btnParse.getText().equalsIgnoreCase("Stop")) {
 			// kill the thread
 			sendingThread.interrupt();
-			client.setKillThread(true);
+			client.kill();
 			return;
 		}
 
@@ -715,7 +713,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 		// sending logic
 		if (!sendingThread.isAlive()) {
-			client.setKillThread(false);
+			client.resetKill();
 			Runnable runner = () -> {
 
 				client.setRecipients(parsedRecipients);    // Set recipients
@@ -792,8 +790,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
 		// Graphical reset
 		EventQueue.invokeLater(() -> {
-			progressBar.setValue(0); // reset the progress bar
-			progressBar.setMaximum(0); // reset progress bar max
+			progressBar.reset();
 			progressLabel.setText("? / ?"); // reset progress label
 			if (timer != null) timer.stop(); // null check for timer, stop if stopped
 			btnParse.setText("Parse"); // reset parse button
@@ -825,10 +822,6 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 		config.defaultVersion();
 		LOGGER.info("Communiqué config exported");
 		return this.config;
-	}
-
-	private void appendCode(Object input) {
-		txtrCode.append("\n" + input.toString());
 	}
 
 	/**
@@ -884,46 +877,14 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	public void sentTo(String recipientName, int x, int length) {
 
 		String recipient = CommuniqueRecipients.createExcludedNation(recipientName).toString();
-		txtrCode.append(x == 0 ? "\n\n" + recipient : "\n" + recipient);
+		txtrCode.appendLine(x == 0 ? "\n" + recipient : recipient); // scrolls to the bottom automatically
 
-		// Progress bar reset code
-		if (timer != null) {
-			timer.stop();               // stop current timer
-			progressBar.setValue(0);    // reset progress bar
-		}
-
-        final long startTime = System.currentTimeMillis();
-        final long endTime = startTime + currentWaitTime();
-
-        timer = new Timer(
-                1000 / 20, // time between updates in ms
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent ae) {
-                        EventQueue.invokeLater(() -> {
-                            progressBar.setMaximum(currentWaitTime());
-                            progressBar.setValue((int) (System.currentTimeMillis() - startTime));
-                            progressBar.setToolTipText(String.format("%.2f seconds until next telegram",
-                                    (double) (endTime - System.currentTimeMillis()) / 1000
-                            ));
-                            if (System.currentTimeMillis() > endTime || sendingThread.isInterrupted())
-                                timer.stop();
-                        });
-                    }
-                });
-        timer.start();
+		progressBar.reset();
+		progressBar.start(System.currentTimeMillis(), System.currentTimeMillis() + currentWaitTime());
 
 		// Update the label and log successes as relevant
 		progressLabel.setText(String.format("%d / %d", x + 1, length));
 		rSuccessTracker.put(recipientName, true);
-
-        scrollBottom();
-    }
-
-    private void scrollBottom() {
-        // scroll the text area to the bottom
-        JScrollBar sb = txtrCodeScrollPane.getVerticalScrollBar();
-        EventQueue.invokeLater(() -> sb.setValue(sb.getMaximum() - 1));
     }
 
     private List<CommuniqueRecipient> exportRecipients() {
@@ -946,29 +907,4 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 	private String showTextInputDialog(String text, String title) {
 		return JOptionPane.showInputDialog(frame, text, title, JOptionPane.PLAIN_MESSAGE);
 	}
-}
-
-class CommuniqueDocumentListener implements DocumentListener {
-
-	private Consumer<DocumentEvent> consumer;
-
-	CommuniqueDocumentListener(Consumer<DocumentEvent> consumer) {
-		this.consumer = consumer;
-	}
-
-	@Override
-	public void changedUpdate(DocumentEvent event) {
-		consumer.accept(event);
-	}
-
-	@Override
-	public void insertUpdate(DocumentEvent event) {
-		consumer.accept(event);
-	}
-
-	@Override
-	public void removeUpdate(DocumentEvent event) {
-		consumer.accept(event);
-	}
-
 }
