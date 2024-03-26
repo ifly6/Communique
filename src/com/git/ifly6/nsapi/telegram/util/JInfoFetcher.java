@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 ifly6
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.git.ifly6.nsapi.telegram.util;
 
 import com.git.ifly6.nsapi.ApiUtils;
@@ -29,118 +46,118 @@ import java.util.stream.Stream;
  */
 public class JInfoFetcher {
 
-	private static JInfoFetcher singleton;
+    private static JInfoFetcher singleton;
 
-	private Map<String, List<String>> regionList = new HashMap<>();
-	private Map<String, List<String>> regionTags = new HashMap<>();
+    private Map<String, List<String>> regionList = new HashMap<>();
+    private Map<String, List<String>> regionTags = new HashMap<>();
 
-	private List<String> allNations;
-	private List<String> delegates;
-	private List<String> waMembers;
+    private List<String> allNations;
+    private List<String> delegates;
+    private List<String> waMembers;
 
-	private JInfoFetcher() {
-	}
+    private JInfoFetcher() {
+    }
 
-	public static JInfoFetcher instance() {
-		if (singleton == null) singleton = new JInfoFetcher();
-		return singleton;
-	}
+    public static JInfoFetcher instance() {
+        if (singleton == null) singleton = new JInfoFetcher();
+        return singleton;
+    }
 
-	/**
-	 * Queries the NationStates API for a listing of all World Assembly delegates.
-	 * @return <code>List&lt;String&gt;</code> with the recipients inside
-	 * @throws JTelegramException in case there is a problem with connecting to the NS API
-	 */
-	public List<String> getDelegates() throws JTelegramException {
-		if (delegates == null) try {
-			delegates = NSWorld.getDelegates();
-		} catch (IOException e) {
-			throw new JTelegramException("Failed to get list of delegates", e);
-		}
-		return delegates;
-	}
+    /**
+     * Queries the NationStates API for a listing of all World Assembly delegates.
+     * @return <code>List&lt;String&gt;</code> with the recipients inside
+     * @throws JTelegramException in case there is a problem with connecting to the NS API
+     */
+    public List<String> getDelegates() throws JTelegramException {
+        if (delegates == null) try {
+            delegates = NSWorld.getDelegates();
+        } catch (IOException e) {
+            throw new JTelegramException("Failed to get list of delegates", e);
+        }
+        return delegates;
+    }
 
-	/**
-	 * Queries the NationStates API for a listing of 50 new nations.
-	 * @return <code>List&lt;String&gt;</code> with the recipients inside
-	 * @throws JTelegramException in case the NationStates API is unreachable for some reason
-	 */
-	public List<String> getNew() throws JTelegramException {
-		try {
-			NSConnection connection = new NSConnection(NSConnection.API_PREFIX + "q=newnations");
-			String response = connection.connect().getResponse();
-			String newNations = new XMLDocument(response).xpath("/WORLD/NEWNATIONS/text()").get(0);
-			return Stream.of(newNations.split(","))
-					.map(String::trim)
-					.filter(ApiUtils::isNotEmpty)
-					.collect(Collectors.toList());
-		} catch (IOException e) {
-			throw new JTelegramException("Failed to get new nations", e);
-		}
-	}
+    /**
+     * Queries the NationStates API for a listing of 50 new nations.
+     * @return <code>List&lt;String&gt;</code> with the recipients inside
+     * @throws JTelegramException in case the NationStates API is unreachable for some reason
+     */
+    public List<String> getNew() throws JTelegramException {
+        try {
+            NSConnection connection = new NSConnection(NSConnection.API_PREFIX + "q=newnations");
+            String response = connection.connect().getResponse();
+            String newNations = new XMLDocument(response).xpath("/WORLD/NEWNATIONS/text()").get(0);
+            return Stream.of(newNations.split(","))
+                    .map(String::trim)
+                    .filter(ApiUtils::isNotEmpty)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new JTelegramException("Failed to get new nations", e);
+        }
+    }
 
-	/**
-	 * Queries the NationStates API for a listing of all the members of a region.
-	 * @return <code>List&lt;String&gt;</code> with the recipients inside
-	 * @throws JTelegramException in case the NationStates API is unreachable for some reason
-	 */
-	public List<String> getRegion(String region) throws JTelegramException {
-		try {
-			if (!regionList.containsKey(region) || regionList.get(region) == null) {
-				NSRegion nsRegion = new NSRegion(region).populateData();
-				regionList.put(region, nsRegion.getRegionMembers());
-			}
-		} catch (NSException e) { // non-existent -> throw NSException
-			throw new JTelegramException(String.format("Failed to load data for region %s", region), e);
-		}
-		return regionList.get(region);
-	}
+    /**
+     * Queries the NationStates API for a listing of all the members of a region.
+     * @return <code>List&lt;String&gt;</code> with the recipients inside
+     * @throws JTelegramException in case the NationStates API is unreachable for some reason
+     */
+    public List<String> getRegion(String region) throws JTelegramException {
+        try {
+            if (!regionList.containsKey(region) || regionList.get(region) == null) {
+                NSRegion nsRegion = new NSRegion(region).populateData();
+                regionList.put(region, nsRegion.getRegionMembers());
+            }
+        } catch (NSException e) { // non-existent -> throw NSException
+            throw new JTelegramException(String.format("Failed to load data for region %s", region), e);
+        }
+        return regionList.get(region);
+    }
 
-	/**
-	 * Queries the NationStates API for a list of all the regions declaring some tag.
-	 * @param regionTag to query (e.g. 'LGBT', 'Massive')
-	 * @return <code>List&lt;String&gt;</code> of regions with that tag
-	 * @throws JTelegramException on IO Exception, likely due to API being unreachable
-	 */
-	public List<String> getRegionTag(String regionTag) throws JTelegramException {
-		try {
-			if (!regionTags.containsKey(regionTag) || regionTags.get(regionTag) == null) {
-				regionTags.put(regionTag, NSWorld.getRegionTag(regionTag));
-			}
-		} catch (IOException e) {
-			throw new JTelegramException("Failed to fetch regions declaring tag " + regionTag, e);
-		} catch (IndexOutOfBoundsException e) {
-			throw new JTelegramException(String.format("Region tag '%s' does not exist", regionTag), e);
-		}
+    /**
+     * Queries the NationStates API for a list of all the regions declaring some tag.
+     * @param regionTag to query (e.g. 'LGBT', 'Massive')
+     * @return <code>List&lt;String&gt;</code> of regions with that tag
+     * @throws JTelegramException on IO Exception, likely due to API being unreachable
+     */
+    public List<String> getRegionTag(String regionTag) throws JTelegramException {
+        try {
+            if (!regionTags.containsKey(regionTag) || regionTags.get(regionTag) == null) {
+                regionTags.put(regionTag, NSWorld.getRegionTag(regionTag));
+            }
+        } catch (IOException e) {
+            throw new JTelegramException("Failed to fetch regions declaring tag " + regionTag, e);
+        } catch (IndexOutOfBoundsException e) {
+            throw new JTelegramException(String.format("Region tag '%s' does not exist", regionTag), e);
+        }
 
-		return regionTags.get(regionTag);
-	}
+        return regionTags.get(regionTag);
+    }
 
-	/**
-	 * Queries the NationStates API for a listing of every single World Assembly member.
-	 * @return <code>List&lt;String&gt;</code> with the recipients inside
-	 * @throws JTelegramException in case the NationStates API is unreachable for some reason
-	 */
-	public List<String> getWAMembers() throws JTelegramException {
-		if (waMembers == null) try {
-			waMembers = NSWorld.getWAMembers();
-		} catch (IOException e) {
-			throw new JTelegramException("Cannot fetch World Assembly members", e);
-		}
-		return waMembers;
-	}
+    /**
+     * Queries the NationStates API for a listing of every single World Assembly member.
+     * @return <code>List&lt;String&gt;</code> with the recipients inside
+     * @throws JTelegramException in case the NationStates API is unreachable for some reason
+     */
+    public List<String> getWAMembers() throws JTelegramException {
+        if (waMembers == null) try {
+            waMembers = NSWorld.getWAMembers();
+        } catch (IOException e) {
+            throw new JTelegramException("Cannot fetch World Assembly members", e);
+        }
+        return waMembers;
+    }
 
-	/**
-	 * Queries the NationStates API for a listing of every nation in the game.
-	 * @return a list of all nations in the game
-	 * @throws JTelegramException in case the NationStates API is unreachable for some reason
-	 */
-	public List<String> getAll() throws JTelegramException {
-		if (allNations == null) try {
-			allNations = NSWorld.getAllNations();
-		} catch (IOException e) {
-			throw new JTelegramException("Cannot fetch all nations", e);
-		}
-		return allNations;
-	}
+    /**
+     * Queries the NationStates API for a listing of every nation in the game.
+     * @return a list of all nations in the game
+     * @throws JTelegramException in case the NationStates API is unreachable for some reason
+     */
+    public List<String> getAll() throws JTelegramException {
+        if (allNations == null) try {
+            allNations = NSWorld.getAllNations();
+        } catch (IOException e) {
+            throw new JTelegramException("Cannot fetch all nations", e);
+        }
+        return allNations;
+    }
 }

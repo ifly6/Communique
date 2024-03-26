@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -39,95 +39,96 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Provides the outline for the recruiter classes. Also provides recipient search functionality shared between {@link
- * CommuniqueRecruiter} and {@link MarconiRecruiter}.
+ * Provides the outline for the recruiter classes. Also provides recipient search functionality shared between
+ * {@link CommuniqueRecruiter} and {@link MarconiRecruiter}.
  * @author ifly6
  */
 public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 
-	private static final JInfoFetcher fetcher = JInfoFetcher.instance();
-	private static final Logger LOGGER = Logger.getLogger(AbstractCommuniqueRecruiter.class.getName());
+    private static final JInfoFetcher fetcher = JInfoFetcher.instance();
+    private static final Logger LOGGER = Logger.getLogger(AbstractCommuniqueRecruiter.class.getName());
 
-	protected List<CommuniqueRecipient> filterList;
-	protected LinkedHashSet<CommuniqueRecipient> sentList;
-	protected Set<CommuniqueRecipient> proscribedRegions;
+    protected List<CommuniqueRecipient> filterList;
+    protected LinkedHashSet<CommuniqueRecipient> sentList;
+    protected Set<CommuniqueRecipient> proscribedRegions;
 
-	public void setConfig(CommuniqueConfig config) {
-		// get the sent list first
-		sentList = config.getcRecipients().stream()
-				.filter(r -> r.getRecipientType() == RecipientType.NATION)
-				.filter(r -> r.getFilterType() == FilterType.EXCLUDE)
-				.collect(Collectors.toCollection(LinkedHashSet::new));
+    public void setConfig(CommuniqueConfig config) {
+        // get the sent list first
+        sentList = config.getcRecipients().stream()
+                .filter(r -> r.getRecipientType() == RecipientType.NATION)
+                .filter(r -> r.getFilterType() == FilterType.EXCLUDE)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
-		// then get extra filter list things
-		RecipientType[] goodRecipientTypes = {RecipientType.NATION};
-		filterList = config.getcRecipients().stream()
-				.filter(r -> r.getFilterType() != FilterType.NORMAL) // exclude all additions
-				.filter(r -> ApiUtils.contains(goodRecipientTypes, r.getRecipientType()))
-				.filter(r -> !sentList.contains(r))
-				.collect(Collectors.toList());
-	}
+        // then get extra filter list things
+        RecipientType[] goodRecipientTypes = {RecipientType.NATION};
+        filterList = config.getcRecipients().stream()
+                .filter(r -> r.getFilterType() != FilterType.NORMAL) // exclude all additions
+                .filter(r -> ApiUtils.contains(goodRecipientTypes, r.getRecipientType()))
+                .filter(r -> !sentList.contains(r))
+                .collect(Collectors.toList());
+    }
 
-	public abstract void send();
+    public abstract void send();
 
-	@Override
-	public void sentTo(String recipient, int recipientNum, int length) {
-		sentList.add(CommuniqueRecipients.createExcludedNation(recipient));
-	}
+    @Override
+    public void sentTo(String recipient, int recipientNum, int length) {
+        sentList.add(CommuniqueRecipients.createExcludedNation(recipient));
+    }
 
-	/**
-	 * Returns a recipient based on the new recipients list from the NS API, filtered by whether it is proscribed. Note
-	 * that any issues or problems are dealt with my defaulting to the newest nation, ignoring the proscription filter.
-	 * It also filters by whether the nation is recruitable.
-	 * @return a <code>String</code> with the name of the recipient
-	 * @see #getRecipient2()
-	 */
-	public CommuniqueRecipient getRecipient() {
-		while (true)
-			try {
-				return getRecipient2();
-			} catch (RuntimeException e) {
-				LOGGER.log(Level.WARNING, "Could not load recipients.", e);
-				try {
-					Thread.sleep(60 * 1000);
-				} catch (InterruptedException ignored) { }
-			}
-	}
+    /**
+     * Returns a recipient based on the new recipients list from the NS API, filtered by whether it is proscribed. Note
+     * that any issues or problems are dealt with my defaulting to the newest nation, ignoring the proscription filter.
+     * It also filters by whether the nation is recruitable.
+     * @return a <code>String</code> with the name of the recipient
+     * @see #getRecipient2()
+     */
+    public CommuniqueRecipient getRecipient() {
+        while (true)
+            try {
+                return getRecipient2();
+            } catch (RuntimeException e) {
+                LOGGER.log(Level.WARNING, "Could not load recipients.", e);
+                try {
+                    Thread.sleep(60 * 1000);
+                } catch (InterruptedException ignored) {
+                }
+            }
+    }
 
-	private CommuniqueRecipient getRecipient2() {
-		List<String> possibleRecipients = ApiUtils.ref(fetcher.getNew());
-		for (String element : possibleRecipients) {
+    private CommuniqueRecipient getRecipient2() {
+        List<String> possibleRecipients = ApiUtils.ref(fetcher.getNew());
+        for (String element : possibleRecipients) {
 
-			// if in sent list, next
-			// if otherwise prohibited by other filter rules, next
-			// if not recruitable, next
-			// otherwise, return
+            // if in sent list, next
+            // if otherwise prohibited by other filter rules, next
+            // if not recruitable, next
+            // otherwise, return
 
-			LOGGER.info(String.format("Checking %s", element));
-			Communique7Parser parser = new Communique7Parser().apply(CommuniqueRecipients.createNation(element))
-					.apply(new ArrayList<>(sentList)) // sent list filter
-					.apply(filterList); // other filters
-			if (!parser.listRecipients().contains(element)) continue;
+            LOGGER.info(String.format("Checking %s", element));
+            Communique7Parser parser = new Communique7Parser().apply(CommuniqueRecipients.createNation(element))
+                    .apply(new ArrayList<>(sentList)) // sent list filter
+                    .apply(filterList); // other filters
+            if (!parser.listRecipients().contains(element)) continue;
 
-			try {
-				NSNation prNation = new NSNation(element).populateData();
-				if (!prNation.isRecruitable()) continue; // if not recruitable yeet
-				if (isProscribed(prNation)) continue; // if proscribed yeet
+            try {
+                NSNation prNation = new NSNation(element).populateData();
+                if (!prNation.isRecruitable()) continue; // if not recruitable yeet
+                if (isProscribed(prNation)) continue; // if proscribed yeet
 
-			} catch (NSException e) {
-				// if it doesn't exist or otherwise fails, ignore this one
-				continue;
-			}
+            } catch (NSException e) {
+                // if it doesn't exist or otherwise fails, ignore this one
+                continue;
+            }
 
-			// 2017-03-18 proscription and recruit checks are now performed by JavaTelegram#predicates
-			// 2020-01-26 disregard above, they're just not done by JavaTelegram#predicates
-			LOGGER.info(String.format("Returning match %s", element));
-			return CommuniqueRecipients.createNation(element);
-		}
+            // 2017-03-18 proscription and recruit checks are now performed by JavaTelegram#predicates
+            // 2020-01-26 disregard above, they're just not done by JavaTelegram#predicates
+            LOGGER.info(String.format("Returning match %s", element));
+            return CommuniqueRecipients.createNation(element);
+        }
 
-		// if the filtering failed entirely, then simply just return the newest nation.
-		LOGGER.info(String.format("Could not find match; returning default match %s", possibleRecipients.get(0)));
-		return CommuniqueRecipients.createNation(possibleRecipients.get(0));
+        // if the filtering failed entirely, then simply just return the newest nation.
+        LOGGER.info(String.format("Could not find match; returning default match %s", possibleRecipients.get(0)));
+        return CommuniqueRecipients.createNation(possibleRecipients.get(0));
 
 //			} catch (JTelegramException e) {
 //				LOGGER.warning("Cannot fetch new nations. Retrying. Sleep one second.");
@@ -151,26 +152,26 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 //			throw new NSIOException("Stack overflow error!");
 //		}
 
-	}
+    }
 
-	/**
-	 * Determines whether a nation is in a region excluded by the JList <code>excludeList</code>. This method acts with
-	 * two assumptions: (1) it is not all right to telegram to anyone who resides in a prescribed region and (2) if they
-	 * moved out of the region since founding, it is certainly all right to do so.
-	 * @param nation to check
-	 * @return <code>boolean</code> on whether it is proscribed
-	 */
-	private boolean isProscribed(NSNation nation) {
+    /**
+     * Determines whether a nation is in a region excluded by the JList <code>excludeList</code>. This method acts with
+     * two assumptions: (1) it is not all right to telegram to anyone who resides in a prescribed region and (2) if they
+     * moved out of the region since founding, it is certainly all right to do so.
+     * @param nation to check
+     * @return <code>boolean</code> on whether it is proscribed
+     */
+    private boolean isProscribed(NSNation nation) {
 
-		if (!nation.hasData()) nation.populateData();
+        if (!nation.hasData()) nation.populateData();
 
-		// API gives region names, can only do this by converting to ref names and then comparing
-		String nRegion = ApiUtils.ref(nation.getRegion());
-		return proscribedRegions.stream()
-				.map(CommuniqueRecipient::getName)
-				.map(ApiUtils::ref)
-				.anyMatch(regionName -> regionName.equals(nRegion));
+        // API gives region names, can only do this by converting to ref names and then comparing
+        String nRegion = ApiUtils.ref(nation.getRegion());
+        return proscribedRegions.stream()
+                .map(CommuniqueRecipient::getName)
+                .map(ApiUtils::ref)
+                .anyMatch(regionName -> regionName.equals(nRegion));
 
-	}
+    }
 
 }

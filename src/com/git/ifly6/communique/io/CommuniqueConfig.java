@@ -35,164 +35,164 @@ import java.util.stream.Collectors;
  */
 public class CommuniqueConfig implements java.io.Serializable {
 
-	// For backwards compatibility, almost all field names cannot be changed
-	private static final long serialVersionUID = Communique7Parser.version;
+    // For backwards compatibility, almost all field names cannot be changed
+    private static final long serialVersionUID = Communique7Parser.version;
 
-	public static final String HEADER = "Communiqué Configuration File. Do not edit by hand. Produced at: "
-			+ CommuniqueUtilities.getDate() + ". Produced by version " + Communique7Parser.version;
+    public static final String HEADER = "Communiqué Configuration File. Do not edit by hand. Produced at: "
+            + CommuniqueUtilities.getDate() + ". Produced by version " + Communique7Parser.version;
 
-	public int version;
+    public int version;
 
-	protected boolean isRecruitment;
-	public CommuniqueProcessingAction processingAction;
+    protected boolean isRecruitment;
+    public CommuniqueProcessingAction processingAction;
 
-	public JTelegramKeys keys;
-	public JTelegramType telegramType;
-	public String waitString;
+    public JTelegramKeys keys;
+    public JTelegramType telegramType;
+    public String waitString;
 
-	/**
-	 * Holds all of the Communique recipients in <code>String</code>s so that it can be edited by hand and not as {@link
-	 * CommuniqueRecipient}.
-	 * <p>To keep this editable by hand, the configuration system uses getters and setters to translate to and from the
-	 * string state representations to present to the programmer a {@link CommuniqueRecipient} API but actually store
-	 * everything in strings.</p>
-	 */
-	private ArrayList<String> cRecipients; // must be mutable, use ArrayList
+    /**
+     * Holds all of the Communique recipients in <code>String</code>s so that it can be edited by hand and not as
+     * {@link CommuniqueRecipient}.
+     * <p>To keep this editable by hand, the configuration system uses getters and setters to translate to and from the
+     * string state representations to present to the programmer a {@link CommuniqueRecipient} API but actually store
+     * everything in strings.</p>
+     */
+    private ArrayList<String> cRecipients; // must be mutable, use ArrayList
 
-	// These should be deprecated, but are kept for backward compatibility
-	@Deprecated
-	public String[] recipients; // consider removing
+    // These should be deprecated, but are kept for backward compatibility
+    @Deprecated
+    public String[] recipients; // consider removing
 
-	@Deprecated
-	public String[] sentList;   // consider removing
+    @Deprecated
+    public String[] sentList;   // consider removing
 
-	/**
-	 * Empty constructor for {@link CommuniqueConfig}
-	 */
-	public CommuniqueConfig() {
-		this.keys = new JTelegramKeys(); // empty keys
-		this.version = defaultVersion(); // default version to current version
-		this.processingAction = CommuniqueProcessingAction.NONE; // no processing action
-	}
+    /**
+     * Empty constructor for {@link CommuniqueConfig}
+     */
+    public CommuniqueConfig() {
+        this.keys = new JTelegramKeys(); // empty keys
+        this.version = defaultVersion(); // default version to current version
+        this.processingAction = CommuniqueProcessingAction.NONE; // no processing action
+    }
 
-	/**
-	 * Constructor for <code>{@link CommuniqueConfig}</code>s. All the
-	 * <code>{@link CommuniqueRecipient}</code>s should be specified after the fact.
-	 * @param t                the type of telegrams configured to be sent
-	 * @param processingAction is the applicable processing action
-	 * @param keys             are the keys
-	 * @param s                for the wait string
-	 */
-	public CommuniqueConfig(JTelegramType t, CommuniqueProcessingAction processingAction,
-	                        JTelegramKeys keys, String s) {
-		this();
-		this.telegramType = t;
-		this.processingAction = processingAction;
-		this.keys = keys;
-		this.waitString = s;
-	}
+    /**
+     * Constructor for <code>{@link CommuniqueConfig}</code>s. All the
+     * <code>{@link CommuniqueRecipient}</code>s should be specified after the fact.
+     * @param t                the type of telegrams configured to be sent
+     * @param processingAction is the applicable processing action
+     * @param keys             are the keys
+     * @param s                for the wait string
+     */
+    public CommuniqueConfig(JTelegramType t, CommuniqueProcessingAction processingAction,
+                            JTelegramKeys keys, String s) {
+        this();
+        this.telegramType = t;
+        this.processingAction = processingAction;
+        this.keys = keys;
+        this.waitString = s;
+    }
 
-	/**
-	 * Sets the default version to the version in {@link Communique7Parser}.
-	 * @return the version in <code>Communique7Parser</code>
-	 */
-	public int defaultVersion() {
-		this.version = Communique7Parser.version;
-		return Communique7Parser.version;
-	}
+    /**
+     * Sets the default version to the version in {@link Communique7Parser}.
+     * @return the version in <code>Communique7Parser</code>
+     */
+    public int defaultVersion() {
+        this.version = Communique7Parser.version;
+        return Communique7Parser.version;
+    }
 
-	/**
-	 * Returns converted <code>cRecipients</code> to <code>List&lt;CommuniqueRecipient&gt;</code>
-	 * @return <code>cRecipients</code> converted to <code>List&lt;CommuniqueRecipient&gt;</code>
-	 */
-	public List<CommuniqueRecipient> getcRecipients() {
-		if (cRecipients == null) return null; // deal with null case
+    /**
+     * Returns converted <code>cRecipients</code> to <code>List&lt;CommuniqueRecipient&gt;</code>
+     * @return <code>cRecipients</code> converted to <code>List&lt;CommuniqueRecipient&gt;</code>
+     */
+    public List<CommuniqueRecipient> getcRecipients() {
+        if (cRecipients == null) return null; // deal with null case
 
-		// use imperative for speed
-		List<CommuniqueRecipient> list = new ArrayList<>(cRecipients.size());
-		for (String s : cRecipients)
-			list.add(CommuniqueRecipient.parseRecipient(s));
-		return list;
-	}
+        // use imperative for speed
+        List<CommuniqueRecipient> list = new ArrayList<>(cRecipients.size());
+        for (String s : cRecipients)
+            list.add(CommuniqueRecipient.parseRecipient(s));
+        return list;
+    }
 
-	/**
-	 * Returns raw <code>cRecipients</code>, which is <code>List&lt;String&gt;</code>
-	 * @return <code>cRecipients</code>
-	 */
-	public List<String> getcRecipientsString() {
-		return cRecipients;
-	}
+    /**
+     * Returns raw <code>cRecipients</code>, which is <code>List&lt;String&gt;</code>
+     * @return <code>cRecipients</code>
+     */
+    public List<String> getcRecipientsString() {
+        return cRecipients;
+    }
 
-	/**
-	 * Sets <code>cRecipients</code> with <code>List&lt;CommuniqueRecipient&gt;</code>, translates to
-	 * <code>String</code> on the fly.
-	 * @param crs {@link CommuniqueRecipient}s to set
-	 */
-	public void setcRecipients(List<CommuniqueRecipient> crs) {
-		// NOTE: No setcRecipients(List<String> crs) because need for verification
-		// use imperative for speed
-		ArrayList<String> list = new ArrayList<>(crs.size());
-		for (CommuniqueRecipient cr : crs)
-			list.add(cr.toString());
-		cRecipients = list;
-	}
+    /**
+     * Sets <code>cRecipients</code> with <code>List&lt;CommuniqueRecipient&gt;</code>, translates to
+     * <code>String</code> on the fly.
+     * @param crs {@link CommuniqueRecipient}s to set
+     */
+    public void setcRecipients(List<CommuniqueRecipient> crs) {
+        // NOTE: No setcRecipients(List<String> crs) because need for verification
+        // use imperative for speed
+        ArrayList<String> list = new ArrayList<>(crs.size());
+        for (CommuniqueRecipient cr : crs)
+            list.add(cr.toString());
+        cRecipients = list;
+    }
 
-	public void addcRecipient(CommuniqueRecipient cr) {
-		cRecipients.add(cr.toString());
-	}
+    public void addcRecipient(CommuniqueRecipient cr) {
+        cRecipients.add(cr.toString());
+    }
 
-	/**
-	 * Gets processing action
-	 * @return processing action, {@link CommuniqueProcessingAction#NONE} if null
-	 */
-	public CommuniqueProcessingAction getProcessingAction() {
-		return processingAction == null ? CommuniqueProcessingAction.NONE : processingAction;
-	}
+    /**
+     * Gets processing action
+     * @return processing action, {@link CommuniqueProcessingAction#NONE} if null
+     */
+    public CommuniqueProcessingAction getProcessingAction() {
+        return processingAction == null ? CommuniqueProcessingAction.NONE : processingAction;
+    }
 
-	/**
-	 * Gets telegram type
-	 * @return telegram type, {@link JTelegramType#NONE} if null
-	 */
-	public JTelegramType getTelegramType() {
-		return telegramType == null ? JTelegramType.NONE : telegramType;
-	}
+    /**
+     * Gets telegram type
+     * @return telegram type, {@link JTelegramType#NONE} if null
+     */
+    public JTelegramType getTelegramType() {
+        return telegramType == null ? JTelegramType.NONE : telegramType;
+    }
 
-	/**
-	 * Checks all the data kept in {@link CommuniqueConfig#cRecipients} and makes they are distinct and applicable to
-	 * save to the program. For backward compatibility, it also applies these changes to the old {@code recipients}
-	 * and the {@code sentList}. It also updates the {@code CommuniqueConfig} version <i>field</i>, not the
-	 * one in the header, to the version of the program on which it was saved.
-	 */
-	void clean() {
-		version = this.defaultVersion(); // updates version
+    /**
+     * Checks all the data kept in {@link CommuniqueConfig#cRecipients} and makes they are distinct and applicable to
+     * save to the program. For backward compatibility, it also applies these changes to the old {@code recipients} and
+     * the {@code sentList}. It also updates the {@code CommuniqueConfig} version <i>field</i>, not the one in the
+     * header, to the version of the program on which it was saved.
+     */
+    void clean() {
+        version = this.defaultVersion(); // updates version
 
-		if (Objects.nonNull(cRecipients) && !cRecipients.isEmpty()) // apparently cRecipients is nullable
-			cRecipients = cRecipients.stream().distinct()
-					.map(CommuniqueConfig::cleanNation)
-					.collect(Collectors.toCollection(ArrayList::new));
-		else
-			cRecipients = new ArrayList<>();
+        if (Objects.nonNull(cRecipients) && !cRecipients.isEmpty()) // apparently cRecipients is nullable
+            cRecipients = cRecipients.stream().distinct()
+                    .map(CommuniqueConfig::cleanNation)
+                    .collect(Collectors.toCollection(ArrayList::new));
+        else
+            cRecipients = new ArrayList<>();
 
-		if (Objects.nonNull(recipients) && recipients.length > 0)
-			recipients = Arrays.stream(recipients)
-					.distinct()
-					.map(CommuniqueConfig::cleanNation)
-					.toArray(String[]::new);
+        if (Objects.nonNull(recipients) && recipients.length > 0)
+            recipients = Arrays.stream(recipients)
+                    .distinct()
+                    .map(CommuniqueConfig::cleanNation)
+                    .toArray(String[]::new);
 
-		if (Objects.nonNull(sentList) && sentList.length > 0)
-			sentList = Arrays.stream(sentList)
-					.distinct()
-					.map(CommuniqueConfig::cleanNation)
-					.toArray(String[]::new);
-	}
+        if (Objects.nonNull(sentList) && sentList.length > 0)
+            sentList = Arrays.stream(sentList)
+                    .distinct()
+                    .map(CommuniqueConfig::cleanNation)
+                    .toArray(String[]::new);
+    }
 
-	/**
-	 * Cleans nation names that could have been prefixed accidentally in a previous version of Communique
-	 * @param recipientString is the string-name of the nation
-	 * @return the same with all the extra 'nation:'s removed.
-	 */
-	private static String cleanNation(String recipientString) {
-		return recipientString.replace(":(nation:)*", ":");
-	}
+    /**
+     * Cleans nation names that could have been prefixed accidentally in a previous version of Communique
+     * @param recipientString is the string-name of the nation
+     * @return the same with all the extra 'nation:'s removed.
+     */
+    private static String cleanNation(String recipientString) {
+        return recipientString.replace(":(nation:)*", ":");
+    }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -22,98 +22,98 @@ package com.git.ifly6.nsapi.telegram;
  */
 public enum JTelegramType {
 
-	/**
-	 * Timing for campaign telegrams with {@link #DEFAULT_TIMING} delay.
-	 */
-	CAMPAIGN {
-		@Override
-		public int getWaitTime() {
-			return DEFAULT_TIMING;
-		}
+    /**
+     * Timing for campaign telegrams with {@link #DEFAULT_TIMING} delay.
+     */
+    CAMPAIGN {
+        @Override
+        public int getWaitTime() {
+            return DEFAULT_TIMING;
+        }
 
-		@Override
-		public void setDefaultTime(int i) {
-			throw new UnsupportedOperationException("Cannot set time on immutable setting");
-		}
+        @Override
+        public void setDefaultTime(int i) {
+            throw new UnsupportedOperationException("Cannot set time on immutable setting");
+        }
 
-		@Override
-		public String toString() {
-			return "Campaign";
-		}
+        @Override
+        public String toString() {
+            return "Campaign";
+        }
 
-	},
+    },
 
-	/**
-	 * Timing for recruitment telegrams with wait timing at 180.05 seconds.
-	 */
-	RECRUIT {
-		@Override
-		public int getWaitTime() {
-			return (int) (180.05 * 1000);
-		}
+    /**
+     * Timing for recruitment telegrams with wait timing at 180.05 seconds.
+     */
+    RECRUIT {
+        @Override
+        public int getWaitTime() {
+            return (int) (180.05 * 1000);
+        }
 
-		@Override
-		public void setDefaultTime(int i) {
-			throw new UnsupportedOperationException("Cannot set time on immutable setting");
-		}
+        @Override
+        public void setDefaultTime(int i) {
+            throw new UnsupportedOperationException("Cannot set time on immutable setting");
+        }
 
-		@Override
-		public String toString() {
-			return "Recruitment";
-		}
+        @Override
+        public String toString() {
+            return "Recruitment";
+        }
 
-	},
+    },
 
-	/**
-	 * Custom telegram type with custom timing. Default timing is still {@link #DEFAULT_TIMING} but can be set to any
-	 * desired value.
-	 */
-	CUSTOM {
-		private int time = DEFAULT_TIMING;
+    /**
+     * Custom telegram type with custom timing. Default timing is still {@link #DEFAULT_TIMING} but can be set to any
+     * desired value.
+     */
+    CUSTOM {
+        private int time = DEFAULT_TIMING;
 
-		@Override
-		public int getWaitTime() {
-			return time;
-		}
+        @Override
+        public int getWaitTime() {
+            return time;
+        }
 
-		@Override
-		public void setDefaultTime(int i) {
-			time = i;
-		}
+        @Override
+        public void setDefaultTime(int i) {
+            time = i;
+        }
 
-		@Override
-		public String toString() {
-			return String.format("Custom timing (%d ms)", time);
-		}
-	},
+        @Override
+        public String toString() {
+            return String.format("Custom timing (%d ms)", time);
+        }
+    },
 
-	/**
-	 * Timing for unmarked telegrams with {@link #DEFAULT_TIMING} delay.
-	 */
-	NONE {
-		@Override
-		public int getWaitTime() {
-			return DEFAULT_TIMING;
-		}
+    /**
+     * Timing for unmarked telegrams with {@link #DEFAULT_TIMING} delay.
+     */
+    NONE {
+        @Override
+        public int getWaitTime() {
+            return DEFAULT_TIMING;
+        }
 
-		@Override
-		public void setDefaultTime(int i) {
-			throw new UnsupportedOperationException("Cannot set time on immutable setting");
-		}
+        @Override
+        public void setDefaultTime(int i) {
+            throw new UnsupportedOperationException("Cannot set time on immutable setting");
+        }
 
-		@Override
-		public String toString() {
-			return "No type";
-		}
+        @Override
+        public String toString() {
+            return "No type";
+        }
 
-	};
+    };
 
-	public static final int DEFAULT_TIMING = (int) (30.05 * 1000);
+    public static final int DEFAULT_TIMING = (int) (30.05 * 1000);
 
-	public abstract int getWaitTime();
+    public abstract int getWaitTime();
 
-	public abstract void setDefaultTime(int i);
+    public abstract void setDefaultTime(int i);
 
-	public abstract String toString();
+    public abstract String toString();
 
 }
