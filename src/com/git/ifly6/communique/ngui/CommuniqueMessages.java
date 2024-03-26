@@ -24,34 +24,34 @@ import java.util.Scanner;
  */
 public class CommuniqueMessages {
 
-	public static final String TITLE = "Communiqué";
-	public static final String ERROR = "Communiqué Error";
-	public static final String UPDATER = "Communiqué Updater";
-	public static final String RECRUITER = "Communiqué Recruiter";
+    public static final String TITLE = "Communiqué";
+    public static final String ERROR = "Communiqué Error";
+    public static final String UPDATER = "Communiqué Updater";
+    public static final String RECRUITER = "Communiqué Recruiter";
 
-	private static String licence;
+    private static String licence;
 
-	// Prevent initialisation
-	private CommuniqueMessages() {
-	}
+    // Prevent initialisation
+    private CommuniqueMessages() {
+    }
 
-	public static final String acknowledgement =
-			"Developed by ifly6, contributing to the repository at "
-					+ "[github.com/ifly6/communique], also known as the nation Imperium Anglorum on "
-					+ "NationStates.\n\nMy thanks to bug-reporters Tinfect, Krypton Nova, Separatist Peoples, "
-					+ "Wallenburg, and Tinhampton.";
+    public static final String acknowledgement =
+            "Developed by ifly6, contributing to the repository at "
+                    + "[github.com/ifly6/communique], also known as the nation Imperium Anglorum on "
+                    + "NationStates.\n\nMy thanks to bug-reporters Tinfect, Krypton Nova, Separatist Peoples, "
+                    + "Wallenburg, and Tinhampton.";
 
-	/**
-	 * Gives the licence information that is saved in the file 'licences' in this source directory.
-	 * @return licence information
-	 */
-	public static String getLicence() {
-		if (licence == null) {
-			InputStream resourceInputStream = CommuniqueMessages.class.getResourceAsStream("licence");
-			try (Scanner s = new Scanner(resourceInputStream)) {
-				licence = s.useDelimiter("\\A").hasNext() ? s.next() : "Could not load licence.";
-			}
-		}
-		return licence;
-	}
+    /**
+     * Gives the licence information that is saved in the file 'licences' in this source directory.
+     * @return licence information
+     */
+    public static String getLicence() {
+        if (licence == null) {
+            InputStream resourceInputStream = CommuniqueMessages.class.getResourceAsStream("licence");
+            try (Scanner s = new Scanner(resourceInputStream)) {
+                licence = s.useDelimiter("\\A").hasNext() ? s.next() : "Could not load licence.";
+            }
+        }
+        return licence;
+    }
 }
