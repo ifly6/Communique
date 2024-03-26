@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -31,6 +31,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.zip.GZIPOutputStream;
@@ -57,9 +58,8 @@ public class CommuniqueLAF {
 		// Create the application support directory
 		try {
 			Files.createDirectories(appSupport);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			LOGGER.warning("Cannot create directory");
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, "Cannot create directory", e);
 		}
 
 		// Get us a reasonable-looking log format
@@ -77,7 +77,7 @@ public class CommuniqueLAF {
 			Logger.getLogger("").addHandler(loggerFileHandler);
 
 		} catch (SecurityException | IOException | NullPointerException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Could not set up logging", e);
 		}
 	}
 
@@ -98,10 +98,10 @@ public class CommuniqueLAF {
 				);
 			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 					| UnsupportedLookAndFeelException e) {
-				LOGGER.severe("Cannot initialise? Cannot find basic Nimbus look and feel.");
-				e.printStackTrace();
+				LOGGER.log(Level.SEVERE, "Cannot initialise? Cannot find basic Nimbus look and feel.", e);
 			}
-			lfE.printStackTrace();
+
+			LOGGER.log(Level.WARNING, "Could not initialise system look and feel", lfE);
 		}
 	}
 
@@ -128,13 +128,13 @@ public class CommuniqueLAF {
 						Files.deleteIfExists(p);
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
-					System.err.println(String.format("Failed to compress %s", p));
+					LOGGER.log(Level.WARNING, String.format("Failed to compress %s", p), e);
 					break; // better safe than sorry
 				}
 			}
+
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Unclear IO exception", e);
 		}
 	}
 

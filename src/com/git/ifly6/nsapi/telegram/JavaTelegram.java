@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 public class JavaTelegram {
 
 	public static final Logger LOGGER = Logger.getLogger(JavaTelegram.class.getName());
+
 	private static volatile boolean killThread = false;
 
 	protected JTelegramKeys keys = new JTelegramKeys();
@@ -167,13 +168,25 @@ public class JavaTelegram {
 	}
 
 	/**
-	 * Shuts down the connect method, if <code>killThread</code> is set to <code>true</code>. The client, if running,
-	 * should terminate by the next cycle.
-	 * @param killNow is the <code>boolean</code> to which <code>killThread</code> will be set
+	 * Shuts down the connect method, interrupting immediately. If interrupt fails, next cycle will fail and dump out.
 	 */
-	public void setKillThread(boolean killNow) {
-		killThread = killNow;
-		if (killNow) Thread.currentThread().interrupt();
+	public void kill() {
+		killThread = true;
+		Thread.currentThread().interrupt();
+	}
+
+	/**
+	 * Resets {@code killThread} to {@code false}.
+	 */
+	public void resetKill() {
+		killThread = false;
+	}
+
+	/**
+	 * @return whether the client has been killed
+	 */
+	public static boolean isKilled() {
+		return killThread;
 	}
 
 	public void addFilter(Predicate<NSNation> p) {
@@ -187,7 +200,7 @@ public class JavaTelegram {
 	/**
 	 * Connects to the NationStates API and starts sending telegrams to the provided recipients with the provided keys.
 	 * Note that checks are made in this method ({@link JavaTelegram#predicates}) to make sure that telegrams are sent
-	 * to nations which do not opt-out of those telegrams. All output is logged using {@link JTelegramLogger}.
+	 * to nations which do not opt out of those telegrams. All output is logged using {@link JTelegramLogger}.
 	 * @see JTelegramConnection
 	 * @see com.git.ifly6.nsapi.telegram.util.JInfoFetcher JInfoFetcher
 	 */
