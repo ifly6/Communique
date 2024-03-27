@@ -46,6 +46,7 @@ import javax.swing.text.DocumentFilter;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FileDialog;
 import java.awt.GridLayout;
 import java.awt.Point;
@@ -65,7 +66,7 @@ import java.util.stream.Stream;
 
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.CODE_HEADER;
 import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
-import static com.git.ifly6.communique.ngui.components.CommuniqueNativisation.showFileChooser;
+import static com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers.show;
 
 public class CommuniqueEditor extends AbstractCommunique {
 
@@ -106,6 +107,13 @@ public class CommuniqueEditor extends AbstractCommunique {
         }
         frame.setSize(new Dimension(800, 600));
 
+        // if there is a file try to load it
+        try {
+            load();
+        } catch (IOException e) {
+            return;  // abort construction
+        }
+
         // initialise content pane components
         initialise();
 
@@ -113,19 +121,19 @@ public class CommuniqueEditor extends AbstractCommunique {
         initialiseMenuBar();
 
         // finalise
-        load();
+        load(config);
         frame.setVisible(true);
     }
 
     private void initialise() {
         // fields
-        CommuniqueDocumentListener saveListener = new CommuniqueDocumentListener(i -> this.save());
+        CommuniqueDelayedDocumentListener saveListener = new CommuniqueDelayedDocumentListener(i -> this.save());
         area = new CommuniqueScrollableTextArea(CommuniqueFactory.createArea("", saveListener));
         fieldClientKey = CommuniqueFactory.createField("CLIENT_KEY", "Client key", saveListener);
         fieldSecretKey = CommuniqueFactory.createField("SECRET_KEY", "Secret key", saveListener);
         fieldTelegramID = CommuniqueFactory.createField("TELEGRAM_ID", "Telegram ID", saveListener);
 
-        CommuniqueActionListener saveListener1 = new CommuniqueActionListener(e -> this.save());
+        CommuniqueDelayedActionListener saveListener1 = new CommuniqueDelayedActionListener(e -> this.save());
         fieldAction = new JComboBox<>(CommuniqueProcessingAction.values());
         fieldAction.setSelectedItem(CommuniqueProcessingAction.NONE);
         fieldAction.setToolTipText("Processing actions can be applied to the list of recipients after they "
@@ -271,7 +279,7 @@ public class CommuniqueEditor extends AbstractCommunique {
         mnImportRecipients.add(createMenuItem(
                 "From Text File",
                 event -> {
-                    Path path = showFileChooser(frame, FileDialog.LOAD);
+                    Path path = show(frame, FileDialog.LOAD);
                     if (path != null) {
                         try (Stream<String> lines = Files.lines(path)) {
                             lines.filter(s -> !s.startsWith("#"))
@@ -333,31 +341,32 @@ public class CommuniqueEditor extends AbstractCommunique {
         r.run();
     }
 
-    private void load() {
+    private void load() throws IOException {
         CommuniqueLoader loader = new CommuniqueLoader(path);
         if (Files.exists(path)) {
             try {
                 config = loader.load();
-                load(config);
 
             } catch (IOException e) {
-                showWarning("Failed to read configuration file at %s", e);
+                showWarning(String.format("Failed to read configuration file at %s", path), e);
+                EventQueue.invokeLater(() -> {
+                    frame.setVisible(false);
+                    frame.dispose();
+                });
+                throw e;
             }
         }
     }
 
     public void load(CommuniqueConfig theConfig) {
+        config = theConfig;
         this.setClientKey(config.keys.getClientKey());
         this.setSecretKey(config.keys.getSecretKey());
         this.setTelegramID(config.keys.getTelegramID());
-        fieldType.setSelectedItem(theConfig.getTelegramType());
-        fieldAction.setSelectedItem(theConfig.getProcessingAction());
-        fieldDelay.setText(theConfig.waitString);
-        area.setText(CODE_HEADER + String.join("\n", theConfig.getcRecipientsString()));
-    }
-
-    private void showWarning(String text) {
-        showWarning(text, null);
+        fieldType.setSelectedItem(config.getTelegramType());
+        fieldAction.setSelectedItem(config.getProcessingAction());
+        fieldDelay.setText(config.waitString);
+        area.setText(CODE_HEADER + String.join("\n", config.getcRecipientsString()));
     }
 
     private void showWarning(String text, Throwable e) {

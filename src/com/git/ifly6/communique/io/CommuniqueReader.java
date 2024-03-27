@@ -105,8 +105,10 @@ class CommuniqueReader {
                 // If we are reading one of the old files, which would throw some RuntimeExceptions,
                 // try the old reader.
 
-                logger.log(Level.INFO, "Json exception thrown. Attempting read with old file reader.", e);
+                logger.log(Level.INFO, "Invalid Json file. Attempting read with old file reader.", e);
                 CommuniqueFileReader reader = new CommuniqueFileReader(path.toFile());
+                if (reader.getFileVersion() == 0)
+                    throw new IOException("This is not a Communique file");
 
                 config = new CommuniqueConfig();
                 config.version = reader.getFileVersion();

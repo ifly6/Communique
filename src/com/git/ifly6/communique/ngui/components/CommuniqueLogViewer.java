@@ -19,6 +19,7 @@ package com.git.ifly6.communique.ngui.components;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -29,6 +30,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.logging.LogRecord;
 
@@ -80,9 +83,10 @@ public class CommuniqueLogViewer extends JSplitPane {
                 case 0:
                     column.setMinWidth(125);
                     column.setMaxWidth(145);
+                    column.setPreferredWidth(145);
                     break;
                 case 1:
-                    column.setMinWidth(150);
+                    column.setMinWidth(125);
                     column.setPreferredWidth(160);
                     break;
                 case 2:
@@ -92,25 +96,39 @@ public class CommuniqueLogViewer extends JSplitPane {
             }
         }
 
-        table.getModel().addTableModelListener(e -> {
-            // table starts with nothing selected; select first item when it populates in
-            if (table.getSelectedRow() == -1 && table.getModel().getRowCount() > 0) {
-                EventQueue.invokeLater(() -> table.setRowSelectionInterval(0, 0));  // need to avoid race condition
-            }
-        });
-
         table.getSelectionModel().addListSelectionListener(e -> {
             LogRecord record = tableModel.getRecord(table.getSelectedRow());
-            southScroll.setText(record.getMessage());
-            source.setText(String.format("<html>%s<br />%s</html>",
-                    record.getSourceClassName(),
-                    record.getSourceMethodName()
-            ));
-            date.setText(formatter.format(record.getMillis()));
+            EventQueue.invokeLater(() -> {
+                // print the message and stack trace
+                southScroll.setText(record.getMessage());
+                if (record.getThrown() != null) {
+                    StringWriter sw = new StringWriter();
+                    record.getThrown().printStackTrace(new PrintWriter(sw, true));
+                    southScroll.appendLine(sw.toString());
+                }
+
+                // update the other ui elements
+                source.setText(String.format("<html>%s<br />%s</html>",
+                        record.getSourceClassName(),
+                        record.getSourceMethodName()
+                ));
+                date.setText(formatter.format(record.getMillis()));
+            });
         });
 
         JScrollPane northScroll = new JScrollPane(table);
         northScroll.setMinimumSize(new Dimension(300, 200));
+
+        table.getModel().addTableModelListener(e -> {
+            // table starts with nothing selected; select first item when it populates in
+            if (table.getSelectedRow() == -1 && table.getModel().getRowCount() > 0)
+                EventQueue.invokeLater(() -> table.setRowSelectionInterval(0, 0));  // need to avoid race condition
+
+            EventQueue.invokeLater(() -> {
+                JScrollBar vs = northScroll.getVerticalScrollBar(); // scroll to bottom
+                vs.setValue(Math.max(vs.getMinimum(), vs.getMaximum() - 1));
+            });
+        });
 
         // place the components about
         southHeader.add(source, BorderLayout.WEST);

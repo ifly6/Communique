@@ -22,32 +22,38 @@ import com.git.ifly6.communique.CommuniqueUtilities;
 import javax.swing.JFileChooser;
 import java.awt.FileDialog;
 import java.awt.Frame;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.APP_SUPPORT;
 
-public class CommuniqueNativisation {
+public class CommuniqueFileChoosers {
 
-    private static final java.util.logging.Logger LOGGER = Logger.getLogger(CommuniqueNativisation.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CommuniqueFileChoosers.class.getName());
+    private static final Path LAST_PATH = APP_SUPPORT.resolve(".last_path");
+    private static final Path DEFAULT = Paths.get(System.getProperty("user.home"));
 
     /**
-     * Creates an file chooser (in an OS specific manner) and shows it to the user.
-     * @param parent <code>Frame</code> to show the chooser from
-     * @param type   either <code>FileDialog.SAVE</code> or <code>FileDialog.LOAD</code>
-     * @return the <code>Path</code> selected by the user
+     * Creates a file chooser (in an OS specific manner) and shows it to the user.
+     * @param parent {@link Frame} to show the chooser from, starts at the last chosen path or {@code user.home}
+     * @param type   either {@code FileDialog.SAVE} or {@code FileDialog.LOAD}
+     * @return the {@link Path} selected by the user
      */
-    public static Path showFileChooser(Frame parent, int type) {
+    public static Path show(Frame parent, int type) {
 
         Path savePath;
 
-        // Due to a problem in Windows and the AWT FileDialog, this will show a JFileChooser on Windows systems.
+        // 2020-06-26 Due to a problem in Windows and its AWT FileDialog,show a JFileChooser thereon
         if (CommuniqueUtilities.IS_OS_MAC) {
 
             FileDialog fDialog = new FileDialog(parent, "Choose file...", type);
             if (type == FileDialog.SAVE) fDialog.setTitle("Save session as...");
-            fDialog.setDirectory(APP_SUPPORT.toFile().toString());
+            fDialog.setDirectory(getLast().toFile().toString());
             fDialog.setVisible(true);
 
             String fileName = fDialog.getFile();
@@ -55,13 +61,15 @@ public class CommuniqueNativisation {
                 LOGGER.info("User cancelled file file dialog");
                 return null;
 
-            } else savePath = Paths.get(fDialog.getDirectory() == null
-                    ? ""
-                    : fDialog.getDirectory()).resolve(fDialog.getFile());
+            } else savePath = Paths.get(
+                    fDialog.getDirectory() == null
+                            ? ""
+                            : fDialog.getDirectory()
+            ).resolve(fDialog.getFile());
 
         } else {
 
-            JFileChooser fChooser = new JFileChooser(APP_SUPPORT.toFile());
+            JFileChooser fChooser = new JFileChooser(getLast().toFile());
             fChooser.setDialogTitle("Choose file...");
 
             int returnVal;
@@ -84,8 +92,44 @@ public class CommuniqueNativisation {
             savePath = savePath.resolveSibling(savePath.getFileName() + ".txt");
         }
 
-        LOGGER.info(String.format("%s file at %s", type == FileDialog.SAVE ? "Saved" : "Loaded",
-                savePath.toAbsolutePath().toString()));
+        LOGGER.info(String.format("%s file at %s",
+                type == FileDialog.SAVE ? "Saving" : "Loading",
+                savePath.normalize())
+        );
+        setLast(savePath.getParent());
         return savePath;
     }
+
+    /**
+     * Get {@link Path} from {@code LAST_PATH} via {@code Gson}
+     * @return the last selected path, {@code DEFAULT} (user's home directory) on failure
+     */
+    private static Path getLast() {
+        try {
+            Path last = Paths.get(new String(Files.readAllBytes(LAST_PATH), StandardCharsets.UTF_8));
+            if (!Files.exists(last) && !Files.exists(last.getParent()))
+                return DEFAULT;
+            if (Files.isDirectory(last)) return last;
+            return last.getParent();
+
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Could not read last used path from file", e);
+            return DEFAULT;
+        }
+    }
+
+    /**
+     * @param last {@link Path} to persist at {@code LAST_PATH} as Json
+     */
+    private static void setLast(Path last) {
+        try {
+            // it is not possible to serialise a path?
+            // https://stackoverflow.com/a/35494088
+            Files.write(LAST_PATH, last.normalize().toString().getBytes(StandardCharsets.UTF_8));
+
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Could not save last used path to file", e);
+        }
+    }
+
 }

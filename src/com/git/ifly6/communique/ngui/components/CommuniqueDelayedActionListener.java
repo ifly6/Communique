@@ -22,12 +22,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
-public class CommuniqueActionListener implements ActionListener {
+public class CommuniqueDelayedActionListener implements ActionListener {
 
     Timer timer;
     private ActionEvent lastEvent;
 
-    public CommuniqueActionListener(Consumer<ActionEvent> eventConsumer) {
+    public CommuniqueDelayedActionListener(Consumer<ActionEvent> eventConsumer) {
         timer = new Timer(1000, event -> eventConsumer.accept(lastEvent));
         timer.setRepeats(false);
         timer.start();

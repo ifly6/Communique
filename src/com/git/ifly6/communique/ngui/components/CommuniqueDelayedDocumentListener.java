@@ -22,11 +22,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.util.function.Consumer;
 
-public class CommuniqueDocumentListener implements DocumentListener {
+public class CommuniqueDelayedDocumentListener implements DocumentListener {
 
     private Timer timer; // https://stackoverflow.com/a/31955279
 
-    public CommuniqueDocumentListener(Consumer<DocumentEvent> consumer) {
+    public CommuniqueDelayedDocumentListener(Consumer<DocumentEvent> consumer) {
         this.timer = new Timer(1000, ae -> consumer.accept(null));
         timer.setRepeats(false);
         timer.start();

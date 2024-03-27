@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>Communique</groupId>
     <artifactId>Communique</artifactId>
-    <version>12</version>
+    <version>13</version>
     <build>
         <sourceDirectory>src</sourceDirectory>
         <resources>
