@@ -78,7 +78,7 @@ public class JTelegramConnection {
      * @throws IOException if there is a problem in connecting to the API
      */
     public JTelegramConnection(JTelegramKeys keys, String recipient) throws IOException {
-        this(keys.getClientKey(), keys.getSecretKey(), keys.getTelegramId(), recipient);
+        this(keys.getClientKey(), keys.getSecretKey(), keys.getTelegramID(), recipient);
     }
 
     /**

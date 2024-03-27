@@ -26,7 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
-import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.appSupport;
+import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.APP_SUPPORT;
 
 public class CommuniqueNativisation {
 
@@ -47,7 +47,7 @@ public class CommuniqueNativisation {
 
             FileDialog fDialog = new FileDialog(parent, "Choose file...", type);
             if (type == FileDialog.SAVE) fDialog.setTitle("Save session as...");
-            fDialog.setDirectory(appSupport.toFile().toString());
+            fDialog.setDirectory(APP_SUPPORT.toFile().toString());
             fDialog.setVisible(true);
 
             String fileName = fDialog.getFile();
@@ -61,7 +61,7 @@ public class CommuniqueNativisation {
 
         } else {
 
-            JFileChooser fChooser = new JFileChooser(appSupport.toFile());
+            JFileChooser fChooser = new JFileChooser(APP_SUPPORT.toFile());
             fChooser.setDialogTitle("Choose file...");
 
             int returnVal;

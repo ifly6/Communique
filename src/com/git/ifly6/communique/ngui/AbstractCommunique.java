@@ -17,36 +17,195 @@
 
 package com.git.ifly6.communique.ngui;
 
-import com.git.ifly6.communique.io.CommuniqueConfig;
-import com.git.ifly6.communique.io.CommuniqueLoader;
-import com.git.ifly6.marconi.Marconi;
+import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
+import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
+import com.git.ifly6.communique.ngui.components.CommuniqueWindowManager;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.undo.UndoManager;
+import java.awt.Desktop;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- * Provides the outline of the Communique and Marconi programs. Also provides the shared {@link CommuniqueConfig} save
- * and load functionality shared between {@link Communique} and {@link Marconi}.
- * @author ifly6
- */
+import static com.git.ifly6.communique.ngui.CommuniqueMessages.ERROR;
+import static com.git.ifly6.communique.ngui.CommuniqueMessages.TITLE;
+import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
+import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
+import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.APP_SUPPORT;
+import static com.git.ifly6.communique.ngui.components.CommuniqueNativisation.showFileChooser;
+
 public abstract class AbstractCommunique {
 
-    /**
-     * Returns a <code>CConfig</code> object which represents the state of the program as it is here.
-     * @return a <code>CConfig</code> representing the program
-     */
-    public abstract CommuniqueConfig exportState();
+    private static final Logger LOGGER = Logger.getLogger(AbstractCommunique.class.getName());
 
-    public abstract void importState(CommuniqueConfig config);
+    protected JFrame frame;
+    protected JMenuBar menuBar;
 
-    public void save(Path savePath) throws IOException {
-        // System.out.println("exportState().sentList\t" + Arrays.toString(exportState().sentList));
-        CommuniqueLoader loader = new CommuniqueLoader(savePath);
-        loader.save(exportState());
+    protected JMenu addFileMenu(JMenuItem saveItem) {
+        // create menu and add
+        JMenu mnFile = new JMenu("File");
+        menuBar.add(mnFile);
+
+        // set up action listener
+        ActionListener openFileAction = ae -> {
+            Path p = showFileChooser(frame, FileDialog.LOAD);
+            if (p == null) {
+                LOGGER.info("New file at null path");
+                return;
+            }
+            CommuniqueWindowManager.getInstance().newEditor(p);
+        };
+
+        // new, open, and save all
+        mnFile.add(createMenuItem("New", KeyEvent.VK_N, openFileAction));
+        mnFile.add(createMenuItem("Open", KeyEvent.VK_O, openFileAction));
+
+        // add the save menu item
+        mnFile.add(saveItem);
+
+        mnFile.addSeparator();
+        mnFile.add(CommuniqueFactory.createMenuItem(
+                "Show Application Support Directory",
+                KeyStroke.getKeyStroke(KeyEvent.VK_O, COMMAND_KEY | InputEvent.SHIFT_DOWN_MASK), ae -> {
+                    try {
+                        Desktop.getDesktop().open(APP_SUPPORT.toFile());
+                    } catch (IOException e) {
+                        String s = "Failed to open application support directory";
+                        showErrorDialog(s);
+                        LOGGER.log(Level.WARNING, s, e);
+                    }
+                }
+        ));
+
+        // Only add the Quit menu item if the OS is not Mac
+        if (!CommuniqueUtilities.IS_OS_MAC) {
+            mnFile.addSeparator();
+            mnFile.add(CommuniqueFactory.createMenuItem(
+                    "Quit",
+                    KeyEvent.VK_Q, ae -> System.exit(0)
+            ));
+        }
+
+        return mnFile;
     }
 
-    public void load(Path savePath) throws IOException {
-        CommuniqueLoader loader = new CommuniqueLoader(savePath);
-        this.importState(loader.load());
+    public JMenu addEditMenu() {
+        JMenu mnEdit = new JMenu("Edit");
+        menuBar.add(mnEdit);
+
+        // Create undo manager to get that dope functionality
+        UndoManager undoManager = new UndoManager();
+
+        JMenuItem mntmUndo = new JMenuItem("Undo");
+        mntmUndo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, COMMAND_KEY));
+        mntmUndo.addActionListener(e -> {
+            if (undoManager.canUndo()) undoManager.undo();
+        });
+        mnEdit.add(mntmUndo);
+
+        JMenuItem mntmRedo = new JMenuItem("Redo");
+        mntmRedo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, COMMAND_KEY | InputEvent.SHIFT_DOWN_MASK));
+        mntmRedo.addActionListener(e -> {
+            if (undoManager.canRedo()) undoManager.redo();
+        });
+        mnEdit.add(mntmRedo);
+
+        mnEdit.addSeparator();
+
+        JMenuItem cut = new JMenuItem(new DefaultEditorKit.CutAction());
+        cut.setText("Cut");
+        cut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, COMMAND_KEY));
+        mnEdit.add(cut);
+
+        JMenuItem copy = new JMenuItem(new DefaultEditorKit.CopyAction());
+        copy.setText("Copy");
+        copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, COMMAND_KEY));
+        mnEdit.add(copy);
+
+        JMenuItem paste = new JMenuItem(new DefaultEditorKit.PasteAction());
+        paste.setText("Paste");
+        paste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, COMMAND_KEY));
+        mnEdit.add(paste);
+
+        return mnEdit;
+    }
+
+    protected JMenu addWindowMenu() {
+        JMenu mnWindow = new JMenu("Window");
+        menuBar.add(mnWindow);
+
+        JMenuItem mntmMinimise = new JMenuItem("Minimise");
+        mntmMinimise.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, COMMAND_KEY));
+        mntmMinimise.addActionListener(e -> {
+            if (frame.getState() == Frame.NORMAL) frame.setState(Frame.ICONIFIED);
+        });
+        mnWindow.add(mntmMinimise);
+
+        return mnWindow;
+    }
+
+    protected JMenu addHelpMenu() {
+        JMenu mnHelp = new JMenu("Help");
+        menuBar.add(mnHelp);
+
+        mnHelp.add(createMenuItem(
+                "About",
+                ae -> CommuniqueTextDialog.createMonospacedDialog(
+                        frame, "About", CommuniqueMessages.acknowledgement,
+                        true)
+        ));
+        mnHelp.addSeparator();
+        mnHelp.add(createMenuItem("Documentation", ae -> {
+            try {
+                Desktop.getDesktop().browse(CommuniqueConstants.GITHUB_URI);
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Cannot open Communiqué GitHub page", e);
+            }
+        }));
+        mnHelp.add(createMenuItem("Forum Thread", ae -> {
+            try {
+                Desktop.getDesktop().browse(CommuniqueConstants.FORUM_THREAD);
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Cannot open NationStates forum support thread for Communiqué", e);
+            }
+        }));
+        mnHelp.addSeparator();
+        mnHelp.add(createMenuItem(
+                "Licence",
+                e -> CommuniqueTextDialog.createMonospacedDialog(frame, "Licence",
+                        CommuniqueMessages.getLicence(), false)
+        ));
+
+        return mnHelp;
+    }
+
+    protected void showErrorDialog(String text) {
+        // new 2020-01-27
+        text = text.endsWith(".") ? text : text + "."; // append a dot
+        JOptionPane.showMessageDialog(frame, text, ERROR, JOptionPane.PLAIN_MESSAGE, null);
+    }
+
+    protected void showErrorDialog(JLabel label) {
+        // new 2020-01-27
+        JOptionPane.showMessageDialog(frame, label, ERROR, JOptionPane.PLAIN_MESSAGE, null);
+    }
+
+    protected String showInputDialog(String text) {
+        return JOptionPane.showInputDialog(frame, text, TITLE, JOptionPane.PLAIN_MESSAGE);
     }
 }

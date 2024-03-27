@@ -279,7 +279,7 @@ public class JavaTelegram {
                             i + 1, totalTelegrams));
 
                 else if (errorCode == JTelegramConnection.NO_SUCH_TELEGRAM)
-                    util.log(formatError("No such telegram by id: " + keys.getTelegramId(), recipient,
+                    util.log(formatError("No such telegram by id: " + keys.getTelegramID(), recipient,
                             i + 1, totalTelegrams));
 
                 else if (errorCode == JTelegramConnection.UNKNOWN_ERROR)

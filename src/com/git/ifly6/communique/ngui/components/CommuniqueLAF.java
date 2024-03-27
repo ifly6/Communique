@@ -41,23 +41,23 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 public class CommuniqueLAF {
 
     private static final Logger LOGGER = Logger.getLogger(CommuniqueLAF.class.getName());
-    public static Path appSupport;
+    public static Path APP_SUPPORT;
     public static FileHandler loggerFileHandler = null; // Save logs to file, if null... uh stuff
 
     static {
         // Do this static initialisation block when LAF is called
         // Find or create the application support directory
-        if (CommuniqueUtilities.IS_OS_WINDOWS) appSupport = Paths.get(System.getenv("LOCALAPPDATA"), "Communique");
+        if (CommuniqueUtilities.IS_OS_WINDOWS) APP_SUPPORT = Paths.get(System.getenv("LOCALAPPDATA"), "Communique");
         else if (CommuniqueUtilities.IS_OS_MAC) {
-            appSupport = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Communique");
+            APP_SUPPORT = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Communique");
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Communiqué " + Communique7Parser.version);
 
-        } else appSupport = Paths.get(System.getProperty("user.dir"), "config");
+        } else APP_SUPPORT = Paths.get(System.getProperty("user.dir"), "config");
 
         // Create the application support directory
         try {
-            Files.createDirectories(appSupport);
+            Files.createDirectories(APP_SUPPORT);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Cannot create directory", e);
         }
@@ -67,7 +67,7 @@ public class CommuniqueLAF {
 
         // Make sure we can also log to file, apply this to the root logger
         try {
-            Path logFile = appSupport
+            Path logFile = APP_SUPPORT
                     .resolve("log")
                     .resolve(String.format("communique-session-%s.log", CommuniqueUtilities.getTime()));
 
@@ -111,7 +111,7 @@ public class CommuniqueLAF {
      */
     public static void compressLogs() {
         try {
-            DirectoryStream<Path> stream = Files.newDirectoryStream(appSupport.resolve("log"), "*.log");
+            DirectoryStream<Path> stream = Files.newDirectoryStream(APP_SUPPORT.resolve("log"), "*.log");
             final Instant yesterday = Instant.now().minus(1, ChronoUnit.DAYS);
             for (Path p : stream) {
                 try {

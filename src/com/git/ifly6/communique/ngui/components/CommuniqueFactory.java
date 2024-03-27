@@ -18,12 +18,20 @@
 package com.git.ifly6.communique.ngui.components;
 
 import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.border.Border;
 import javax.swing.event.DocumentListener;
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.ActionListener;
 
-import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.CODE_HEADER;
+import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
 
 public class CommuniqueFactory {
 
@@ -43,13 +51,43 @@ public class CommuniqueFactory {
         return field;
     }
 
-    public static JTextArea createArea(String defaultText, DocumentListener listener) {
+    public static JTextArea createArea(String text, DocumentListener listener) {
         JTextArea area = new JTextArea();
-        area.setText(CODE_HEADER);
+        area.setText(text);
         area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         area.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        area.getDocument().addDocumentListener(listener);
+        if (listener != null)
+            area.getDocument().addDocumentListener(listener);
         return area;
     }
 
+    public static JPanel labelledComponent(String label, Component component) {
+        JPanel f = new JPanel();
+        f.setLayout(new BorderLayout(5, 5));
+        f.add(new JLabel(label), BorderLayout.WEST);
+        f.add(component, BorderLayout.CENTER);
+        return f;
+    }
+
+    public static Border createBorder(int pixels) {
+        return BorderFactory.createEmptyBorder(pixels, pixels, pixels, pixels);
+    }
+
+    public static JMenuItem createMenuItem(String label, ActionListener... als) {
+        return createMenuItem(label, null, als);
+    }
+
+    public static JMenuItem createMenuItem(String label, int shortcut, ActionListener... als) {
+        return createMenuItem(label, KeyStroke.getKeyStroke(shortcut, COMMAND_KEY), als);
+    }
+
+    public static JMenuItem createMenuItem(String label, KeyStroke shortcut, ActionListener... als) {
+        JMenuItem menuItem = new JMenuItem(label);
+        for (ActionListener al : als)
+            menuItem.addActionListener(al);
+        if (shortcut != null)
+            menuItem.setAccelerator(shortcut);
+
+        return menuItem;
+    }
 }

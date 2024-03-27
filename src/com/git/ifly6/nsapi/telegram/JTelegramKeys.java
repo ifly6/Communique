@@ -46,9 +46,9 @@ public class JTelegramKeys {
      * @param tgId   a <code>String</code> which contains the <code>telegramId</code>
      */
     public JTelegramKeys(String client, String secret, String tgId) {
-        clientKey = client;
-        secretKey = secret;
-        telegramId = tgId;
+        clientKey = client.trim();
+        secretKey = secret.trim();
+        telegramId = tgId.trim();
     }
 
     /**
@@ -98,7 +98,7 @@ public class JTelegramKeys {
      * Gets the telegram ID as a {@code String}. If {@code null} returns {@code TELEGRAM_ID}.
      * @return <code>String</code> containing whatever the telegram ID was already set to.
      */
-    public String getTelegramId() {
+    public String getTelegramID() {
         return (telegramId != null) ? telegramId : "TELEGRAM_ID";
     }
 
@@ -132,7 +132,7 @@ public class JTelegramKeys {
      * <code>{ clientKey, secretKey, telegramId }</code>
      */
     public String[] toArray() {
-        return new String[]{clientKey, secretKey, telegramId};
+        return new String[] {clientKey, secretKey, telegramId};
     }
 
     public boolean anyEmpty() {

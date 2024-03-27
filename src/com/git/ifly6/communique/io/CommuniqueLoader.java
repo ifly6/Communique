@@ -17,16 +17,8 @@
 
 package com.git.ifly6.communique.io;
 
-import com.git.ifly6.nsapi.ApiUtils;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
-
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
-
-import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.appSupport;
 
 /**
  * {@link CommuniqueLoader} is a class allowing the easy abstraction of access to a single point and simplifying the
@@ -72,36 +64,5 @@ public class CommuniqueLoader {
     public CommuniqueConfig load() throws IOException {
         CommuniqueReader reader = new CommuniqueReader(path);
         return reader.read();
-    }
-
-    /**
-     * Writes the standard configuration file for the currently used client key. Properties writing here has been
-     * localised for this setup using this method.
-     */
-    public static void writeProperties(String clientKey) {
-        try {
-            Properties prop = new Properties();
-            prop.setProperty("clientKey", clientKey);
-            FileOutputStream output = new FileOutputStream(appSupport.resolve("config.properties").toFile());
-            prop.store(output, "Communique Properties");
-            output.close();
-        } catch (IOException e) {
-            throw new JTelegramException("Cannot write Communique properties", e);
-        }
-    }
-
-    /**
-     * Returns the last used client key from the configuration file.
-     * @return the client key from file
-     */
-    public static String getClientKey() {
-        try {
-            Properties prop = new Properties();
-            prop.load(Files.newInputStream(appSupport.resolve("config.properties").toFile().toPath()));
-            String clientKey = prop.getProperty("clientKey");
-            return ApiUtils.isEmpty(clientKey) ? "CLIENT_KEY" : clientKey;
-        } catch (IOException e) {
-            return "CLIENT_KEY";
-        }
     }
 }

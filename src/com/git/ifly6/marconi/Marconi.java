@@ -21,16 +21,18 @@ import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueConfig;
-import com.git.ifly6.communique.ngui.AbstractCommunique;
+import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 import com.git.ifly6.nsapi.telegram.JavaTelegram;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class Marconi extends AbstractCommunique implements JTelegramLogger {
+public class Marconi implements JTelegramLogger {
 
     private static final Logger LOGGER = Logger.getLogger(Marconi.class.getName());
     private static FileHandler handler;
@@ -91,9 +93,7 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
     /**
      * Note that this will not return what is loaded. It will return a sentList whose duplicates have been removed and,
      * if any elements start with a negation <code>/</code>, it will remove it.
-     * @see com.git.ifly6.communique.ngui.AbstractCommunique#exportState()
      */
-    @Override
     public CommuniqueConfig exportState() {
         // Remove duplicates from the sentList as part of save action
         config.setcRecipients(config.getcRecipients().stream()
@@ -103,10 +103,7 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
 
     }
 
-    /**
-     * @see com.git.ifly6.communique.ngui.AbstractCommunique#importState(com.git.ifly6.communique.io.CommuniqueConfig)
-     */
-    @Override
+
     public void importState(CommuniqueConfig config) {
         this.config = config;
     }
@@ -126,4 +123,16 @@ public class Marconi extends AbstractCommunique implements JTelegramLogger {
     public void sentTo(String nationName, int x, int length) {
         config.addcRecipient(CommuniqueRecipients.createExcludedNation(nationName));
     }
+
+    public void save(Path savePath) throws IOException {
+        // System.out.println("exportState().sentList\t" + Arrays.toString(exportState().sentList));
+        CommuniqueLoader loader = new CommuniqueLoader(savePath);
+        loader.save(exportState());
+    }
+
+    public void load(Path savePath) throws IOException {
+        CommuniqueLoader loader = new CommuniqueLoader(savePath);
+        this.importState(loader.load());
+    }
+
 }

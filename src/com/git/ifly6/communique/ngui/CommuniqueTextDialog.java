@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * <code>CommuniqueTextDialog</code> shows a JTextArea in the centre of the frame. It then displays some text in that
  * area and a close button.
  */
-class CommuniqueTextDialog extends JDialog {
+public class CommuniqueTextDialog extends JDialog {
 
     private static final Logger log = Logger.getLogger(CommuniqueTextDialog.class.getName());
 
@@ -51,7 +51,7 @@ class CommuniqueTextDialog extends JDialog {
         new CommuniqueTextDialog(parent, title, message, new Font(Font.SANS_SERIF, Font.PLAIN, 11), true);
     }
 
-    static void createMonospacedDialog(JFrame parent, String title, String message, boolean lineWrap) {
+    public static void createMonospacedDialog(JFrame parent, String title, String message, boolean lineWrap) {
         new CommuniqueTextDialog(parent, title, message, new Font(Font.MONOSPACED, Font.PLAIN, 11), lineWrap);
     }
 

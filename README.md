@@ -141,6 +141,8 @@ it is not backwards compatible with older versions.
     
 12. Version 12 allows typing of telegrams to specify default delay times and also introduces overriding the default times with wait time input. Both changes affect configuration file format.
 
+13. Version 13 reflects substantial changes to the Communiqué GUI, especially in allowing multiple files to be opened, a clearly-visible sending log in tabular format, etc.
+
 ## Road ahead
 In a future version, I intend to phase out the concept of a separate recruiter and simply permit someoneone to specify that some action be taken repeatedly. Some syntax like `flag:repeat; limit:1; tag:new`.
 
