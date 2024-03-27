@@ -37,7 +37,7 @@ public class CommuniqueWriterTest {
         CommuniqueConfig config = new CommuniqueConfig(JTelegramType.RECRUIT, CommuniqueProcessingAction.NONE,
                 new JTelegramKeys("client-key", "secret-key", "telegram-id"), "");
 
-        CommuniqueRecipient[] recipients = new CommuniqueRecipient[]{
+        CommuniqueRecipient[] recipients = new CommuniqueRecipient[] {
                 CommuniqueRecipients.createFlag("recruit"),
                 CommuniqueRecipients.createExcludedNation("excluded1"),
                 CommuniqueRecipients.createExcludedNation("excluded2"),

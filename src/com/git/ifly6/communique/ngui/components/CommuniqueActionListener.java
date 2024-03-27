@@ -15,14 +15,27 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * This package manages parsing for the Communique system. Each recipient is contained in a
- * {@link com.git.ifly6.communique.data.CommuniqueRecipient CommuniqueRecipient} object, which can then be applied via
- * the {@link com.git.ifly6.communique.data.Communique7Parser parser} to determine whatever recipients are meant. This
- * package also contains a number of <code>enum</code>s which are used to hold methods that make those recipients work.
- * <p>A lot of the data which is queried in the parser is provided via
- * {@link com.git.ifly6.nsapi.telegram.util.JInfoFetcher} and other classes like {@link com.git.ifly6.nsapi.NSNation}
- * and {@link com.git.ifly6.nsapi.NSRegion}.</p>
- * @see com.git.ifly6.nsapi
- */
-package com.git.ifly6.communique.data;
+package com.git.ifly6.communique.ngui.components;
+
+import javax.swing.Timer;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.function.Consumer;
+
+public class CommuniqueActionListener implements ActionListener {
+
+    Timer timer;
+    private ActionEvent lastEvent;
+
+    public CommuniqueActionListener(Consumer<ActionEvent> eventConsumer) {
+        timer = new Timer(1000, event -> eventConsumer.accept(lastEvent));
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        lastEvent = e;
+        timer.restart();
+    }
+}

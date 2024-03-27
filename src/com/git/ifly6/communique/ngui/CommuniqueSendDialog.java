@@ -91,10 +91,10 @@ public class CommuniqueSendDialog extends JDialog {
         buttonPane.setBorder(new EmptyBorder(0, 5, 5, 5));
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
         GridBagLayout gbl_buttonPane = new GridBagLayout();
-        gbl_buttonPane.columnWidths = new int[]{229, 75, 86, 0};
-        gbl_buttonPane.rowHeights = new int[]{29, 0};
-        gbl_buttonPane.columnWeights = new double[]{1.0, 0.0, 0.0, Double.MIN_VALUE};
-        gbl_buttonPane.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+        gbl_buttonPane.columnWidths = new int[] {229, 75, 86, 0};
+        gbl_buttonPane.rowHeights = new int[] {29, 0};
+        gbl_buttonPane.columnWeights = new double[] {1.0, 0.0, 0.0, Double.MIN_VALUE};
+        gbl_buttonPane.rowWeights = new double[] {0.0, Double.MIN_VALUE};
         buttonPane.setLayout(gbl_buttonPane);
         JLabel lblThisWillTake = new JLabel(String.format("Estimated sending time: %s",
                 estimateTime(parsedRecipients.size(), delay)));

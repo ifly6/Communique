@@ -76,6 +76,11 @@ class CommuniqueReader {
                 Gson gson = new Gson();
                 config = gson.fromJson(Files.newBufferedReader(path), CommuniqueConfig.class);
 
+                // convert something with a null cRecipients over if there are recipients and sent list
+                if (config.getcRecipients() == null &&
+                        (config.recipients.length != 0 || config.sentList.length != 0))
+                    unifySendList(config);
+
                 // convert from randomise flag to new enums
                 if (config.version == 7) {
                     List<String> lines = Files.readAllLines(path).stream()

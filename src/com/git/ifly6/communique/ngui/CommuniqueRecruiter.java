@@ -23,9 +23,9 @@ import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.FilterType;
 import com.git.ifly6.communique.data.RecipientType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
-import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
+import com.git.ifly6.communique.ngui.components.CommuniqueEditor;
 import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
 import com.git.ifly6.communique.ngui.components.CommuniqueNativisation;
 import com.git.ifly6.nsapi.ApiUtils;
@@ -63,9 +63,7 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,7 +83,7 @@ import java.util.stream.Collectors;
  */
 public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements JTelegramLogger {
 
-    private static final String[] protectedRegions = new String[]{"the Pacific", "the North Pacific", "the South Pacific",
+    private static final String[] protectedRegions = new String[] {"the Pacific", "the North Pacific", "the South Pacific",
             "the East Pacific", "the West Pacific", "Lazarus", "Balder", "Osiris", "the Rejected Realms"};
     private static final Logger LOGGER = Logger.getLogger(CommuniqueRecruiter.class.getName());
 
@@ -94,6 +92,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
     }
 
     private Communique communique;
+    private CommuniqueEditor recruitEditor;
 
     private JFrame frame;
     private JTextField clientKeyField;
@@ -113,16 +112,17 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
     /**
      * Create the application, if necessary.
      */
-    CommuniqueRecruiter(Communique comm) {
-        initialize();
-        frame.setVisible(true);
+    CommuniqueRecruiter(Communique comm, CommuniqueEditor recruitEditor) {
         this.communique = comm;
+        this.recruitEditor = recruitEditor;
+        initialise();
+        frame.setVisible(true);
     }
 
     /**
      * Initialise the contents of the frame.
      */
-    private void initialize() {
+    private void initialise() {
 
         frame = new JFrame("Communiqué Recruiter " + Communique7Parser.version);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -409,17 +409,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
         // * Importing that configuration into Communique
         // * Have Communique save that file
         sync();
-
-        // Save
-        try {
-            if (!savePath.toAbsolutePath().toString().endsWith(".txt"))
-                savePath = Paths.get(savePath.toAbsolutePath().toString() + ".txt");
-            CommuniqueLoader loader = new CommuniqueLoader(savePath);
-            loader.save(communique.exportState());
-
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
+        recruitEditor.save();
     }
 
     private void sync() {
@@ -441,7 +431,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 
         // Sync up with Communique
         config.setcRecipients(rList);
-        communique.importState(config);
+        recruitEditor.load(config);
 
     }
 
@@ -462,7 +452,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
         // Client, Secret, and Telegram Keys
         clientKeyField.setText(config.keys.getClientKey());
         secretKeyField.setText(config.keys.getSecretKey());
-        telegramIdField.setText(config.keys.getTelegramId());
+        telegramIdField.setText(config.keys.getTelegramID());
 
         // Update graphical component
         lblNationsCount.setText(sentList.size() + (sentList.size() == 1 ? " nation" : " nations"));

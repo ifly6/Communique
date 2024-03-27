@@ -51,7 +51,7 @@ public class CommuniqueFileReader {
     private boolean recruitment;
     private boolean randomised;
 
-    Object[] information = {new JTelegramKeys(), new String[]{}};
+    Object[] information = {new JTelegramKeys(), new String[] {}};
 
     /**
      * Constructs a FileReader tailored to the correct file and loads the entire file into an ArrayList. From there, it
@@ -150,7 +150,7 @@ public class CommuniqueFileReader {
             }
         }
 
-        return new Object[]{keys, recipientsList.toArray(new String[0])};
+        return new Object[] {keys, recipientsList.toArray(new String[0])};
     }
 
     /**

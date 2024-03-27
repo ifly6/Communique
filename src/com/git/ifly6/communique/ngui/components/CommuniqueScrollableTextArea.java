@@ -23,6 +23,8 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import java.awt.EventQueue;
+import java.util.Arrays;
+import java.util.List;
 
 public class CommuniqueScrollableTextArea extends JScrollPane {
 
@@ -54,6 +56,18 @@ public class CommuniqueScrollableTextArea extends JScrollPane {
     public void appendLine(Object obj) {
         area.append("\n" + obj.toString());
         this.scrollBottom();
+    }
+
+    public List<String> getLines() {
+        return Arrays.asList(this.getText().split("\n"));
+    }
+
+    public void setFontSize(int points) {
+        area.setFont(area.getFont().deriveFont((float) points)); // must cast to float for size
+    }
+
+    public void setEditable(boolean b) {
+        area.setEditable(b);
     }
 
 }

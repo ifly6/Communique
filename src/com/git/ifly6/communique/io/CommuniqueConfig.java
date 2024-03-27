@@ -89,7 +89,7 @@ public class CommuniqueConfig implements java.io.Serializable {
         this.telegramType = t;
         this.processingAction = processingAction;
         this.keys = keys;
-        this.waitString = s;
+        this.waitString = s.trim();
     }
 
     /**

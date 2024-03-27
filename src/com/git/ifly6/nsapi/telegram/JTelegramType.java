@@ -83,7 +83,7 @@ public enum JTelegramType {
 
         @Override
         public String toString() {
-            return String.format("Custom timing (%d ms)", time);
+            return "Custom timing";
         }
     },
 
