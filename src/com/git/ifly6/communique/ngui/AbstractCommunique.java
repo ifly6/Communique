@@ -47,7 +47,7 @@ import static com.git.ifly6.communique.ngui.CommuniqueMessages.TITLE;
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
 import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
 import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.APP_SUPPORT;
-import static com.git.ifly6.communique.ngui.components.CommuniqueNativisation.showFileChooser;
+import static com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers.show;
 
 public abstract class AbstractCommunique {
 
@@ -63,7 +63,7 @@ public abstract class AbstractCommunique {
 
         // set up action listener
         ActionListener openFileAction = ae -> {
-            Path p = showFileChooser(frame, FileDialog.LOAD);
+            Path p = show(frame, FileDialog.LOAD);
             if (p == null) {
                 LOGGER.info("New file at null path");
                 return;
@@ -77,6 +77,12 @@ public abstract class AbstractCommunique {
 
         // add the save menu item
         mnFile.add(saveItem);
+
+        mnFile.addSeparator();
+        mnFile.add(createMenuItem("Close", KeyEvent.VK_W, ae -> {
+            frame.setVisible(false);
+            frame.dispose();
+        }));
 
         mnFile.addSeparator();
         mnFile.add(CommuniqueFactory.createMenuItem(

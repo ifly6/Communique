@@ -77,7 +77,7 @@ public class CommuniqueWindowManager {
             List<String> pathList = getActiveEditors().stream()
                     .map(CommuniqueEditor::getPath) // nullable!
                     .filter(Objects::nonNull)
-                    .map(Path::toAbsolutePath)
+                    .map(Path::normalize)
                     .map(Path::toString)
                     .collect(Collectors.toList());
             Files.write(PATH_LOCATION, pathList);
@@ -99,7 +99,7 @@ public class CommuniqueWindowManager {
         }
 
         return new ArrayList<>(Collections.singletonList(
-                AUTOSAVE.toAbsolutePath().toString()));
+                AUTOSAVE.normalize().toString()));
     }
 
     public void initialiseEditors() {

@@ -140,7 +140,7 @@ public class MarconiLauncher {
         // Add shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                LOGGER.info("Attempting to save to:" + configPath.toAbsolutePath().toString());    // save config
+                LOGGER.info("Attempting to save to:" + configPath.normalize());    // save config
                 marconi.save(configPath);
                 if (Files.deleteIfExists(MarconiUtilities.lockFile))
                     LOGGER.info("Removed file lock");    // remove file lock, if it exists

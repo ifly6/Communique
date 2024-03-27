@@ -27,7 +27,7 @@ import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditor;
 import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
-import com.git.ifly6.communique.ngui.components.CommuniqueNativisation;
+import com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
@@ -175,7 +175,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 
             } else { // SHUTTING DOWN
                 thread.interrupt();
-                Path savePath = CommuniqueNativisation.showFileChooser(frame, FileDialog.SAVE);
+                Path savePath = CommuniqueFileChoosers.show(frame, FileDialog.SAVE);
 
                 // Cancel saving if null
                 if (savePath == null) return;
