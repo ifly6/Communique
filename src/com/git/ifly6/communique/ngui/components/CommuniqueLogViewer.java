@@ -73,17 +73,21 @@ public class CommuniqueLogViewer extends JSplitPane {
         table = new JTable(tableModel);
         table.setBorder(CommuniqueFactory.createBorder(5));
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setFillsViewportHeight(true);
 
+        table.setFillsViewportHeight(true);
         table.setShowGrid(false);
-        table.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11)); // start viewing section
+        table.setIntercellSpacing(new Dimension(0, 0));
+
+        Font monospaced = new Font(Font.MONOSPACED, Font.PLAIN, 11);
+        table.setFont(monospaced); // start viewing section
         for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
             TableColumn column = table.getColumnModel().getColumn(i);
             switch (i) {
                 case 0:
-                    column.setMinWidth(125);
-                    column.setMaxWidth(145);
-                    column.setPreferredWidth(145);
+                    column.setMinWidth(table.getFontMetrics(table.getFont()).stringWidth("2024-01-01 "));
+                    int width = table.getFontMetrics(table.getFont()).stringWidth("2024-01-01 00:00:00 ");
+                    column.setMaxWidth(width + 1);
+                    column.setPreferredWidth(width + 1);
                     break;
                 case 1:
                     column.setMinWidth(125);
@@ -91,7 +95,6 @@ public class CommuniqueLogViewer extends JSplitPane {
                     break;
                 case 2:
                     column.setMinWidth(100);
-                    column.setPreferredWidth(1000);
                     break;
             }
         }
@@ -126,7 +129,7 @@ public class CommuniqueLogViewer extends JSplitPane {
 
             EventQueue.invokeLater(() -> {
                 JScrollBar vs = northScroll.getVerticalScrollBar(); // scroll to bottom
-                vs.setValue(Math.max(vs.getMinimum(), vs.getMaximum() - 1));
+                vs.setValue(Math.max(vs.getMinimum(), vs.getMaximum()));
             });
         });
 

@@ -30,7 +30,6 @@ import com.git.ifly6.communique.ngui.AbstractCommunique;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
-import com.sun.istack.internal.Nullable;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -54,6 +53,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -70,6 +70,7 @@ import static com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers.sh
 
 public class CommuniqueEditor extends AbstractCommunique {
 
+    public static final ArrayList<CommuniqueEditor> INSTANCES = new ArrayList<>();
     private static final Logger LOGGER = Logger.getLogger(CommuniqueEditor.class.getName());
 
     private Path path;
@@ -84,7 +85,7 @@ public class CommuniqueEditor extends AbstractCommunique {
     private JComboBox<CommuniqueProcessingAction> fieldAction;
     private JComboBox<JTelegramType> fieldType;
 
-    private CommuniqueConfig config;
+    private CommuniqueConfig config; // initialise a new configuration on nothing
 
     CommuniqueEditor(Path path) {
         this.path = path;
@@ -96,23 +97,24 @@ public class CommuniqueEditor extends AbstractCommunique {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setMinimumSize(new Dimension(725, 400));
 
+        // if there is a file try to load it
+        config = new CommuniqueConfig();
+        try {
+            config = load();
+        } catch (IOException e) {
+            return;  // abort construction
+        }
+
         // set up default location
         Point startingLocation = new Point(50 + 400, 50 + 50); // default location
         for (int i = 0; i < 10; i++) {
             Point hypothetical = new Point(startingLocation.x + 50 * i, startingLocation.y + 50 * i);
-            if (!CommuniqueWindowManager.getInstance().isLocationUsed(hypothetical)) {
+            if (!CommuniqueEditorManager.getInstance().isLocationUsed(hypothetical)) {
                 frame.setLocation(hypothetical);
                 break;
             }
         }
         frame.setSize(new Dimension(800, 600));
-
-        // if there is a file try to load it
-        try {
-            load();
-        } catch (IOException e) {
-            return;  // abort construction
-        }
 
         // initialise content pane components
         initialise();
@@ -121,8 +123,12 @@ public class CommuniqueEditor extends AbstractCommunique {
         initialiseMenuBar();
 
         // finalise
-        load(config);
+        synchronise(config);
         frame.setVisible(true);
+
+        // register the editor with yourself and clean up inactive editors
+        INSTANCES.removeIf(editor -> !editor.active());
+        INSTANCES.add(this);
     }
 
     private void initialise() {
@@ -341,11 +347,11 @@ public class CommuniqueEditor extends AbstractCommunique {
         r.run();
     }
 
-    private void load() throws IOException {
+    private CommuniqueConfig load() throws IOException {
         CommuniqueLoader loader = new CommuniqueLoader(path);
         if (Files.exists(path)) {
             try {
-                config = loader.load();
+                return loader.load();
 
             } catch (IOException e) {
                 showWarning(String.format("Failed to read configuration file at %s", path), e);
@@ -356,9 +362,11 @@ public class CommuniqueEditor extends AbstractCommunique {
                 throw e;
             }
         }
+
+        return new CommuniqueConfig();
     }
 
-    public void load(CommuniqueConfig theConfig) {
+    public void synchronise(CommuniqueConfig theConfig) {
         config = theConfig;
         this.setClientKey(config.keys.getClientKey());
         this.setSecretKey(config.keys.getSecretKey());
@@ -379,9 +387,12 @@ public class CommuniqueEditor extends AbstractCommunique {
         return frame.isDisplayable();
     }
 
-    @Nullable
+    /**
+     * The {@link Path} at which the editor is pointed
+     * @return that path
+     */
     public Path getPath() {
-        return Files.exists(path) ? path : null;
+        return path;
     }
 
     public Point getLocation() {
@@ -421,6 +432,10 @@ public class CommuniqueEditor extends AbstractCommunique {
 
     public void setTelegramID(String s) {
         fieldTelegramID.setText(s);
+    }
+
+    public void toFront() {
+        frame.toFront();
     }
 
 }

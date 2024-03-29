@@ -38,7 +38,7 @@ public class CommuniqueConfig implements java.io.Serializable {
     // For backwards compatibility, almost all field names cannot be changed
     private static final long serialVersionUID = Communique7Parser.version;
 
-    public static final String HEADER = "Communiqué Configuration File. Do not edit by hand. Produced at: "
+    public String HEADER = "Communiqué Configuration file. Do not edit by hand. Produced at: " // cannot be static!
             + CommuniqueUtilities.getDate() + ". Produced by version " + Communique7Parser.version;
 
     public int version;

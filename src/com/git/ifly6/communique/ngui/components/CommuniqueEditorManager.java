@@ -33,43 +33,38 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class CommuniqueWindowManager {
-    private static CommuniqueWindowManager instance = new CommuniqueWindowManager();
-    private static final Logger LOGGER = Logger.getLogger(CommuniqueWindowManager.class.getName());
+public class CommuniqueEditorManager {
+    private static CommuniqueEditorManager instance = new CommuniqueEditorManager();
+    private static final Logger LOGGER = Logger.getLogger(CommuniqueEditorManager.class.getName());
     private static final Path PATH_LOCATION = CommuniqueLAF.APP_SUPPORT.resolve(".editor-paths");
     private static final Path AUTOSAVE = CommuniqueLAF.APP_SUPPORT.resolve("autosave.txt");
 
+    private CommuniqueEditorManager() {
+    }
 
-    private List<CommuniqueEditor> editors = new ArrayList<>();
-
-    public static CommuniqueWindowManager getInstance() {
+    public static CommuniqueEditorManager getInstance() {
         return instance;
     }
 
-    private CommuniqueWindowManager() {
-    }
-
     public List<CommuniqueEditor> getEditors() {
-        return editors;
+        return CommuniqueEditor.INSTANCES;
     }
 
     public List<CommuniqueEditor> getActiveEditors() {
-        return editors.stream().filter(CommuniqueEditor::active).collect(Collectors.toList());
+        return getEditors().stream().filter(CommuniqueEditor::active).collect(Collectors.toList());
     }
 
-    private void registerEditor(CommuniqueEditor editor) {
-        editors.add(editor);
-    }
-
-    public CommuniqueEditor newEditor(Path p) {
+    /**
+     * Attempt to construct a new editor
+     * @param p is the {@link Path} to be editing at
+     */
+    public void newEditor(Path p) {
         if (getActiveEditors().stream()
-                .map(CommuniqueEditor::getPath).collect(Collectors.toSet())
-                .contains(p))
-            return null;
+                .map(CommuniqueEditor::getPath)
+                .anyMatch(p::equals))
+            return;
 
-        CommuniqueEditor e = new CommuniqueEditor(p);
-        registerEditor(e);
-        return e;
+        new CommuniqueEditor(p); // create otherwise
     }
 
     public void savePaths() {

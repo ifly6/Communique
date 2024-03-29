@@ -76,6 +76,11 @@ class CommuniqueReader {
                 Gson gson = new Gson();
                 config = gson.fromJson(Files.newBufferedReader(path), CommuniqueConfig.class);
 
+                // check if the header is null and fill it in with "dunno mate" if not present
+                if (config.HEADER == null)
+                    config.HEADER = "Communiqué Configuration file. Do not edit by hand. " +
+                            "Unknown production date and version.";
+
                 // convert something with a null cRecipients over if there are recipients and sent list
                 if (config.getcRecipients() == null &&
                         (config.recipients.length != 0 || config.sentList.length != 0))
@@ -107,7 +112,7 @@ class CommuniqueReader {
 
                 logger.log(Level.INFO, "Invalid Json file. Attempting read with old file reader.", e);
                 CommuniqueFileReader reader = new CommuniqueFileReader(path.toFile());
-                if (reader.getFileVersion() == 0)
+                if (reader.getFileVersion() <= 0)
                     throw new IOException("This is not a Communique file");
 
                 config = new CommuniqueConfig();

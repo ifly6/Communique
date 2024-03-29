@@ -20,7 +20,7 @@ package com.git.ifly6.communique.ngui;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
-import com.git.ifly6.communique.ngui.components.CommuniqueWindowManager;
+import com.git.ifly6.communique.ngui.components.CommuniqueEditorManager;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -68,7 +68,7 @@ public abstract class AbstractCommunique {
                 LOGGER.info("New file at null path");
                 return;
             }
-            CommuniqueWindowManager.getInstance().newEditor(p);
+            CommuniqueEditorManager.getInstance().newEditor(p);
         };
 
         // new, open, and save all

@@ -31,7 +31,8 @@ public class ApiUtils {
      */
     public static String ref(String input) {
         if (input == null) throw new NullPointerException("Cannot convert null string to reference format");
-        return input.trim().toLowerCase().replace("\\s", "_");
+        return input.trim().toLowerCase().replaceAll("\\s", "_");
+        // 2024-03-29 MUST be replaceAll and NOT replace
     }
 
     /**

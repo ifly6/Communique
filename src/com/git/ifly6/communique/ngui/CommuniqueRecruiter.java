@@ -26,8 +26,8 @@ import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditor;
-import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
 import com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers;
+import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
@@ -91,7 +91,6 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
         LOGGER.addHandler(CommuniqueLAF.loggerFileHandler);
     }
 
-    private Communique communique;
     private CommuniqueEditor recruitEditor;
 
     private JFrame frame;
@@ -112,10 +111,11 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
     /**
      * Create the application, if necessary.
      */
-    CommuniqueRecruiter(Communique comm, CommuniqueEditor recruitEditor) {
-        this.communique = comm;
+    CommuniqueRecruiter(CommuniqueEditor recruitEditor) {
         this.recruitEditor = recruitEditor;
         initialise();
+
+        this.setConfig(recruitEditor.getConfig());
         frame.setVisible(true);
     }
 
@@ -124,7 +124,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
      */
     private void initialise() {
 
-        frame = new JFrame("Communiqué Recruiter " + Communique7Parser.version);
+        frame = new JFrame(CommuniqueMessages.RECRUITER + " " + Communique7Parser.version);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         {
@@ -431,7 +431,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 
         // Sync up with Communique
         config.setcRecipients(rList);
-        recruitEditor.load(config);
+        recruitEditor.synchronise(config);
 
     }
 

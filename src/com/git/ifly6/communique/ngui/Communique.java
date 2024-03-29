@@ -22,16 +22,15 @@ import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.data.RecipientType;
-import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditor;
+import com.git.ifly6.communique.ngui.components.CommuniqueEditorManager;
 import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
 import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
 import com.git.ifly6.communique.ngui.components.CommuniqueLogHandler;
 import com.git.ifly6.communique.ngui.components.CommuniqueLogViewer;
 import com.git.ifly6.communique.ngui.components.CommuniqueTimerBar;
-import com.git.ifly6.communique.ngui.components.CommuniqueWindowManager;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
@@ -76,7 +75,6 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
     private static final Logger LOGGER = Logger.getLogger(Communique.class.getName());
 
-    private CommuniqueConfig config = new CommuniqueConfig();
     private JavaTelegram client; // Sending client
     private Thread sendingThread = new Thread(); // The one sending thread
 
@@ -162,6 +160,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
             CommuniqueEditor newFocusedEditor = editorSelector.getItemAt(editorSelector.getSelectedIndex());
             if (focusedEditor != newFocusedEditor) {
                 focusedEditor = newFocusedEditor;
+                focusedEditor.toFront();
                 LOGGER.info(String.format("Selected editor for path %s", focusedEditor.getPath().getFileName()));
             }
         });
@@ -169,7 +168,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
             @Override
             public void focusGained(FocusEvent e) {
                 EventQueue.invokeLater(() -> {
-                    List<CommuniqueEditor> activeEditors = CommuniqueWindowManager.getInstance().getActiveEditors();
+                    List<CommuniqueEditor> activeEditors = CommuniqueEditorManager.getInstance().getActiveEditors();
                     HashSet<CommuniqueEditor> displaySet = new HashSet<>();
                     for (int i = 0; i < editorSelector.getItemCount(); i++)
                         displaySet.add(editorSelector.getItemAt(i));
@@ -217,7 +216,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         JMenu fileMenu = this.addFileMenu(
                 createMenuItem(  // save action
                         "Save All", KeyEvent.VK_S,
-                        ae -> CommuniqueWindowManager.getInstance().saveAll()
+                        ae -> CommuniqueEditorManager.getInstance().saveAll()
                 )
         );
 
@@ -236,10 +235,10 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         Logger.getLogger("").addHandler(new CommuniqueLogHandler(logViewer));
 
         // post initialisation
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> CommuniqueWindowManager.getInstance().saveAll()));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> CommuniqueEditorManager.getInstance().saveAll()));
         LOGGER.info("Shutdown hook added");
         LOGGER.info("Communiqué loaded");
-        CommuniqueWindowManager.getInstance().initialiseEditors();
+        CommuniqueEditorManager.getInstance().initialiseEditors();
     }
 
     /**
@@ -272,14 +271,15 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         Communique7Parser parser = new Communique7Parser();
         try {
             parsedRecipients = parser.apply(tokens).listRecipients();
-            if (!ApiUtils.contains(CommuniqueProcessingAction.values(), config.processingAction)) {
+            if (!ApiUtils.contains(CommuniqueProcessingAction.values(),
+                    focusedEditor.getConfig().processingAction)) {
                 // if config.processingAction not in CommuniqueProcessingAction.values
                 // deal with invalid processing action
                 this.showErrorDialog("Invalid processing action.\n"
                         + "Select a valid processing action");
                 return;
             }
-            parsedRecipients = config.processingAction.apply(parsedRecipients);
+            parsedRecipients = focusedEditor.getConfig().processingAction.apply(parsedRecipients);
 
         } catch (PatternSyntaxException pse) {
             // note 2020-01-27: better that regex errors are shown in monospaced font
@@ -406,8 +406,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
      */
     private void showRecruiter() {
         if (recruiter == null || !recruiter.isDisplayable()) {
-            recruiter = new CommuniqueRecruiter(this, focusedEditor);
-            recruiter.setConfig(focusedEditor.getConfig());
+            recruiter = new CommuniqueRecruiter(focusedEditor);
         } else recruiter.toFront();
     }
 
