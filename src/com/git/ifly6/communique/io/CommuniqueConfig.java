@@ -38,9 +38,7 @@ public class CommuniqueConfig implements java.io.Serializable {
     // For backwards compatibility, almost all field names cannot be changed
     private static final long serialVersionUID = Communique7Parser.version;
 
-    public String HEADER = "Communiqué Configuration file. Do not edit by hand. Produced at: " // cannot be static!
-            + CommuniqueUtilities.getDate() + ". Produced by version " + Communique7Parser.version;
-
+    public String HEADER;
     public int version;
 
     protected boolean isRecruitment;
@@ -70,9 +68,11 @@ public class CommuniqueConfig implements java.io.Serializable {
      * Empty constructor for {@link CommuniqueConfig}
      */
     public CommuniqueConfig() {
-        this.keys = new JTelegramKeys(); // empty keys
-        this.version = defaultVersion(); // default version to current version
-        this.processingAction = CommuniqueProcessingAction.NONE; // no processing action
+        HEADER = "Communiqué Configuration file. Do not edit by hand. Produced at: " // cannot be static!
+                + CommuniqueUtilities.getDate() + ". Produced by version " + Communique7Parser.version;
+        keys = new JTelegramKeys(); // empty keys
+        version = defaultVersion(); // default version to current version
+        processingAction = CommuniqueProcessingAction.NONE; // no processing action
     }
 
     /**
