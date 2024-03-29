@@ -26,8 +26,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -79,17 +80,18 @@ public class JavaTelegram {
      * <br /> else (we are campaigning) and nation is not campaignable -> false</code>
      * </p>
      */
-    private List<Predicate<NSNation>> predicates = new ArrayList<>();  // additional predicates here
+    private List<JTelegramPredicate> predicates = new ArrayList<>();  // additional predicates here
 
     {
-        predicates.add(n -> {
+        predicates.add(new JTelegramPredicate(
+                "telegram type receivable", n -> {
             // if we are recruiting and nation is not recruitable -> false
             // if campaigning and nation is not campaignable -> false
             // otherwise return true
             if (telegramType == JTelegramType.RECRUIT) return n.isRecruitable();
             if (telegramType == JTelegramType.CAMPAIGN) return n.isCampaignable();
             return true;
-        });
+        }));
     }
 
     /**
@@ -189,7 +191,7 @@ public class JavaTelegram {
         return killThread;
     }
 
-    public void addFilter(Predicate<NSNation> p) {
+    public void addFilter(JTelegramPredicate p) {
         this.predicates.add(p);
     }
 
@@ -225,16 +227,13 @@ public class JavaTelegram {
             String recipient = recipients.get(i);
 
             // Verify the defaultPredicate
-            boolean passedChecks = true;
+            Map<JTelegramPredicate, Boolean> results = new LinkedHashMap<>();
             NSNation nation = new NSNation(recipient);
             try {
                 nation.populateData();
-                for (Predicate<NSNation> predicate : predicates) {
+                for (JTelegramPredicate predicate : predicates) {
                     if (predicate == null) continue; // skip null predicates
-                    if (!predicate.test(nation)) {
-                        passedChecks = false;
-                        break;
-                    }
+                    results.put(predicate, predicate.test(nation));
                 }
 
             } catch (NSException e) {
@@ -243,12 +242,18 @@ public class JavaTelegram {
 
             } catch (NSIOException e) {
                 util.log(String.format("Cannot query for data on %s, assuming check passed, continuing", recipient));
-                e.printStackTrace();
 
             }
 
-            if (!passedChecks) {
-                util.log("Failed predicate check, skipping " + recipient);
+            if (results.containsValue(false)) {
+                // list the failed predicates
+                List<String> failedPredicates = results.entrySet().stream()
+                        .filter(e -> !e.getValue())
+                        .map(e -> e.getKey().getName())
+                        .collect(Collectors.toList());
+                util.log(String.format("Failed predicates %s skipping recipient %s",
+                        failedPredicates,
+                        recipient));
                 continue;
             }
 
