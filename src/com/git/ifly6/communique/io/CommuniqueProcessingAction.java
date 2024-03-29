@@ -58,7 +58,7 @@ public enum CommuniqueProcessingAction {
                 input.set(i, input.get(other));
                 input.set(other, original);
             }
-            return input; // do nothing
+            return input; // it happened in place
         }
 
         @Override

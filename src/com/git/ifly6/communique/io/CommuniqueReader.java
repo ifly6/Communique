@@ -48,7 +48,7 @@ import static java.util.Arrays.asList;
         // Suppress deprecation as we use dep. classes
 class CommuniqueReader {
 
-    private Logger logger = Logger.getLogger(CommuniqueReader.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CommuniqueReader.class.getName());
 
     /**
      * {@link Path} where the class is pointed to
@@ -110,7 +110,7 @@ class CommuniqueReader {
                 // If we are reading one of the old files, which would throw some RuntimeExceptions,
                 // try the old reader.
 
-                logger.log(Level.INFO, "Invalid Json file. Attempting read with old file reader.", e);
+                LOGGER.log(Level.INFO, "Invalid Json file. Attempting read with old file reader.", e);
                 CommuniqueFileReader reader = new CommuniqueFileReader(path.toFile());
                 if (reader.getFileVersion() <= 0)
                     throw new IOException("This is not a Communique file");
@@ -138,7 +138,7 @@ class CommuniqueReader {
                 unifySendList(config);
 
         } catch (NullPointerException npe) {
-            logger.log(Level.SEVERE, "Found null pointer exception when reading file; returning default " +
+            LOGGER.log(Level.SEVERE, "Found null pointer exception when reading file; returning default " +
                     "configuation", npe);
             config = new CommuniqueConfig();
         }

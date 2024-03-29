@@ -22,6 +22,7 @@ import com.git.ifly6.nsapi.telegram.JTelegramException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Stores information about a recipient. It is based on three characteristics, a <code>FilterType</code>, a
@@ -104,8 +105,7 @@ public class CommuniqueRecipient {
     }
 
     /**
-     * Decomposes a tag to its constituent nations. All decompositions are done in
-     * {@link com.git.ifly6.communique.data.RecipientType RecipientType} class.
+     * Decomposes a tag to its constituent nations. All decompositions are done in {@link RecipientType}.
      * @return a list of <code>CommuniqueRecipient</code>s
      */
     public List<CommuniqueRecipient> decompose() throws JTelegramException {
@@ -149,28 +149,17 @@ public class CommuniqueRecipient {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (filterType == null ? 0 : filterType.hashCode());
-        result = prime * result + (name == null ? 0 : name.hashCode());
-        result = prime * result + (recipientType == null ? 0 : recipientType.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommuniqueRecipient that = (CommuniqueRecipient) o;
+        return filterType == that.filterType && recipientType == that.recipientType
+                && Objects.equals(name, that.name);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        CommuniqueRecipient other = (CommuniqueRecipient) obj;
-        if (filterType != other.filterType) return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return recipientType == other.recipientType;
+    public int hashCode() {
+        return Objects.hash(filterType, recipientType, name);
     }
 
     private static final String RECRUIT_FLAG = "flag:recruit";
@@ -229,7 +218,6 @@ public class CommuniqueRecipient {
         List<String> tokens = new ArrayList<>();
         for (String oldToken : oldTokens) {
 
-
             if (oldToken.startsWith(RECRUIT_FLAG)) {
                 tokens.add(RECRUIT_FLAG);
                 if (oldToken.trim().equalsIgnoreCase(RECRUIT_FLAG)) {
@@ -248,7 +236,7 @@ public class CommuniqueRecipient {
                 String[] split = oldToken.split(OLD_INCLUDE);
                 tokens.add(translateToken(split[0]));
                 tokens.add(translateToken(OLD_INCLUDE + split[1]));
-                continue;    // to next!
+                continue; // to next!
             }
 
             if (oldToken.contains(OLD_EXCLUDE)) {
@@ -258,7 +246,7 @@ public class CommuniqueRecipient {
                         tokens.add(translateToken(split[0].trim()));
                     if (ApiUtils.isNotEmpty(split[1]))
                         tokens.add(translateToken(OLD_EXCLUDE + split[1].trim()));
-                    continue;    // to next!
+                    continue; // to next!
                 }
             }
             tokens.add(translateToken(oldToken));
@@ -281,15 +269,20 @@ public class CommuniqueRecipient {
         // logic tags, somewhat recursive to ease translation of sub-tokens
         // no need to use HashMap, that seems over-engineered for something this simple
         if (oldToken.startsWith("/")) return "-" + translateToken(oldToken.replaceFirst("/", "").trim());
-        if (oldToken.startsWith("-- ")) return "-" + translateToken(oldToken.replaceFirst("-- ", "").trim());
-        if (oldToken.startsWith("-> ")) return "+" + translateToken(oldToken.replaceFirst("->", "").trim());
+        if (oldToken.startsWith("-- ") || oldToken.startsWith(" -- "))
+            return "-" + translateToken(oldToken.replaceFirst("-- ", "").trim());
+        if (oldToken.startsWith(OLD_INCLUDE) || oldToken.startsWith(OLD_INCLUDE + " "))
+            return "+" + translateToken(oldToken.replaceFirst(OLD_INCLUDE, "").trim());
 
         // translate tags which can be decomposed
-        if (oldToken.equalsIgnoreCase("wa:delegates")) return "tag:delegates";
-        if (oldToken.equalsIgnoreCase("wa:delegate")) return "tag:delegates";
-        if (oldToken.equalsIgnoreCase("wa:members") || oldToken.equalsIgnoreCase("wa:nations"))
+        if (oldToken.trim().equalsIgnoreCase("wa:delegates")) return "tag:delegates";
+        if (oldToken.trim().equalsIgnoreCase("wa:delegate")) return "tag:delegates";
+        if (oldToken.trim().equalsIgnoreCase("wa:members")
+                || oldToken.trim().equalsIgnoreCase("wa:nations")
+                || oldToken.trim().equalsIgnoreCase("wa:all"))
             return "tag:wa";
         if (oldToken.startsWith("world:new")) return "tag:new";
+        if (oldToken.startsWith("world:all")) return "tag:all";
 
         // somewhat-direct recipient tags, like region and nation
         if (oldToken.startsWith("region:")) return oldToken;
