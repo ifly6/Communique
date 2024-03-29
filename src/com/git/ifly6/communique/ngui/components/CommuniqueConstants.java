@@ -27,7 +27,7 @@ public class CommuniqueConstants {
     public static final int COMMAND_KEY = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
     public static final String CODE_HEADER =
-            "# == Communiqué Recipients Syntax ==\n"
+            "# == Communiqué recipients syntax ==\n"
                     + "# See readme [ https://github.com/iflycode/communique#readme ]\n\n";
 
     public static final String INTERNET_ERROR = "NationStates appears down from your location.\n" +
