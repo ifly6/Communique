@@ -18,8 +18,11 @@ package com.git.ifly6.nsapi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ApiUtils {
+
+    private static final Pattern WHITESPACE = Pattern.compile("\\s");
 
     private ApiUtils() {
     }
@@ -31,8 +34,9 @@ public class ApiUtils {
      */
     public static String ref(String input) {
         if (input == null) throw new NullPointerException("Cannot convert null string to reference format");
-        return input.trim().toLowerCase().replaceAll("\\s", "_");
+        return WHITESPACE.matcher(input.trim().toLowerCase()).replaceAll("_");
         // 2024-03-29 MUST be replaceAll and NOT replace
+        // 2024-03-30 change to pattern
     }
 
     /**
