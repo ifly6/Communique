@@ -42,7 +42,7 @@ class Communique7ParserTest {
                         new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "imperium_anglorum"),
                         new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "transilia")
                 ).listRecipients());
-        assertEquals(results, Arrays.asList("imperium_anglorum", "transilia"));
+        assertEquals(results, List.of("imperium_anglorum", "transilia"));
 
         List<String> regexRemove = new ArrayList<>(
                 new Communique7Parser().apply(
@@ -50,6 +50,6 @@ class Communique7ParserTest {
                         new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "transilia"),
                         new CommuniqueRecipient(FilterType.EXCLUDE_REGEX, RecipientType.NATION, "imperium_[A-Z]+")
                 ).listRecipients());
-        assertEquals(regexRemove, Collections.singletonList("transilia"));
+        assertEquals(regexRemove, List.of("transilia"));
     }
 }

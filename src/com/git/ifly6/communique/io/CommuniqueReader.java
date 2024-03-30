@@ -36,8 +36,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
-
 /**
  * {@link CommuniqueReader} reads Communique configuration files. It contains some backwards compatibility for the last
  * version of the pre-JSON configuration files. The handling for this logic is done primarily in the
@@ -124,7 +122,7 @@ class CommuniqueReader {
                 config.keys = reader.getKeys();
 
                 List<CommuniqueRecipient> recipients = CommuniqueRecipient
-                        .translateTokens(asList(reader.getRecipients())).stream()
+                        .translateTokens(List.of(reader.getRecipients())).stream()
                         .map(CommuniqueRecipient::parseRecipient)
                         .collect(Collectors.toList());
                 config.setcRecipients(recipients);
@@ -162,7 +160,7 @@ class CommuniqueReader {
 
             // if recipients contains things, lets deal with that
             if (config.recipients != null && config.recipients.length != 0) {
-                List<String> recipients = CommuniqueRecipient.translateTokens(asList(config.recipients));
+                List<String> recipients = CommuniqueRecipient.translateTokens(List.of(config.recipients));
                 list.addAll(recipients.stream()    // add all recipients
                         .map(CommuniqueRecipient::parseRecipient)
                         .map(r -> CommuniqueRecipients.setFilter(r, FilterType.NORMAL))
@@ -171,7 +169,7 @@ class CommuniqueReader {
 
             // if sentList contains things, deal with that
             if (config.sentList != null && config.sentList.length != 0) {
-                List<String> sentList = CommuniqueRecipient.translateTokens(asList(config.sentList));
+                List<String> sentList = CommuniqueRecipient.translateTokens(List.of(config.sentList));
                 list.addAll(sentList.stream()  // translate, then change flag as necessary
                         .map(CommuniqueRecipient::parseRecipient)
                         .map(CommuniqueRecipients::exclude) // manual cast if necessary

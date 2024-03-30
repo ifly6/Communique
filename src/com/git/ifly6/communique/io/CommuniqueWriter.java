@@ -23,7 +23,6 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 class CommuniqueWriter {
 
@@ -45,14 +44,10 @@ class CommuniqueWriter {
      * @throws IOException if there is an error in writing the file
      */
     void write() throws IOException {
-
         // Have configuration clean itself
         config.clean();
-
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String response = gson.toJson(config);
-
-        Files.write(path, Arrays.asList(response.split("\n")));
+        Files.writeString(path, gson.toJson(config));
     }
 
 }

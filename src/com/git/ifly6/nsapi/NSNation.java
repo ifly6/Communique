@@ -24,7 +24,6 @@ import com.jcabi.xml.XMLDocument;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -47,19 +46,19 @@ public class NSNation {
 
     static {
         CATEGORIES_MAP.put("balanced",
-                Arrays.asList("Anarchy", "Capitalizt", "New York Times Democracy", "Benevolent Dictatorship",
+                List.of("Anarchy", "Capitalizt", "New York Times Democracy", "Benevolent Dictatorship",
                         "Inoffensive Centrist Democracy", "Tyranny By Majority", "Father Knows Best State",
                         "Authoritarian Democracy", "Psychotic Dictatorship"));
         CATEGORIES_MAP.put("right-leaning",
-                Arrays.asList("Corporate Bordello", "Capitalist Paradise", "Conservative Democracy",
+                List.of("Corporate Bordello", "Capitalist Paradise", "Conservative Democracy",
                         "Compulsory Consumerist State", "Moralistic Democracy", "Iron Fist Consumerists"));
         CATEGORIES_MAP.put("left-leaning",
-                Arrays.asList("Civil Rights Lovefest", "Left Leaning College State", "Liberal Democratic Socialists",
+                List.of("Civil Rights Lovefest", "Left Leaning College State", "Liberal Democratic Socialists",
                         "Libertarian Police State", "Democratic Socialists", "Corrupt Dictatorship"));
         CATEGORIES_MAP.put("right-wing",
-                Arrays.asList("Free Market Paradise", "Right Wing Utopia", "Corporate Police State"));
+                List.of("Free Market Paradise", "Right Wing Utopia", "Corporate Police State"));
         CATEGORIES_MAP.put("left-wing",
-                Arrays.asList("Left Wing Utopia", "Scandinavian Liberal Paradise", "Iron Fist Socialists"));
+                List.of("Left Wing Utopia", "Scandinavian Liberal Paradise", "Iron Fist Socialists"));
     }
 
     // Nation identifiers
@@ -113,7 +112,7 @@ public class NSNation {
             try {
                 // Split endorsements string
                 String endorsements = xml.xpath("/NATION/ENDORSEMENTS/text()").get(0);
-                endorsingNations = Arrays.asList(endorsements.split(","));
+                endorsingNations = List.of(endorsements.split(","));
                 endoCount = endorsingNations.size();
 
             } catch (RuntimeException e) {

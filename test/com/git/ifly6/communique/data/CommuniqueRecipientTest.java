@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CommuniqueRecipientTest {
 
     private String firstTranslated(String input) {
-        List<String> r = CommuniqueRecipient.translateTokens(Collections.singletonList(input));
+        List<String> r = CommuniqueRecipient.translateTokens(List.of(input));
         if (r.isEmpty())
             throw new IllegalArgumentException(String.format("input %s is bad", input));
 
@@ -105,17 +104,17 @@ class CommuniqueRecipientTest {
 
         // exclude and include tokens
         assertEquals(
-                new ArrayList<>(Arrays.asList("region:Europe", "-nation:imperium_anglorum")),
+                new ArrayList<>(List.of("region:Europe", "-nation:imperium_anglorum")),
                 CommuniqueRecipient.translateTokens(
-                        Collections.singletonList("region:Europe -- imperium_anglorum")));
+                        List.of("region:Europe -- imperium_anglorum")));
         assertEquals(
-                new ArrayList<>(Arrays.asList("tag:delegates", "+region:Europe")),
+                new ArrayList<>(List.of("tag:delegates", "+region:Europe")),
                 CommuniqueRecipient.translateTokens(
-                        Collections.singletonList("wa:delegates -> region:Europe")));
+                        List.of("wa:delegates -> region:Europe")));
         assertEquals(
-                new ArrayList<>(Arrays.asList("tag:delegates", "+region:Europe")),
+                new ArrayList<>(List.of("tag:delegates", "+region:Europe")),
                 CommuniqueRecipient.translateTokens(
-                        Collections.singletonList("wa:delegates->region:Europe")));  // spacing
+                        List.of("wa:delegates->region:Europe")));  // spacing
     }
 
     @Test

@@ -229,7 +229,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
             String rName =
                     (String) JOptionPane.showInputDialog(frame, "Input the name of the region you want to exclude.",
                             "Exclude region", JOptionPane.PLAIN_MESSAGE, null, null, "");
-            if (!ApiUtils.isEmpty(rName)) exListModel.addElement(rName);
+            if (!rName.isBlank()) exListModel.addElement(rName);
         });
 
         JButton btnRemove = new JButton("—");
@@ -384,7 +384,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
     public void sentTo(String recipient, int recipientNum, int length) {
         super.sentTo(recipient, recipientNum, length);
         lblNationsCount.setText(sentList.size() + (sentList.size() == 1 ? " nation" : " nations"));
-        if (!ApiUtils.isEmpty(sentListArea.getText())) sentListArea.append("\n" + recipient);
+        if (!sentListArea.getText().isBlank()) sentListArea.append("\n" + recipient);
         else sentListArea.setText(recipient);
     }
 

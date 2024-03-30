@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
@@ -51,20 +50,6 @@ class ApiUtilsTest {
 
     @Test
     void isEmpty() {
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("imperium anglorum", false);
-        map.put("", true);
-        map.put(" ", true);
-        map.put("  1", false);
-        map.put("  _", false);
-
-        for (Map.Entry<String, Boolean> entry : map.entrySet())
-            assertEquals(entry.getValue(), ApiUtils.isEmpty(entry.getKey()));
-
-        assertArrayEquals(
-                map.keySet().stream().map(ApiUtils::isEmpty).toArray(),
-                map.values().toArray(new Boolean[0])
-        );
     }
 
     @Test

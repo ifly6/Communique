@@ -51,16 +51,6 @@ public class ApiUtils {
     }
 
     /**
-     * Trims string and checks whether it is empty
-     * @param s to trim and check
-     * @return empty if nothing but input contains nothing but whitespace
-     */
-    public static boolean isEmpty(String s) {
-        if (s == null) return true;
-        return s.trim().isEmpty(); // isEmpty : value.length == 0
-    }
-
-    /**
      * Determines whether a given array is empty.
      * @param a array
      * @return true if empty
@@ -71,10 +61,10 @@ public class ApiUtils {
 
     /**
      * @param s to check for empty-ness
-     * @return inverted {@link #isEmpty(String)}
+     * @return inverted {@link String#isBlank()}
      */
     public static boolean isNotEmpty(String s) {
-        return !ApiUtils.isEmpty(s);
+        return !s.isBlank();
     }
 
     /**

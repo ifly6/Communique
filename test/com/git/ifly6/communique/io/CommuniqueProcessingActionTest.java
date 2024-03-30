@@ -15,33 +15,32 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.tests;
+package com.git.ifly6.communique.io;
 
 import com.git.ifly6.communique.data.CommuniqueRecipient;
-import com.git.ifly6.communique.io.CommuniqueProcessingAction;
+import com.git.ifly6.communique.data.CommuniqueRecipients;
+import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.git.ifly6.communique.data.CommuniqueRecipients.createNation;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CommuniqueProcessingActionTest {
+class CommuniqueProcessingActionTest {
 
+    @Test
+    void apply() {
+        List<String> input = Stream
+                .of("alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf")
+                .map(CommuniqueRecipients::createNation)
+                .map(CommuniqueRecipient::toString)
+                .collect(Collectors.toList());
 
-    public static void main(String[] args) {
-        List<CommuniqueRecipient> original = new ArrayList<>();
-        original.add(createNation("alpha"));
-        original.add(createNation("bravo"));
-        original.add(createNation("charlie"));
-        original.add(createNation("delta"));
-        original.add(createNation("echo"));
-        original.add(createNation("foxtrot"));
-        original.add(createNation("golf"));
-
-        List<String> input = original.stream().map(CommuniqueRecipient::toString).collect(Collectors.toList());
-        System.out.println(CommuniqueProcessingAction.REVERSE.apply(input));
-        System.out.println(CommuniqueProcessingAction.RANDOMISE.apply(input));
-        System.out.println(CommuniqueProcessingAction.NONE.apply(input));
+        assertEquals(CommuniqueProcessingAction.NONE.apply(input), input);
+        assertEquals(CommuniqueProcessingAction.RANDOMISE.apply(input).size(), input.size());
+        assertEquals(
+                CommuniqueProcessingAction.REVERSE.apply(CommuniqueProcessingAction.REVERSE.apply(input)),
+                input);
     }
 }

@@ -208,7 +208,7 @@ public class CommuniqueParser {
 
         // Filter out comments and empty lines
         input = Arrays.stream(input)
-                .filter(s -> !s.startsWith("#") && !ApiUtils.isEmpty(s))
+                .filter(s -> !s.startsWith("#") && !s.isBlank())
                 .toArray(String[]::new);
 
         // Form a list of all the nation we want in this list.

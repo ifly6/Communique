@@ -14,7 +14,7 @@ from the author if action is taken against your NationStates account or from oth
 ## Documentation ##
 
 ### System Requirements ###
-* Java JRE 9+ (Eg [Amazon's distribution](https://aws.amazon.com/corretto/) or [Eclipse' distribution](https://adoptium.net/en-GB/temurin/releases/).)
+* Java JRE 11+ (Eg [Amazon's distribution](https://aws.amazon.com/corretto/) or [Eclipse' distribution](https://adoptium.net/en-GB/temurin/releases/).)
 * A [NationStates](https://www.nationstates.net) nation
 * A NationStates [API client key](https://www.nationstates.net/pages/api.html#telegrams)
 * A NationStates [telegram ID and secret key](https://www.nationstates.net/pages/api.html#telegrams)
@@ -141,7 +141,7 @@ it is not backwards compatible with older versions.
     
 12. Version 12 allows typing of telegrams to specify default delay times and also introduces overriding the default times with wait time input. Both changes affect configuration file format.
 
-13. Version 13 reflects substantial changes to the Communiqué GUI, especially in allowing multiple files to be opened, a clearly-visible sending log in tabular format, etc. Due to reliance on `java.awt.Taskbar` this requires Java 9+. Also adopted `FlatLAF` the Swing theme; Windows' system LAF is awful.
+13. Version 13 reflects substantial changes to the Communiqué GUI, especially in allowing multiple files to be opened, a clearly-visible sending log in tabular format, etc. Due to reliance on `java.awt.Taskbar` this requires Java 11+. Also adopted `FlatLAF` the Swing theme; Windows' system LAF is awful.
 
 ## Road ahead
 In a future version, I intend to phase out the concept of a separate recruiter and simply permit someoneone to specify that some action be taken repeatedly. Some syntax like `flag:repeat; limit:1; tag:new`.

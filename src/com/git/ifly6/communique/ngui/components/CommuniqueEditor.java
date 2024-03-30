@@ -293,7 +293,7 @@ public class CommuniqueEditor extends AbstractCommunique {
                                     "Select Chamber and Side", JOptionPane.PLAIN_MESSAGE, null,
                                     possibilities, "GA For");
 
-                    if (!ApiUtils.isEmpty(selection)) {
+                    if (!selection.isBlank()) {
                         LOGGER.info("Starting scrape of NS WA voting page, " + selection);
                         String[] elements = selection.toLowerCase().split("\\s+?");
                         String chamber = elements[0].equals("ga") ? CommuniqueScraper.GA : CommuniqueScraper.SC;
@@ -441,7 +441,7 @@ public class CommuniqueEditor extends AbstractCommunique {
 
     public int getDelay() {
         getConfig();
-        if (ApiUtils.isEmpty(config.waitString))
+        if (config.waitString.isBlank())
             return config.getTelegramType().getWaitTime();
 
         return Integer.parseInt(config.waitString);

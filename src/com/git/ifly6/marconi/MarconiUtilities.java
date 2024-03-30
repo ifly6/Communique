@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -45,7 +43,7 @@ public class MarconiUtilities {
     static boolean isFileLocked() {
         try {
             if (!Files.exists(lockFile)) {
-                Files.write(lockFile, Collections.singletonList(CommuniqueUtilities.getDate()));
+                Files.write(lockFile, List.of(CommuniqueUtilities.getDate()));
                 return false;
             } else return true;
         } catch (IOException exc) {
@@ -94,6 +92,6 @@ public class MarconiUtilities {
      * @return answer
      */
     static String promptYN(String prompt) {
-        return prompt(prompt, Arrays.asList("yes", "no", "y", "n"));
+        return prompt(prompt, List.of("yes", "no", "y", "n"));
     }
 }

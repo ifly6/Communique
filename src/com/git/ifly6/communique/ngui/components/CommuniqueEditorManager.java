@@ -25,7 +25,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -93,8 +92,7 @@ public class CommuniqueEditorManager {
             LOGGER.log(Level.SEVERE, "Unable to read the paths of previously open files", e);
         }
 
-        return new ArrayList<>(Collections.singletonList(
-                AUTOSAVE.normalize().toString()));
+        return new ArrayList<>(List.of(AUTOSAVE.normalize().toString()));
     }
 
     public void initialiseEditors() {

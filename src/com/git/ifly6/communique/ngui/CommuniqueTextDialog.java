@@ -34,7 +34,6 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
@@ -62,7 +61,7 @@ public class CommuniqueTextDialog extends JDialog {
 
         int width = lineWrap
                 ? 400
-                : 10 + Arrays.stream(message.split("\n")).mapToInt(String::length).max().orElse(50) * 8;
+                : 10 + message.lines().mapToInt(String::length).max().orElse(50) * 8;
         int height = 450;
         this.setSize(width, height);
         this.setMinimumSize(new Dimension(300, 350));

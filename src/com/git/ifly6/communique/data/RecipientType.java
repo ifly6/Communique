@@ -41,7 +41,7 @@ public enum RecipientType {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             // return singleton list
-            return Collections.singletonList(cr);
+            return List.of(cr);
         }
 
         @Override
@@ -105,7 +105,7 @@ public enum RecipientType {
                 return newRecipients(JInfoFetcher.instance().getDelegates(), cr.getFilterType());
             if (tag.equals("new")) return newRecipients(JInfoFetcher.instance().getNew(), cr.getFilterType());
             if (tag.equals("all")) return newRecipients(JInfoFetcher.instance().getAll(), cr.getFilterType());
-            throw new JTelegramException("Invalid flag: \"" + cr.toString() + "\"");
+            throw new JTelegramException(String.format("Invalid flag: \"%s\"", cr));
         }
 
         @Override
@@ -115,14 +115,14 @@ public enum RecipientType {
     },
 
     /**
-     * Declares that the recipient is an internal Commmunique flag.
+     * Declares that the recipient is an internal Communiqué flag.
      */
     FLAG {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             String tag = cr.getName();
             if (tag.equals("recruit"))
-                return Collections.emptyList(); // recruit is handled by Communique logic, not here
+                return Collections.emptyList(); // recruit is handled by Communiqué logic, not here
             if (tag.equals("repeat")) return Collections.emptyList(); // repeat last pull and continue
             if (tag.equals("active")) return HappeningsParser.getActiveNations();  // active
             return Collections.emptyList();
