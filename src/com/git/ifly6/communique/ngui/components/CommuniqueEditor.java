@@ -39,6 +39,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -52,6 +53,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,6 +61,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,6 +71,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.CODE_HEADER;
+import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
 import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
 import static com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers.show;
 
@@ -210,9 +214,26 @@ public class CommuniqueEditor extends AbstractCommunique {
         frame.setJMenuBar(menuBar);
 
         // file
-        this.addFileMenu(createMenuItem(
-                "Save", KeyEvent.VK_S,
-                ae -> this.save()
+        this.addFileMenu(List.of(
+                createMenuItem(
+                        "Save", KeyEvent.VK_S,
+                        ae -> this.save()
+                ),
+                createMenuItem(
+                        "Save as",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, COMMAND_KEY | InputEvent.SHIFT_DOWN_MASK),
+                        ae -> {
+                            Path newPath = CommuniqueFileChoosers.show(this.frame, FileDialog.SAVE);
+                            if (newPath == null) {
+                                LOGGER.info("\"Save as\" cancelled");
+                                return;
+                            }
+                            LOGGER.info(String.format("Saving file %s as %s",
+                                    this.path.getFileName(), newPath));
+                            this.path = newPath;
+                            save();
+                        }
+                )
         ));
 
         // edit

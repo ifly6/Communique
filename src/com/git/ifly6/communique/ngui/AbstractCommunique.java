@@ -39,6 +39,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,7 +56,7 @@ public abstract class AbstractCommunique {
     protected JFrame frame;
     protected JMenuBar menuBar;
 
-    protected JMenu addFileMenu(JMenuItem saveItem) {
+    protected JMenu addFileMenu(List<JMenuItem> saveItems) {
         // create menu and add
         JMenu mnFile = new JMenu("File");
         menuBar.add(mnFile);
@@ -81,7 +82,8 @@ public abstract class AbstractCommunique {
         }));
 
         // add the save menu item
-        mnFile.add(saveItem);
+        for (JMenuItem i : saveItems)
+            mnFile.add(i);
 
         mnFile.addSeparator();
         mnFile.add(createMenuItem("Close", KeyEvent.VK_W, ae -> {

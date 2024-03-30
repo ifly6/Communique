@@ -210,10 +210,10 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
         // create file menu
         JMenu fileMenu = this.addFileMenu(
-                createMenuItem(  // save action
+                List.of(createMenuItem(  // save action
                         "Save All", KeyEvent.VK_S,
                         ae -> CommuniqueEditorManager.getInstance().saveAll()
-                )
+                ))
         );
 
         // default edit menu
