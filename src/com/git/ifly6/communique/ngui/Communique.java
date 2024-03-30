@@ -17,7 +17,6 @@
 
 package com.git.ifly6.communique.ngui;
 
-import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
@@ -37,7 +36,6 @@ import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 import com.git.ifly6.nsapi.telegram.JavaTelegram;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -128,8 +126,6 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
     private void initialise() {
 
         frame = new JFrame();
-        if (!CommuniqueUtilities.IS_OS_MAC)
-            frame.setIconImage(new ImageIcon(getClass().getResource("/icon.png")).getImage());
 
         Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
         double sWidth = screenDimensions.getWidth();

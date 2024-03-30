@@ -20,8 +20,10 @@ package com.git.ifly6.communique.ngui.components;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 
+import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import java.awt.Taskbar;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -30,6 +32,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -102,6 +105,20 @@ public class CommuniqueLAF {
             }
 
             LOGGER.log(Level.WARNING, "Could not initialise system look and feel", lfE);
+        }
+
+        // 2024-03-30
+        // JDK 9 set taskbar image
+        try {
+            Taskbar taskbar = Taskbar.getTaskbar();
+            taskbar.setIconImage(new ImageIcon(
+                    Objects.requireNonNull(CommuniqueLAF.class.getResource("/icon.png"))).getImage());
+
+        } catch (UnsupportedOperationException e) {
+            LOGGER.log(Level.WARNING, "Cannot set taskbar icon because it is not supported", e);
+
+        } catch (SecurityException e) {
+            LOGGER.log(Level.WARNING, "Cannot set taskbar icon due to security exception", e);
         }
     }
 
