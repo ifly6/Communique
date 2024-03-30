@@ -17,12 +17,13 @@
 
 package com.git.ifly6.communique.ngui.components;
 
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import java.awt.Taskbar;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -31,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -50,13 +50,17 @@ public class CommuniqueLAF {
     static {
         // Do this static initialisation block when LAF is called
         // Find or create the application support directory
-        if (CommuniqueUtilities.IS_OS_WINDOWS) APP_SUPPORT = Paths.get(System.getenv("LOCALAPPDATA"), "Communique");
+        if (CommuniqueUtilities.IS_OS_WINDOWS)
+            APP_SUPPORT = Paths.get(System.getenv("LOCALAPPDATA"), "Communique");
+
         else if (CommuniqueUtilities.IS_OS_MAC) {
             APP_SUPPORT = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Communique");
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Communiqué " + Communique7Parser.version);
+            System.setProperty("apple.awt.application.name", "Communiqué"); // dock
+//            System.setProperty("apple.awt.application.appearance", "system"); // macOS dark and light theme
 
-        } else APP_SUPPORT = Paths.get(System.getProperty("user.dir"), "config");
+        } else APP_SUPPORT = Paths.get(System.getProperty("user.home"), ".communique");
 
         // Create the application support directory
         try {
@@ -87,24 +91,16 @@ public class CommuniqueLAF {
     public static void setLAF() {
         // Set our look and feel
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            if (CommuniqueUtilities.IS_OS_MAC) FlatMacLightLaf.setup();
+            else FlatLightLaf.setup();
 
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-                 | UnsupportedLookAndFeelException lfE) {
+        } catch (Exception lfe) {
+            LOGGER.log(Level.WARNING, "Failed to load FlatLAF GUI theme", lfe);
             try {
-                UIManager.setLookAndFeel(
-                        Arrays.stream(UIManager.getInstalledLookAndFeels())
-                                .filter(laf -> laf.getName().equals("Nimbus"))
-                                .findFirst()
-                                .orElseThrow(ClassNotFoundException::new)
-                                .getClassName()
-                );
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-                     | UnsupportedLookAndFeelException e) {
-                LOGGER.log(Level.SEVERE, "Cannot initialise? Cannot find basic Nimbus look and feel.", e);
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Could not initialise system look and feel", e);
             }
-
-            LOGGER.log(Level.WARNING, "Could not initialise system look and feel", lfE);
         }
 
         // 2024-03-30

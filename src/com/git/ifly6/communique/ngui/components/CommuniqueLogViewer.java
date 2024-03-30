@@ -24,7 +24,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableColumn;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -48,7 +47,6 @@ public class CommuniqueLogViewer extends JSplitPane {
         super(JSplitPane.VERTICAL_SPLIT);
         this.setContinuousLayout(true);
         this.setBorder(CommuniqueFactory.createBorder(0));
-        this.setDividerSize(1);
 
         // initialise south components
         JPanel southPane = new JPanel();
@@ -62,7 +60,7 @@ public class CommuniqueLogViewer extends JSplitPane {
 
         JPanel southHeader = new JPanel();
         southHeader.setLayout(new BorderLayout(5, 5));
-        southHeader.setBorder(new EmptyBorder(10, 0, 5, 0));
+        southHeader.setBorder(CommuniqueFactory.createBorder(2));
         source = new JLabel("");
         source.setVerticalAlignment(JLabel.TOP);
         date = new JLabel("");

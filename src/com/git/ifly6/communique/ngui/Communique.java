@@ -190,8 +190,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         bottom.setLayout(new BorderLayout(5, 5));
 
         progressBar = new CommuniqueTimerBar();
-        progressBar.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
         progressLabel = new JLabel("? / ?");
+        progressLabel.setBorder(BorderFactory.createEmptyBorder(0, 0,0, 2));
         JPanel bottomCentre = new JPanel();
         bottomCentre.setLayout(new BorderLayout(5, 5));
         bottomCentre.add(progressBar, BorderLayout.CENTER);

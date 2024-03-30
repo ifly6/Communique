@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2020 ifly6
+Copyright (c) 2024 ifly6
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,5 +22,8 @@ SOFTWARE.
 
 ---
 
-Telegraph icons – https://www.flaticon.com/free-icons/telegraph – created by
+"Telegraph icons" – https://www.flaticon.com/free-icons/telegraph – created by
 Freepik - Flaticon.
+
+Java Swing theme is FlatLAF: https://github.com/JFormDesigner/FlatLaf/. The
+theme on macOS is the macOS version thereof.
