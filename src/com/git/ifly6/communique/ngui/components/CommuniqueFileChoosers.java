@@ -22,9 +22,11 @@ import com.git.ifly6.communique.CommuniqueUtilities;
 import javax.swing.JFileChooser;
 import java.awt.FileDialog;
 import java.awt.Frame;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
@@ -107,10 +109,17 @@ public class CommuniqueFileChoosers {
     private static Path getLast() {
         try {
             Path last = Paths.get(new String(Files.readAllBytes(LAST_PATH), StandardCharsets.UTF_8));
-            if (!Files.exists(last) && !Files.exists(last.getParent()))
+            if (!Files.exists(last) && !Files.exists(last.getParent())) {
+                LOGGER.log(Level.WARNING, String.format(
+                        ".last_path points to %s but that directory does not exist", last));
                 return DEFAULT;
+            }
             if (Files.isDirectory(last)) return last;
             return last.getParent();
+
+        } catch (FileNotFoundException | NoSuchFileException fnf) {
+            LOGGER.log(Level.INFO, "No .last_path file present; opening at user home");
+            return DEFAULT;
 
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Could not read last used path from file", e);

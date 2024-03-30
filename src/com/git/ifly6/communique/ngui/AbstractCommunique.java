@@ -65,7 +65,7 @@ public abstract class AbstractCommunique {
         ActionListener openFileAction = ae -> {
             Path p = show(frame, FileDialog.LOAD);
             if (p == null) {
-                LOGGER.info("New file at null path");
+                LOGGER.info("No file path selected");
                 return;
             }
             CommuniqueEditorManager.getInstance().newEditor(p);
