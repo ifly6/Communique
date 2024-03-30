@@ -47,7 +47,7 @@ public class CommuniqueLogViewer extends JSplitPane {
     public CommuniqueLogViewer() {
         super(JSplitPane.VERTICAL_SPLIT);
         this.setContinuousLayout(true);
-        this.setBorder(CommuniqueFactory.createBorder(5));
+        this.setBorder(CommuniqueFactory.createBorder(0));
         this.setDividerSize(1);
 
         // initialise south components

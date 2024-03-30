@@ -33,11 +33,13 @@ import com.git.ifly6.nsapi.telegram.JTelegramType;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -47,6 +49,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FileDialog;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -179,15 +182,20 @@ public class CommuniqueEditor extends AbstractCommunique {
         // content pane layout
         JPanel sidebarFrame = new JPanel();
         sidebarFrame.setLayout(new BorderLayout(5, 5));
+        sidebarFrame.setBorder(new EmptyBorder(0, 5, 0, 0));
 
         JPanel northFrame = new JPanel();
-        northFrame.setLayout(new GridLayout(3, 1));
-        for (JTextField f : Arrays.asList(fieldClientKey, fieldSecretKey, fieldTelegramID))
-            northFrame.add(CommuniqueFactory.labelledComponent(f.getToolTipText(), f));
+        northFrame.setLayout(new GridBagLayout());
+        JTextField[] threeFields = new JTextField[] {fieldClientKey, fieldSecretKey, fieldTelegramID};
+        for (int i = 0; i < threeFields.length; i++) {
+            JTextField f = threeFields[i];
+            northFrame.add(new JLabel(f.getToolTipText()), CommuniqueFactory.createGridBagConstraints(0, i, false));
+            northFrame.add(f, CommuniqueFactory.createGridBagConstraints(1, i, true));
+        }
         sidebarFrame.add(northFrame, BorderLayout.NORTH);
 
         JPanel southFrame = new JPanel();
-        southFrame.setLayout(new GridLayout(3, 1));
+        southFrame.setLayout(new GridLayout(3, 1, 2, 2));
         for (Map.Entry<String, Component> m : southComponents.entrySet())
             southFrame.add(CommuniqueFactory.labelledComponent(m.getKey(), m.getValue()));
         sidebarFrame.add(southFrame, BorderLayout.SOUTH);

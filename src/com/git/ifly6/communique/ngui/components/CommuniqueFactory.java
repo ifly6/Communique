@@ -29,6 +29,9 @@ import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
 
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
@@ -89,5 +92,24 @@ public class CommuniqueFactory {
             menuItem.setAccelerator(shortcut);
 
         return menuItem;
+    }
+
+    /**
+     * Create Communique-default {@link GridBagConstraints} for {@link GridBagLayout} that align-left with top and
+     * bottom insets of 2 pixels.
+     * @param gridX on the layout
+     * @param gridY on the layout
+     * @param hFill {@code true} if it should fill horizontal space
+     * @return constructed constraints
+     */
+    public static GridBagConstraints createGridBagConstraints(int gridX, int gridY, boolean hFill) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.LINE_START;
+        c.insets = new Insets(2, 0, 2, 0);
+        c.fill = (hFill) ? GridBagConstraints.HORIZONTAL : GridBagConstraints.NONE;
+        c.weightx = (hFill) ? 1 : 0;
+        c.gridx = gridX;
+        c.gridy = gridY;
+        return c;
     }
 }
