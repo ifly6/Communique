@@ -19,8 +19,9 @@ package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
-import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditorManager;
+import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
+import com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,7 +35,6 @@ import javax.swing.undo.UndoManager;
 import java.awt.Desktop;
 import java.awt.FileDialog;
 import java.awt.Frame;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -47,7 +47,6 @@ import static com.git.ifly6.communique.ngui.CommuniqueMessages.TITLE;
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
 import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
 import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.APP_SUPPORT;
-import static com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers.show;
 
 public abstract class AbstractCommunique {
 
@@ -62,18 +61,24 @@ public abstract class AbstractCommunique {
         menuBar.add(mnFile);
 
         // set up action listener
-        ActionListener openFileAction = ae -> {
-            Path p = show(frame, FileDialog.LOAD);
+
+        // new, open, and save all
+        mnFile.add(createMenuItem("New", KeyEvent.VK_N, a -> {
+            Path p = CommuniqueFileChoosers.show(frame, FileDialog.SAVE);
             if (p == null) {
                 LOGGER.info("No file path selected");
                 return;
             }
             CommuniqueEditorManager.getInstance().newEditor(p);
-        };
-
-        // new, open, and save all
-        mnFile.add(createMenuItem("New", KeyEvent.VK_N, openFileAction));
-        mnFile.add(createMenuItem("Open", KeyEvent.VK_O, openFileAction));
+        }));
+        mnFile.add(createMenuItem("Open", KeyEvent.VK_O, a -> {
+            Path p = CommuniqueFileChoosers.show(frame, FileDialog.LOAD);
+            if (p == null) {
+                LOGGER.info("No file path selected");
+                return;
+            }
+            CommuniqueEditorManager.getInstance().newEditor(p);
+        }));
 
         // add the save menu item
         mnFile.add(saveItem);
