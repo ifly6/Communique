@@ -48,6 +48,9 @@ public class CommuniqueLAF {
     public static FileHandler loggerFileHandler = null; // Save logs to file, if null... uh stuff
 
     static {
+        // Get us a reasonable-looking log format
+        System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
+
         // Do this static initialisation block when LAF is called
         // Find or create the application support directory
         if (CommuniqueUtilities.IS_OS_WINDOWS)
@@ -60,7 +63,7 @@ public class CommuniqueLAF {
             System.setProperty("apple.awt.application.name", "Communiqué"); // dock
 //            System.setProperty("apple.awt.application.appearance", "system"); // macOS dark and light theme
 
-        } else APP_SUPPORT = Paths.get(System.getProperty("user.home"), ".communique");
+        } else APP_SUPPORT = Paths.get(System.getProperty("user.home"), ".communique"); // linux style config
 
         // Create the application support directory
         try {
@@ -68,9 +71,6 @@ public class CommuniqueLAF {
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Cannot create directory", e);
         }
-
-        // Get us a reasonable-looking log format
-        System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
 
         // Make sure we can also log to file, apply this to the root logger
         try {
@@ -95,7 +95,7 @@ public class CommuniqueLAF {
             else FlatLightLaf.setup();
 
         } catch (Exception lfe) {
-            LOGGER.log(Level.WARNING, "Failed to load FlatLAF GUI theme", lfe);
+            LOGGER.log(Level.WARNING, "Failed to load FlatLAF GUI theme. Falling back on system theme.", lfe);
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception e) {

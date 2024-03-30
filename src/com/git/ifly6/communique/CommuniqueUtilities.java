@@ -27,8 +27,8 @@ import java.time.temporal.ChronoUnit;
  */
 public class CommuniqueUtilities {
 
-    public static final boolean IS_OS_MAC = System.getProperty("os.name").toLowerCase().contains("mac");
-    public static final boolean IS_OS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
+    public static final boolean IS_OS_MAC = System.getProperty("os.name").toLowerCase().startsWith("mac");
+    public static final boolean IS_OS_WINDOWS = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
     // Prevent initialisation
     private CommuniqueUtilities() {
