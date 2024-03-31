@@ -154,6 +154,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         JComboBox<CommuniqueEditor> editorSelector = new JComboBox<>();
         editorSelector.addActionListener(ae -> {
             CommuniqueEditor newFocusedEditor = editorSelector.getItemAt(editorSelector.getSelectedIndex());
+            if (newFocusedEditor == null)
+                focusedEditor = null;
+
             if (focusedEditor != newFocusedEditor) {
                 focusedEditor = newFocusedEditor;
                 focusedEditor.toFront();

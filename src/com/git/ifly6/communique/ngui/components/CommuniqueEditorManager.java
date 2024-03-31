@@ -81,9 +81,16 @@ public class CommuniqueEditorManager {
         }
     }
 
+    /**
+     * Gets a list of the paths that the program says were previously open. If the list is empty or there is an error it
+     * returns a modifiable singleton list pointing to the {@link CommuniqueEditorManager#AUTOSAVE} location
+     * @return {@link List} of {@link Path}s
+     */
     public List<String> getPaths() {
+        final ArrayList<String> DEFAULT = new ArrayList<>(List.of(AUTOSAVE.normalize().toString()));
         try {
-            return Files.readAllLines(PATH_LOCATION);
+            List<String> thePaths = Files.readAllLines(PATH_LOCATION);
+            return (thePaths.isEmpty()) ? DEFAULT : thePaths;
 
         } catch (FileNotFoundException | NoSuchFileException e) {
             LOGGER.info("No \".editor-paths\" file to read! Passing autosave only");
@@ -92,7 +99,7 @@ public class CommuniqueEditorManager {
             LOGGER.log(Level.SEVERE, "Unable to read the paths of previously open files", e);
         }
 
-        return new ArrayList<>(List.of(AUTOSAVE.normalize().toString()));
+        return DEFAULT;
     }
 
     public void initialiseEditors() {
