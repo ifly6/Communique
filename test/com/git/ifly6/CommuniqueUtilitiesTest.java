@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -15,34 +15,32 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.gui3;
+package com.git.ifly6;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.function.Consumer;
+import org.junit.jupiter.api.Test;
 
-/**
- * Consumes mouse events and only applies to {@link #mouseClicked(MouseEvent)}. This also should really be in stock.
- * @since version 3.0 (build 13)
- */
-class CommuniqueMouseAdapter extends MouseAdapter {
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-    private Consumer<MouseEvent> consumer;
+class CommuniqueUtilitiesTest {
 
-    /**
-     * Constructs adapter.
-     * @param eventConsumer defines actions to be taken
-     */
-    public CommuniqueMouseAdapter(Consumer<MouseEvent> eventConsumer) {
-        consumer = eventConsumer;
+
+    @Test
+    void time() {
     }
 
-    /**
-     * Called on click.
-     * @param e event to be passed
-     */
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        consumer.accept(e);
+    @Test
+    void getDate() {
+    }
+
+    @Test
+    void getTime() {
+//        public static String getTime() {
+//            // must avoid colons in file names because windows doesn't like it apparently
+//            return DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault())
+//                    .format(Instant.now().truncatedTo(ChronoUnit.SECONDS)) // truncate to seconds to ignore decimals
+//                    .replace(':', '-') // hacky, whatever
+//                    .replace('T', ' ');
+//        }
+        assertFalse(CommuniqueUtilities.getTime(CommuniqueUtilities.NO_COLONS).contains(":"));
     }
 }

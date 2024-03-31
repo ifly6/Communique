@@ -17,13 +17,14 @@
 
 package com.git.ifly6.marconi;
 
-import com.git.ifly6.commons.CommuniqueApplication;
-import com.git.ifly6.commons.CommuniqueUtilities;
+import com.git.ifly6.CommuniqueApplication;
+import com.git.ifly6.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Monitor;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
+import com.git.ifly6.communique.ngui.Communique;
 import com.git.ifly6.nsapi.ctelegram.CommSender;
 import com.git.ifly6.nsapi.ctelegram.CommSenderInterface;
 import org.apache.commons.cli.CommandLine;
@@ -33,8 +34,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,8 +48,8 @@ import java.util.logging.Logger;
 
 
 /**
- * Command line program executing {@link com.git.ifly6.communique.gui3.Communique3} configuration files.
- * @since version 1.0 (build 1)
+ * Command line program executing {@link Communique} configuration files.
+ * @since version 1
  */
 public class Marconi implements CommSenderInterface {
 
@@ -119,7 +118,7 @@ public class Marconi implements CommSenderInterface {
 
             // version option
             if (commandLine.hasOption("v")) {
-                System.out.println("Marconi version " + Communique7Parser.BUILD + "\n"
+                System.out.println("Marconi version " + Communique7Parser.VERSION + "\n"
                         + "See https://github.com/ifly6/Communique/releases.\n");
                 System.exit(0); // terminate
             }

@@ -17,17 +17,16 @@
 
 package com.git.ifly6.communique.ngui;
 
-import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
-import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueFilterType;
+import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditor;
 import com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers;
-import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
@@ -87,10 +86,6 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
             "the East Pacific", "the West Pacific", "Lazarus", "Balder", "Osiris", "the Rejected Realms"};
     private static final Logger LOGGER = Logger.getLogger(CommuniqueRecruiter.class.getName());
 
-    static {
-        LOGGER.addHandler(CommuniqueLAF.loggerFileHandler);
-    }
-
     private CommuniqueEditor recruitEditor;
 
     private JFrame frame;
@@ -124,7 +119,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
      */
     private void initialise() {
 
-        frame = new JFrame(CommuniqueMessages.RECRUITER + " " + Communique7Parser.version);
+        frame = new JFrame(CommuniqueMessages.RECRUITER + " " + Communique7Parser.VERSION);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -18,8 +18,8 @@
 package com.git.ifly6.nsapi.ctelegram.io;
 
 import com.git.ifly6.nsapi.NSIOException;
-import com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
+import com.git.ifly6.nsapi.telegram.JTelegramResponseCode;
 
 /**
  * Thrown for explicit mismatches or errors from NationStates telegrams API.
@@ -30,7 +30,7 @@ public class NSTGSettingsException extends NSIOException {
         super(message);
     }
 
-    public static NSTGSettingsException createException(JTelegramKeys keys, ResponseCode errorCode) {
+    public static NSTGSettingsException createException(JTelegramKeys keys, JTelegramResponseCode errorCode) {
         return new NSTGSettingsException(String.format("Error with keys %s; got error %s",
                 keys.toString(), errorCode.toString()));
     }

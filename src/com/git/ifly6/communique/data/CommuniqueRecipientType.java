@@ -17,7 +17,8 @@
 
 package com.git.ifly6.communique.data;
 
-import com.git.ifly6.commons.CommuniqueSplitter;
+import com.git.ifly6.CommuniqueSplitter;
+import com.git.ifly6.communique.io.HappeningsParser;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.NSRegion;
 import com.git.ifly6.nsapi.NSWorld;
@@ -36,10 +37,6 @@ import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommVoteMonitor;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 
 import java.time.Duration;
-import com.git.ifly6.communique.io.HappeningsParser;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
-import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -135,6 +132,21 @@ public enum CommuniqueRecipientType {
     },
 
     /**
+     * Declares that the recipient is an internal Communiqué flag.
+     */
+    FLAG {
+        @Override
+        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
+            String tag = cr.getName();
+            if (tag.equals("recruit"))
+                return Collections.emptyList(); // recruit is handled by Communiqué logic, not here
+            if (tag.equals("repeat")) return Collections.emptyList(); // repeat last pull and continue
+            if (tag.equals("active")) return HappeningsParser.getActiveNations();  // active
+            return Collections.emptyList();
+        }
+    },
+
+    /**
      * Provides from {@link CommRecruitMonitor} new nations up to a certain limit. The number of nations returned should
      * be specified as in {@code _new:5}. This monitor never returns the same nation twice; it does not exhaust.
      * @see CommRecruitMonitor#setUpdateInterval(Duration)
@@ -177,10 +189,10 @@ public enum CommuniqueRecipientType {
     },
 
     /**
-     * Nations moving into or out of a list of regions. Eg, {@code _movement:into;europe,the_north_pacific} or {@code
-     * _movement:out_of;europe}.
-     * @since version 3.0 (build 13)
+     * Nations moving into or out of a list of regions. Eg, {@code _movement:into;europe,the_north_pacific} or
+     * {@code _movement:out_of;europe}.
      * @see CommMovementMonitor.Direction
+     * @since version 3.0 (build 13)
      */
     _MOVEMENT {
         private final CommuniqueSplitter splitter = new CommuniqueSplitter(this.toString(), 2);
@@ -196,10 +208,10 @@ public enum CommuniqueRecipientType {
     },
 
     /**
-     * Delegates approving a proposal. Eg, {@code _approval:__raids__} for all approval raids, {@code
-     * _approval:given_to; PROPOSAL_ID}, or {@code _approval:removed_from; PROPOSAL_ID}.
-     * @since version 3.0 (build 13)
+     * Delegates approving a proposal. Eg, {@code _approval:__raids__} for all approval raids,
+     * {@code _approval:given_to; PROPOSAL_ID}, or {@code _approval:removed_from; PROPOSAL_ID}.
      * @see CommApprovalMonitor.Action
+     * @since version 3.0 (build 13)
      */
     _APPROVAL {
         private final CommuniqueSplitter splitter = new CommuniqueSplitter(this.toString(), 2);
@@ -237,20 +249,30 @@ public enum CommuniqueRecipientType {
         }
     },
 
-    /** Declares that the recipient has no recipient type. This element is parsed last. */
+    /**
+     * Declares that the recipient has no recipient type. This element is parsed last.
+     */
     NONE {
         @Override
-        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) { return Collections.emptyList(); }
+        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
+            return Collections.emptyList();
+        }
 
         @Override
-        public String toString() { return ""; }
+        public String toString() {
+            return "";
+        }
     };
 
     private static final Logger LOGGER = Logger.getLogger(CommuniqueRecipientType.class.getName());
 
-    /** Recipient type prefixes should be compatible with the NationStates telegram system. */
+    /**
+     * Recipient type prefixes should be compatible with the NationStates telegram system.
+     */
     @Override
-    public String toString() { return this.name().toLowerCase(); }
+    public String toString() {
+        return this.name().toLowerCase();
+    }
 
     /**
      * Decomposes tag into {@code List<{@link CommuniqueRecipient}>}.
@@ -273,7 +295,9 @@ public enum CommuniqueRecipientType {
         return result;
     }
 
-    /** Creates illegal argument exception with preformatted string. */
+    /**
+     * Creates illegal argument exception with preformatted string.
+     */
     private static IllegalArgumentException newException(CommuniqueRecipient s) {
         return new IllegalArgumentException(String.format("Invalid tag string \"%s\"", s));
     }

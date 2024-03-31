@@ -17,16 +17,16 @@
 
 package com.git.ifly6.communique.ngui;
 
+import com.git.ifly6.CommuniqueApplication;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
-import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.data.CommuniqueRecipientType;
+import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditor;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditorManager;
 import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
-import com.git.ifly6.communique.ngui.components.CommuniqueLAF;
 import com.git.ifly6.communique.ngui.components.CommuniqueLogHandler;
 import com.git.ifly6.communique.ngui.components.CommuniqueLogViewer;
 import com.git.ifly6.communique.ngui.components.CommuniqueTimerBar;
@@ -53,6 +53,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -88,8 +89,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
     private JLabel progressLabel;
 
     public static void main(String[] args) {
-        CommuniqueLAF.setLAF(); // note that this line will also set up the static initialisation for appSupport etc
-        CommuniqueLAF.compressLogs(); // compresses logs one day older than this initialisation
+        CommuniqueApplication.setLAF(); // note that this line will also set up the static initialisation for appSupport etc
+        CommuniqueApplication.compressLogs(); // compresses logs one day older than this initialisation
 
         EventQueue.invokeLater(() -> {
             try {
@@ -131,7 +132,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         double sWidth = screenDimensions.getWidth();
         double sHeight = screenDimensions.getHeight();
 
-        frame.setTitle("Communiqué " + Communique7Parser.version);
+        frame.setTitle("Communiqué " + Communique7Parser.VERSION);
         frame.setBounds(50, 50, 600, 600);
         frame.setMinimumSize(new Dimension(400, 600));
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -333,7 +334,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
                 client.setRecipients(parsedRecipients);
                 client.setKeys(focusedEditor.getConfig().keys);
                 client.setTelegramType(focusedEditor.getTelegramType());
-                client.setWaitTime(this.currentWaitTime());
+                client.setWaitTime((int) this.currentWaitTime().toMillis());
 
                 // Create tracker, initialise success tracking HashMap
                 rSuccessTracker = new LinkedHashMap<>();
@@ -394,7 +395,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
     /**
      * @return currently selected wait time if present, otherwise, defualt wait time (in milliseconds)
      */
-    private int currentWaitTime() {
+    private Duration currentWaitTime() {
         return focusedEditor.getDelay();
     }
 
@@ -426,7 +427,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         focusedEditor.appendLine(x == 0 ? "\n" + recipient : recipient); // scrolls to the bottom automatically
 
         progressBar.reset();
-        progressBar.start(System.currentTimeMillis(), System.currentTimeMillis() + currentWaitTime());
+        progressBar.start(System.currentTimeMillis(), System.currentTimeMillis() + currentWaitTime().toMillis());
 
         // Update the label and log successes as relevant
         progressLabel.setText(String.format("%d / %d", x + 1, length));

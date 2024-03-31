@@ -17,46 +17,44 @@
 
 package com.git.ifly6.nsapi;
 
-import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueFilterType;
+import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("ALL")
 class ApiUtilsTest {
 
-    static Map<String, String> values = new HashMap<>();
+    static Map<String, String> map = new HashMap<>();
 
     static {
-        values.put("region:EuRoPe", "region:europe");
-        values.put("imperium anglorum", "imperium_anglorum");
-        values.put("panem Et circensus", "panem_et_circensus");
-        values.put("        pax", "pax");
-        values.put("IO SATURNALIA", "io_saturnalia");
-        values.put("IO  SATURNALIA", "io__saturnalia");
-        values.put("  IO  oPAlIA  ", "io__opalia");
-        values.put("europe ", "europe");
-        values.put("Europe ", "europe");
-        values.put("     imperium anglorum  ", "imperium_anglorum");
-        values.put("-123", "-123");
+        map.put("region:EuRoPe", "region:europe");
+        map.put("imperium anglorum", "imperium_anglorum");
+        map.put("panem Et circensus", "panem_et_circensus");
+        map.put("        pax", "pax");
+        map.put("IO SATURNALIA", "io_saturnalia");
+        map.put("IO  SATURNALIA", "io__saturnalia");
+        map.put("  IO  oPAlIA  ", "io__opalia");
+        map.put("europe ", "europe");
+        map.put("Europe ", "europe");
+        map.put("     imperium anglorum  ", "imperium_anglorum");
+        map.put("-123", "-123");
     }
 
     @Test
     void ref() {
         // for individual ref
         assertThrows(NullPointerException.class, () -> ApiUtils.ref((String) null));
-        for (Map.Entry<String, String> entry : values.entrySet())
+        for (Map.Entry<String, String> entry : map.entrySet())
             assertEquals(ApiUtils.ref(entry.getKey()), entry.getValue());
 
         // for the array ref

@@ -19,9 +19,9 @@ package com.git.ifly6.communique.io;
 
 import com.git.ifly6.communique.CommuniqueFileReader;
 import com.git.ifly6.communique.data.Communique7Parser;
+import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
-import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -31,9 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -116,7 +114,7 @@ class CommuniqueReader {
                     throw new IOException("This is not a Communique file");
 
                 config = new CommuniqueConfig();
-                config.version = reader.getFileVersion();
+                config.version = (int) reader.getFileVersion();
                 config.processingAction = reader.isRandomised() // translate old boolean flag
                         ? CommuniqueProcessingAction.RANDOMISE
                         : CommuniqueProcessingAction.NONE;

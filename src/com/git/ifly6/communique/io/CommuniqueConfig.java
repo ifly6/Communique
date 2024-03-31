@@ -17,21 +17,20 @@
 
 package com.git.ifly6.communique.io;
 
-import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
-import java.text.MessageFormat;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.git.ifly6.CommuniqueUtilities.NORMAL_FORM;
 
 /**
  * <code>CommuniqueConfig</code> creates a unified object for the storage and retrieval of configuration information
@@ -40,7 +39,7 @@ import java.util.stream.Collectors;
 public class CommuniqueConfig implements Serializable {
 
     // NOTE! For backwards compatibility, do not change field names!
-    private static final long serialVersionUID = Communique7Parser.version;
+    private static final long serialVersionUID = Communique7Parser.VERSION;
 
     public String HEADER;
     public int version;
@@ -51,9 +50,10 @@ public class CommuniqueConfig implements Serializable {
     public JTelegramKeys keys;
     public JTelegramType telegramType;
     public String waitString;
+    public boolean repeats;
 
     /**
-     * Holds all of the Communique recipients in <code>String</code>s so that it can be edited by hand and not as
+     * Holds the Communique recipients in <code>String</code>s so that it can be edited by hand and not as
      * {@link CommuniqueRecipient}.
      * <p>To keep this editable by hand, the configuration system uses getters and setters to translate to and from the
      * string state representations to present to the programmer a {@link CommuniqueRecipient} API but actually store
@@ -65,6 +65,7 @@ public class CommuniqueConfig implements Serializable {
     @Deprecated
     public String[] recipients; // consider removing
 
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public String[] sentList;   // consider removing
 
@@ -73,7 +74,7 @@ public class CommuniqueConfig implements Serializable {
      */
     public CommuniqueConfig() {
         HEADER = "Communiqué Configuration file. Do not edit by hand. Produced at: " // cannot be static!
-                + CommuniqueUtilities.getDate() + ". Produced by version " + Communique7Parser.version;
+                + CommuniqueUtilities.getTime(NORMAL_FORM) + ". Produced by version " + Communique7Parser.VERSION;
         keys = new JTelegramKeys(); // empty keys
         version = defaultVersion(); // default version to current version
         processingAction = CommuniqueProcessingAction.NONE; // no processing action
@@ -101,8 +102,8 @@ public class CommuniqueConfig implements Serializable {
      * @return the version in <code>Communique7Parser</code>
      */
     public int defaultVersion() {
-        this.version = Communique7Parser.version;
-        return Communique7Parser.version;
+        this.version = Communique7Parser.VERSION;
+        return Communique7Parser.VERSION;
     }
 
     /**
@@ -128,8 +129,8 @@ public class CommuniqueConfig implements Serializable {
     }
 
     /**
-     * Sets {@link #cRecipients} with {@link List} of {@link CommuniqueRecipient}, automatically translates to {@link
-     * String} on the fly.
+     * Sets {@link #cRecipients} with {@link List} of {@link CommuniqueRecipient}, automatically translates to
+     * {@link String} on the fly.
      * @param crs {@link CommuniqueRecipient}s to set
      */
     public void setcRecipients(List<CommuniqueRecipient> crs) {

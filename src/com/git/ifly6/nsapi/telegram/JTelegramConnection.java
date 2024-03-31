@@ -20,32 +20,29 @@ package com.git.ifly6.nsapi.telegram;
 import com.git.ifly6.nsapi.NSConnection;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.logging.Level;
-import java.text.MessageFormat;
 import java.util.logging.Logger;
 
-import static com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode.CLIENT_NOT_REGISTERED;
-import static com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode.NO_SUCH_TELEGRAM;
-import static com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode.QUEUED;
-import static com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode.RATE_LIMIT_EXCEEDED;
-import static com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode.REGION_MISMATCH;
-import static com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode.SECRET_KEY_MISMATCH;
-import static com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode.UNKNOWN_ERROR;
+import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.CLIENT_NOT_REGISTERED;
+import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.NO_SUCH_TELEGRAM;
+import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.QUEUED;
+import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.RATE_LIMIT_EXCEEDED;
+import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.REGION_MISMATCH;
+import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.SECRET_KEY_MISMATCH;
+import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.UNKNOWN_ERROR;
 
 /**
- * {@code JTelegramConnection} connects to NationStates telegram API. This is done by creating a
- * {@link HttpURLConnection} to the appropriately generated URL with provided keys. On connection, also parses response
- * to appropriate response codes.
- * <p>Note that there are no in-built rate limits in this class! This is unlike {@link NSConnection}, which limits
- * connections with {@link NSConnection#connect()} to every {@value NSConnection#WAIT_TIME} milliseconds. Rate limits
- * for this class must be implemented externally.</p>
+ * {@code JTelegramConnection} connects to NationStates telegram API. There are no rate limits built in to this class
+ * unlike with {@link NSConnection} and its {@link NSConnection#WAIT_TIME}! Rate limits for this class must be
+ * implemented externally.
  */
 public class JTelegramConnection {
 
@@ -74,17 +71,18 @@ public class JTelegramConnection {
                 NSConnection.API_PREFIX,
                 keys.getClientKey(),
                 keys.getSecretKey(),
-                keys.getTelegramId(),
+                keys.getTelegramID(),
                 recipient);
         URL tgURL = new URL(urlString);
         try {
             HttpRequest request = HttpRequest.newBuilder(tgURL.toURI())
                     .header("User-Agent",
-                            String.format("JavaTelegram (maintained by Imperium Anglorum, used by %s)", clientKey))
+                            String.format("JavaTelegram (maintained by Imperium Anglorum, used by %s)",
+                                    keys.getClientKey()))
                     .GET().build();
             if (doNothing) {
                 LOGGER.fine(String.format("Constructed JTelegramConnection for TG <%s> to <%s>. Did not send.",
-                        keys.getTelegramId(), recipient));
+                        keys.getTelegramID(), recipient));
                 return;
             }
             httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -110,7 +108,7 @@ public class JTelegramConnection {
      * @return a {@code ResponseCode}
      * @throws IOException if error in queuing the telegram
      */
-    public ResponseCode verify() throws IOException {
+    public JTelegramResponseCode verify() throws IOException {
         String response = httpResponse.body().trim().toLowerCase();
 
         if (response.startsWith("queued")) return QUEUED;
@@ -126,10 +124,5 @@ public class JTelegramConnection {
                 httpResponse.statusCode(), httpResponse.body().trim()
         ));
         return UNKNOWN_ERROR;
-    }
-
-    public enum ResponseCode {
-        QUEUED, UNKNOWN_ERROR, REGION_MISMATCH, CLIENT_NOT_REGISTERED, RATE_LIMIT_EXCEEDED,
-        SECRET_KEY_MISMATCH, NO_SUCH_TELEGRAM
     }
 }

@@ -16,8 +16,7 @@
  */
 package com.git.ifly6.communique.ngui;
 
-import com.git.ifly6.communique.CommuniqueUtilities;
-import com.git.ifly6.communique.data.Communique7Parser;
+import com.git.ifly6.CommuniqueUtilities;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -57,7 +56,7 @@ public class CommuniqueSendDialog extends JDialog {
 
     private JButton sendButton;
 
-    public CommuniqueSendDialog(JFrame parent, List<String> parsedRecipients, int delay) {
+    public CommuniqueSendDialog(JFrame parent, List<String> parsedRecipients, Duration delay) {
         super(parent, true);
 
         Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();

@@ -32,13 +32,10 @@ import static com.git.ifly6.communique.data.CommuniqueFilterType.REQUIRE_REGEX;
 import static com.git.ifly6.communique.data.CommuniqueRecipientType.NATION;
 import static com.git.ifly6.communique.data.CommuniqueRecipientType.NONE;
 import static com.git.ifly6.communique.data.CommuniqueRecipientType.REGION;
+import static com.git.ifly6.communique.data.CommuniqueRecipientType.REGION_TAG;
 import static com.git.ifly6.communique.data.CommuniqueRecipientType._VOTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CommuniqueRecipientTest {
 

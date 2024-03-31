@@ -42,7 +42,7 @@ public class Communique7Parser {
      * Declares the version of the parser, which is based on two values: (1) the syntax of the Communique recipients
      * language and (2) the file syntax in which that information is held.
      */
-    public static final int version = 13;
+    public static final int VERSION = 13;
 
     /**
      * List of recipients changed by various actions and applications called by the parser.
@@ -80,6 +80,10 @@ public class Communique7Parser {
     public Communique7Parser apply(List<CommuniqueRecipient> list) throws JTelegramException {
         list.forEach(this::apply);
         return this;
+    }
+
+    public Communique7Parser apply(CommuniqueRecipient... crs) throws JTelegramException {
+        return apply(List.of(crs));
     }
 
     /**

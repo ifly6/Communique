@@ -17,6 +17,8 @@
 
 package com.git.ifly6.communique.ngui.components;
 
+import com.git.ifly6.CommuniqueApplication;
+
 import java.awt.Point;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,8 +37,8 @@ import java.util.stream.Collectors;
 public class CommuniqueEditorManager {
     private static CommuniqueEditorManager instance = new CommuniqueEditorManager();
     private static final Logger LOGGER = Logger.getLogger(CommuniqueEditorManager.class.getName());
-    private static final Path PATH_LOCATION = CommuniqueLAF.APP_SUPPORT.resolve(".editor-paths");
-    private static final Path AUTOSAVE = CommuniqueLAF.APP_SUPPORT.resolve("autosave.txt");
+    private static final Path PATH_LOCATION = CommuniqueApplication.APP_SUPPORT.resolve(".editor-paths");
+    private static final Path AUTOSAVE = CommuniqueApplication.APP_SUPPORT.resolve("autosave.txt");
 
     private CommuniqueEditorManager() {
     }

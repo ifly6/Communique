@@ -37,7 +37,7 @@ public class JTelegramKeys {
 
     private String clientKey;
     private String secretKey;
-    private String telegramId;
+    private String telegramID;
 
     /**
      * Creates a <code>JTelegramKeys</code> which holds the client, secret, and telegram keys provided in the
@@ -49,7 +49,7 @@ public class JTelegramKeys {
     public JTelegramKeys(String client, String secret, String teleID) {
         clientKey = client.trim();
         secretKey = secret.trim();
-        telegramId = teleID.trim();
+        telegramID = teleID.trim();
     }
 
     /**
@@ -59,25 +59,25 @@ public class JTelegramKeys {
         // cannot be removed; IO code relies on this 'empty' constructorclientKey = "CLIENT_KEY";
         clientKey = "CLIENT_KEY";
         secretKey = "SECRET_KEY";
-        telegramId = "TELEGRAM_ID";
+        telegramID = "TELEGRAM_ID";
     }
 
 
     @Override
     public String toString() {
-        return String.join(", ", Arrays.asList(clientKey, secretKey, telegramId));
+        return String.join(", ", Arrays.asList(clientKey, secretKey, telegramID));
     }
 
     public String getClientKey() {
-        return (clientKey != null) ? clientKey : "CLIENT_KEY";;
+        return (clientKey != null) ? clientKey : "CLIENT_KEY";
     }
 
     public String getSecretKey() {
-        return (secretKey != null) ? secretKey : "SECRET_KEY";;
+        return (secretKey != null) ? secretKey : "SECRET_KEY";
     }
 
-    public String getTelegramId() {
-        return (telegramId != null) ? telegramId : "TELEGRAM_ID";;
+    public String getTelegramID() {
+        return (telegramID != null) ? telegramID : "TELEGRAM_ID";
     }
 
     public void setClientKey(String input) {
@@ -90,26 +90,26 @@ public class JTelegramKeys {
         secretKey = input.trim();
     }
 
-    public void setTelegramId(String input) {
+    public void setTelegramID(String input) {
         Objects.requireNonNull(input);
-        telegramId = input.trim();
+        telegramID = input.trim();
     }
 
     /**
      * @return {@code String[]} with elements {@code { clientKey, secretKey, telegramId }}.
      */
     public String[] toArray() {
-        return new String[] {clientKey, secretKey, telegramId};
+        return new String[] {clientKey, secretKey, telegramID};
     }
 
     /**
      * @return true if any key is empty or null
      */
-    //noinspection RedundantIfStatement
+    @SuppressWarnings("RedundantIfStatement")
     public boolean anyEmpty() {
         if (Objects.isNull(clientKey) || clientKey.isEmpty()) return true;
         if (Objects.isNull(secretKey) || secretKey.isEmpty()) return true;
-        if (Objects.isNull(telegramId) || telegramId.isEmpty()) return true;
+        if (Objects.isNull(telegramID) || telegramID.isEmpty()) return true;
         return false;
     }
 

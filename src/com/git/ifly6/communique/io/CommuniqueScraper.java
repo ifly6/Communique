@@ -19,6 +19,7 @@ package com.git.ifly6.communique.io;
 
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
+import com.git.ifly6.nsapi.NSException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -99,7 +100,9 @@ public class CommuniqueScraper {
 
             for (Element element : bolded) {
                 String s = element.parent().text().replaceAll("\\(.+?\\)", ""); // get rid of brackets
-                if (s.contains("No Resolution At Vote")) throw new NoResolutionException();
+                if (s.contains("No Resolution At Vote"))
+                    throw new NSException(String.format("No resolution at vote in chamber %s", chamber));
+
                 if (s.startsWith(side)) {
                     s = s.replace(side, "");
                     System.out.println("data1:\t" + s);

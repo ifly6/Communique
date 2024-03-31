@@ -124,7 +124,7 @@ public class CommuniqueFileReader {
                 keys.setSecretKey(element.replace("secret_key=", ""));
 
             } else if (element.startsWith("telegram_id=")) {
-                keys.setTelegramId(element.replace("telegram_id=", ""));
+                keys.setTelegramID(element.replace("telegram_id=", ""));
 
             } else if (element.startsWith("isRecruitment=")) {
                 recruitment = Boolean.parseBoolean(element.replace("isRecruitment=", ""));

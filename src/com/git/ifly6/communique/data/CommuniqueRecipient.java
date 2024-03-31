@@ -25,8 +25,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import static com.git.ifly6.nsapi.ApiUtils.startsWithLowerCase;
-
 /**
  * Stores information about a recipient. It is based on three characteristics, a <code>FilterType</code>, a
  * <code>RecipientType</code>, and the name. The filter type can be used to exclude, include, or simply add. The
@@ -49,7 +47,7 @@ public class CommuniqueRecipient {
     /**
      * Creates a <code>CommuniqueRecipient</code> with certain characteristics.
      */
-    public CommuniqueRecipient(CommuniqueFilterType filterType, CommuniqueRecipientType recipientType, String name, String raw) {
+    public CommuniqueRecipient(CommuniqueFilterType filterType, CommuniqueRecipientType recipientType, String name) {
         this.filterType = filterType;
         this.recipientType = recipientType;
         this.name = ApiUtils.ref(name);    // convert to reference name
@@ -84,7 +82,6 @@ public class CommuniqueRecipient {
     }
 
     /**
-
      * Returns a string representation of the recipient, in the same form which is used by the NationStates telegram
      * system to specify large numbers of nations. For example, <code>tag:wa</code> or
      * <code>nation:imperium_anglorum</code>.
@@ -95,15 +92,8 @@ public class CommuniqueRecipient {
     }
 
     /**
-     * Decomposes a tag to its constituent nations. All decompositions are done in {@link
-CommuniqueRecipientType} class.
-     * @return a list of <code>CommuniqueRecipient</code>s
-     */
-    public List<CommuniqueRecipient> decompose() throws JTelegramException {
-        return getRecipientType().decompose(this);
-    }
-    /**
-     * Decomposes a tag to its constituent nations. All decompositions are done in {@link CommuniqueRecipientType}.
+     * Decomposes a tag to its constituent nations. All decompositions are done in {@link CommuniqueRecipientType}
+     * class.
      * @return a list of <code>CommuniqueRecipient</code>s
      */
     public List<CommuniqueRecipient> decompose() throws JTelegramException {
@@ -121,7 +111,7 @@ CommuniqueRecipientType} class.
      * </p>
      * @return a <code>CommuniqueRecipient</code> representing that string
      */
-    public static CommuniqueRecipient parseRecipient(final String s) {
+    public static CommuniqueRecipient parseRecipient(String s) {
         // 2020-12-24 do not put a toLowerCase here: it breaks case-sensitive regex input!
         s = s.trim();
 
@@ -146,9 +136,9 @@ CommuniqueRecipientType} class.
         if (fType == CommuniqueFilterType.NORMAL && rType == CommuniqueRecipientType.NONE)
             rType = CommuniqueRecipientType.NATION;
 
-        if (rawInput.contains(":")) { // ie is an prefix to be looking at!
+        if (s.contains(":")) { // ie is an prefix to be looking at!
             String expectedPrefix = fType.toString() + rType.toString();
-            String actualPrefix = rawInput.substring(0, rawInput.indexOf(":"));
+            String actualPrefix = s.substring(0, s.indexOf(":"));
             if (!expectedPrefix.equalsIgnoreCase(actualPrefix))
                 throw new IllegalArgumentException(String.format("Expected prefix %s, got prefix %s; parse failed!",
                         expectedPrefix, actualPrefix));
@@ -185,13 +175,14 @@ CommuniqueRecipientType} class.
         return Objects.hash(filterType, recipientType, name);
     }
 
-    /** Pre-Communique build 7 recruiter flag. */
+    /**
+     * Pre-Communique build 7 recruiter flag.
+     */
     private static final String OLD_RECRUIT_FLAG = "flag:recruit";
 
     /**
-     * The old include flag, which served the purpose of something like the current {@code +} tag, eg {@code
-     *region:Europe,
-      +tag:wa} was a two-part flag on one line as {@code region:Europe -> wa:all}.
+     * The old include flag, which served the purpose of something like the current {@code +} tag, eg
+     * {@code region:Europe, +tag:wa} was a two-part flag on one line as {@code region:Europe -> wa:all}.
      * @see CommuniqueRecipient#translateTokens(List)
      */
     private static final String OLD_INCLUDE = "->";
@@ -237,7 +228,6 @@ CommuniqueRecipientType} class.
      * @param oldTokens to translate
      * @return a list of tokens which means the same thing in the new system
      * @see Communique7Parser
-
      */
     public static List<String> translateTokens(List<String> oldTokens) {
         List<String> tokens = new ArrayList<>();

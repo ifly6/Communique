@@ -94,7 +94,7 @@ public class CommuniqueParser {
      * and the IO system, either of them can trigger a change in the version number. See {@link Communique7Parser} for
      * the version declaration.
      */
-    public static final int version = Communique7Parser.version;
+    public static final int version = Communique7Parser.VERSION;
     private static JInfoFetcher fetcher = JInfoFetcher.instance();
 
     /**

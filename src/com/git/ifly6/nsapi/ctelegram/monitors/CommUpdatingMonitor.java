@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -20,6 +20,8 @@ package com.git.ifly6.nsapi.ctelegram.monitors;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.NSConnection;
 import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommWaitingMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommRecruitMonitor;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -33,6 +35,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -49,7 +52,9 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
 
     private Duration updateInterval;
 
-    /** {@link Instant} of last update start. */
+    /**
+     * {@link Instant} of last update start.
+     */
     private Instant lastUpdate;
 
     /**
@@ -95,17 +100,15 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
         if (!listString.contains(",")) regions = Collections.singletonList(ApiUtils.ref(listString));
         else regions = Arrays.stream(listString.split(",\\s+"))
                 .map(ApiUtils::ref)
-                .filter(s -> !ApiUtils.isEmpty(s))
+                .filter(Predicate.not(String::isBlank))
                 .collect(Collectors.toList());
         return regions;
     }
 
     /**
-     * Updating monitors have no defined number of recipients. There might be no new nations. See {@link
-     * com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommRecruitMonitor CommRecruitMonitor}. There might be many.
-     * There might be no movement in or out of a region. See {@link com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor
-     * CommMovementMonitor}. But then there might be. See the {@link com.git.ifly6.communique.gui3.Communique3SendHandler
-     * Communique3SendHandler} for details on time-outs.
+     * Updating monitors have no defined number of recipients. There might be no new nations. See
+     * {@link CommRecruitMonitor}. There might be many. There might be no movement in or out of a region. See
+     * {@link CommMovementMonitor}. But then there might be.
      * @return empty {@link OptionalLong}
      */
     @Override
@@ -116,7 +119,9 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
     @Override
     public abstract boolean recipientsExhausted();
 
-    /** Things to do before calling {@link #updateAction()}. */
+    /**
+     * Things to do before calling {@link #updateAction()}.
+     */
     private void preUpdateAction() {
         if (Thread.currentThread().isInterrupted()) {
             LOGGER.info(String.format("Monitor %s interrupted", this.getClass().getSimpleName()));
@@ -151,7 +156,9 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
      */
     protected abstract void updateAction();
 
-    /** Starts the monitor immediately. If start is called after job already started, does nothing. */
+    /**
+     * Starts the monitor immediately. If start is called after job already started, does nothing.
+     */
     public void start() {
         start(Duration.ZERO);
     }
@@ -174,17 +181,23 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
         }
     }
 
-    /** Stops the monitor. */
+    /**
+     * Stops the monitor.
+     */
     public void stop() {
         job.cancel(true); // don't allow completion of tasks
     }
 
-    /** @return {@link Instant} of last update start. */
+    /**
+     * @return {@link Instant} of last update start.
+     */
     public Instant getLastUpdate() {
         return lastUpdate;
     }
 
-    /** @return optional {@link Instant} of predicted next update trigger. */
+    /**
+     * @return optional {@link Instant} of predicted next update trigger.
+     */
     public Optional<Instant> getNextUpdateTime() {
         if (job == null) {
             // there is no next update
@@ -232,7 +245,9 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
         return latch;
     }
 
-    /** Thrown on exception in update thread. */
+    /**
+     * Thrown on exception in update thread.
+     */
     private static class CommUpdateException extends RuntimeException {
         public CommUpdateException(String message, Throwable e) {
             super(message, e);

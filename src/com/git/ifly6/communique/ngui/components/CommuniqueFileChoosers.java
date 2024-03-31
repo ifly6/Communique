@@ -17,7 +17,7 @@
 
 package com.git.ifly6.communique.ngui.components;
 
-import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.CommuniqueUtilities;
 
 import javax.swing.JFileChooser;
 import java.awt.FileDialog;
@@ -32,7 +32,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.APP_SUPPORT;
+import static com.git.ifly6.CommuniqueApplication.APP_SUPPORT;
 
 public class CommuniqueFileChoosers {
 

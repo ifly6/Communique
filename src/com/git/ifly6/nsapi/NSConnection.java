@@ -17,7 +17,7 @@
 
 package com.git.ifly6.nsapi;
 
-import com.git.ifly6.commons.CommuniqueUtilities;
+import com.git.ifly6.CommuniqueUtilities;
 import com.google.common.util.concurrent.RateLimiter;
 
 import java.io.BufferedReader;
@@ -47,15 +47,18 @@ public class NSConnection {
     private static final double PERMITS_PER_SECOND = 40 / (double) 30; // 50 requests per 30 seconds
     private static final RateLimiter limiter = RateLimiter.create(PERMITS_PER_SECOND);
 
-    /**API delay in milliseconds. */
-     public final static long WAIT_TIME = Math.round(Math.pow(PERMITS_PER_SECOND, -1));
+    /**
+     * API delay in milliseconds.
+     */
+    public final static long WAIT_TIME = Math.round(Math.pow(PERMITS_PER_SECOND, -1));
 
-    /** NationStates API call prefix, {@code https://www.nationstates.net/cgi-bin/api.cgi?}.
+    /**
+     * NationStates API call prefix, {@code https://www.nationstates.net/cgi-bin/api.cgi?}.
      */
     public static final String API_PREFIX = "https://www.nationstates.net/cgi-bin/api.cgi?";
 
     /**
-      NationStates API query prefix, {@code &q=}.
+     * NationStates API query prefix, {@code &q=}.
      */
     public static final String QUERY_PREFIX = "&q=";
 
@@ -72,7 +75,8 @@ public class NSConnection {
     public NSConnection(String urlString) {
         try {
             this.url = new URL(urlString);
-        LOGGER.finest(String.format("Connecting to %s", urlString));} catch (MalformedURLException e) {
+            LOGGER.finest(String.format("Connecting to %s", urlString));
+        } catch (MalformedURLException e) {
             throw new NSIOException(String.format("Input URL <%s> malformed", urlString), e);
         }
     }
@@ -84,11 +88,13 @@ public class NSConnection {
      * @throws IOException           if connection otherwise fails
      * @throws NSIOException         if rate limit exceeded
      * @throws NSException           if other error
-     */public NSConnection connect() throws IOException {
+     */
+    public NSConnection connect() throws IOException {
         // Implement the rate limit
         double secondsWaited = limiter.acquire();
         LOGGER.finest(String.format("NSConnection rate limit -> waited %.3f seconds", secondsWaited));
 
+        // todo rewrite with HttpClient
         // Create connection, add request properties
         HttpURLConnection apiConnection = (HttpURLConnection) url.openConnection();
         apiConnection.addRequestProperty("User-Agent",
@@ -110,7 +116,7 @@ public class NSConnection {
             xml_raw = reader.lines().collect(Collectors.joining("\n"));
             reader.close();
 
-            if (apiConnection.getResponseCode() == 429){
+            if (apiConnection.getResponseCode() == 429) {
                 String retryAfter = apiConnection.getHeaderField("X-Retry-After");
                 throw new NSIOException(
                         String.format("API rate limit exceeded! Retry after %s.",
@@ -118,7 +124,7 @@ public class NSConnection {
             }
 
             if (xml_raw.contains("Unknown nation")
-                || apiConnection.getResponseCode() == 404)
+                    || apiConnection.getResponseCode() == 404)
                 throw new FileNotFoundException(String.format("No result for url %s", url.toString()));
 
 
@@ -132,21 +138,12 @@ public class NSConnection {
     }
 
     /**
-     * Sets HTML POST headers
-     * @param entries of keys and values to pass
-     * @return self, after setting
-     */public NSConnection setHeaders(Map<String, String> entries) {
-        this.entries = entries;
-        return this;
-    }
-
-    /**
      * Delivers response as {@code String}. If {@code NSConnection} has already connected, ie is spent, returns result
      * thereof. If not yet connected, invokes {@link #connect()} automatically.
      * @return response
-     * @throws IOException        if connection fails
+     * @throws IOException if connection fails
      */
-    public String getResponse() throws  IOException {
+    public String getResponse() throws IOException {
         // if it has connected, get response. otherwise, connect and return response
         return hasConnected ? xml_raw : connect().xml_raw;
     }

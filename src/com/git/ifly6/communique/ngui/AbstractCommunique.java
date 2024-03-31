@@ -17,7 +17,7 @@
 
 package com.git.ifly6.communique.ngui;
 
-import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.CommuniqueUtilities;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditorManager;
 import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
@@ -47,7 +47,7 @@ import static com.git.ifly6.communique.ngui.CommuniqueMessages.ERROR;
 import static com.git.ifly6.communique.ngui.CommuniqueMessages.TITLE;
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
 import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
-import static com.git.ifly6.communique.ngui.components.CommuniqueLAF.APP_SUPPORT;
+import static com.git.ifly6.CommuniqueApplication.APP_SUPPORT;
 
 public abstract class AbstractCommunique {
 

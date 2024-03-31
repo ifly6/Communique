@@ -17,7 +17,7 @@
 
 package com.git.ifly6.nsapi.telegram;
 
-public enum JTelegramResponse {
+public enum JTelegramResponseCode {
 
     QUEUED {
         @Override

@@ -22,6 +22,7 @@ import com.git.ifly6.nsapi.telegram.JavaTelegram;
 import javax.swing.JProgressBar;
 import javax.swing.Timer;
 import java.awt.EventQueue;
+import java.time.Instant;
 
 public class CommuniqueTimerBar extends JProgressBar {
 
@@ -62,6 +63,10 @@ public class CommuniqueTimerBar extends JProgressBar {
                 });
 
         timer.start();
+    }
+
+    public void start(Instant start, Instant end) {
+        start(start.toEpochMilli(), end.toEpochMilli());
     }
 
     public void stop() {

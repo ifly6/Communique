@@ -18,7 +18,7 @@
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.data.Communique7Parser;
-import com.git.ifly6.communique.gui3.Communique3Utils;
+import com.git.ifly6.communique.ngui.components.CommuniqueSwingUtilities;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -34,7 +34,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -44,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class CommuniqueTextDialog extends JDialog {
 
-    private static final long serialVersionUID = Communique7Parser.BUILD;
+    private static final long serialVersionUID = Communique7Parser.VERSION;
     private static final Logger log = Logger.getLogger(CommuniqueTextDialog.class.getName());
 
     public
@@ -65,18 +64,10 @@ public class CommuniqueTextDialog extends JDialog {
         int width = lineWrap
                 ? 400
                 : 10 + message.lines().mapToInt(String::length).max().orElse(50) * 8;
-        int height = 450;
-
-        this.setSize(width, height);
-        this.setMinimumSize(new Dimension(300, 350));
-        Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setLocation(
-                Math.round((float) sSize.width / 2 - (float) width / 2),
-                Math.round((float) sSize.height / 2 - (float) height / 2));
-//        Communique3Utils.setupDimensions(this,
-//                new Dimension(350, 350),
-//                new Dimension(width, 450),
-//                true);
+        CommuniqueSwingUtilities.setupDimensions(this,
+                new Dimension(350, 350),
+                new Dimension(width, 450),
+                true);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(5, 5));

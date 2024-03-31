@@ -24,7 +24,6 @@ import com.git.ifly6.nsapi.NSNation;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -261,46 +260,20 @@ public class JavaTelegram {
 
                 // Connect to the API
                 JTelegramConnection connection = new JTelegramConnection(keys, recipient);
-                int errorCode = connection.verify();
+                JTelegramResponseCode errorCode = connection.verify();
 
                 // Verify Status, then deal with all the possible error codes...
-                if (errorCode == JTelegramConnection.QUEUED) {
+                if (errorCode == JTelegramResponseCode.QUEUED) {
                     util.sentTo(recipient, i, totalTelegrams);
                     sentList.add(recipient);
 
-                } else if (errorCode == JTelegramConnection.REGION_MISMATCH)
-                    util.log(formatError("Region key mismatch.", recipient, i + 1, totalTelegrams));
-
-                else if (errorCode == JTelegramConnection.RATE_LIMIT_EXCEEDED)
-                    util.log(formatError("Client exceeded rate limit. Check for multiple recruiter instances",
-                            recipient, i + 1, totalTelegrams));
-
-                else if (errorCode == JTelegramConnection.CLIENT_NOT_REGISTERED)
-                    util.log(formatError("Client key not registered with API, verify client key", recipient,
-                            i + 1, totalTelegrams));
-
-                else if (errorCode == JTelegramConnection.SECRET_KEY_MISMATCH)
-                    util.log(formatError("Secret key incorrect, verify secret key", recipient,
-                            i + 1, totalTelegrams));
-
-                else if (errorCode == JTelegramConnection.NO_SUCH_TELEGRAM)
-                    util.log(formatError("No such telegram by id: " + keys.getTelegramID(), recipient,
-                            i + 1, totalTelegrams));
-
-                else if (errorCode == JTelegramConnection.UNKNOWN_ERROR)
-                    util.log(formatError("Unknown connection error", recipient, i + 1, totalTelegrams));
-
-                else util.log(formatError("Unknown internal error", recipient, i + 1, totalTelegrams));
-                // above should literally never happen
+                } else
+                    util.log(formatError(errorCode.getExplanation(), recipient, i + 1, totalTelegrams));
 
             } catch (IOException e) {
                 util.log(formatError("Error in queuing. Check your Internet connection",
                         recipient, i + 1, totalTelegrams));
                 LOGGER.log(Level.SEVERE, "IO Exception in JavaTelegram sending thread", e);
-                LOGGER.severe("Stack trace:\n" + Arrays.stream(e.getStackTrace())
-                        .map(st -> "\t" + st.toString())
-                        .collect(Collectors.joining("\n")));
-                e.printStackTrace();
             }
 
             // Implement the rate limit, is skipped if campaign not possible

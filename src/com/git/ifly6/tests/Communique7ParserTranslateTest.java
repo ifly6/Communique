@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -65,17 +65,16 @@ public class Communique7ParserTranslateTest {
 
             ps.apply(blah);
             System.out.println(ps.listRecipients());
-
         }
 
         scan.close();
-
     }
 
     /**
-     * This method is syntactical sugar for the translation process in {@link CommuniqueRecipient#translateTokens(List)}.
-     * That method is applied on lists because some of the old tokens, e.g. <code>region:europe -> wa:members</code> now
-     * translates to <code>region:europe, +tag:wa</code>, which is technically two statements.
+     * This method is syntactical sugar for the translation process in
+     * {@link CommuniqueRecipient#translateTokens(List)}. That method is applied on lists because some of the old
+     * tokens, e.g. <code>region:europe -> wa:members</code> now translates to <code>region:europe, +tag:wa</code>,
+     * which is technically two statements.
      * @param s is a <code>String</code> in the old style to translate
      * @return the {@link CommuniqueRecipient} that is translated
      */

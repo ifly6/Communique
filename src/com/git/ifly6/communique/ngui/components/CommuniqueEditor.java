@@ -18,16 +18,16 @@
 package com.git.ifly6.communique.ngui.components;
 
 import com.git.ifly6.communique.data.Communique7Parser;
+import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
-import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.io.CommuniqueScraper;
-import com.git.ifly6.communique.io.NoResolutionException;
 import com.git.ifly6.communique.ngui.AbstractCommunique;
 import com.git.ifly6.nsapi.ApiUtils;
+import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
@@ -58,6 +58,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -98,7 +99,7 @@ public class CommuniqueEditor extends AbstractCommunique {
         this.path = path;
         frame = new JFrame(String.format(
                 "Communiqué %d – %s",
-                Communique7Parser.version,
+                Communique7Parser.VERSION,
                 path.getFileName().toString().replaceFirst("\\..+$", "")
         ));
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -167,7 +168,7 @@ public class CommuniqueEditor extends AbstractCommunique {
                 "Leave as blank to accept defaults. Must be in milliseconds.",
                 saveListener
         );
-        fieldDelay.addActionListener(ae -> JTelegramType.CUSTOM.setDefaultTime(getDelay())); // must have this to sync
+        fieldDelay.addActionListener(ae -> JTelegramType.CUSTOM.setWaitDuration(getDelay())); // must have this to sync
         AbstractDocument document = (AbstractDocument) fieldDelay.getDocument();
         document.setDocumentFilter(new CommuniqueDigitFilter());
 
@@ -303,7 +304,7 @@ public class CommuniqueEditor extends AbstractCommunique {
                                     .map(CommuniqueRecipient::toString)
                                     .forEach(this::appendLine);
 
-                        } catch (NoResolutionException nre) {
+                        } catch (NSException nre) {
                             this.showErrorDialog("No resolution is at vote in that chamber");
 
                         } catch (RuntimeException exc) {
@@ -439,12 +440,12 @@ public class CommuniqueEditor extends AbstractCommunique {
         area.appendLine(obj.toString());
     }
 
-    public int getDelay() {
+    public Duration getDelay() {
         getConfig();
         if (config.waitString.isBlank())
-            return config.getTelegramType().getWaitTime();
+            return config.getTelegramType().getWaitDuration();
 
-        return Integer.parseInt(config.waitString);
+        return Duration.ofMillis(Integer.parseInt(config.waitString));
     }
 
     public JTelegramType getTelegramType() {

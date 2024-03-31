@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -25,8 +25,8 @@ import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor.ExhaustedException;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatingMonitor;
 import com.git.ifly6.nsapi.telegram.JTelegramConnection;
-import com.git.ifly6.nsapi.telegram.JTelegramConnection.ResponseCode;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
+import com.git.ifly6.nsapi.telegram.JTelegramResponseCode;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 import com.google.common.base.Throwables;
 
@@ -200,11 +200,11 @@ public class CommSender {
 
         try {
             // get response code
-            ResponseCode responseCode = connection.verify();
+            JTelegramResponseCode responseCode = connection.verify();
             LOGGER.info(String.format("Received response code %s", responseCode));
 
             // if there is an error
-            if (responseCode != ResponseCode.QUEUED)
+            if (responseCode != JTelegramResponseCode.QUEUED)
                 throw NSTGSettingsException.createException(keys, responseCode);
 
             // we sent to this recipient
@@ -260,16 +260,19 @@ public class CommSender {
     }
 
     public void stopSend() {
-        LOGGER.info("Stopping comm sender sending thread");
-        if (job != null && !job.isDone()) {
-            job.cancel(true);
-            if (monitor instanceof CommUpdatingMonitor)
-                ((CommUpdatingMonitor) monitor).stop();
-        }
-        if (!scheduler.isShutdown()) {
-            List<Runnable> incomplete = scheduler.shutdownNow();
-            LOGGER.info(String.format("Shutdown left %d incomplete tasks", incomplete.size()));
-        }
+        LOGGER.info("Stopping CommuniqueSender sending thread");
+        if (job != null)
+            if (!job.isDone()) {
+                job.cancel(true);
+                if (monitor instanceof CommUpdatingMonitor)
+                    ((CommUpdatingMonitor) monitor).stop();
+            }
+
+        if (!scheduler.isShutdown())
+            LOGGER.info(String.format("Shutdown left %d incomplete tasks",
+                    scheduler.shutdownNow().size()));
+
+        outputInterface.onTerminate(); // trigger the interface termination task
     }
 
     /** Returns list of sent recipients. */

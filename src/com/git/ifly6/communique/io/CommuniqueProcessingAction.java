@@ -18,9 +18,9 @@ package com.git.ifly6.communique.io;
 
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommDelegatesCache;
-import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

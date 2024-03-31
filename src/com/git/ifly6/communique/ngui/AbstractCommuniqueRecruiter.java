@@ -18,12 +18,11 @@
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.communique.data.Communique7Parser;
-import com.git.ifly6.communique.data.CommuniqueRecipient;
-import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.data.CommuniqueFilterType;
+import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipientType;
+import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueConfig;
-import com.git.ifly6.marconi.MarconiRecruiter;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSNation;
@@ -40,8 +39,9 @@ import java.util.stream.Collectors;
 
 /**
  * Provides the outline for the recruiter classes. Also provides recipient search functionality shared between
- * {@link CommuniqueRecruiter} and {@link MarconiRecruiter}.
+ * {@link CommuniqueRecruiter}.
  * @author ifly6
+ * @since version 7
  */
 public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 

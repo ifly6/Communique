@@ -17,17 +17,19 @@
 
 package com.git.ifly6.marconi;
 
-import com.git.ifly6.commons.CommuniqueApplication;
-import com.git.ifly6.commons.CommuniqueUtilities;
+import com.git.ifly6.CommuniqueApplication;
+import com.git.ifly6.CommuniqueUtilities;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Utilities associated with Marconi.
@@ -36,7 +38,8 @@ import java.util.logging.Logger;
 public class MarconiUtilities {
 
     private static final Logger LOGGER = Logger.getLogger(MarconiUtilities.class.getName());
-    private static final Path lockFile = CommuniqueApplication.APP_SUPPORT.resolve("marconi.lock");
+    private static final Path LOCK_FILE = CommuniqueApplication.APP_SUPPORT.resolve("marconi.lock");
+    private static final Scanner SCANNER = new Scanner(System.in);
 
     /**
      * Creates two column string, each column is 30 characters wide.
@@ -60,14 +63,13 @@ public class MarconiUtilities {
      */
     static void createFileLock() {
         try {
-            if (!Files.exists(lockFile)) {
-                Files.write(lockFile, Collections.singletonList(
-                        String.format("marconi. started %s.", CommuniqueUtilities.getDate())));
-                lockFile.toFile().deleteOnExit(); // delete lock file when marconi closes!
+            if (!Files.exists(LOCK_FILE)) {
+                Files.writeString(LOCK_FILE,
+                        String.format("marconi. started %s.", CommuniqueUtilities.getTime()),
+                        StandardOpenOption.DELETE_ON_CLOSE);
             }
         } catch (IOException e) {
-            LOGGER.severe("Cannot get or create lock file!");
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Cannot get or create lock file!", e);
         }
     }
 
@@ -76,7 +78,7 @@ public class MarconiUtilities {
      * @return boolean, whether lock file already exists
      */
     static boolean isFileLocked() {
-        return Files.exists(lockFile);
+        return Files.exists(LOCK_FILE);
     }
 
     /**
@@ -87,7 +89,7 @@ public class MarconiUtilities {
      */
     static String prompt(String prompt) {
         System.out.print(prompt + "\t");
-        return scan.nextLine();
+        return SCANNER.nextLine();
     }
 
     /**
@@ -98,7 +100,7 @@ public class MarconiUtilities {
      * @return the user's answer, which is required to be in the list of valid responses
      */
     static String prompt(String prompt, List<String> acceptableAnswers) {
-        if (acceptableAnswers.size() == 0)
+        if (acceptableAnswers.isEmpty())
             throw new UnsupportedOperationException("Must provide some acceptable answers");
         final List<String> accepted = acceptableAnswers
                 .stream()
