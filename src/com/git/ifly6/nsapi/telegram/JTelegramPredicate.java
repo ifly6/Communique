@@ -19,17 +19,33 @@ package com.git.ifly6.nsapi.telegram;
 
 import com.git.ifly6.nsapi.NSNation;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class JTelegramPredicate implements Predicate<NSNation> {
 
     private final String name;
-
     private final Predicate<NSNation> predicate;
 
+    private Path cacheAt;
+
     public JTelegramPredicate(String name, Predicate<NSNation> predicate) {
+        this(name, predicate, null);
+    }
+
+    public JTelegramPredicate(String name, Predicate<NSNation> predicate, Path cacheAt) {
         this.name = name;
         this.predicate = predicate;
+        try {
+            this.cacheAt = Files.isDirectory(Objects.requireNonNull(cacheAt))
+                    ? cacheAt.resolve(this.getName()) : cacheAt;
+            Files.createDirectories(this.cacheAt.getParent());
+        } catch (IOException | NullPointerException e) {
+            this.cacheAt = null;
+        }
     }
 
     public String getName() {

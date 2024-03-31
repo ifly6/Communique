@@ -19,13 +19,15 @@ package com.git.ifly6.nsapi.telegram;
 
 import com.git.ifly6.nsapi.NSConnection;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * <code>JTelegramConnection</code> is the system used to connect to the NationStates API.
@@ -41,6 +43,8 @@ import java.util.stream.Collectors;
  */
 public class JTelegramConnection {
 
+    public static final Logger LOGGER = Logger.getLogger(JTelegramConnection.class.getName());
+
     static final int QUEUED = 0;
     static final int UNKNOWN_ERROR = 1;
     static final int REGION_MISMATCH = 2;
@@ -49,25 +53,33 @@ public class JTelegramConnection {
     static final int SECRET_KEY_MISMATCH = 5;
     static final int NO_SUCH_TELEGRAM = 6;
 
-    private HttpURLConnection apiConnection;
+    private static HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+    private HttpResponse<String> httpResponse;
 
     /**
      * Creates and establishes a <code>JTelegramConenction</code> with the relevant codes and keys (Death Cab for
      * Cutie?). It automatically connects when established.
      * @param clientKey  is a <code>String</code> which contains the client key
      * @param secretKey  is a <code>String</code> which contains the secret key
-     * @param telegramId is a <code>String</code> which contains the telegram ID
+     * @param telegramID is a <code>String</code> which contains the telegram ID
      * @param recipient  is a <code>String</code> which contains the name of the recipient in NationStates back-end
      *                   format (that is, all spaces turned into underscores)
      * @throws IOException if there is a problem in connecting to the API
      */
-    public JTelegramConnection(String clientKey, String secretKey, String telegramId, String recipient) throws IOException {
+    public JTelegramConnection(String clientKey, String secretKey, String telegramID, String recipient) throws IOException {
         URL tgURL = new URL(NSConnection.API_PREFIX + "a=sendTG&client=" + clientKey + "&key=" + secretKey + "&tgid="
-                + telegramId + "&to=" + recipient);
-        apiConnection = (HttpURLConnection) tgURL.openConnection();
-        apiConnection.setRequestProperty("User-Agent",
-                "NationStates JavaTelegram (maintained by Imperium Anglorum, used by " + clientKey + ")");
-        apiConnection.connect();
+                + telegramID + "&to=" + recipient);
+        try {
+            HttpRequest request = HttpRequest.newBuilder(tgURL.toURI())
+                    .header("User-Agent",
+                            String.format("JavaTelegram (maintained by Imperium Anglorum, used by %s)", clientKey))
+                    .GET().build();
+            httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        } catch (URISyntaxException | InterruptedException e) {
+            LOGGER.log(Level.SEVERE, String.format("Encountered normally-impossible %s",
+                    e.getClass().getSimpleName()), e);
+        }
     }
 
     /**
@@ -92,23 +104,19 @@ public class JTelegramConnection {
      * @throws IOException if error in queuing the telegram
      */
     int verify() throws IOException {
-
-        BufferedReader webReader = apiConnection.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST
-                ? new BufferedReader(new InputStreamReader(apiConnection.getInputStream()))
-                : new BufferedReader(new InputStreamReader(apiConnection.getErrorStream()));
-        String response = webReader.lines().collect(Collectors.joining("\n"));
-        webReader.close();
-
-        if (response.startsWith("queued")) return QUEUED;
-        if (response.contains("API Recruitment TG rate-limit exceeded")) return RATE_LIMIT_EXCEEDED;
-        if (response.contains("Region mismatch between Telegram and Client API Key")) return REGION_MISMATCH;
-        if (response.contains("Client Not Registered For API")) return CLIENT_NOT_REGISTERED;
-        if (response.contains("Incorrect Secret Key")) return SECRET_KEY_MISMATCH;
-        if (response.contains("No Such API Telegram Template")) return NO_SUCH_TELEGRAM;
+        String response = httpResponse.body().trim().toLowerCase();
+        if (response.startsWith("queued"))
+            return QUEUED;
+        if (response.contains("api recruitment tg rate-limit exceeded")) return RATE_LIMIT_EXCEEDED;
+        if (response.contains("region mismatch between telegram and client api key")) return REGION_MISMATCH;
+        if (response.contains("client not registered for api")) return CLIENT_NOT_REGISTERED;
+        if (response.contains("incorrect secret key")) return SECRET_KEY_MISMATCH;
+        if (response.contains("no such api telegram template")) return NO_SUCH_TELEGRAM;
 
         // else, print and return
-        Logger.getLogger(this.getClass().getName()).warning(String.format("Unknown error at code (%d):\n%s",
-                apiConnection.getResponseCode(), response));
+        LOGGER.severe(String.format("Unknown error with code %d: %s",
+                httpResponse.statusCode(), httpResponse.body().trim()
+        ));
         return UNKNOWN_ERROR;
     }
 
