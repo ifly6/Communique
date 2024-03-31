@@ -15,42 +15,23 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.io;
+package com.git.ifly6.communique.ngui.components;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+public class CommuniqueDigitFilter extends DocumentFilter {
+    Pattern regex = Pattern.compile("\\d*");
 
-/**
- * Writes Communique configuration files.
- * @since version 5
- */
-class CommuniqueWriter {
-
-    private Path path;
-    private CommuniqueConfig config;
-
-    /**
-     * Creates <code>CommuniqueWriter</code> pointing to some path with some loaded configuration data.
-     * @param path   on which to write
-     * @param config data
-     */
-    CommuniqueWriter(Path path, CommuniqueConfig config) {
-        this.path = path;
-        this.config = config;
-    }
-
-    /**
-     * Writes the configuration data to the path specified in the constructor.
-     * @throws IOException if there is an error in writing the file
-     */
-    void write() throws IOException {
-        config.clean(); // Have configuration clean itself
-        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-        Files.writeString(path, gson.toJson(config));
+    @Override
+    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+            throws BadLocationException {
+        Matcher matcher = regex.matcher(text);
+        if (!matcher.matches()) return;
+        super.replace(fb, offset, length, text, attrs);
     }
 
 }

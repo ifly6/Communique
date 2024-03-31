@@ -30,6 +30,7 @@ import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -99,7 +100,20 @@ class CommuniqueReader {
                 // correct for introduction of recruitment enum instead of boolean flag
                 if (config.version <= 11)
                     if (config.isRecruitment)
-                        config.telegramType = JTelegramType.RECRUIT;
+                        config.setTelegramType(JTelegramType.RECRUIT);
+
+                // correct for replacement of wait string with durations
+                if (config.version <= 13)
+                    if (config.waitString != null && !config.waitString.isBlank())
+                        try {
+                            config.setTelegramInterval(Duration.ofMillis(Long.parseLong(config.waitString)));
+                        } catch (NumberFormatException e) {
+                            config.setTelegramInterval(
+                                    config.getTelegramType() == JTelegramType.RECRUIT
+                                            ? JTelegramType.RECRUIT.getWaitDuration()
+                                            : JTelegramType.NONE.getWaitDuration())
+                            ;
+                        }
 
                 // defaults for wait string are not necessary: blank accepts hard-coded defaults already. A+
 

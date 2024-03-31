@@ -22,12 +22,21 @@ import net.java.balloontip.styles.RoundedBalloonStyle;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -62,8 +71,9 @@ public class CommuniqueSwingUtilities {
      * @param initialSize of window
      * @param centering   true if centered on screen
      */
-    public static void setupDimensions(Window window, Dimension minimumSize, Dimension initialSize,
-                                       boolean centering) {
+    public static void setupDimensions(
+            Window window, Dimension minimumSize, Dimension initialSize,
+            boolean centering) {
         window.setMinimumSize(minimumSize);
         window.setPreferredSize(initialSize);
         if (centering)
@@ -99,4 +109,21 @@ public class CommuniqueSwingUtilities {
                     2, TimeUnit.SECONDS);
         });
     }
+
+    public static void addComponents(JPanel panel, LinkedHashMap<String, Component> components) {
+        // we're using grid bag layout
+        panel.setLayout(new GridBagLayout());
+
+        // set up grid
+        List<Map.Entry<String, Component>> entryList = new ArrayList<>(components.entrySet());
+        for (int i = 0; i < entryList.size(); i++) {
+            Map.Entry<String, Component> entry = entryList.get(i);
+            GridBagConstraints column1 = CommuniqueFactory.createGridBagConstraints(0, i, false);
+            column1.insets.right = 4; // internal padding
+
+            panel.add(new JLabel(entry.getKey()), column1);
+            panel.add(entry.getValue(), CommuniqueFactory.createGridBagConstraints(1, i, true));
+        }
+    }
+
 }

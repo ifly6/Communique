@@ -64,6 +64,7 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -423,11 +424,13 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
                 secretKeyField.getText(),
                 telegramIdField.getText()
         );
-        CommuniqueConfig config = new CommuniqueConfig(JTelegramType.NONE, CommuniqueProcessingAction.NONE, keys, "");
+        CommuniqueConfig config = new CommuniqueConfig(
+                keys, JTelegramType.RECRUIT, null,
+                CommuniqueProcessingAction.NONE, true, Duration.ofSeconds(181)
+        );
 
         // Create and set recipients and sent-lists
         List<CommuniqueRecipient> rList = new ArrayList<>();
-
         rList.add(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.FLAG, "recruit"));
         rList.addAll(filterList); // add filtered list
         rList.addAll(listProscribedRegions()); // add proscribed regions

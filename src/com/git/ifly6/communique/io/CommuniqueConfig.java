@@ -23,7 +23,11 @@ import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,21 +40,29 @@ import static com.git.ifly6.CommuniqueUtilities.NORMAL_FORM;
  * <code>CommuniqueConfig</code> creates a unified object for the storage and retrieval of configuration information
  * necessary to have persistent states between Communiqué or Marconi instances.
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 public class CommuniqueConfig implements Serializable {
 
     // NOTE! For backwards compatibility, do not change field names!
     private static final long serialVersionUID = Communique7Parser.VERSION;
 
-    public String HEADER;
-    public int version;
-
-    protected boolean isRecruitment;
-    public CommuniqueProcessingAction processingAction;
+    public String HEADER =
+            "Communiqué Configuration file. Do not edit by hand. Produced at: " // cannot be static!
+                    + CommuniqueUtilities.getTime(NORMAL_FORM) + ". Produced by version " + Communique7Parser.VERSION;
+    public int version = Communique7Parser.VERSION;
 
     public JTelegramKeys keys;
-    public JTelegramType telegramType;
-    public String waitString;
+
+    private JTelegramType telegramType;
+
+    @Nullable
+    private Duration telegramInterval;
+
+    public CommuniqueProcessingAction processingAction;
+
     public boolean repeats;
+    @Nullable
+    private Duration repeatInterval;
 
     /**
      * Holds the Communique recipients in <code>String</code>s so that it can be edited by hand and not as
@@ -64,37 +76,51 @@ public class CommuniqueConfig implements Serializable {
     // These should be deprecated, but are kept for backward compatibility
     @Deprecated
     public String[] recipients; // consider removing
-
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public String[] sentList;   // consider removing
 
+    @Deprecated
+    protected boolean isRecruitment;
+    @Deprecated
+    public String waitString;
+
     /**
-     * Empty constructor for {@link CommuniqueConfig}
+     * Constructs with default parameters
      */
     public CommuniqueConfig() {
-        HEADER = "Communiqué Configuration file. Do not edit by hand. Produced at: " // cannot be static!
-                + CommuniqueUtilities.getTime(NORMAL_FORM) + ". Produced by version " + Communique7Parser.VERSION;
-        keys = new JTelegramKeys(); // empty keys
-        version = defaultVersion(); // default version to current version
-        processingAction = CommuniqueProcessingAction.NONE; // no processing action
+        this.keys = new JTelegramKeys();
+        this.telegramType = JTelegramType.NONE;
+        this.telegramInterval = null;
+        this.processingAction = CommuniqueProcessingAction.NONE;
+        this.repeats = false;
+        this.repeatInterval = null;
     }
 
     /**
-     * Constructor for <code>{@link CommuniqueConfig}</code>s. All the
-     * <code>{@link CommuniqueRecipient}</code>s should be specified after the fact.
-     * @param t                the type of telegrams configured to be sent
-     * @param processingAction is the applicable processing action
-     * @param keys             are the keys
-     * @param s                for the wait string
+     * Constructs configuration file with given parameters. The recipients should be specified after the fact with
+     * {@link this#setcRecipients(List)} or {@link this#addcRecipient(CommuniqueRecipient)}.
+     * @param keys             identifying the telegram to send
+     * @param telegramType     of telegram to send
+     * @param telegramInterval between which to send telegrams (only set when telegram type is
+     *                         {@link JTelegramType#CUSTOM}
+     * @param processingAction to apply after parsing
+     * @param repeats          flag whether the client should interrupt and repeat
+     * @param repeatInterval   over which to interrupt and repeat (only set when {@code repeats} is true)
      */
-    public CommuniqueConfig(JTelegramType t, CommuniqueProcessingAction processingAction,
-                            JTelegramKeys keys, String s) {
+    public CommuniqueConfig(
+            JTelegramKeys keys, JTelegramType telegramType, Duration telegramInterval,
+            CommuniqueProcessingAction processingAction,
+            boolean repeats, Duration repeatInterval
+    ) {
         this();
-        this.telegramType = t;
-        this.processingAction = processingAction;
         this.keys = keys;
-        this.waitString = s.trim();
+        this.telegramType = telegramType;
+        this.telegramInterval = (this.telegramType == JTelegramType.CUSTOM) ? telegramInterval : null;
+        this.processingAction = processingAction;
+        this.repeats = repeats;
+        this.repeatInterval = (this.repeats)
+                ? (repeatInterval.compareTo(Duration.ofMinutes(3)) > 0 ? repeatInterval : Duration.ofMinutes(3))
+                : null;
     }
 
     /**
@@ -147,6 +173,18 @@ public class CommuniqueConfig implements Serializable {
     }
 
     /**
+     * Gets telegram type
+     * @return telegram type, {@link JTelegramType#NONE} if null
+     */
+    public JTelegramType getTelegramType() {
+        return telegramType == null ? JTelegramType.NONE : telegramType;
+    }
+
+    public void setTelegramType(JTelegramType type) {
+        this.telegramType = Objects.requireNonNull(type);
+    }
+
+    /**
      * Gets processing action
      * @return processing action, {@link CommuniqueProcessingAction#NONE} if null
      */
@@ -154,12 +192,20 @@ public class CommuniqueConfig implements Serializable {
         return processingAction == null ? CommuniqueProcessingAction.NONE : processingAction;
     }
 
-    /**
-     * Gets telegram type
-     * @return telegram type, {@link JTelegramType#NONE} if null
-     */
-    public JTelegramType getTelegramType() {
-        return telegramType == null ? JTelegramType.NONE : telegramType;
+    @NotNull
+    public Duration getTelegramInterval() {
+        if (telegramInterval == null) return this.getTelegramType().getWaitDuration();
+        return telegramInterval;
+    }
+
+    public void setTelegramInterval(Duration interval) {
+        this.telegramInterval = Objects.requireNonNull(interval);
+    }
+
+    @NotNull
+    public Duration getRepeatInterval() {
+        if (!repeats || repeatInterval == null) return ChronoUnit.FOREVER.getDuration();
+        return repeatInterval;
     }
 
     /**

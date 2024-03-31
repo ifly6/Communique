@@ -93,7 +93,7 @@ public abstract class AbstractCommunique {
 
         mnFile.addSeparator();
         mnFile.add(CommuniqueFactory.createMenuItem(
-                "Show Application Support Directory",
+                "Show application support directory",
                 KeyStroke.getKeyStroke(KeyEvent.VK_O, COMMAND_KEY | InputEvent.SHIFT_DOWN_MASK), ae -> {
                     try {
                         Desktop.getDesktop().open(APP_SUPPORT.toFile());
@@ -190,7 +190,7 @@ public abstract class AbstractCommunique {
                 LOGGER.log(Level.WARNING, "Cannot open Communiqué GitHub page", e);
             }
         }));
-        mnHelp.add(createMenuItem("Forum Thread", ae -> {
+        mnHelp.add(createMenuItem("Forum thread", ae -> {
             try {
                 Desktop.getDesktop().browse(CommuniqueConstants.FORUM_THREAD);
             } catch (IOException e) {

@@ -401,7 +401,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
      * @return currently selected wait time if present, otherwise, defualt wait time (in milliseconds)
      */
     private Duration currentWaitTime() {
-        return focusedEditor.getDelay();
+        return focusedEditor.getTelegramInterval();
     }
 
     /**

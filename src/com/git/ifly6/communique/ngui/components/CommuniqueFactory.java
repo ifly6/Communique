@@ -25,6 +25,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -82,6 +83,14 @@ public class CommuniqueFactory {
         return BorderFactory.createEmptyBorder(pixels, pixels, pixels, pixels);
     }
 
+    public static TitledBorder createTitledBorder(String text) {
+        TitledBorder tb = new TitledBorder(text);
+        tb.setTitlePosition(TitledBorder.ABOVE_TOP);
+        tb.setTitleFont(tb.getTitleFont().deriveFont(Font.BOLD));
+        tb.setBorder(BorderFactory.createEmptyBorder(2, 4, 0, 0));
+        return tb;
+    }
+
     public static JMenuItem createMenuItem(String label, ActionListener... als) {
         return createMenuItem(label, null, als);
     }
@@ -111,7 +120,7 @@ public class CommuniqueFactory {
     public static GridBagConstraints createGridBagConstraints(int gridX, int gridY, boolean hFill) {
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.LINE_START;
-        c.insets = new Insets(2, 0, 2, 0);
+        c.insets = new Insets(0, 0, 2, 0);
         c.fill = (hFill) ? GridBagConstraints.HORIZONTAL : GridBagConstraints.NONE;
         c.weightx = (hFill) ? 1 : 0;
         c.gridx = gridX;
