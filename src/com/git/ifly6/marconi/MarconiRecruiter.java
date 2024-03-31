@@ -18,8 +18,8 @@
 package com.git.ifly6.marconi;
 
 import com.git.ifly6.communique.data.CommuniqueRecipient;
-import com.git.ifly6.communique.data.FilterType;
-import com.git.ifly6.communique.data.RecipientType;
+import com.git.ifly6.communique.data.CommuniqueFilterType;
+import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import com.git.ifly6.communique.ngui.AbstractCommuniqueRecruiter;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 import com.git.ifly6.nsapi.telegram.JavaTelegram;
@@ -148,8 +148,8 @@ public class MarconiRecruiter extends AbstractCommuniqueRecruiter implements JTe
     private Set<CommuniqueRecipient> getProscribedRegions() {
         if (proscribedRegions == null)
             return marconi.exportState().getcRecipients().stream()
-                    .filter(r -> r.getRecipientType() == RecipientType.REGION)
-                    .filter(r -> r.getFilterType() == FilterType.EXCLUDE)
+                    .filter(r -> r.getRecipientType() == CommuniqueRecipientType.REGION)
+                    .filter(r -> r.getFilterType() == CommuniqueFilterType.EXCLUDE)
                     .collect(Collectors.toCollection(HashSet::new));
         return proscribedRegions;
     }

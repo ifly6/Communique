@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * <code>CommuniqueRecipient</code>.
  * @author ifly6
  */
-public enum RecipientType {
+public enum CommuniqueRecipientType {
 
     /**
      * Declares the recipient is a nation and requires no further processing in decomposition.
@@ -62,7 +62,7 @@ public enum RecipientType {
             List<String> regions = JInfoFetcher.instance().getRegionTag(cr.getName());
             LOGGER.info(String.format("Tag %s: %d regions", cr.getName(), regions.size()));
             return regions.stream()
-                    .map(s -> new CommuniqueRecipient(cr.getFilterType(), RecipientType.REGION, s))
+                    .map(s -> new CommuniqueRecipient(cr.getFilterType(), CommuniqueRecipientType.REGION, s))
                     .map(CommuniqueRecipient::decompose)
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
@@ -134,7 +134,7 @@ public enum RecipientType {
         }
     };
 
-    private static final Logger LOGGER = Logger.getLogger(RecipientType.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CommuniqueRecipientType.class.getName());
 
     /**
      * Allows for the recipient type to be compatible with the NationStates telegram system by providing the same tag
@@ -156,7 +156,7 @@ public enum RecipientType {
      * @param filterType from which to extract type data
      * @return list of CommuniqueRecipients
      */
-    private static List<CommuniqueRecipient> newRecipients(List<String> list, FilterType filterType) {
+    private static List<CommuniqueRecipient> newRecipients(List<String> list, CommuniqueFilterType filterType) {
         // we use this a lot, probably better to use a loop for speed
         List<CommuniqueRecipient> result = new ArrayList<>();
         for (String s : list)

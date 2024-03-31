@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.nsapi.tests;
+package com.git.ifly6.nsapi.manualtests;
 
 import com.git.ifly6.nsapi.NSRegion;
 

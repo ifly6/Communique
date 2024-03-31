@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
  * <code>JTelegramLogger</code> and the raw connection system is in <code>JTelegramConnection</code>.
  * </p>
  */
+@Deprecated
 public class JavaTelegram {
 
     public static final Logger LOGGER = Logger.getLogger(JavaTelegram.class.getName());
@@ -70,7 +71,7 @@ public class JavaTelegram {
     private int waitTime = telegramType.getWaitTime();
 
     /**
-     * A list of tests to run on each recipient. A <code>NSNation</code> is created for each recipient in
+     * A list of manualtests to run on each recipient. A <code>NSNation</code> is created for each recipient in
      * {@link JavaTelegram#connect()} and populated before it is tested by the predicate. If any predicate returns
      * false, the recipient will be skipped. A default predicate, which cannot be removed, is statically initialised to
      * prevent telegrams from being sent based on this algorithm:

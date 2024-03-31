@@ -20,8 +20,8 @@ package com.git.ifly6.communique.ngui;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
-import com.git.ifly6.communique.data.FilterType;
-import com.git.ifly6.communique.data.RecipientType;
+import com.git.ifly6.communique.data.CommuniqueFilterType;
+import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.marconi.MarconiRecruiter;
 import com.git.ifly6.nsapi.ApiUtils;
@@ -55,14 +55,14 @@ public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
     public void setConfig(CommuniqueConfig config) {
         // get the sent list first
         sentList = config.getcRecipients().stream()
-                .filter(r -> r.getRecipientType() == RecipientType.NATION)
-                .filter(r -> r.getFilterType() == FilterType.EXCLUDE)
+                .filter(r -> r.getRecipientType() == CommuniqueRecipientType.NATION)
+                .filter(r -> r.getFilterType() == CommuniqueFilterType.EXCLUDE)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         // then get extra filter list things
-        RecipientType[] goodRecipientTypes = {RecipientType.NATION};
+        CommuniqueRecipientType[] goodRecipientTypes = {CommuniqueRecipientType.NATION};
         filterList = config.getcRecipients().stream()
-                .filter(r -> r.getFilterType() != FilterType.NORMAL) // exclude all additions
+                .filter(r -> r.getFilterType() != CommuniqueFilterType.NORMAL) // exclude all additions
                 .filter(r -> ApiUtils.contains(goodRecipientTypes, r.getRecipientType()))
                 .filter(r -> !sentList.contains(r))
                 .collect(Collectors.toList());

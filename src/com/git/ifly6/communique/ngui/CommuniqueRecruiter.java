@@ -20,8 +20,8 @@ package com.git.ifly6.communique.ngui;
 import com.git.ifly6.communique.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
-import com.git.ifly6.communique.data.FilterType;
-import com.git.ifly6.communique.data.RecipientType;
+import com.git.ifly6.communique.data.CommuniqueFilterType;
+import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
@@ -395,7 +395,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
     private Set<CommuniqueRecipient> listProscribedRegions() {
         return Arrays.stream(excludeList.getSelectedIndices())
                 .mapToObj(x -> excludeList.getModel().getElementAt(x))
-                .map(s -> new CommuniqueRecipient(FilterType.EXCLUDE, RecipientType.REGION, s))
+                .map(s -> new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE, CommuniqueRecipientType.REGION, s))
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
@@ -424,7 +424,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
         // Create and set recipients and sent-lists
         List<CommuniqueRecipient> rList = new ArrayList<>();
 
-        rList.add(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.FLAG, "recruit"));
+        rList.add(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.FLAG, "recruit"));
         rList.addAll(filterList); // add filtered list
         rList.addAll(listProscribedRegions()); // add proscribed regions
         rList.addAll(sentList); // add sent list
@@ -461,8 +461,8 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
         excludeList.clearSelection();
         DefaultListModel<String> model = (DefaultListModel<String>) excludeList.getModel();
         List<String> excludeRegions = config.getcRecipients().stream()
-                .filter(r -> r.getRecipientType() == RecipientType.REGION)
-                .filter(r -> r.getFilterType() == FilterType.EXCLUDE)
+                .filter(r -> r.getRecipientType() == CommuniqueRecipientType.REGION)
+                .filter(r -> r.getFilterType() == CommuniqueFilterType.EXCLUDE)
                 .map(CommuniqueRecipient::getName)
                 .collect(Collectors.toList());
 

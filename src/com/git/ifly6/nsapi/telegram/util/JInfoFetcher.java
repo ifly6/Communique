@@ -44,6 +44,7 @@ import java.util.stream.Stream;
  * the NationStates API.
  * </p>
  */
+@Deprecated
 public class JInfoFetcher {
 
     private static JInfoFetcher singleton;

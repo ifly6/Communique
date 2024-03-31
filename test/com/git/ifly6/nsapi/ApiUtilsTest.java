@@ -18,8 +18,8 @@
 package com.git.ifly6.nsapi;
 
 import com.git.ifly6.communique.data.CommuniqueRecipient;
-import com.git.ifly6.communique.data.FilterType;
-import com.git.ifly6.communique.data.RecipientType;
+import com.git.ifly6.communique.data.CommuniqueFilterType;
+import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -61,11 +61,11 @@ class ApiUtilsTest {
         Map<Object[], Object> trues = new HashMap<>();
         trues.put(new String[] {"imperium anglorum", "123"}, "imperium anglorum");
         trues.put(new CommuniqueRecipient[] {
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.REGION, "europe"),
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.REGION, "the_north_pacific"),
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "transilia")
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "europe"),
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "the_north_pacific"),
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "transilia")
                 },
-                new CommuniqueRecipient(FilterType.NORMAL, RecipientType.REGION, "europe"));
+                new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "europe"));
 
         for (Map.Entry<Object[], Object> entry : trues.entrySet()) {
             assertTrue(ApiUtils.contains(entry.getKey(), entry.getValue()));
@@ -74,11 +74,11 @@ class ApiUtilsTest {
         Map<Object[], Object> falses = new HashMap<>();
         trues.put(new String[] {"imperium anglorum", "123"}, "separatist peoples");
         trues.put(new CommuniqueRecipient[] {
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.REGION, "europe"),
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.REGION, "the_north_pacific"),
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "transilia")
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "europe"),
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "the_north_pacific"),
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "transilia")
                 },
-                new CommuniqueRecipient(FilterType.NORMAL, RecipientType.REGION, "the_rejected_realms"));
+                new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "the_rejected_realms"));
 
         for (Map.Entry<Object[], Object> entry : falses.entrySet())
             assertFalse(ApiUtils.contains(entry.getKey(), entry.getValue()));

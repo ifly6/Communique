@@ -20,7 +20,6 @@ package com.git.ifly6.communique.data;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,50 +37,50 @@ class CommuniqueRecipientTest {
     @Test
     void parseRecipient() {
         // normal, name shenanigans
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "imperium_anglorum"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
                 CommuniqueRecipient.parseRecipient("nation:imperium anglorum"));
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "imperium_anglorum"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
                 CommuniqueRecipient.parseRecipient("nation:ImPerIUm_angloRuM"));
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "imperium_anglorum"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
                 CommuniqueRecipient.parseRecipient("nation:imperium_anglorum"));
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "imperium_anglorum"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
                 CommuniqueRecipient.parseRecipient("nation:   imperium_anglorum      "));
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "a_b_c_d_e"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "a_b_c_d_e"),
                 CommuniqueRecipient.parseRecipient("nation:   A b C d E "));
 
         // other normal types
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.REGION, "europe"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "europe"),
                 CommuniqueRecipient.parseRecipient("region:europe"));
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.TAG, "delegates"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.TAG, "delegates"),
                 CommuniqueRecipient.parseRecipient("tag:delegates"));
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.TAG, "all"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.TAG, "all"),
                 CommuniqueRecipient.parseRecipient("tag:all"));
 
         // exclude
-        assertEquals(new CommuniqueRecipient(FilterType.EXCLUDE, RecipientType.REGION, "europe"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE, CommuniqueRecipientType.REGION, "europe"),
                 CommuniqueRecipient.parseRecipient("-region:europe"));
-        assertEquals(new CommuniqueRecipient(FilterType.EXCLUDE, RecipientType.REGION_TAG, "massive"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE, CommuniqueRecipientType.REGION_TAG, "massive"),
                 CommuniqueRecipient.parseRecipient("-region_tag:massive"));
 
         // include
-        assertEquals(new CommuniqueRecipient(FilterType.INCLUDE, RecipientType.REGION, "europe"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.INCLUDE, CommuniqueRecipientType.REGION, "europe"),
                 CommuniqueRecipient.parseRecipient("+region:europe"));
 
         // flag
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.FLAG, "recruit"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.FLAG, "recruit"),
                 CommuniqueRecipient.parseRecipient("flag:recruit"));
-        assertEquals(new CommuniqueRecipient(FilterType.NORMAL, RecipientType.FLAG, "active"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.FLAG, "active"),
                 CommuniqueRecipient.parseRecipient("flag:active"));
 
         // regular expressions
-        assertEquals(new CommuniqueRecipient(FilterType.EXCLUDE_REGEX, RecipientType.NATION, "\\d+"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE_REGEX, CommuniqueRecipientType.NATION, "\\d+"),
                 CommuniqueRecipient.parseRecipient("-regex:\\d+"));
-        assertEquals(new CommuniqueRecipient(FilterType.REQUIRE_REGEX, RecipientType.NATION, "[A-Z]+"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.REQUIRE_REGEX, CommuniqueRecipientType.NATION, "[A-Z]+"),
                 CommuniqueRecipient.parseRecipient("+regex:[A-Z]+"));
 
         // weird shit
         // "2017-03-30 use lastIndexOf to deal with strange name changes, can cause error in name `+region:euro:pe`"
-        assertEquals(new CommuniqueRecipient(FilterType.INCLUDE, RecipientType.REGION, "pe"),
+        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.INCLUDE, CommuniqueRecipientType.REGION, "pe"),
                 CommuniqueRecipient.parseRecipient("+region:euro:pe"));
     }
 
@@ -120,10 +119,10 @@ class CommuniqueRecipientTest {
     @Test
     void testToString() {
         assertEquals("-nation:imperium_anglorum",
-                new CommuniqueRecipient(FilterType.EXCLUDE, RecipientType.NATION,
+                new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE, CommuniqueRecipientType.NATION,
                         "imperium_anglorum").toString());
         assertEquals("-nation:imperium_anglorum",
-                new CommuniqueRecipient(FilterType.EXCLUDE, RecipientType.NATION,
+                new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE, CommuniqueRecipientType.NATION,
                         "imperium anglorum").toString());
     }
 }

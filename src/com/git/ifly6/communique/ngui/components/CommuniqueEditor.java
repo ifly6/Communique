@@ -20,7 +20,7 @@ package com.git.ifly6.communique.ngui.components;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
-import com.git.ifly6.communique.data.FilterType;
+import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
@@ -338,7 +338,7 @@ public class CommuniqueEditor extends AbstractCommunique {
                     if (input != null) {
                         input = input.replaceAll("\\(.+?\\)", ""); // get rid of brackets and anything in them
                         Arrays.stream(input.split(","))
-                                .map(n -> CommuniqueRecipients.createNation(FilterType.EXCLUDE, n)) // method auto-formats
+                                .map(n -> CommuniqueRecipients.createNation(CommuniqueFilterType.EXCLUDE, n)) // method auto-formats
                                 .map(CommuniqueRecipient::toString)
                                 .forEach(this::appendLine);
                     }

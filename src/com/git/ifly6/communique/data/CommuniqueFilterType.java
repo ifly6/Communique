@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * the exact definitions of what occurs are kept here.
  * @author ifly6
  */
-public enum FilterType {
+public enum CommuniqueFilterType {
 
     REQUIRE_REGEX {
         @Override
@@ -130,7 +130,7 @@ public enum FilterType {
 
     /**
      * Applies the provided <code>CommuniqueRecipient</code> to the provided recipients list. Without a provided
-     * <code>enum</code> state, this defaults to {@link FilterType#NORMAL}.
+     * <code>enum</code> state, this defaults to {@link CommuniqueFilterType#NORMAL}.
      * @param recipients upon which the token is to be applied
      * @param provided   token
      * @return recipients after the token is applied

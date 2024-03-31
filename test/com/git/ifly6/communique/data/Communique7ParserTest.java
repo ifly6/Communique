@@ -20,8 +20,6 @@ package com.git.ifly6.communique.data;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,23 +30,23 @@ class Communique7ParserTest {
     void listRecipients() {
         List<String> empty = new ArrayList<>(
                 new Communique7Parser().apply(
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "imperium_anglorum"),
-                        new CommuniqueRecipient(FilterType.EXCLUDE, RecipientType.NATION, "imperium_anglorum")
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
+                        new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE, CommuniqueRecipientType.NATION, "imperium_anglorum")
                 ).listRecipients());
         assertEquals(empty, new ArrayList<>());
 
         List<String> results = new ArrayList<>(
                 new Communique7Parser().apply(
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "imperium_anglorum"),
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "transilia")
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "transilia")
                 ).listRecipients());
         assertEquals(results, List.of("imperium_anglorum", "transilia"));
 
         List<String> regexRemove = new ArrayList<>(
                 new Communique7Parser().apply(
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "imperium_anglorum"),
-                        new CommuniqueRecipient(FilterType.NORMAL, RecipientType.NATION, "transilia"),
-                        new CommuniqueRecipient(FilterType.EXCLUDE_REGEX, RecipientType.NATION, "imperium_[A-Z]+")
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
+                        new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "transilia"),
+                        new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE_REGEX, CommuniqueRecipientType.NATION, "imperium_[A-Z]+")
                 ).listRecipients());
         assertEquals(regexRemove, List.of("transilia"));
     }

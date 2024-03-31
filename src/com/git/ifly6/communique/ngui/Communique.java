@@ -20,7 +20,7 @@ package com.git.ifly6.communique.ngui;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
-import com.git.ifly6.communique.data.RecipientType;
+import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditor;
@@ -258,7 +258,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
         // Check if a recruit-flag has been used.
         boolean rfPresent = tokens.stream()
-                .filter(t -> t.getRecipientType() == RecipientType.FLAG)
+                .filter(t -> t.getRecipientType() == CommuniqueRecipientType.FLAG)
                 .anyMatch(t -> t.getName().equals("recruit"));
         if (rfPresent) {
             showRecruiter();

@@ -80,7 +80,6 @@ public class ApiUtils {
         for (Object element : array)
             if (element.equals(needle))
                 return true;
-
         return false;
     }
 

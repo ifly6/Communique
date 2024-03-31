@@ -34,19 +34,19 @@ import java.util.Objects;
 public class CommuniqueRecipient {
 
     public static final CommuniqueRecipient DELEGATES =
-            new CommuniqueRecipient(FilterType.NORMAL, RecipientType.TAG, "delegates");
+            new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.TAG, "delegates");
     public static final CommuniqueRecipient WA_MEMBERS =
-            new CommuniqueRecipient(FilterType.NORMAL, RecipientType.TAG, "wa");
+            new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.TAG, "wa");
 
-    private FilterType filterType;
-    private RecipientType recipientType;
+    private CommuniqueFilterType filterType;
+    private CommuniqueRecipientType recipientType;
     private String name;
     private String raw;
 
     /**
      * Creates a <code>CommuniqueRecipient</code> with certain characteristics.
      */
-    public CommuniqueRecipient(FilterType filterType, RecipientType recipientType, String name, String raw) {
+    public CommuniqueRecipient(CommuniqueFilterType filterType, CommuniqueRecipientType recipientType, String name, String raw) {
         this.filterType = filterType;
         this.recipientType = recipientType;
         this.name = ApiUtils.ref(name);    // convert to reference name
@@ -59,7 +59,7 @@ public class CommuniqueRecipient {
     /**
      * Creates {@link CommuniqueRecipient} with null <code>raw</code> string
      */
-    public CommuniqueRecipient(FilterType filterType, RecipientType recipientType, String name) {
+    public CommuniqueRecipient(CommuniqueFilterType filterType, CommuniqueRecipientType recipientType, String name) {
         this(filterType, recipientType, name, null);
     }
 
@@ -72,18 +72,18 @@ public class CommuniqueRecipient {
     }
 
     /**
-     * Returns the type of the filter or token, defined in {@link com.git.ifly6.communique.data.FilterType FilterType}.
+     * Returns the type of the filter or token, defined in {@link CommuniqueFilterType FilterType}.
      * @return the type of filter or token
      */
-    public FilterType getFilterType() {
+    public CommuniqueFilterType getFilterType() {
         return filterType;
     }
 
     /**
-     * Returns the type of the recipient, defined in {@link com.git.ifly6.communique.data.RecipientType RecipientType}.
+     * Returns the type of the recipient, defined in {@link CommuniqueRecipientType RecipientType}.
      * @return the type of recipient
      */
-    public RecipientType getRecipientType() {
+    public CommuniqueRecipientType getRecipientType() {
         return recipientType;
     }
 
@@ -105,7 +105,7 @@ public class CommuniqueRecipient {
     }
 
     /**
-     * Decomposes a tag to its constituent nations. All decompositions are done in {@link RecipientType}.
+     * Decomposes a tag to its constituent nations. All decompositions are done in {@link CommuniqueRecipientType}.
      * @return a list of <code>CommuniqueRecipient</code>s
      */
     public List<CommuniqueRecipient> decompose() throws JTelegramException {
@@ -128,16 +128,16 @@ public class CommuniqueRecipient {
         String start = String.valueOf(s); // strings are immutable this is safe
         s = s.trim();
 
-        FilterType fType = FilterType.NORMAL; // default
-        for (FilterType type : FilterType.values())
+        CommuniqueFilterType fType = CommuniqueFilterType.NORMAL; // default
+        for (CommuniqueFilterType type : CommuniqueFilterType.values())
             if (s.startsWith(type.toString())) {
                 fType = type;
                 s = s.substring(type.toString().length());
                 break;
             }
 
-        RecipientType rType = RecipientType.NATION; // default
-        for (RecipientType type : RecipientType.values())
+        CommuniqueRecipientType rType = CommuniqueRecipientType.NATION; // default
+        for (CommuniqueRecipientType type : CommuniqueRecipientType.values())
             if (s.startsWith(type.toString())) {
                 rType = type;
                 s = s.substring(type.toString().length());
