@@ -34,7 +34,7 @@ import static com.git.ifly6.CommuniqueApplication.APP_SUPPORT;
 
 /**
  * Caches information about nations. Expiration duration is {@link CommCache#DEFAULT_EXPIRATION_DURATION}.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class CommNationCache extends CommCache<NSNation> {
 

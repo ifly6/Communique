@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -32,8 +32,8 @@ import java.util.logging.Logger;
 import static com.git.ifly6.nsapi.ctelegram.io.permcache.CommPermanentCache.createKey;
 
 /**
- * Monitors voters in specified regions for votes for or against a resolution at vote.
- * @since version 3.0 (build 13)
+ * Monitors voters votes for or against a resolution at vote.
+ * @since version 13
  */
 public class CommVoteMonitor extends CommAssemblyMonitor implements CommMonitor {
 
@@ -49,7 +49,7 @@ public class CommVoteMonitor extends CommAssemblyMonitor implements CommMonitor 
         this.voting = voting;
 
         /* This code here comes from an earlier version of the monitor; it initally had a set-up phase where it
-         * determined whether or not it should include recipients already voting at the start (ie, if you start it up
+         * determined whether it should include recipients already voting at the start (ie, if you start it up
          * after voting has started, it won't include anyone who has already voted). For ease of instantiation, this
          * functionality was stripped. See commit 9b93b08c510f749f9b4e81c7bb150bc533f30a0b. */
 //        if (ignoreInitial) {
@@ -65,14 +65,13 @@ public class CommVoteMonitor extends CommAssemblyMonitor implements CommMonitor 
      */
     public static CommVoteMonitor getOrCreate(String chamber, String voting) {
         Pair<Chamber, Vote> values = CommAssemblyMonitor.parseStrings(chamber, voting);
-        return cache.getOrCreate(
-                createKey(chamber, voting),
+        return cache.getOrCreate(createKey(chamber, voting),
                 () -> new CommVoteMonitor(values.getValue0(), values.getValue1()));
     }
 
     /**
      * Gets current voters.
-     * @return list of voters
+     * @return {@link Set} of voters
      */
     @Override
     protected Set<String> getMonitoredRecipients() {

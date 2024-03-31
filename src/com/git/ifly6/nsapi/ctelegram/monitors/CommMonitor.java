@@ -26,7 +26,7 @@ import java.util.OptionalLong;
  * Monitors generate a stream of recipients provided by {@link #getRecipients()} until exhausted
  * {@link #recipientsExhausted()}. If implemented correctly, if a monitor is exhausted, calling {@link #getRecipients()}
  * should throw {@link ExhaustedException}.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public interface CommMonitor {
 

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 /**
  * Utilities associated with Marconi.
- * @since version 1.6 (build 6) (file initially created in build 1)
+ * @since version 6 (file created in version 1)
  */
 public class MarconiUtilities {
 
@@ -44,7 +44,7 @@ public class MarconiUtilities {
     /**
      * Creates two column string, each column is 30 characters wide.
      * @returns string with lines
-     * @since version 3.0 (build 13)
+     * @since version 13
      */
     protected static String twoColumn(List<String> items) {
         List<String> lines = new ArrayList<>();
@@ -59,7 +59,7 @@ public class MarconiUtilities {
 
     /**
      * Creates Marconi lock file.
-     * @since version 3.0 (build 13)
+     * @since version 13
      */
     static void createFileLock() {
         try {

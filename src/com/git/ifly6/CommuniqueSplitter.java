@@ -19,7 +19,7 @@ package com.git.ifly6;
 
 /**
  * Splits strings and produces error if count is incorrect.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class CommuniqueSplitter {
 

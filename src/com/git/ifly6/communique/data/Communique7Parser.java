@@ -44,9 +44,7 @@ public class Communique7Parser {
      */
     public static final int VERSION = 13;
 
-    /**
-     * List of recipients changed by various actions and applications called by the parser.
-     */
+    /** List of recipients changed by various actions and applications called by the parser. */
     private Set<CommuniqueRecipient> recipients = new LinkedHashSet<>();
 
     /**

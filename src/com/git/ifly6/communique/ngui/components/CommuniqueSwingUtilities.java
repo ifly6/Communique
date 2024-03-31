@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Graphical utilities for Communique 3.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class CommuniqueSwingUtilities {
 
@@ -49,7 +49,7 @@ public class CommuniqueSwingUtilities {
      * @param <T> type of object
      * @return selected item
      */
-    public static <T> T getComboBoxSelection(JComboBox<T> box) {
+    public static <T> T getSelected(JComboBox<T> box) {
         int selection = Objects.requireNonNull(box).getSelectedIndex();
         if (selection != -1 && selection < box.getModel().getSize()) return box.getItemAt(selection);
         throw new IllegalArgumentException(String.format("Selection value %d is is invalid", selection));

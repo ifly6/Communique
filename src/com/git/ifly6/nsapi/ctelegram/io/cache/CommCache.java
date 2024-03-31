@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  * Creates a high-level caching framework for objects which can be timestamped. Also implicitly requires, due to
  * {@link #createNewObject(String)} that the key (a string) be mappable 1:1 to the object.
  * @param <T> is time-stamped object, ie implements {@link NSTimeStamped}.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public abstract class CommCache<T extends NSTimeStamped> {
 

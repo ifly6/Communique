@@ -25,6 +25,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /* There is only one World, so this is going to be static. */
+
+/**
+ * Methods to query the NS API about occurrences in the world generally.
+ * @since version 10
+ */
 public class NSWorld {
 
     private NSWorld() {
@@ -106,7 +111,7 @@ public class NSWorld {
 
     /**
      * Thrown if the specified region tag does not exist.
-     * @since version 3.0 (build 13)
+     * @since version 13
      */
     public static class NSNoSuchTagException extends NSException {
         public NSNoSuchTagException(String message, Throwable cause) {

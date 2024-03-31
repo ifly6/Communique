@@ -36,7 +36,7 @@ import static com.git.ifly6.nsapi.ctelegram.io.cache.CommProposalCache.searchPro
  * Monitors for approval raids; returns list of recipients who are no longer approving a proposal, whose delegate status
  * changed (ie were bumped), who are currently delegates, whose approval was removed from an existing proposal. This
  * applies against <b>all</b> proposals, not just one.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class CommApprovalRaidMonitor extends CommUpdatingMonitor {
 

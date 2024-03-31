@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -28,18 +28,18 @@ import java.util.logging.Logger;
 /**
  * Decorates an {@link CommUpdatingMonitor} and forces anything calling it to wait until that monitor fully initialises,
  * see {@link CommUpdatingMonitor#getLatch()}, before allowing any {@link CommMonitor} calls.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
-public class CommWaitingMonitor implements CommMonitor {
+public class CommDelayedMonitor implements CommMonitor {
 
-    private static final Logger LOGGER = Logger.getLogger(CommWaitingMonitor.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CommDelayedMonitor.class.getName());
     private CommUpdatingMonitor monitor;
 
     /**
      * Constructs decorator for the provided monitor.
      * @param monitor to wrap
      */
-    public CommWaitingMonitor(CommUpdatingMonitor monitor) {
+    public CommDelayedMonitor(CommUpdatingMonitor monitor) {
         this.monitor = monitor;
     }
 

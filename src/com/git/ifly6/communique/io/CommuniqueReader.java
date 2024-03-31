@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  * version of the pre-JSON configuration files. The handling for this logic is done primarily in the
  * {@link CommuniqueReader#read()} file.
  * @see CommuniqueFileReader
- * @since version 2.0 (build 7)
+ * @since version 7
  */
 @SuppressWarnings("deprecation")
 class CommuniqueReader {

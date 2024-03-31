@@ -29,6 +29,7 @@ import com.git.ifly6.communique.ngui.components.CommuniqueEditorManager;
 import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
 import com.git.ifly6.communique.ngui.components.CommuniqueLogHandler;
 import com.git.ifly6.communique.ngui.components.CommuniqueLogViewer;
+import com.git.ifly6.communique.ngui.components.CommuniqueSwingUtilities;
 import com.git.ifly6.communique.ngui.components.CommuniqueTimerBar;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
@@ -159,7 +160,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         // top
         JComboBox<CommuniqueEditor> editorSelector = new JComboBox<>();
         editorSelector.addActionListener(ae -> {
-            CommuniqueEditor newFocusedEditor = editorSelector.getItemAt(editorSelector.getSelectedIndex());
+            CommuniqueEditor newFocusedEditor = CommuniqueSwingUtilities.getSelected(editorSelector);
             if (newFocusedEditor == null)
                 focusedEditor = null;
 

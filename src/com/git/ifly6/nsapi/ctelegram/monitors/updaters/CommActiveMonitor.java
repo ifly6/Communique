@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -37,7 +37,7 @@ import java.util.Set;
  */
 public class CommActiveMonitor extends CommUpdatingMonitor {
 
-    private static final long MINUTES = 10;
+    private static final long MINUTES = 10; // must be separate to allow for @value
     private static final Duration ACTIVE_MIN = Duration.ofMinutes(MINUTES);
     private static CommActiveMonitor instance;
     private static CommMonitor exhaustiveInstance;

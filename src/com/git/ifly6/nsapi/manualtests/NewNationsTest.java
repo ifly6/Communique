@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -18,12 +18,12 @@
 package com.git.ifly6.nsapi.manualtests;
 
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommWaitingMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommDelayedMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommRecruitMonitor;
 
 public class NewNationsTest {
     public static void main(String[] args) throws InterruptedException {
-        CommMonitor m = new CommWaitingMonitor(CommRecruitMonitor.getInstance().setBatchLimit(3));
+        CommMonitor m = new CommDelayedMonitor(CommRecruitMonitor.getInstance().setBatchLimit(3));
 
         // print current
         System.out.println(m.getRecipients().toString());

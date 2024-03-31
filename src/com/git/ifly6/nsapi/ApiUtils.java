@@ -30,7 +30,7 @@ public class ApiUtils {
 
     /**
      * Stable randomisation seed.
-     * @since version 3.0 (build 13)
+     * @since version 13
      */
     public static final Random RANDOM = new Random(81141418);
 
@@ -112,7 +112,7 @@ public class ApiUtils {
      * Shuffles array and returns it. Always shuffles with the same {@link Random} source: {@link #RANDOM}.
      * @param list to shuffle
      * @returns shuffled list; can be ignored because {@link Collections#shuffle(List, Random)} acts in-place
-     * @since version 3.0 (build 13)
+     * @since version 13
      */
     public static <T> List<T> shuffle(List<T> list) {
         Collections.shuffle(list, RANDOM);

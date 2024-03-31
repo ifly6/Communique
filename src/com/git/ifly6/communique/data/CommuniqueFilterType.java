@@ -17,9 +17,11 @@
 
 package com.git.ifly6.communique.data;
 
+
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -27,19 +29,24 @@ import java.util.stream.Collectors;
  * Defines a number of filter types which can be used in {@link Communique7Parser} to effect the recipients list. All of
  * the exact definitions of what occurs are kept here.
  * @author ifly6
- * @since version 2.0 (build 7)
+ * @since version 7
  */
 public enum CommuniqueFilterType {
 
     /**
      * Filters out nations <b>not</b> matching the given regex.
-     * @since version 10
+     * @since version 10 (2020-01-26)
      */
-    REQUIRE_REGEX("+regex", true) {
+    REQUIRE_REGEX("+regex") {
         @Override
         public Set<CommuniqueRecipient> apply(Set<CommuniqueRecipient> recipients,
                                               CommuniqueRecipient provided) {
             String regex = provided.getName();
+            if (!regex.toLowerCase().equals(regex))
+                LOGGER.info(String.format(
+                        "Regex %s has mixed case; but matching is always on lower case \"reference\" forms",
+                        regex));
+
             Pattern p = Pattern.compile(regex);
             return recipients.stream()
                     .filter(r -> p.matcher(r.getName()).matches()) // if matches, keep
@@ -49,9 +56,9 @@ public enum CommuniqueFilterType {
 
     /**
      * Filters out nations matching the given regex.
-     * @since version 10
+     * @since version 10 (2020-01-26)
      */
-    EXCLUDE_REGEX("-regex", true) {
+    EXCLUDE_REGEX("-regex") {
         @Override
         public Set<CommuniqueRecipient> apply(Set<CommuniqueRecipient> recipients,
                                               CommuniqueRecipient provided) {
@@ -69,7 +76,7 @@ public enum CommuniqueFilterType {
      * the list and the token provided.
      * @since version 7
      */
-    INCLUDE("+", false) {
+    INCLUDE("+") {
         @Override
         public Set<CommuniqueRecipient> apply(Set<CommuniqueRecipient> recipients,
                                               CommuniqueRecipient provided) {
@@ -86,7 +93,7 @@ public enum CommuniqueFilterType {
      * NationStates "{@code -}" prefix (e.g. {@code -region:Europe}) in telegram queries.
      * @since version 7
      */
-    EXCLUDE("-", false) {
+    EXCLUDE("-") {
         @Override
         public Set<CommuniqueRecipient> apply(Set<CommuniqueRecipient> recipients,
                                               CommuniqueRecipient provided) {
@@ -101,9 +108,9 @@ public enum CommuniqueFilterType {
      * Adds the provided {@link CommuniqueRecipient} to the recipients list. This should be the default action for all
      * such tokens.
      * <p>This {@code enum} value must be at the bottom or {@link CommuniqueRecipient#parseRecipient} will break.</p>
-     * @since version 2.0 (build 7)
+     * @since version 7
      */
-    NORMAL("", false) {
+    NORMAL("") {
         @Override
         public Set<CommuniqueRecipient> apply(Set<CommuniqueRecipient> recipients,
                                               CommuniqueRecipient provided) {
@@ -112,18 +119,16 @@ public enum CommuniqueFilterType {
         }
     };
 
-    private final boolean caseSensitive;
+    private static final Logger LOGGER = Logger.getLogger(CommuniqueFilterType.class.getName());
     private final String stringRep;
 
     /**
      * Constructs with given final values
-     * @param stringRep     to use for parsing
-     * @param caseSensitive whether tag information is case sensitive
-     * @since version 3.0 (build 13)
+     * @param stringRep to use for parsing
+     * @since version 13
      */
-    CommuniqueFilterType(String stringRep, boolean caseSensitive) {
+    CommuniqueFilterType(String stringRep) {
         this.stringRep = stringRep;
-        this.caseSensitive = caseSensitive;
     }
 
     /**
@@ -150,21 +155,11 @@ public enum CommuniqueFilterType {
     /**
      * Returns string as required for {@link CommuniqueRecipient#parseRecipient(String) parser}.
      * @return string representation
-     * @since version 2.0 (build 7)
+     * @since version 7
      */
     @Override
     public String toString() {
         return this.stringRep;
     }
 
-    /**
-     * Returns whether tag has case sensitive input. Eg {@code +regex:[A-Z].*$} is case-sensitive, while
-     * {@code +region:europe} is not. Used in
-     * {@link CommuniqueRecipient#CommuniqueRecipient(CommuniqueFilterType, CommuniqueRecipientType, String)}.
-     * @return whether tag is case sensitive
-     * @since version 3.0 (build 13)
-     */
-    public boolean isCaseSensitive() {
-        return caseSensitive;
-    }
 }

@@ -29,11 +29,13 @@ import java.util.function.Function;
 /**
  * This implements post-processing actions on the recipient list as a whole for Communique and Marconi clients. It has
  * various functions, like randomisation, reversing the order of recipients, and prioritisation of delegates.
+ * @since version 8 (2018-01-07)
  */
 public enum CommuniqueProcessingAction implements Function<List<String>, List<String>> {
 
     /**
      * Randomises the order of recipients
+     * @since version 8 (2018-01-07)
      */
     RANDOMISE {
         @Override
@@ -50,6 +52,7 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
 
     /**
      * Reverses the initial order of recipients
+     * @since version 8 (2018-01-07)
      */
     REVERSE {
         @Override
@@ -72,6 +75,7 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
     /**
      * Moves all delegates in the list of recipients to the front, randomises its order, then places all other nations
      * in a random order after those delegates.
+     * @since version 8 (2018-01-07)
      */
     DELEGATE_PRIORITISE {
         @Override

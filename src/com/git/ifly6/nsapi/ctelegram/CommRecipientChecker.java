@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -23,7 +23,7 @@ import com.git.ifly6.nsapi.telegram.JTelegramType;
 
 /**
  * Checks whether recipient accepts telegrams based on telegram type.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class CommRecipientChecker {
 

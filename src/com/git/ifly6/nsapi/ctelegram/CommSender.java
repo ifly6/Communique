@@ -53,7 +53,7 @@ import static com.git.ifly6.nsapi.ctelegram.io.CommFormatter.entry;
  * Sends telegrams on the NationStates API. Instantiation is not restricted; regardless, there should never be more than
  * one. Sender sends indefinitely or until linked {@link CommMonitor}
  * {@link CommMonitor#recipientsExhausted() exhuasts}.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class CommSender {
 

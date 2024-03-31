@@ -27,7 +27,7 @@ import com.git.ifly6.nsapi.ctelegram.io.cache.CommMembersCache;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommRegionCache;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommRegionTagCache;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommWaitingMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommDelayedMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommActiveMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalRaidMonitor;
@@ -53,7 +53,7 @@ public enum CommuniqueRecipientType {
 
     /**
      * Declares the recipient is a nation and requires no further processing in decomposition.
-     * @since version 2.0 (build 7)
+     * @since version 7 (2016-12-16)
      */
     NATION {
         @Override
@@ -66,7 +66,7 @@ public enum CommuniqueRecipientType {
     /**
      * Declares that the recipient is a REGION TAG and that it needs decomposing into a list of regions which then is
      * decomposed into the nations therein.
-     * @since version 2.4 (build 11) (2020-04-04)
+     * @since version 11 (2020-04-04)
      */
     REGION_TAG {
         @Override
@@ -84,7 +84,7 @@ public enum CommuniqueRecipientType {
     /**
      * Declares the recipient is a region, allowing for decomposition into a list of {@link CommuniqueRecipient} nations
      * in the region.
-     * @since version 2.0 (build 7)
+     * @since version 7 (2016-12-16)
      */
     REGION {
         @Override
@@ -110,7 +110,7 @@ public enum CommuniqueRecipientType {
      *             raw call</a>)
      *     </li>
      * </ul>
-     * @since version 2.0 (build 7)
+     * @since version 7 (2016-12-16)
      */
     TAG {
         @Override
@@ -134,6 +134,7 @@ public enum CommuniqueRecipientType {
 
     /**
      * Declares that the recipient is an internal Communiqué flag.
+     * @since version 7 (2016-12-16)
      */
     FLAG {
         @Override
@@ -151,7 +152,7 @@ public enum CommuniqueRecipientType {
      * Provides from {@link CommRecruitMonitor} new nations up to a certain limit. The number of nations returned should
      * be specified as in {@code _new:5}. This monitor never returns the same nation twice; it does not exhaust.
      * @see CommRecruitMonitor#setUpdateInterval(Duration)
-     * @since version 3.0 (build 13)
+     * @since version 13
      */
     _NEW {
         @Override
@@ -159,7 +160,7 @@ public enum CommuniqueRecipientType {
             String tag = cr.getName();
             try {
                 int limit = Integer.parseInt(tag);
-                CommMonitor nnm = new CommWaitingMonitor(CommRecruitMonitor.getInstance().setBatchLimit(limit));
+                CommMonitor nnm = new CommDelayedMonitor(CommRecruitMonitor.getInstance().setBatchLimit(limit));
                 return newRecipients(nnm.getRecipients(), cr.getFilterType());
 
             } catch (NumberFormatException e) {
@@ -174,7 +175,7 @@ public enum CommuniqueRecipientType {
      *     <li>{@code _happenings:active} (see {@link CommActiveMonitor}) returning nations active in the last
      *     10 minutes.</li>
      * </ul>
-     * @since version 3.0 (build 13)
+     * @since version 13 (2020-12-24 in "Communique 3"), replacing {@code flag:active} in version 9
      */
     _HAPPENINGS {
         @Override
@@ -193,7 +194,7 @@ public enum CommuniqueRecipientType {
      * Nations moving into or out of a list of regions. Eg, {@code _movement:into;europe,the_north_pacific} or
      * {@code _movement:out_of;europe}.
      * @see CommMovementMonitor.Direction
-     * @since version 3.0 (build 13)
+     * @since version 13 (2020-12-24 in "Communique 3")
      */
     _MOVEMENT {
         private final CommuniqueSplitter splitter = new CommuniqueSplitter(this.toString(), 2);
@@ -203,7 +204,7 @@ public enum CommuniqueRecipientType {
             String[] tags = splitter.split(cr.getName());
             String direction = tags[0];
             String region = tags[1];
-            CommMonitor monitor = new CommWaitingMonitor(CommMovementMonitor.getOrCreate(direction, region));
+            CommMonitor monitor = new CommDelayedMonitor(CommMovementMonitor.getOrCreate(direction, region));
             return newRecipients(monitor.getRecipients(), cr.getFilterType());
         }
     },
@@ -212,7 +213,7 @@ public enum CommuniqueRecipientType {
      * Delegates approving a proposal. Eg, {@code _approval:__raids__} for all approval raids,
      * {@code _approval:given_to; PROPOSAL_ID}, or {@code _approval:removed_from; PROPOSAL_ID}.
      * @see CommApprovalMonitor.Action
-     * @since version 3.0 (build 13)
+     * @since version 13 (2020-12-24 in "Communique 3")
      */
     _APPROVAL {
         private final CommuniqueSplitter splitter = new CommuniqueSplitter(this.toString(), 2);
@@ -221,21 +222,21 @@ public enum CommuniqueRecipientType {
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             if (cr.getName().equalsIgnoreCase("__raids__"))
                 return newRecipients(
-                        new CommWaitingMonitor(
+                        new CommDelayedMonitor(
                                 CommApprovalRaidMonitor.getInstance()).getRecipients(),
                         cr.getFilterType());
 
             String[] tags = splitter.split(cr.getName());
             String givenOrRemoved = tags[0];
             String proposal = tags[1];
-            CommMonitor monitor = new CommWaitingMonitor(CommApprovalMonitor.getOrCreate(givenOrRemoved, proposal));
+            CommMonitor monitor = new CommDelayedMonitor(CommApprovalMonitor.getOrCreate(givenOrRemoved, proposal));
             return newRecipients(monitor.getRecipients(), cr.getFilterType());
         }
     },
 
     /**
      * Persons voting on a proposal. Eg {@code _voting:ga; for}.
-     * @since version 3.0 (build 13)
+     * @since version 13 (2020-12-24 in "Communique 3")
      */
     _VOTING {
         private final CommuniqueSplitter splitter = new CommuniqueSplitter(this.toString(), 2);
@@ -245,13 +246,14 @@ public enum CommuniqueRecipientType {
             String[] split = splitter.split(cr.getName());
             String chamber = split[0];
             String voting = split[1];
-            CommMonitor monitor = new CommWaitingMonitor(CommVoteMonitor.getOrCreate(chamber, voting));
+            CommMonitor monitor = new CommDelayedMonitor(CommVoteMonitor.getOrCreate(chamber, voting));
             return newRecipients(monitor.getRecipients(), cr.getFilterType());
         }
     },
 
     /**
      * Declares that the recipient has no recipient type. This element is parsed last.
+     * @since version 7
      */
     NONE {
         @Override
@@ -269,6 +271,7 @@ public enum CommuniqueRecipientType {
 
     /**
      * Recipient type prefixes should be compatible with the NationStates telegram system.
+     * @since version 7
      */
     @Override
     public String toString() {
@@ -279,6 +282,7 @@ public enum CommuniqueRecipientType {
      * Decomposes tag into {@code List<{@link CommuniqueRecipient}>}.
      * @param cr tag to be decomposed
      * @return list of recipients
+     * @since version 7
      */
     public abstract List<CommuniqueRecipient> decompose(CommuniqueRecipient cr);
 
@@ -287,6 +291,7 @@ public enum CommuniqueRecipientType {
      * @param list       of nation reference names
      * @param filterType from which to extract filter type data
      * @return list of recipients
+     * @since version 7
      */
     private static List<CommuniqueRecipient> newRecipients(List<String> list, CommuniqueFilterType filterType) {
         // we use this a lot, probably better to use a loop for speed
@@ -298,6 +303,7 @@ public enum CommuniqueRecipientType {
 
     /**
      * Creates illegal argument exception with preformatted string.
+     * @since version 13 (2020-12-24 in "Communique 3")
      */
     private static IllegalArgumentException newException(CommuniqueRecipient s) {
         return new IllegalArgumentException(String.format("Invalid tag string \"%s\"", s));

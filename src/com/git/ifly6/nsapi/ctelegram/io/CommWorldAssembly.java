@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -37,12 +37,11 @@ import java.util.stream.IntStream;
 
 /**
  * Gets information about the World Assembly.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class CommWorldAssembly {
 
-    private CommWorldAssembly() {
-    }
+    private CommWorldAssembly() { }
 
     /** Formats URL to get information on the resolution. */
     private static String formatResolutionURL(Chamber c) {

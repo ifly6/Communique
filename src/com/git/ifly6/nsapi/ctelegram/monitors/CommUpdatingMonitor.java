@@ -19,7 +19,7 @@ package com.git.ifly6.nsapi.ctelegram.monitors;
 
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.NSConnection;
-import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommWaitingMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommDelayedMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommRecruitMonitor;
 
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 /**
  * Framework for creating monitors which update. Each monitor caches data and provides it per {@link CommMonitor};
  * update monitors have defined update intervals where their cached data change.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public abstract class CommUpdatingMonitor implements CommMonitor {
 
@@ -59,7 +59,7 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
 
     /**
      * Latch. If {@link CountDownLatch} is 0, monitor has fully initialised.
-     * @see CommWaitingMonitor
+     * @see CommDelayedMonitor
      */
     private CountDownLatch latch = new CountDownLatch(1);
 
@@ -76,7 +76,8 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
 
     /**
      * Constructs updating monitor with provided update interval. Monitor automatically starts.
-     * @param updateInterval replacing {@link #DEFAULT_UPDATE_INTERVAL}
+     * @param updateInterval replacing {@link #DEFAULT_UPDATE_INTERVAL}; must be larger than {@code 2 * {
+     * @link NSConnection#WAIT_TIME}} ms.
      */
     public CommUpdatingMonitor(final Duration updateInterval) {
         final long minimumWaitMillis = NSConnection.WAIT_TIME * 2;
@@ -245,12 +246,4 @@ public abstract class CommUpdatingMonitor implements CommMonitor {
         return latch;
     }
 
-    /**
-     * Thrown on exception in update thread.
-     */
-    private static class CommUpdateException extends RuntimeException {
-        public CommUpdateException(String message, Throwable e) {
-            super(message, e);
-        }
-    }
 }

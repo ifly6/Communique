@@ -161,7 +161,8 @@ public class CommuniqueEditor extends AbstractCommunique {
         fieldType.setToolTipText("Telegram types are declared site-side in the telegram sent to \"tag:api\"");
         fieldType.addActionListener(saveListener1);
         fieldType.addActionListener(ae -> { // force default delays when not selecting custom
-            if (!fieldType.getItemAt(fieldType.getSelectedIndex()).equals(JTelegramType.CUSTOM)) fieldDelay.setText("");
+            JTelegramType telegramType = CommuniqueSwingUtilities.getSelected(fieldType);
+            if (!telegramType.equals(JTelegramType.CUSTOM)) fieldDelay.setText("");
         });
 
         fieldDelay = CommuniqueFactory.createField("", "Leave as blank to accept defaults. Must be in milliseconds.",
@@ -324,12 +325,16 @@ public class CommuniqueEditor extends AbstractCommunique {
 
 
     public CommuniqueConfig getConfig() {
-        config = new CommuniqueConfig(fieldType.getItemAt(fieldType.getSelectedIndex()),
-                fieldAction.getItemAt(fieldAction.getSelectedIndex()),
+        config = new CommuniqueConfig(
+                CommuniqueSwingUtilities.getSelected(fieldType),
+                CommuniqueSwingUtilities.getSelected(fieldAction),
                 new JTelegramKeys(fieldClientKey.getText(), fieldSecretKey.getText(), fieldTelegramID.getText()),
                 fieldDelay.getText());
-        config.setcRecipients(area.getLines().stream().filter(ApiUtils::isNotEmpty).filter(s -> !s.startsWith("#"))
-                .map(CommuniqueRecipient::parseRecipient).collect(Collectors.toList()));
+        config.setcRecipients(area.getLines().stream()
+                .filter(ApiUtils::isNotEmpty)
+                .filter(s -> !s.startsWith("#"))
+                .map(CommuniqueRecipient::parseRecipient)
+                .collect(Collectors.toList()));
         return config;
     }
 

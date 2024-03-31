@@ -29,6 +29,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Scans for active nations with the Happenings API.
+ * @since version 9
+ */
 @Deprecated
 public class HappeningsParser {
 

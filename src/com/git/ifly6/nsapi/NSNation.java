@@ -266,7 +266,7 @@ public class NSNation implements NSTimeStamped {
 
     /**
      * Thrown if no such nation exists.
-     * @since version 3.0 (build 13)
+     * @since version 13
      */
     public static class NSNoSuchNationException extends NSException {
         public NSNoSuchNationException(String message, Throwable throwable) {

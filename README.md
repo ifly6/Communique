@@ -75,16 +75,15 @@ This program reports its `UserAgent` to the NationStates API as follows:
 
 ## Changelog ##
 
-The following are the various changelogs from various version of Communique:
+The following are the various changelogs from various version of Commnuniqué:
 
 1. Version 1 comes in three flavours, Communiqué (GUI), Morse (old CLI), and Marconi (new CLI).
     - Communiqué has support for the keys, variable flags, and the saving and loading of the program configuration.
     - Morse does not do any of this. It only has support for a simple list of recipients without support for loading or
       saving of anything more than the client key.
     - Marconi is a headless client. It will only accept valid files from Communiqué and then read those files and use
-      all the data in them. It does not write these files (other than updating their sent lists).
-    - Note that Morse will likely be phased out in favour of just Communiqué and Marconi. *Edit: Morse no longer
-      exists.*
+      all the data in them. It does not write these files (other than updating their sent-lists).
+    - Note that Morse will likely be phased out in favour of just Communiqué and Marconi. *Morse has been removed.*
 
 2. Version 2 is a change due to the introduction of a new operator which is written to file. The `->` operator,
    signifying 'in', cannot be parsed by version 1 parsers, and hence, necessitated a change in the version number.
@@ -128,7 +127,7 @@ The following are the various changelogs from various version of Communique:
       the
       program checks for whether the recipient is valid, saving around 1.6 seconds from every recruitment call. When not
       on
-      recruitment, it also checks whether that nation has opt-ed into campaign telegrams, and if not, skips to the next
+      recruitment, it also checks whether that nation has opted into campaign telegrams, and if not, skips to the next
       recipient.
     - Version 7.1 overhauls the UI present since version 5. This eliminates the second text area showing the parsed
       recipients and creates a dialog which shows them. It also puts out a bug fix to the web scraper introduced in
@@ -147,8 +146,8 @@ The following are the various changelogs from various version of Communique:
 10. Version 10 allows names to be filtered using `+regex:PATTERN` and `-regex:PATTERN` flags that require and omit regex
     matches, respectively. Obviously, these flags break compatibility with previous versions. If there are further kinds
     of filters desired, make a feature request on GitHub.
-    - As this operates on the Java `Pattern` library, anything that fails in that library—which I don't expect will be
-      often—will also fail here. There may be issues when using `:` in any regex because of the way that Communique
+    - As this operates on the Java `Pattern` library, anything that fails in that library – which I don't expect will be
+      often – will also fail here. There may be issues when using `:` in any regex because of the way that Communiqué
       parses names. But `:` doesn't mean anything special, so that should not be much of a problem.
     - Hint: `-regex:.*[0-9]$` will omit anything that ends with a digit
     - Hint: `+regex:[a-zA-Z]+` will require only characters
@@ -156,26 +155,35 @@ The following are the various changelogs from various version of Communique:
 11. Version 11 introduces regional tags searches. These will usually take a long time because there are lots of regions
     and each regions must be polled individually. There is also now greater coverage of the internal parser in the logs:
     if you use the regional tags and want updates on parsing, open in a command line.
-    - Hint: `region_tag:*,-tiny,-small,-minuscule` will probably remove most of the small regions from your query.
+    - Hint: `-region_tag:tiny` will probably remove all "tiny" regions (this may take a while!).
     - Important note: The program no longer automatically separates items within a single line with commas. This is to
       facilitate the use of the NS API tag queries. Thus, `region:Europe, +tag:wa` will now throw an error unless on two
       different lines. Previous configuration files already split those lines automatically, so old configuration files
       should work without changes.
-    - Back-end note: NS JavaTelegram has now been subsumed into Communique.
+    - Back-end note: NS JavaTelegram has now been subsumed into Commnuniqué.
 
 12. Version 12 allows typing of telegrams to specify default delay times and also introduces overriding the default
     times with wait time input. Both changes affect configuration file format.
 
 13. Version 13 reflects substantial changes to the Communiqué GUI and parsing structure.
-    - A new editor allows multiple files to be opened along with clearly-visible sending log in tabular format. Due to reliance on `java.awt.Taskbar` this requires Java 11+.
-      Also adopted `FlatLAF` the Swing theme; Windows' system LAF is awful.
-    - Caching for data is now ported from the abortive Communique 3 branch.
-    - A plethora of new data flags is now available from the abortive Communique 3 branch.
+    - A new editor allows multiple files to be opened along with clearly-visible sending log in tabular format. Due to
+      reliance on `java.awt.Taskbar` this requires Java 11+. Also adopted `FlatLAF` the Swing theme; Windows' system LAF
+      is awful.
+    - Caching for data is now ported from the abortive Communiqué 3 branch.
+    - A plethora of new data flags is now available from the abortive Communiqué 3 branch.
+        - `_new:5` gives the five newest nations from the API's new nations shard (I would use `_new:1`).
+        - `_happenings:active` returns nations noted as active in the happenings API; on repeat, it does not provide
+          nations that have not appeared in the last 10 minutes.
+        - `_movement:[out_of|into]; REGION` creates an updating list of nations that have left the region since start;
+          eg `_movement:out_of; europe`.
+        - `_approval:[given_to|removed_from]; PROPOSAL_ID` initialises (for `given_to`) and updates a list of nations
+          that have given (or removed) approvals from the proposal identified. `_approval:__raid__` telegrams delegates
+          that have been affected by a quorum raid (no filtering by proposal).
+        - `_voting:[ga|sc]; [for|against]` initialises and then updates a list of nations that are voting for or against
+          a proposal. (Consider `_voting:ga;for // +region:REGION` to telegram people voting for a proposal in a certain
+          region.)
 
 ## Road ahead
 
-In a future version, I intend to phase out the concept of a separate recruiter and simply permit someoneone to specify
-that some action be taken repeatedly. Some syntax like `flag:repeat; limit:1; tag:new`.
-
-Another possibility is adding exit or entrance listeners. Perhaps something like `flag:exit,europe`. Ideas are as of yet
-vague.
+In a future version, I intend to phase out the concept of a separate recruiter and simply permit someone to specify
+that some action be taken repeatedly. Some syntax like `flag:repeat; limit:1; tag:new`?

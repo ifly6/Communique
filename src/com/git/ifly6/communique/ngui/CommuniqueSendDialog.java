@@ -18,6 +18,7 @@ package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.CommuniqueUtilities;
 import com.git.ifly6.communique.ngui.components.CommuniqueKeyListener;
+import com.git.ifly6.communique.ngui.components.CommuniqueSwingUtilities;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -34,7 +35,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.time.Duration;
 import java.util.List;
@@ -58,19 +58,10 @@ public class CommuniqueSendDialog extends JDialog {
 
     public CommuniqueSendDialog(JFrame parent, List<String> parsedRecipients, Duration delay) {
         super(parent, true);
-
-        Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
-        double sWidth = screenDimensions.getWidth();
-        double sHeight = screenDimensions.getHeight();
-        int windowWidth = 500;
-        int windowHeight = 500;
-        setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth,
-                windowHeight);
-        setMinimumSize(new Dimension(windowWidth, windowHeight));
-//        Communique3Utils.setupDimensions(this,
-//                new Dimension(500, 500),
-//                new Dimension(500, 500),
-//                true);
+        CommuniqueSwingUtilities.setupDimensions(this,
+                new Dimension(500, 500),
+                new Dimension(500, 500),
+                true);
 
         setTitle("Confirm Send");
         getContentPane().setLayout(new BorderLayout());

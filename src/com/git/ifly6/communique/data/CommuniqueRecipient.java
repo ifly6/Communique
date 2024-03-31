@@ -31,7 +31,7 @@ import java.util.Objects;
  * recipient type can be used to specify multiple recipients, like in a region or in the set of World Assembly
  * delegates. All <code>CommuniqueRecipient</code>s have names which are reference-name safe.
  * @author ifly6
- * @since version 2.0 (build 7)
+ * @since version 7
  */
 public class CommuniqueRecipient {
 
@@ -175,9 +175,7 @@ public class CommuniqueRecipient {
         return Objects.hash(filterType, recipientType, name);
     }
 
-    /**
-     * Pre-Communique build 7 recruiter flag.
-     */
+    /** Recruiter flag prior to version 7 */
     private static final String OLD_RECRUIT_FLAG = "flag:recruit";
 
     /**

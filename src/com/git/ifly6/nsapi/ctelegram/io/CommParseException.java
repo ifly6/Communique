@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -24,7 +24,7 @@ import java.util.Arrays;
 /**
  * Thrown if parsing parameter to whatever specialised object from text fails. All public non-abstract constructors for
  * {@link CommMonitor} implementors should {@link String}-only parameters.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class CommParseException extends RuntimeException {
     public CommParseException(String message) {

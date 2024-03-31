@@ -23,7 +23,7 @@ import com.git.ifly6.nsapi.telegram.JTelegramResponseCode;
 
 /**
  * Thrown for explicit mismatches or errors from NationStates telegrams API.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class NSTGSettingsException extends NSIOException {
     public NSTGSettingsException(String message) {

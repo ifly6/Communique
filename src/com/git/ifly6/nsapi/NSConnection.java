@@ -47,8 +47,8 @@ public class NSConnection {
 
     private static final RateLimiter limiter = RateLimiter.create(PERMITS_PER_SECOND);
 
-    /** API delay in milliseconds. */
-    public final static long WAIT_TIME = Math.round(Math.pow(PERMITS_PER_SECOND, -1));
+    /** API delay in milliseconds. Should be equal to 750 milliseconds. */
+    public final static long WAIT_TIME = 1000 * Math.round(Math.pow(PERMITS_PER_SECOND, -1));
 
     /** NationStates API call prefix, {@code https://www.nationstates.net/cgi-bin/api.cgi?}. */
     public static final String API_PREFIX = "https://www.nationstates.net/cgi-bin/api.cgi?";

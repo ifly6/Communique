@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Caches NationStates delegates for later access. <b>Only invoke with {@link #MEMBERS_KEY}!</b> Cache expiration time
  * for this cache is thirty minutes; prefer {@link #getWAMembers()}.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public class CommMembersCache extends CommCache<CommMembersCache.Members> {
 

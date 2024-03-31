@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  * 5's configuration files, and therefore, because it is still used to read those configuration files when necessary,
  * should not be changed.</p>
  * @see com.git.ifly6.communique.io.CommuniqueLoader
- * @since version 1.0 (build 1)
+ * @since version 1
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated
@@ -54,14 +54,14 @@ public class CommuniqueFileReader {
      * Reads the file to {@code List<String>}. Then parses information and makes accessible by get methods.
      * @param file location of  configuration file
      * @throws FileNotFoundException      if thrown by {@link FileReader}
-     * @throws CommuniqueVersionException if the build is incorrect
+     * @throws CommuniqueVersionException if the version is incorrect
      */
     public CommuniqueFileReader(File file) throws FileNotFoundException, CommuniqueVersionException {
         // load the file into memory
         BufferedReader br = new BufferedReader(new FileReader(file));
         fileContents = br.lines().collect(Collectors.toList());
         if (isCompatible()) keysAndList = parseConfig();
-        else throw new CommuniqueVersionException("Communiqué file build mismatch");
+        else throw new CommuniqueVersionException("Communiqué file version mismatch");
     }
 
 
@@ -141,7 +141,7 @@ public class CommuniqueFileReader {
     }
 
     /**
-     * Queries the file for build number to determine whether it is compatible with this parser.
+     * Queries the file for version number to determine whether it is compatible with this parser.
      * @return true if compatible
      */
     public boolean isCompatible() {
@@ -149,9 +149,9 @@ public class CommuniqueFileReader {
     }
 
     /**
-     * Checks the version tag. Otherwise, finds file build by parsing text for line
+     * Checks the version tag. Otherwise, finds file version by parsing text for line
      * <pre># Produced by version INT</pre>
-     * @return build number
+     * @return version number
      */
     public long getFileVersion() {
         // Look for version tag first

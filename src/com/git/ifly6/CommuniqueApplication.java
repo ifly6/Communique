@@ -49,7 +49,7 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 /**
  * Enumerates Communique-based applications.
- * @since version 3.0 (build 13)
+ * @since version 13
  */
 public enum CommuniqueApplication {
 
@@ -65,9 +65,9 @@ public enum CommuniqueApplication {
     }
 
     /**
-     * Generates display name; includes build variable if {@code includeBuild}.
-     * @return names like {@code Communiqué 2.5 (build 12)}
-     * @since version 3.0 (build 13)
+     * Generates display name; includes version number
+     * @return names like {@code Communiqué 12}
+     * @since version 13
      */
     public String generateName() {
         return MessageFormat.format("{0} {1}", displayName, version());
