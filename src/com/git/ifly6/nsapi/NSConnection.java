@@ -43,23 +43,17 @@ import java.util.stream.Collectors;
 public class NSConnection {
 
     private static final Logger LOGGER = Logger.getLogger(NSConnection.class.getName());
-
     private static final double PERMITS_PER_SECOND = 40 / (double) 30; // 50 requests per 30 seconds
+
     private static final RateLimiter limiter = RateLimiter.create(PERMITS_PER_SECOND);
 
-    /**
-     * API delay in milliseconds.
-     */
+    /** API delay in milliseconds. */
     public final static long WAIT_TIME = Math.round(Math.pow(PERMITS_PER_SECOND, -1));
 
-    /**
-     * NationStates API call prefix, {@code https://www.nationstates.net/cgi-bin/api.cgi?}.
-     */
+    /** NationStates API call prefix, {@code https://www.nationstates.net/cgi-bin/api.cgi?}. */
     public static final String API_PREFIX = "https://www.nationstates.net/cgi-bin/api.cgi?";
 
-    /**
-     * NationStates API query prefix, {@code &q=}.
-     */
+    /** NationStates API query prefix, {@code &q=}. */
     public static final String QUERY_PREFIX = "&q=";
 
     private URL url;
@@ -99,9 +93,8 @@ public class NSConnection {
         HttpURLConnection apiConnection = (HttpURLConnection) url.openConnection();
         apiConnection.addRequestProperty("User-Agent",
                 "NS API request; maintained by Imperium Anglorum, email: cyrilparsons.london@gmail.com; see IP");
-        if (entries != null && !entries.isEmpty())
-            for (Map.Entry<String, String> entry : entries.entrySet())
-                apiConnection.addRequestProperty(entry.getKey(), entry.getValue());
+        if (entries != null && !entries.isEmpty()) for (Map.Entry<String, String> entry : entries.entrySet())
+            apiConnection.addRequestProperty(entry.getKey(), entry.getValue());
 
         apiConnection.connect(); // do connection
         hasConnected = true; // update API
@@ -118,20 +111,17 @@ public class NSConnection {
 
             if (apiConnection.getResponseCode() == 429) {
                 String retryAfter = apiConnection.getHeaderField("X-Retry-After");
-                throw new NSIOException(
-                        String.format("API rate limit exceeded! Retry after %s.",
-                                CommuniqueUtilities.time(Integer.parseInt(retryAfter))));
+                throw new NSIOException(String.format("API rate limit exceeded! Retry after %s.",
+                        CommuniqueUtilities.time(Integer.parseInt(retryAfter))));
             }
 
-            if (xml_raw.contains("Unknown nation")
-                    || apiConnection.getResponseCode() == 404)
+            if (xml_raw.contains("Unknown nation") || apiConnection.getResponseCode() == 404)
                 throw new FileNotFoundException(String.format("No result for url %s", url.toString()));
 
 
-            throw new NSException(String.format("Cannot get data from the API at url %s"
-                            + "\nHTTP response code %d",
-                    url.toString(),
-                    apiConnection.getResponseCode()));
+            throw new NSException(
+                    String.format("Cannot get data from the API at url %s" + "\nHTTP response code %d", url.toString(),
+                            apiConnection.getResponseCode()));
         }
 
         return this;

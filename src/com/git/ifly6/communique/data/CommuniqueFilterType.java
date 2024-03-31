@@ -158,9 +158,9 @@ public enum CommuniqueFilterType {
     }
 
     /**
-     * Returns whether tag has case sensitive input. Eg {@code +regex:[A-Z].*$} is case-sensitive, while {@code
-     * +region:europe} is not. Used in {@link CommuniqueRecipient#CommuniqueRecipient(CommuniqueFilterType,
-     * CommuniqueRecipientType, String)}.
+     * Returns whether tag has case sensitive input. Eg {@code +regex:[A-Z].*$} is case-sensitive, while
+     * {@code +region:europe} is not. Used in
+     * {@link CommuniqueRecipient#CommuniqueRecipient(CommuniqueFilterType, CommuniqueRecipientType, String)}.
      * @return whether tag is case sensitive
      * @since version 3.0 (build 13)
      */

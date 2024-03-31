@@ -49,7 +49,8 @@ public class CommuniqueRecipients {
     }
 
     /**
-     * Creates new recipient with copied {@link CommuniqueRecipientType} and name, but with {@link CommuniqueFilterType#EXCLUDE}
+     * Creates new recipient with copied {@link CommuniqueRecipientType} and name, but with
+     * {@link CommuniqueFilterType#EXCLUDE}
      * @param recipient holding name and type
      * @return the recipient, excluded
      */

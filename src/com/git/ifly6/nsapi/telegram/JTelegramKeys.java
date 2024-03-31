@@ -37,7 +37,7 @@ public class JTelegramKeys {
 
     private String clientKey;
     private String secretKey;
-    private String telegramID;
+    private String telegramId; // cannot be renamed
 
     /**
      * Creates a <code>JTelegramKeys</code> which holds the client, secret, and telegram keys provided in the
@@ -49,7 +49,7 @@ public class JTelegramKeys {
     public JTelegramKeys(String client, String secret, String teleID) {
         clientKey = client.trim();
         secretKey = secret.trim();
-        telegramID = teleID.trim();
+        telegramId = teleID.trim();
     }
 
     /**
@@ -59,13 +59,13 @@ public class JTelegramKeys {
         // cannot be removed; IO code relies on this 'empty' constructorclientKey = "CLIENT_KEY";
         clientKey = "CLIENT_KEY";
         secretKey = "SECRET_KEY";
-        telegramID = "TELEGRAM_ID";
+        telegramId = "TELEGRAM_ID";
     }
 
 
     @Override
     public String toString() {
-        return String.join(", ", Arrays.asList(clientKey, secretKey, telegramID));
+        return String.join(", ", Arrays.asList(clientKey, secretKey, telegramId));
     }
 
     public String getClientKey() {
@@ -77,7 +77,7 @@ public class JTelegramKeys {
     }
 
     public String getTelegramID() {
-        return (telegramID != null) ? telegramID : "TELEGRAM_ID";
+        return (telegramId != null) ? telegramId : "TELEGRAM_ID";
     }
 
     public void setClientKey(String input) {
@@ -92,14 +92,14 @@ public class JTelegramKeys {
 
     public void setTelegramID(String input) {
         Objects.requireNonNull(input);
-        telegramID = input.trim();
+        telegramId = input.trim();
     }
 
     /**
      * @return {@code String[]} with elements {@code { clientKey, secretKey, telegramId }}.
      */
     public String[] toArray() {
-        return new String[] {clientKey, secretKey, telegramID};
+        return new String[] {clientKey, secretKey, telegramId};
     }
 
     /**
@@ -109,7 +109,7 @@ public class JTelegramKeys {
     public boolean anyEmpty() {
         if (Objects.isNull(clientKey) || clientKey.isEmpty()) return true;
         if (Objects.isNull(secretKey) || secretKey.isEmpty()) return true;
-        if (Objects.isNull(telegramID) || telegramID.isEmpty()) return true;
+        if (Objects.isNull(telegramId) || telegramId.isEmpty()) return true;
         return false;
     }
 

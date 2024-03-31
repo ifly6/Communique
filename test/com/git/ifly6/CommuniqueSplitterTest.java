@@ -15,12 +15,11 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.commons;
+package com.git.ifly6;
 
-import com.git.ifly6.CommuniqueSplitter;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CommuniqueSplitterTest {
@@ -28,7 +27,7 @@ class CommuniqueSplitterTest {
     @Test
     void split() {
         CommuniqueSplitter splitter = new CommuniqueSplitter("CommuniqueTest", 2);
-        assertEquals(splitter.split("alpha;beta"), new String[] {"alpha", "beta"});
+        assertArrayEquals(splitter.split("alpha;beta"), new String[] {"alpha", "beta"});
         assertThrows(IllegalArgumentException.class, () -> splitter.split("alpha;beta;gamma"));
     }
 }

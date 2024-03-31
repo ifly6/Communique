@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 /**
  * Caches region tags.
+ * @since version 13
  */
 public class CommRegionTagCache extends CommCache<CommRegionTagCache.CommRegionTag> {
 
@@ -52,8 +53,6 @@ public class CommRegionTagCache extends CommCache<CommRegionTagCache.CommRegionT
      * {@inheritDoc}
      * @see #getRegionsWithTag(String)
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")
-    @Deprecated
     @Override
     public CommRegionTag lookupObject(String s) {
         return super.lookupObject(s);

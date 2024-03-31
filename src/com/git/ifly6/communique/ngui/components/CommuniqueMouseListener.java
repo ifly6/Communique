@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -15,22 +15,41 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.commons;
+package com.git.ifly6.communique.ngui.components;
 
-import org.junit.jupiter.api.Test;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+/**
+ * {@link MouseListener} implementation only for clicks.
+ * @since version 13
+ */
+public class CommuniqueMouseListener implements MouseListener {
+    private final Consumer<MouseEvent> meConsumer;
 
-class CommuniqueUtilitiesTest {
-    @Test
-    void time() {
-        assertEquals(CommuniqueUtilities.time(30), "0d:0h:0m:30s");
+    public CommuniqueMouseListener(Consumer<MouseEvent> meConsumer) {
+        this.meConsumer = meConsumer;
     }
 
-    @Test
-    void getWindowsSafeDate() {
-        String s = CommuniqueUtilities.getDate();
-        assertFalse(s.contains(":"));
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        meConsumer.accept(e);
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 }

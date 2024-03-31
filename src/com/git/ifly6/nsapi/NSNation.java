@@ -90,8 +90,7 @@ public class NSNation implements NSTimeStamped {
     /**
      * Queries and fetches information for {@link NSNation}.
      * <p>Note that {@link #getInfluenceCount()} and {@link #getEndoCount()} etc only provide information already
-     * loaded. Calling populate data after it already is populated will update influence
-      count.</p>
+     * loaded. Calling populate data after it already is populated will update influence count.</p>
      * @return self, with populated data
      * @throws NSNoSuchNationException if nation does not exist
      */
@@ -175,7 +174,7 @@ public class NSNation implements NSTimeStamped {
     }
 
     /**
-     @return {@link List<String>} of nations that  endorsed the nation
+     * @return {@link List<String>} of nations that  endorsed the nation
      */
     public List<String> getEndoList() {
         return endorsingNations;
@@ -213,18 +212,19 @@ public class NSNation implements NSTimeStamped {
      * <ul>
      * <li>Balanced: Anarchy, Capitalizt, New York Times Democracy, Benevolent Dictatorship, Inoffensive Centrist
      * Democracy,
-      Tyranny by Majority, Father Knows Best State, Authoritarian Democracy, Psychotic Dictatorship
-     </li>
-     * <li> Right-leaning: Corporate Bordello, Capitalist Paradise, Conservative Democracy, Compulsory Consumerist State,
+     * Tyranny by Majority, Father Knows Best State, Authoritarian Democracy, Psychotic Dictatorship
+     * </li>
+     * <li> Right-leaning: Corporate Bordello, Capitalist Paradise, Conservative Democracy, Compulsory Consumerist
+     * State,
      * Moralistic Democracy, Iron Fist Consumerists
-     </li>
+     * </li>
      * <li>Left-leaning: Civil Rights Lovefest, Left Leaning College State, Liberal Democratic Socialists, Libertarian
      * Police State, Democratic Socialists, Corrupt Dictatorship
-     </li>
+     * </li>
      * <li>Right wing: Free Market Paradise, Right Wing Utopia, Corporate Police State
-     </li>
+     * </li>
      * <li> Left wing: Left Wing Utopia, Scandinavian Liberal Paradise, Iron Fist Socialists
-     </li>
+     * </li>
      * </ul>
      * @return the nation category
      */

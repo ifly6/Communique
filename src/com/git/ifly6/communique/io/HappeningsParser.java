@@ -32,7 +32,8 @@ import java.util.stream.Collectors;
 @Deprecated
 public class HappeningsParser {
 
-    private static final String HAPPENINGS_URL = "https://www.nationstates.net/cgi-bin/api.cgi?q=happenings;filter=law+change+dispatch+rmb+embassy+admin+vote+resolution+member";
+    private static final String HAPPENINGS_URL = "https://www.nationstates.net/cgi-bin/api.cgi?q=happenings;"
+            + "filter=law+change+dispatch+rmb+embassy+admin+vote+resolution+member";
 
     public static List<CommuniqueRecipient> getActiveNations() throws JTelegramException {
         try {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -52,9 +52,7 @@ public class CommDelegatesCache extends CommCache<CommDelegatesCache.Delegates> 
     }
 
     /** Prefer {@link #getDelegates()}. */
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Override
-    @Deprecated
     public Delegates lookupObject(String s) {
         if (s.equals(DELEGATE_KEY))
             return super.lookupObject(s);

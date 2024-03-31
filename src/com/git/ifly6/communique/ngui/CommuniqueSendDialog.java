@@ -17,6 +17,7 @@
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.CommuniqueUtilities;
+import com.git.ifly6.communique.ngui.components.CommuniqueKeyListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -35,7 +36,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.time.Duration;
 import java.util.List;
 import java.util.logging.Logger;
@@ -64,7 +64,8 @@ public class CommuniqueSendDialog extends JDialog {
         double sHeight = screenDimensions.getHeight();
         int windowWidth = 500;
         int windowHeight = 500;
-        setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth, windowHeight);
+        setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth,
+                windowHeight);
         setMinimumSize(new Dimension(windowWidth, windowHeight));
 //        Communique3Utils.setupDimensions(this,
 //                new Dimension(500, 500),
@@ -85,7 +86,8 @@ public class CommuniqueSendDialog extends JDialog {
         textPane.setEditable(false);
         textPane.setText(String.join("\n", parsedRecipients));
 
-        JLabel lblConfirmSendTo = new JLabel(String.format("Confirm send to initial %d recipients?", parsedRecipients.size()));
+        JLabel lblConfirmSendTo = new JLabel(
+                String.format("Confirm send to initial %d recipients?", parsedRecipients.size()));
         lblConfirmSendTo.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
         contentPanel.add(lblConfirmSendTo, BorderLayout.NORTH);
 
@@ -136,21 +138,10 @@ public class CommuniqueSendDialog extends JDialog {
         gbc_cancelButton.gridy = 0;
         buttonPane.add(cancelButton, gbc_cancelButton);
 
-        contentPanel.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) sendButton.doClick();
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-            }
-        });
-
+        contentPanel.addKeyListener(new CommuniqueKeyListener(ke -> {
+            if (ke.getKeyCode() == KeyEvent.VK_ENTER)
+                sendButton.doClick();
+        }));
         this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         this.setVisible(true);
     }

@@ -97,11 +97,7 @@ public class CommuniqueEditor extends AbstractCommunique {
 
     CommuniqueEditor(Path path) {
         this.path = path;
-        frame = new JFrame(String.format(
-                "Communiqué %d – %s",
-                Communique7Parser.VERSION,
-                path.getFileName().toString().replaceFirst("\\..+$", "")
-        ));
+        frame = new JFrame(constructTitle());
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setMinimumSize(new Dimension(725, 400));
 
@@ -139,6 +135,11 @@ public class CommuniqueEditor extends AbstractCommunique {
         INSTANCES.add(this);
     }
 
+    private String constructTitle() {
+        return String.format("Communiqué %d – %s", Communique7Parser.VERSION,
+                path.getFileName().toString().replaceFirst("\\..+$", ""));
+    }
+
     private void initialise() {
         // fields
         CommuniqueDelayedDocumentListener saveListener = new CommuniqueDelayedDocumentListener(i -> this.save());
@@ -150,8 +151,9 @@ public class CommuniqueEditor extends AbstractCommunique {
         CommuniqueDelayedActionListener saveListener1 = new CommuniqueDelayedActionListener(e -> this.save());
         fieldAction = new JComboBox<>(CommuniqueProcessingAction.values());
         fieldAction.setSelectedItem(CommuniqueProcessingAction.NONE);
-        fieldAction.setToolTipText("Processing actions can be applied to the list of recipients after they "
-                + "are parsed. Select a processing action here");
+        fieldAction.setToolTipText(
+                "Processing actions can be applied to the list of recipients after they " + "are " + "parsed. Select "
+                        + "a processing action here");
         fieldAction.addActionListener(saveListener1);
 
         fieldType = new JComboBox<>(JTelegramType.values());
@@ -159,15 +161,11 @@ public class CommuniqueEditor extends AbstractCommunique {
         fieldType.setToolTipText("Telegram types are declared site-side in the telegram sent to \"tag:api\"");
         fieldType.addActionListener(saveListener1);
         fieldType.addActionListener(ae -> { // force default delays when not selecting custom
-            if (!fieldType.getItemAt(fieldType.getSelectedIndex()).equals(JTelegramType.CUSTOM))
-                fieldDelay.setText("");
+            if (!fieldType.getItemAt(fieldType.getSelectedIndex()).equals(JTelegramType.CUSTOM)) fieldDelay.setText("");
         });
 
-        fieldDelay = CommuniqueFactory.createField(
-                "",
-                "Leave as blank to accept defaults. Must be in milliseconds.",
-                saveListener
-        );
+        fieldDelay = CommuniqueFactory.createField("", "Leave as blank to accept defaults. Must be in milliseconds.",
+                saveListener);
         fieldDelay.addActionListener(ae -> JTelegramType.CUSTOM.setWaitDuration(getDelay())); // must have this to sync
         AbstractDocument document = (AbstractDocument) fieldDelay.getDocument();
         document.setDocumentFilter(new CommuniqueDigitFilter());
@@ -215,154 +213,123 @@ public class CommuniqueEditor extends AbstractCommunique {
         frame.setJMenuBar(menuBar);
 
         // file
-        this.addFileMenu(List.of(
-                createMenuItem(
-                        "Save", KeyEvent.VK_S,
-                        ae -> this.save()
-                ),
-                createMenuItem(
-                        "Save as",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_S, COMMAND_KEY | InputEvent.SHIFT_DOWN_MASK),
-                        ae -> {
-                            Path newPath = CommuniqueFileChoosers.show(this.frame, FileDialog.SAVE);
-                            if (newPath == null) {
-                                LOGGER.info("\"Save as\" cancelled");
-                                return;
-                            }
-                            LOGGER.info(String.format("Saving file %s as %s",
-                                    this.path.getFileName(), newPath));
-                            this.path = newPath;
-                            save();
-                        }
-                )
-        ));
+        this.addFileMenu(List.of(createMenuItem("Save", KeyEvent.VK_S, ae -> this.save()), createMenuItem("Save as",
+                KeyStroke.getKeyStroke(KeyEvent.VK_S, COMMAND_KEY | InputEvent.SHIFT_DOWN_MASK), ae -> {
+                    Path newPath = CommuniqueFileChoosers.show(this.frame, FileDialog.SAVE);
+                    if (newPath == null) {
+                        LOGGER.info("\"Save as\" cancelled");
+                        return;
+                    }
+                    saveAs(path);
+                })));
 
         // edit
         JMenu mnEdit = this.addEditMenu();
         mnEdit.addSeparator();
 
-        mnEdit.add(createMenuItem("Import Keys from Telegram URL",
-                ae -> {
-                    String rawURL = this.showInputDialog("Paste in keys from the URL provided by receipt by the "
-                            + "Telegrams API");
+        mnEdit.add(createMenuItem("Import Keys from Telegram URL", ae -> {
+            String rawURL = this.showInputDialog(
+                    "Paste in keys from the URL provided by receipt by the " + "Telegrams API");
 
-                    // verify that it is a valid NationStates URL
-                    String raw1 = "https://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&";
-                    String raw2 = "http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&";
-                    if (rawURL.startsWith(raw1) || rawURL.startsWith(raw2)) {
+            // verify that it is a valid NationStates URL
+            String raw1 = "https://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&";
+            String raw2 = "http://www.nationstates.net/cgi-bin/api.cgi?a=sendTG&client=YOUR_API_CLIENT_KEY&";
+            if (rawURL.startsWith(raw1) || rawURL.startsWith(raw2)) {
 
-                        rawURL = rawURL.substring(rawURL.indexOf("a=sendTG&client=YOUR_API_CLIENT_KEY&") +
-                                "a=sendTG&client=YOUR_API_CLIENT_KEY&".length()); // use substring
-                        rawURL = rawURL.replace("&to=NATION_NAME", "");
+                rawURL = rawURL.substring(rawURL.indexOf(
+                        "a=sendTG&client=YOUR_API_CLIENT_KEY&") + ("a=sendTG&client" + "=YOUR_API_CLIENT_KEY"
+                        + "&").length()); // use substring
+                rawURL = rawURL.replace("&to=NATION_NAME", "");
 
-                        String[] shards = rawURL.split("&");
-                        if (shards.length == 2) {
-                            String secretKey = shards[1].substring(shards[1].indexOf("=") + "=".length());
-                            this.setSecretKey(secretKey);
+                String[] shards = rawURL.split("&");
+                if (shards.length == 2) {
+                    String secretKey = shards[1].substring(shards[1].indexOf("=") + "=".length());
+                    this.setSecretKey(secretKey);
 
-                            String telegramID = shards[0].substring(shards[0].indexOf("=") + "=".length());
-                            this.setTelegramID(telegramID);
-                        }
+                    String telegramID = shards[0].substring(shards[0].indexOf("=") + "=".length());
+                    this.setTelegramID(telegramID);
+                }
 
-                    } else this.showErrorDialog("Input a properly formatted NationStates URL in the form displayed "
-                            + "when a telegram is sent to 'tag:api'");
-                }));
+            } else this.showErrorDialog(
+                    "Input a properly formatted NationStates URL in the form displayed " + "when a " + "telegram " +
+                            "is sent to 'tag:api'");
+        }));
 
         JMenu mnImportRecipients = new JMenu("Import Recipients");
         mnEdit.add(mnImportRecipients);
-        mnImportRecipients.add(createMenuItem(
-                "From WA Delegate List", ae -> this.appendLine(CommuniqueRecipient.DELEGATES)));
-        mnImportRecipients.add(createMenuItem(
-                "As Comma Separated List", ae -> {
-                    String message = "Input a string of delegates, as found on a list of delegates\nin one of the "
-                            + "NationStates World Assembly pages:";
-                    String input = this.showInputDialog(message);
-                    if (input != null) {
-                        input = input.replaceAll("\\(.+?\\)", ""); // get rid of brackets and anything in them
-                        Arrays.stream(input.split(",\\s*?"))
-                                .map(CommuniqueRecipients::createNation) // createNation auto-trims
-                                .map(CommuniqueRecipient::toString)
-                                .forEach(this::appendLine);
-                    }
-                }));
-        mnImportRecipients.add(createMenuItem(
-                "Delegates from At Vote Screen", ae -> {
-                    Object[] possibilities = {"GA For", "GA Against", "SC For", "SC Against"};
-                    String selection =
-                            (String) JOptionPane.showInputDialog(
-                                    frame, "Select which chamber and side you want to address:",
-                                    "Select Chamber and Side", JOptionPane.PLAIN_MESSAGE, null,
-                                    possibilities, "GA For");
+        mnImportRecipients.add(
+                createMenuItem("From WA Delegate List", ae -> this.appendLine(CommuniqueRecipient.DELEGATES)));
+        mnImportRecipients.add(createMenuItem("As Comma Separated List", ae -> {
+            String message = "Input a string of delegates, as found on a list of delegates\nin one of the " +
+                    "NationStates World Assembly pages:";
+            String input = this.showInputDialog(message);
+            if (input != null) {
+                input = input.replaceAll("\\(.+?\\)", ""); // get rid of brackets and anything in them
+                Arrays.stream(input.split(",\\s*?")).map(CommuniqueRecipients::createNation) // createNation auto-trims
+                        .map(CommuniqueRecipient::toString).forEach(this::appendLine);
+            }
+        }));
+        mnImportRecipients.add(createMenuItem("Delegates from At Vote Screen", ae -> {
+            Object[] possibilities = {"GA For", "GA Against", "SC For", "SC Against"};
+            String selection = (String) JOptionPane.showInputDialog(frame,
+                    "Select which chamber and side you want " + "to" + " address:", "Select Chamber and Side",
+                    JOptionPane.PLAIN_MESSAGE, null, possibilities, "GA For");
 
-                    if (!selection.isBlank()) {
-                        LOGGER.info("Starting scrape of NS WA voting page, " + selection);
-                        String[] elements = selection.toLowerCase().split("\\s+?");
-                        String chamber = elements[0].equals("ga") ? CommuniqueScraper.GA : CommuniqueScraper.SC;
-                        String side = elements[1].equals("for") ? CommuniqueScraper.FOR : CommuniqueScraper.AGAINST;
-                        try {
-                            CommuniqueScraper.importAtVoteDelegates(chamber, side).stream()
-                                    .map(CommuniqueRecipient::toString)
-                                    .forEach(this::appendLine);
+            if (!selection.isBlank()) {
+                LOGGER.info("Starting scrape of NS WA voting page, " + selection);
+                String[] elements = selection.toLowerCase().split("\\s+?");
+                String chamber = elements[0].equals("ga") ? CommuniqueScraper.GA : CommuniqueScraper.SC;
+                String side = elements[1].equals("for") ? CommuniqueScraper.FOR : CommuniqueScraper.AGAINST;
+                try {
+                    CommuniqueScraper.importAtVoteDelegates(chamber, side).stream().map(CommuniqueRecipient::toString)
+                            .forEach(this::appendLine);
 
-                        } catch (NSException nre) {
-                            this.showErrorDialog("No resolution is at vote in that chamber");
+                } catch (NSException nre) {
+                    this.showErrorDialog("No resolution is at vote in that chamber");
 
-                        } catch (RuntimeException exc) {
-                            LOGGER.log(Level.WARNING, "Cannot import data.", exc);
-                            this.showErrorDialog("Cannot import data from NationStates website");
-                        }
-                    }
-                }));
-        mnImportRecipients.add(createMenuItem(
-                "From Text File",
-                event -> {
-                    Path path = show(frame, FileDialog.LOAD);
-                    if (path != null) {
-                        try (Stream<String> lines = Files.lines(path)) {
-                            lines.filter(s -> !s.startsWith("#"))
-                                    .filter(ApiUtils::isNotEmpty)
-                                    .map(ApiUtils::ref) // process
-                                    .forEach(this::appendLine); // append to text area
-                        } catch (IOException e1) {
-                            LOGGER.log(Level.WARNING, "Cannot read file, IOException", e1);
-                            this.showErrorDialog(String.format("Cannot read file at %s", path));
-                        }
-                    }
-                }));
+                } catch (RuntimeException exc) {
+                    LOGGER.log(Level.WARNING, "Cannot import data.", exc);
+                    this.showErrorDialog("Cannot import data from NationStates website");
+                }
+            }
+        }));
+        mnImportRecipients.add(createMenuItem("From Text File", event -> {
+            Path path = show(frame, FileDialog.LOAD);
+            if (path != null) {
+                try (Stream<String> lines = Files.lines(path)) {
+                    lines.filter(s -> !s.startsWith("#")).filter(ApiUtils::isNotEmpty).map(ApiUtils::ref) // process
+                            .forEach(this::appendLine); // append to text area
+                } catch (IOException e1) {
+                    LOGGER.log(Level.WARNING, "Cannot read file, IOException", e1);
+                    this.showErrorDialog(String.format("Cannot read file at %s", path));
+                }
+            }
+        }));
 
         mnEdit.addSeparator();
-        mnEdit.add(createMenuItem(
-                "Exclude Nations",
-                ae -> {
-                    String message = "Input nations to exclude as comma-separated list (Do not include trailing 'and'.)";
-                    String input = this.showInputDialog(message);
-                    if (input != null) {
-                        input = input.replaceAll("\\(.+?\\)", ""); // get rid of brackets and anything in them
-                        Arrays.stream(input.split(","))
-                                .map(n -> CommuniqueRecipients.createNation(CommuniqueFilterType.EXCLUDE, n)) // method auto-formats
-                                .map(CommuniqueRecipient::toString)
-                                .forEach(this::appendLine);
-                    }
-                }));
+        mnEdit.add(createMenuItem("Exclude Nations", ae -> {
+            String message = "Input nations to exclude as comma-separated list (Do not include trailing 'and'.)";
+            String input = this.showInputDialog(message);
+            if (input != null) {
+                input = input.replaceAll("\\(.+?\\)", ""); // get rid of brackets and anything in them
+                Arrays.stream(input.split(","))
+                        .map(n -> CommuniqueRecipients.createNation(CommuniqueFilterType.EXCLUDE, n))
+                        .map(CommuniqueRecipient::toString).forEach(this::appendLine);
+            }
+        }));
 
         this.addWindowMenu();
         this.addHelpMenu();
     }
 
+
     public CommuniqueConfig getConfig() {
-        config = new CommuniqueConfig(
-                fieldType.getItemAt(fieldType.getSelectedIndex()),
+        config = new CommuniqueConfig(fieldType.getItemAt(fieldType.getSelectedIndex()),
                 fieldAction.getItemAt(fieldAction.getSelectedIndex()),
-                new JTelegramKeys(
-                        fieldClientKey.getText(), fieldSecretKey.getText(), fieldTelegramID.getText()
-                ),
+                new JTelegramKeys(fieldClientKey.getText(), fieldSecretKey.getText(), fieldTelegramID.getText()),
                 fieldDelay.getText());
-        config.setcRecipients(
-                area.getLines().stream()
-                        .filter(ApiUtils::isNotEmpty)
-                        .filter(s -> !s.startsWith("#"))
-                        .map(CommuniqueRecipient::parseRecipient)
-                        .collect(Collectors.toList()));
+        config.setcRecipients(area.getLines().stream().filter(ApiUtils::isNotEmpty).filter(s -> !s.startsWith("#"))
+                .map(CommuniqueRecipient::parseRecipient).collect(Collectors.toList()));
         return config;
     }
 
@@ -397,6 +364,13 @@ public class CommuniqueEditor extends AbstractCommunique {
         return new CommuniqueConfig();
     }
 
+    private void saveAs(Path newPath) {
+        LOGGER.info(String.format("Saving file %s as %s", this.path.getFileName(), newPath));
+        this.path = newPath;
+        save();
+        frame.setTitle(constructTitle());
+    }
+
     public void synchronise(CommuniqueConfig theConfig) {
         config = theConfig;
         this.setClientKey(config.keys.getClientKey());
@@ -410,8 +384,7 @@ public class CommuniqueEditor extends AbstractCommunique {
 
     private void showWarning(String text, Throwable e) {
         JOptionPane.showMessageDialog(frame, text, "Warning!", JOptionPane.PLAIN_MESSAGE, null);
-        if (e != null)
-            LOGGER.log(Level.WARNING, text, e);
+        if (e != null) LOGGER.log(Level.WARNING, text, e);
     }
 
     public boolean active() {
@@ -442,8 +415,7 @@ public class CommuniqueEditor extends AbstractCommunique {
 
     public Duration getDelay() {
         getConfig();
-        if (config.waitString.isBlank())
-            return config.getTelegramType().getWaitDuration();
+        if (config.waitString.isBlank()) return config.getTelegramType().getWaitDuration();
 
         return Duration.ofMillis(Integer.parseInt(config.waitString));
     }
@@ -472,14 +444,13 @@ public class CommuniqueEditor extends AbstractCommunique {
 }
 
 class CommuniqueDigitFilter extends DocumentFilter {
-    Pattern regEx = Pattern.compile("\\d*");
+    Pattern regex = Pattern.compile("\\d*");
 
     @Override
     public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
             throws BadLocationException {
-        Matcher matcher = regEx.matcher(text);
-        if (!matcher.matches())
-            return;
+        Matcher matcher = regex.matcher(text);
+        if (!matcher.matches()) return;
         super.replace(fb, offset, length, text, attrs);
     }
 }

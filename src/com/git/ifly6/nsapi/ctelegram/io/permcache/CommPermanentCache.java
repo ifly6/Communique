@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -23,9 +23,9 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * Holds elements in the cache permanently. This does not extend {@link com.git.ifly6.nsapi.ctelegram.io.cache.CommCache}
- * because it uses a different creation mechanism: this creates based on a {@link Supplier} rather than on the key
- * itself.
+ * Holds elements in the cache permanently. This does not extend
+ * {@link com.git.ifly6.nsapi.ctelegram.io.cache.CommCache} because it uses a different creation mechanism: this creates
+ * based on a {@link Supplier} rather than on the key itself.
  * @param <T> to cache
  */
 public class CommPermanentCache<T> {

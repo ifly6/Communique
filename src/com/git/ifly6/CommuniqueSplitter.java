@@ -48,8 +48,9 @@ public class CommuniqueSplitter {
     public String[] split(String input) {
         String[] elements = input.trim().split(SPLIT_PATTERN);
         if (elements.length != requiredArguments)
-            throw new IllegalArgumentException(String.format("Parser for %s demands %d arguments but got %d from \"%s\"",
-                    name, requiredArguments, elements.length, input));
+            throw new IllegalArgumentException(
+                    String.format("Parser for %s demands %d arguments but got %d from \"%s\"",
+                            name, requiredArguments, elements.length, input));
 
         return elements;
     }

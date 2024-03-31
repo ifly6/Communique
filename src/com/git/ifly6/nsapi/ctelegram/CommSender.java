@@ -51,15 +51,17 @@ import static com.git.ifly6.nsapi.ctelegram.io.CommFormatter.entry;
 
 /**
  * Sends telegrams on the NationStates API. Instantiation is not restricted; regardless, there should never be more than
- * one. Sender sends indefinitely or until linked {@link CommMonitor} {@link CommMonitor#recipientsExhausted()
- * exhuasts}.
+ * one. Sender sends indefinitely or until linked {@link CommMonitor}
+ * {@link CommMonitor#recipientsExhausted() exhuasts}.
  * @since version 3.0 (build 13)
  */
 public class CommSender {
 
     public static final Logger LOGGER = Logger.getLogger(CommSender.class.getName());
 
-    /** One thread for many clients. */
+    /**
+     * One thread for many clients.
+     */
     private static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> job;
 
@@ -69,13 +71,19 @@ public class CommSender {
     private final JTelegramType telegramType;
     private final CommMonitor monitor;
 
-    /** If true, does not send telegrams. */
+    /**
+     * If true, does not send telegrams.
+     */
     private boolean dryRun = false;
 
-    /** First-in-first-out send queue. */
+    /**
+     * First-in-first-out send queue.
+     */
     private final Queue<String> sendQueue = new LinkedList<>();
 
-    /** Recipients to which the telegram has already been sent are put in the sent list. */
+    /**
+     * Recipients to which the telegram has already been sent are put in the sent list.
+     */
     private Set<String> sentList = new LinkedHashSet<>(); // ordered
     private Set<String> skipList = new LinkedHashSet<>();
 
@@ -94,12 +102,16 @@ public class CommSender {
         outputInterface = anInterface;
     }
 
-    /** @return {@link CommMonitor} instantiating */
+    /**
+     * @return {@link CommMonitor} instantiating
+     */
     public CommMonitor getMonitor() {
         return monitor;
     }
 
-    /** Feeds the queue until the feed limit is exceeded. Queue is fed whenever the queue is empty. */
+    /**
+     * Feeds the queue until the feed limit is exceeded. Queue is fed whenever the queue is empty.
+     */
     private void feedQueue() {
         LOGGER.fine("Feeding queue");
         List<String> recipients = monitor.getRecipients();
@@ -124,7 +136,9 @@ public class CommSender {
         this.dryRun = dryRun;
     }
 
-    /** Sends telegram to recipient, with recipient determined as first thing in the queue. */
+    /**
+     * Sends telegram to recipient, with recipient determined as first thing in the queue.
+     */
     private void executeSend() {
         LOGGER.finer("Send starting");
         if (dryRun) LOGGER.warning("SENDING AS DRY RUN!");
@@ -261,12 +275,11 @@ public class CommSender {
 
     public void stopSend() {
         LOGGER.info("Stopping CommuniqueSender sending thread");
-        if (job != null)
-            if (!job.isDone()) {
-                job.cancel(true);
-                if (monitor instanceof CommUpdatingMonitor)
-                    ((CommUpdatingMonitor) monitor).stop();
-            }
+        if (isRunning()) {
+            job.cancel(true);
+            if (monitor instanceof CommUpdatingMonitor)
+                ((CommUpdatingMonitor) monitor).stop();
+        }
 
         if (!scheduler.isShutdown())
             LOGGER.info(String.format("Shutdown left %d incomplete tasks",
@@ -275,12 +288,16 @@ public class CommSender {
         outputInterface.onTerminate(); // trigger the interface termination task
     }
 
-    /** Returns list of sent recipients. */
+    /**
+     * Returns list of sent recipients.
+     */
     public Set<String> getSentList() {
         return sentList;
     }
 
-    /** Returns list of skipped recipients. */
+    /**
+     * Returns list of skipped recipients.
+     */
     public Set<String> getSkipList() {
         return skipList;
     }
@@ -293,19 +310,23 @@ public class CommSender {
         return sentList.contains(s) || skipList.contains(s);
     }
 
-    /** @returns {@link CommSender} initialisation time */
+    /**
+     * @returns {@link CommSender} initialisation time
+     */
     public Instant getInitAt() {
         return initAt;
     }
 
-    /** @return true if sending telegrams. */
+    /**
+     * @return true if sending telegrams.
+     */
     public boolean isRunning() {
         if (job == null) return false;
         if (job.isDone() || job.isCancelled()) return false;
         return !scheduler.isShutdown() && !scheduler.isTerminated();
     }
 
-    public ScheduledExecutorService getScheduler() throws InterruptedException {
+    public ScheduledExecutorService getScheduler() {
         return scheduler;
     }
 
@@ -319,10 +340,15 @@ public class CommSender {
         throw new UnsupportedOperationException("No duration to next telegram; no telegrams are being sent");
     }
 
-    /** Thrown if no recipient is found in the queue */
-    public static class EmptyQueueException extends NoSuchElementException {}
+    /**
+     * Thrown if no recipient is found in the queue
+     */
+    public static class EmptyQueueException extends NoSuchElementException {
+    }
 
-    /** Indicates whether something was sent or skipped. */
+    /**
+     * Indicates whether something was sent or skipped.
+     */
     public enum SendingAction {
         SENT, SKIPPED
     }

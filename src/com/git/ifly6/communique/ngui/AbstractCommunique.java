@@ -43,11 +43,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.git.ifly6.CommuniqueApplication.APP_SUPPORT;
 import static com.git.ifly6.communique.ngui.CommuniqueMessages.ERROR;
 import static com.git.ifly6.communique.ngui.CommuniqueMessages.TITLE;
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
 import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
-import static com.git.ifly6.CommuniqueApplication.APP_SUPPORT;
 
 public abstract class AbstractCommunique {
 

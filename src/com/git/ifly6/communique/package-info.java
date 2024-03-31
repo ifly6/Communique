@@ -25,8 +25,8 @@
  * Marconi classes have been moved to their own package.
  * </p>
  * <p>
- * The only classes here are a {@link com.git.ifly6.CommuniqueUtilities CommuniqueUtilities}, a utility class
- * and the legacy {@link com.git.ifly6.communique.CommuniqueFileReader CommuniqueFileReader} classes, used by the
+ * The only classes here are a {@link com.git.ifly6.CommuniqueUtilities CommuniqueUtilities}, a utility class and the
+ * legacy {@link com.git.ifly6.communique.CommuniqueFileReader CommuniqueFileReader} classes, used by the
  * {@link com.git.ifly6.communique.io communique.io} package to read legacy files.
  * </p>
  */

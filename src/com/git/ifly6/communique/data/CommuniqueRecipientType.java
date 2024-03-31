@@ -105,7 +105,8 @@ public enum CommuniqueRecipientType {
      *     <li>{@code tag:wa}: all WA nations</li>
      *     <li>{@code tag:delegates}: all WA delegates</li>
      *     <li>
-     *         {@code tag:new}: new nations (but see the <a href="https://www.nationstates.net/cgi-bin/api.cgi?q=newnations">
+     *         {@code tag:new}: new nations (but see the
+     *         <a href="https://www.nationstates.net/cgi-bin/api.cgi?q=newnations">
      *             raw call</a>)
      *     </li>
      * </ul>

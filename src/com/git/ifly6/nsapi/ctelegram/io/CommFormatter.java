@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Prints entries if the entry is attached to a {@code true} key. Joins everything with commas. Anything which is passed
+ * Prints entries if the entry is attached to a {@code true} key. Joins everything with commas. Anything which is
+ * passed
  * <i>without</i> a {@code true} key is not displayed. Handles filtering automatically. Formatters are immutable.
  */
 public class CommFormatter {

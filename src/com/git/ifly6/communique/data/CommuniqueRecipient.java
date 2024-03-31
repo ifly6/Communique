@@ -111,9 +111,9 @@ public class CommuniqueRecipient {
      * </p>
      * @return a <code>CommuniqueRecipient</code> representing that string
      */
-    public static CommuniqueRecipient parseRecipient(String s) {
-        // 2020-12-24 do not put a toLowerCase here: it breaks case-sensitive regex input!
-        s = s.trim();
+    public static CommuniqueRecipient parseRecipient(final String raw) {
+        // 2020-12-24 do not put a toLowerCase here: it breaks case-sensitive regex raw!
+        String s = raw.trim();
 
         CommuniqueFilterType fType = CommuniqueFilterType.NORMAL; // default
         for (CommuniqueFilterType type : CommuniqueFilterType.values())
@@ -132,13 +132,13 @@ public class CommuniqueRecipient {
             }
 
         // 2020-12-24 insert override for RecipientType.NONE -> NATION if FilterType.NORMAL
-        // this is to correctly parse input like `imperium_anglorum` without tags
+        // this is to correctly parse something like `imperium_anglorum` without tags
         if (fType == CommuniqueFilterType.NORMAL && rType == CommuniqueRecipientType.NONE)
             rType = CommuniqueRecipientType.NATION;
 
         if (s.contains(":")) { // ie is an prefix to be looking at!
             String expectedPrefix = fType.toString() + rType.toString();
-            String actualPrefix = s.substring(0, s.indexOf(":"));
+            String actualPrefix = raw.substring(0, raw.indexOf(":"));
             if (!expectedPrefix.equalsIgnoreCase(actualPrefix))
                 throw new IllegalArgumentException(String.format("Expected prefix %s, got prefix %s; parse failed!",
                         expectedPrefix, actualPrefix));

@@ -35,7 +35,6 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
-import static com.git.ifly6.communique.ngui.CommuniqueConstants.CODE_HEADER;
 
 public class CommuniqueFactory {
 
@@ -48,10 +47,16 @@ public class CommuniqueFactory {
      */
     public static JTextField createField(String text, String tooltip, DocumentListener listener) {
         JTextField field = new JTextField();
+
+        // visuals
         field.setToolTipText(tooltip);
         field.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         field.setText(text);
+
+        // listeners
         field.getDocument().addDocumentListener(listener);
+        field.addMouseListener(new CommuniqueMouseListener(me -> field.selectAll()));
+
         return field;
     }
 

@@ -82,7 +82,8 @@ import java.util.stream.Collectors;
  */
 public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements JTelegramLogger {
 
-    private static final String[] protectedRegions = new String[] {"the Pacific", "the North Pacific", "the South Pacific",
+    private static final String[] protectedRegions = new String[] {"the Pacific", "the North Pacific",
+            "the South Pacific",
             "the East Pacific", "the West Pacific", "Lazarus", "Balder", "Osiris", "the Rejected Realms"};
     private static final Logger LOGGER = Logger.getLogger(CommuniqueRecruiter.class.getName());
 
@@ -267,13 +268,16 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
                                                 .addGroup(gl_leftPanel.createParallelGroup(Alignment.LEADING)
                                                         .addGroup(gl_leftPanel.createSequentialGroup()
                                                                 .addComponent(btnAdd, GroupLayout.PREFERRED_SIZE,
-                                                                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                                        GroupLayout.DEFAULT_SIZE,
+                                                                        GroupLayout.PREFERRED_SIZE)
                                                                 .addPreferredGap(ComponentPlacement.RELATED)
                                                                 .addComponent(btnRemove, GroupLayout.PREFERRED_SIZE,
-                                                                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                                        GroupLayout.DEFAULT_SIZE,
+                                                                        GroupLayout.PREFERRED_SIZE)
                                                                 .addGap(30)
                                                                 .addComponent(buttonsPane, GroupLayout.PREFERRED_SIZE,
-                                                                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                                        GroupLayout.DEFAULT_SIZE,
+                                                                        GroupLayout.PREFERRED_SIZE)
                                                                 .addPreferredGap(ComponentPlacement.RELATED, 219,
                                                                         Short.MAX_VALUE))
                                                         .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 305,
@@ -285,28 +289,33 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
                 gl_leftPanel.createParallelGroup(Alignment.LEADING)
                         .addGroup(gl_leftPanel.createSequentialGroup()
                                 .addGroup(gl_leftPanel.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(clientKeyField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        .addComponent(clientKeyField, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE,
                                                 GroupLayout.PREFERRED_SIZE)
                                         .addComponent(lblClientKey))
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addGroup(gl_leftPanel.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(secretKeyField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        .addComponent(secretKeyField, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE,
                                                 GroupLayout.PREFERRED_SIZE)
                                         .addComponent(lblSecretKey))
                                 .addGap(5)
                                 .addGroup(gl_leftPanel.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(telegramIdField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        .addComponent(telegramIdField, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE,
                                                 GroupLayout.PREFERRED_SIZE)
                                         .addComponent(lblTelegramId))
                                 .addGap(8)
                                 .addGroup(gl_leftPanel.createParallelGroup(Alignment.LEADING)
                                         .addGroup(gl_leftPanel.createSequentialGroup()
-                                                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
+                                                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 238,
+                                                        Short.MAX_VALUE)
                                                 .addGap(5)
                                                 .addGroup(gl_leftPanel.createParallelGroup(Alignment.LEADING)
                                                         .addGroup(gl_leftPanel.createParallelGroup(Alignment.BASELINE)
                                                                 .addComponent(btnAdd, GroupLayout.PREFERRED_SIZE,
-                                                                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                                        GroupLayout.DEFAULT_SIZE,
+                                                                        GroupLayout.PREFERRED_SIZE)
                                                                 .addComponent(btnRemove, GroupLayout.PREFERRED_SIZE,
                                                                         GroupLayout.DEFAULT_SIZE,
                                                                         GroupLayout.PREFERRED_SIZE))

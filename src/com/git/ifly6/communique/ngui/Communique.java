@@ -63,13 +63,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.PatternSyntaxException;
 
+import static com.git.ifly6.CommuniqueApplication.COMMUNIQUE;
 import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
 
 /**
  * <code>Communiqué</code> is the main class of the Communiqué system. It handles the GUI aspect of the entire program
  * and other actions.
  */
-@SuppressWarnings("ALL")
 public class Communique extends AbstractCommunique implements JTelegramLogger {
 
     private static final Logger LOGGER = Logger.getLogger(Communique.class.getName());
@@ -89,9 +89,14 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
     private JLabel progressLabel;
 
     public static void main(String[] args) {
-        CommuniqueApplication.setLAF(); // note that this line will also set up the static initialisation for appSupport etc
-        CommuniqueApplication.compressLogs(); // compresses logs one day older than this initialisation
+        // initialisation cascade
+        CommuniqueApplication.setupLogger(COMMUNIQUE);
+        CommuniqueApplication.setLogLevel(Level.INFO);
+        CommuniqueApplication.nativise(COMMUNIQUE);
+        CommuniqueApplication.compressLogs();
+        CommuniqueApplication.setLAF();
 
+        // start the gui
         EventQueue.invokeLater(() -> {
             try {
                 Communique window = new Communique();
@@ -184,8 +189,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
             }
 
             @Override
-            public void focusLost(FocusEvent e) {
-            }
+            public void focusLost(FocusEvent e) { }
         });
         contentPane.add(editorSelector, BorderLayout.NORTH);
 
@@ -195,7 +199,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
         progressBar = new CommuniqueTimerBar();
         progressLabel = new JLabel("? / ?");
-        progressLabel.setBorder(BorderFactory.createEmptyBorder(0, 0,0, 2));
+        progressLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
         JPanel bottomCentre = new JPanel();
         bottomCentre.setLayout(new BorderLayout(5, 5));
         bottomCentre.add(progressBar, BorderLayout.CENTER);

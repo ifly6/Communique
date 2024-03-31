@@ -63,4 +63,4 @@ public enum JTelegramResponseCode {
     };
 
     public abstract String getExplanation();
-    }
+}

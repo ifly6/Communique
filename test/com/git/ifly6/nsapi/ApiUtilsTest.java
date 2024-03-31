@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("ALL")
 class ApiUtilsTest {
 
     static Map<String, String> map = new HashMap<>();
