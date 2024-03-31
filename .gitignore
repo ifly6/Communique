@@ -35,3 +35,5 @@ Communique.iml
 communique-last-session.log
 marconi-last-session.log
 *.log
+Communique-.iml
+dependency-reduced-pom.xml

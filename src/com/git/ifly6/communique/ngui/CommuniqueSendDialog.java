@@ -37,6 +37,7 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.Duration;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -46,7 +47,7 @@ import java.util.logging.Logger;
  */
 public class CommuniqueSendDialog extends JDialog {
 
-    private static final long serialVersionUID = Communique7Parser.version;
+
     private static final Logger LOGGER = Logger.getLogger(CommuniqueSendDialog.class.getName());
 
     public static final int SEND = 1;
@@ -64,9 +65,12 @@ public class CommuniqueSendDialog extends JDialog {
         double sHeight = screenDimensions.getHeight();
         int windowWidth = 500;
         int windowHeight = 500;
-        setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth,
-                windowHeight);
+        setBounds((int) (sWidth / 2 - windowWidth / 2), (int) (sHeight / 2 - windowHeight / 2), windowWidth, windowHeight);
         setMinimumSize(new Dimension(windowWidth, windowHeight));
+//        Communique3Utils.setupDimensions(this,
+//                new Dimension(500, 500),
+//                new Dimension(500, 500),
+//                true);
 
         setTitle("Confirm Send");
         getContentPane().setLayout(new BorderLayout());
@@ -82,11 +86,11 @@ public class CommuniqueSendDialog extends JDialog {
         textPane.setEditable(false);
         textPane.setText(String.join("\n", parsedRecipients));
 
-        JLabel lblConfirmSendTo = new JLabel(String.format("Confirm send to %d recipients?",
-                parsedRecipients.size()));
+        JLabel lblConfirmSendTo = new JLabel(String.format("Confirm send to initial %d recipients?", parsedRecipients.size()));
         lblConfirmSendTo.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
         contentPanel.add(lblConfirmSendTo, BorderLayout.NORTH);
 
+        // wtf does this do and why is a grid bag layout needed?
         JPanel buttonPane = new JPanel();
         buttonPane.setBorder(new EmptyBorder(0, 5, 5, 5));
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
@@ -97,7 +101,7 @@ public class CommuniqueSendDialog extends JDialog {
         gbl_buttonPane.rowWeights = new double[] {0.0, Double.MIN_VALUE};
         buttonPane.setLayout(gbl_buttonPane);
         JLabel lblThisWillTake = new JLabel(String.format("Estimated sending time: %s",
-                estimateTime(parsedRecipients.size(), delay)));
+                estimateTime(parsedRecipients.size(), delay.toMillis())));
         lblThisWillTake.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
         GridBagConstraints gbc_lblThisWillTake = new GridBagConstraints();
         gbc_lblThisWillTake.fill = GridBagConstraints.HORIZONTAL;
@@ -136,8 +140,7 @@ public class CommuniqueSendDialog extends JDialog {
         contentPanel.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                    sendButton.doClick();
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) sendButton.doClick();
             }
 
             @Override
@@ -161,8 +164,8 @@ public class CommuniqueSendDialog extends JDialog {
         return returnValue;
     }
 
-    private String estimateTime(int count, int delay) {
-        int seconds = Math.round(count * ((float) delay / 1000));
+    private String estimateTime(int count, long delayMillis) {
+        int seconds = Math.round(count * (int) (delayMillis / 1000));
         return CommuniqueUtilities.time(seconds);
     }
 

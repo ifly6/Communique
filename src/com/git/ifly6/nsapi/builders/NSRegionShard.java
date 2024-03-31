@@ -19,39 +19,22 @@ package com.git.ifly6.nsapi.builders;
 
 public enum NSRegionShard {
 
-    REGION {
-        @Override
-        public String toString() {
-            return "region=";
-        }
-    },
+    REGION("region="),
 
-    PROPER_NAME {
-        @Override
-        public String toString() {
-            return "name";
-        }
-    },
+    PROPER_NAME("name"),
+    DELEGATE("delegate"),
+    FOUNDER("founder"),
+    NATIONS_LIST("nations");
 
-    DELEGATE {
-        @Override
-        public String toString() {
-            return "delegate";
-        }
-    },
+    private final String apiShard;
 
-    FOUNDER {
-        @Override
-        public String toString() {
-            return "founder";
-        }
-    },
-
-    NATIONS_LIST {
-        @Override
-        public String toString() {
-            return "nations";
-        }
+    NSRegionShard(String apiShard) {
+        this.apiShard = apiShard;
     }
 
+
+    @Override
+    public String toString() {
+        return apiShard;
+    }
 }

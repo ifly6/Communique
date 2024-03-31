@@ -20,11 +20,48 @@ package com.git.ifly6.communique.data;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.git.ifly6.communique.data.CommuniqueFilterType.EXCLUDE;
+import static com.git.ifly6.communique.data.CommuniqueFilterType.INCLUDE;
+import static com.git.ifly6.communique.data.CommuniqueFilterType.NORMAL;
+import static com.git.ifly6.communique.data.CommuniqueFilterType.REQUIRE_REGEX;
+import static com.git.ifly6.communique.data.CommuniqueRecipientType.NATION;
+import static com.git.ifly6.communique.data.CommuniqueRecipientType.NONE;
+import static com.git.ifly6.communique.data.CommuniqueRecipientType.REGION;
+import static com.git.ifly6.communique.data.CommuniqueRecipientType._VOTING;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CommuniqueRecipientTest {
+
+    // DO NOT RE-ORDER! testToString requires order!
+    static Map<String, CommuniqueRecipient> reversible = new HashMap<>();
+    static List<String> parseFails = new ArrayList<>();
+
+    static {
+        reversible.put("+nation:panem", new CommuniqueRecipient(INCLUDE, NATION, "panem"));
+        reversible.put("-nation:et", new CommuniqueRecipient(EXCLUDE, NATION, "et"));
+        reversible.put("+region:circenses", new CommuniqueRecipient(INCLUDE, REGION, "circenses"));
+        reversible.put("+regex:[A-Z].*", new CommuniqueRecipient(REQUIRE_REGEX, NONE, "[A-Z].*"));
+        reversible.put("imperium_anglorum", new CommuniqueRecipient(NORMAL, NATION, "imperium_anglorum"));
+        reversible.put("_voting:ga; for", new CommuniqueRecipient(NORMAL, _VOTING, "ga; for"));
+        reversible.put("nation:   A b C d E ", new CommuniqueRecipient(NORMAL, NATION, "a_b_c_d_e"));
+        reversible.put("-region_tag:massive", new CommuniqueRecipient(EXCLUDE, REGION_TAG, "massive"));
+
+        parseFails.add("PEN:15");
+        parseFails.add("hari:seldon_has");
+        parseFails.add("a_great:foundational");
+        parseFails.add("plan:for_the");
+        parseFails.add("long_long:ages");
+    }
 
     private String firstTranslated(String input) {
         List<String> r = CommuniqueRecipient.translateTokens(List.of(input));
@@ -36,56 +73,26 @@ class CommuniqueRecipientTest {
 
     @Test
     void parseRecipient() {
-        // normal, name shenanigans
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
-                CommuniqueRecipient.parseRecipient("nation:imperium anglorum"));
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
-                CommuniqueRecipient.parseRecipient("nation:ImPerIUm_angloRuM"));
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
-                CommuniqueRecipient.parseRecipient("nation:imperium_anglorum"));
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium_anglorum"),
-                CommuniqueRecipient.parseRecipient("nation:   imperium_anglorum      "));
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "a_b_c_d_e"),
-                CommuniqueRecipient.parseRecipient("nation:   A b C d E "));
+        for (Map.Entry<String, CommuniqueRecipient> entry : reversible.entrySet())
+            assertEquals(
+                    entry.getValue(),
+                    CommuniqueRecipient.parseRecipient(entry.getKey()));
+        for (Map.Entry<String, CommuniqueRecipient> entry : reversible.entrySet()) // test if upper case
+            assertEquals(
+                    entry.getValue(),
+                    CommuniqueRecipient.parseRecipient(entry.getKey().toUpperCase()));
 
-        // other normal types
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "europe"),
-                CommuniqueRecipient.parseRecipient("region:europe"));
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.TAG, "delegates"),
-                CommuniqueRecipient.parseRecipient("tag:delegates"));
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.TAG, "all"),
-                CommuniqueRecipient.parseRecipient("tag:all"));
+        assertEquals(
+                CommuniqueRecipient.parseRecipient("nation:nation:Imperium Anglorum"),
+                new CommuniqueRecipient(NORMAL, NATION, "imperium anglorum")
+        );
 
-        // exclude
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE, CommuniqueRecipientType.REGION, "europe"),
-                CommuniqueRecipient.parseRecipient("-region:europe"));
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE, CommuniqueRecipientType.REGION_TAG, "massive"),
-                CommuniqueRecipient.parseRecipient("-region_tag:massive"));
-
-        // include
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.INCLUDE, CommuniqueRecipientType.REGION, "europe"),
-                CommuniqueRecipient.parseRecipient("+region:europe"));
-
-        // flag
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.FLAG, "recruit"),
-                CommuniqueRecipient.parseRecipient("flag:recruit"));
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.FLAG, "active"),
-                CommuniqueRecipient.parseRecipient("flag:active"));
-
-        // regular expressions
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE_REGEX, CommuniqueRecipientType.NATION, "\\d+"),
-                CommuniqueRecipient.parseRecipient("-regex:\\d+"));
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.REQUIRE_REGEX, CommuniqueRecipientType.NATION, "[A-Z]+"),
-                CommuniqueRecipient.parseRecipient("+regex:[A-Z]+"));
-
-        // weird shit
-        // "2017-03-30 use lastIndexOf to deal with strange name changes, can cause error in name `+region:euro:pe`"
-        assertEquals(new CommuniqueRecipient(CommuniqueFilterType.INCLUDE, CommuniqueRecipientType.REGION, "pe"),
-                CommuniqueRecipient.parseRecipient("+region:euro:pe"));
+        for (String s : parseFails)
+            assertThrows(IllegalArgumentException.class, () -> CommuniqueRecipient.parseRecipient(s));
     }
 
     @Test
-    void translateTokens() {
+    void translateToken() {
         // world tags
         assertEquals("tag:delegates", firstTranslated("wa:delegate"));
         assertEquals("tag:delegates", firstTranslated("wa:delegates"));
@@ -100,7 +107,10 @@ class CommuniqueRecipientTest {
 
         // nation tags
         assertEquals("nation:imperium_anglorum", firstTranslated("imperium_anglorum"));
+    }
 
+    @Test
+    void translateTokens() {
         // exclude and include tokens
         assertEquals(
                 new ArrayList<>(List.of("region:Europe", "-nation:imperium_anglorum")),
@@ -114,10 +124,34 @@ class CommuniqueRecipientTest {
                 new ArrayList<>(List.of("tag:delegates", "+region:Europe")),
                 CommuniqueRecipient.translateTokens(
                         List.of("wa:delegates->region:Europe")));  // spacing
+
+        // new tests from 2022's communique3
+        List<String> tokens = CommuniqueRecipient.translateTokens(Arrays.asList(
+                "wa:members -- region:Europe",
+                "/imperium_anglorum",
+                "wa:delegates",
+                "wa:nations -> region:the_north_pacific",
+                "region:the_east_pacific->wa:members"
+        ));
+        assertEquals(tokens, Arrays.asList(
+                "tag:wa", "-region:europe",
+                "-nation:imperium_anglorum",
+                "tag:delegates",
+                "tag:wa", "+region:the_north_pacific",
+                "region:the_east_pacific", "+tag:wa"
+        ));
     }
 
     @Test
     void testToString() {
+        // new tests from 2022's communique3
+        List<Map.Entry<String, CommuniqueRecipient>> entries = new ArrayList<>(reversible.entrySet());
+        for (Map.Entry<String, CommuniqueRecipient> entry : entries) {
+            if (!entry.getKey().contains(":")) continue;
+            assertEquals(entry.getKey(), entry.getValue().toString());
+        }
+
+        // old tests
         assertEquals("-nation:imperium_anglorum",
                 new CommuniqueRecipient(CommuniqueFilterType.EXCLUDE, CommuniqueRecipientType.NATION,
                         "imperium_anglorum").toString());

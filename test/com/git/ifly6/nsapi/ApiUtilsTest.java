@@ -22,6 +22,9 @@ import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,27 +36,39 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings("ALL")
 class ApiUtilsTest {
 
+    static Map<String, String> values = new HashMap<>();
+
+    static {
+        values.put("region:EuRoPe", "region:europe");
+        values.put("imperium anglorum", "imperium_anglorum");
+        values.put("panem Et circensus", "panem_et_circensus");
+        values.put("        pax", "pax");
+        values.put("IO SATURNALIA", "io_saturnalia");
+        values.put("IO  SATURNALIA", "io__saturnalia");
+        values.put("  IO  oPAlIA  ", "io__opalia");
+        values.put("europe ", "europe");
+        values.put("Europe ", "europe");
+        values.put("     imperium anglorum  ", "imperium_anglorum");
+        values.put("-123", "-123");
+    }
+
     @Test
     void ref() {
-        Map<String, String> map = new HashMap<>();
-        map.put("imperium anglorum", "imperium_anglorum");
-        map.put("europe ", "europe");
-        map.put("Europe ", "europe");
-        map.put("     imperium anglorum  ", "imperium_anglorum");
-        map.put("-123", "-123");
+        // for individual ref
+        assertThrows(NullPointerException.class, () -> ApiUtils.ref((String) null));
+        for (Map.Entry<String, String> entry : values.entrySet())
+            assertEquals(ApiUtils.ref(entry.getKey()), entry.getValue());
 
-        for (Map.Entry<String, String> entry : map.entrySet())
-            assertEquals(entry.getValue(), ApiUtils.ref(entry.getKey()));
-
+        // for the array ref
         assertLinesMatch(map.keySet().stream().map(ApiUtils::ref), map.values().stream());
     }
 
     @Test
-    void isEmpty() {
-    }
-
-    @Test
     void isNotEmpty() {
+        assertTrue(ApiUtils.isNotEmpty("jdkl"));
+        assertTrue(ApiUtils.isNotEmpty("  j      dkl"));
+        assertFalse(ApiUtils.isNotEmpty("        "));
+        assertFalse(ApiUtils.isNotEmpty(""));
     }
 
     @Test
@@ -72,8 +87,8 @@ class ApiUtilsTest {
         }
 
         Map<Object[], Object> falses = new HashMap<>();
-        trues.put(new String[] {"imperium anglorum", "123"}, "separatist peoples");
-        trues.put(new CommuniqueRecipient[] {
+        falses.put(new String[] {"imperium anglorum", "123"}, "separatist peoples");
+        falses.put(new CommuniqueRecipient[] {
                         new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "europe"),
                         new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.REGION, "the_north_pacific"),
                         new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "transilia")

@@ -17,15 +17,18 @@
 
 package com.git.ifly6.nsapi;
 
-import com.git.ifly6.nsapi.telegram.JTelegramException;
+import com.git.ifly6.commons.CommuniqueUtilities;
+import com.google.common.util.concurrent.RateLimiter;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -36,20 +39,23 @@ import java.util.stream.Collectors;
  * <code>synchronized</code> block to force that only one connection exists at one time.
  * </p>
  */
+@SuppressWarnings("UnstableApiUsage")
 public class NSConnection {
 
-    /**
-     * This is the API delay timer, in milliseconds.
-     */
-    public final static int WAIT_TIME = 610;
+    private static final Logger LOGGER = Logger.getLogger(NSConnection.class.getName());
 
-    /**
-     * The NationStates API call prefix, "<code>https://www.nationstates.net/cgi-bin/api.cgi?</code>".
+    private static final double PERMITS_PER_SECOND = 40 / (double) 30; // 50 requests per 30 seconds
+    private static final RateLimiter limiter = RateLimiter.create(PERMITS_PER_SECOND);
+
+    /**API delay in milliseconds. */
+     public final static long WAIT_TIME = Math.round(Math.pow(PERMITS_PER_SECOND, -1));
+
+    /** NationStates API call prefix, {@code https://www.nationstates.net/cgi-bin/api.cgi?}.
      */
     public static final String API_PREFIX = "https://www.nationstates.net/cgi-bin/api.cgi?";
 
     /**
-     * The NationStates API query prefix, "<code>&q=</code>".
+      NationStates API query prefix, {@code &q=}.
      */
     public static final String QUERY_PREFIX = "&q=";
 
@@ -60,20 +66,28 @@ public class NSConnection {
     private Map<String, String> entries;
 
     /**
-     * Creates an unconnected <code>NSConnection</code> which will query the specified URL.
-     * @param urlString to query
+     * Creates an unconnected {@code NSConnection} to query the specified URL.
+     * @param urlString to query* @throws NSIOException if {@code urlString} is invalid URL
      */
     public NSConnection(String urlString) {
         try {
             this.url = new URL(urlString);
-        } catch (MalformedURLException e) {
-            throw new NSException(String.format("URL string '%s' invalid URL", urlString), e);
+        LOGGER.finest(String.format("Connecting to %s", urlString));} catch (MalformedURLException e) {
+            throw new NSIOException(String.format("Input URL <%s> malformed", urlString), e);
         }
     }
 
-    public NSConnection connect() throws IOException {
+    /**
+     * Connects instantiated {@code NSConnection}.
+     * @return this
+     * @throws FileNotFoundException if nation does not exist
+     * @throws IOException           if connection otherwise fails
+     * @throws NSIOException         if rate limit exceeded
+     * @throws NSException           if other error
+     */public NSConnection connect() throws IOException {
         // Implement the rate limit
-        rateLimit();
+        double secondsWaited = limiter.acquire();
+        LOGGER.finest(String.format("NSConnection rate limit -> waited %.3f seconds", secondsWaited));
 
         // Create connection, add request properties
         HttpURLConnection apiConnection = (HttpURLConnection) url.openConnection();
@@ -96,44 +110,43 @@ public class NSConnection {
             xml_raw = reader.lines().collect(Collectors.joining("\n"));
             reader.close();
 
-            if (apiConnection.getResponseCode() == 429)
-                throw new NSIOException("Api ratelimit exceeded");
+            if (apiConnection.getResponseCode() == 429){
+                String retryAfter = apiConnection.getHeaderField("X-Retry-After");
+                throw new NSIOException(
+                        String.format("API rate limit exceeded! Retry after %s.",
+                                CommuniqueUtilities.time(Integer.parseInt(retryAfter))));
+            }
 
-            if (xml_raw.contains("Unknown nation"))
-                throw new NSException("Nation does not exist");
+            if (xml_raw.contains("Unknown nation")
+                || apiConnection.getResponseCode() == 404)
+                throw new FileNotFoundException(String.format("No result for url %s", url.toString()));
 
-            System.err.println(String.format("API called URL:\t%s", url.toString()));
-            throw new JTelegramException(String.format("Cannot get data from the API,\nHTTP response code %d",
+
+            throw new NSException(String.format("Cannot get data from the API at url %s"
+                            + "\nHTTP response code %d",
+                    url.toString(),
                     apiConnection.getResponseCode()));
         }
 
         return this;
     }
 
-    public NSConnection setHeaders(Map<String, String> entries) {
+    /**
+     * Sets HTML POST headers
+     * @param entries of keys and values to pass
+     * @return self, after setting
+     */public NSConnection setHeaders(Map<String, String> entries) {
         this.entries = entries;
         return this;
     }
 
     /**
-     * Makes sure that the many different instances have to compete for a single API call which is regulated to at least
-     * the number of milliseconds defined in {@link NSConnection#WAIT_TIME}.
+     * Delivers response as {@code String}. If {@code NSConnection} has already connected, ie is spent, returns result
+     * thereof. If not yet connected, invokes {@link #connect()} automatically.
+     * @return response
+     * @throws IOException        if connection fails
      */
-    private synchronized void rateLimit() {
-        try {
-            Thread.sleep(WAIT_TIME);
-        } catch (InterruptedException e) {
-            System.err.println("Rate limit was interrupted.");
-        }
-    }
-
-    /**
-     * Gets response from server as a <code>String</code>.
-     * @return response in a String form
-     * @throws JTelegramException if thrown from connect method
-     * @throws IOException        from {@link java.net.URLConnection}
-     */
-    public String getResponse() throws JTelegramException, IOException {
+    public String getResponse() throws  IOException {
         // if it has connected, get response. otherwise, connect and return response
         return hasConnected ? xml_raw : connect().xml_raw;
     }

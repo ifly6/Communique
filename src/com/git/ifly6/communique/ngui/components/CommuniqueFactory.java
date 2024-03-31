@@ -35,6 +35,7 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
+import static com.git.ifly6.communique.ngui.CommuniqueConstants.CODE_HEADER;
 
 public class CommuniqueFactory {
 

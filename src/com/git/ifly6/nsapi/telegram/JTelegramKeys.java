@@ -17,6 +17,7 @@
 
 package com.git.ifly6.nsapi.telegram;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -43,106 +44,72 @@ public class JTelegramKeys {
      * constructor.
      * @param client a <code>String</code> which contains the <code>clientKey</code>
      * @param secret a <code>String</code> which contains the <code>secretKey</code>
-     * @param tgId   a <code>String</code> which contains the <code>telegramId</code>
+     * @param teleID a <code>String</code> which contains the <code>telegramId</code>
      */
-    public JTelegramKeys(String client, String secret, String tgId) {
+    public JTelegramKeys(String client, String secret, String teleID) {
         clientKey = client.trim();
         secretKey = secret.trim();
-        telegramId = tgId.trim();
+        telegramId = teleID.trim();
     }
 
     /**
      * Creates a purposely invalid "empty" <code>JTelegramKeys</code>.
      */
     public JTelegramKeys() {
+        // cannot be removed; IO code relies on this 'empty' constructorclientKey = "CLIENT_KEY";
         clientKey = "CLIENT_KEY";
         secretKey = "SECRET_KEY";
         telegramId = "TELEGRAM_ID";
     }
 
-    /**
-     * Converts <code>JTelegramKeys</code> into a string with a comma delimiter.
-     */
+
     @Override
     public String toString() {
-        return clientKey + ", " + secretKey + ", " + telegramId;
+        return String.join(", ", Arrays.asList(clientKey, secretKey, telegramId));
     }
 
-    /**
-     * Gets all keys as a <code>String[]</code>. This method is the same as <code>toArray()</code>.
-     * @return <code>String[]</code> containing all the keys in the form
-     * <code>{ clientKey, secretKey, telegramId }</code>
-     */
-    @Deprecated
-    public String[] getKeys() {
-        return toArray();
-    }
-
-    /**
-     * Gets the client key as a {@code String}. If {@code null} returns {@code CLIENT_KEY}.
-     * @return <code>String</code> containing whatever the client key was already set to.
-     */
     public String getClientKey() {
-        return (clientKey != null) ? clientKey : "CLIENT_KEY";
+        return (clientKey != null) ? clientKey : "CLIENT_KEY";;
     }
 
-    /**
-     * Gets the secret key as a {@code String}. If {@code null} returns {@code SECRET_KEY}.
-     * @return <code>String</code> containing whatever the secret key was already set to.
-     */
     public String getSecretKey() {
-        return (secretKey != null) ? secretKey : "SECRET_KEY";
+        return (secretKey != null) ? secretKey : "SECRET_KEY";;
     }
 
-    /**
-     * Gets the telegram ID as a {@code String}. If {@code null} returns {@code TELEGRAM_ID}.
-     * @return <code>String</code> containing whatever the telegram ID was already set to.
-     */
-    public String getTelegramID() {
-        return (telegramId != null) ? telegramId : "TELEGRAM_ID";
+    public String getTelegramId() {
+        return (telegramId != null) ? telegramId : "TELEGRAM_ID";;
     }
 
-    /**
-     * Sets the client key using a <code>String</code>.
-     * @param input is a <code>String</code> containing the client key
-     */
     public void setClientKey(String input) {
+        Objects.requireNonNull(input);
         clientKey = input.trim();
     }
 
-    /**
-     * Sets the secret key using a <code>String</code>.
-     * @param input is a <code>String</code> containing the secret key
-     */
     public void setSecretKey(String input) {
+        Objects.requireNonNull(input);
         secretKey = input.trim();
     }
 
-    /**
-     * Sets the telegram ID using a <code>String</code>.
-     * @param input is a <code>String</code> containing the telegram ID
-     */
     public void setTelegramId(String input) {
+        Objects.requireNonNull(input);
         telegramId = input.trim();
     }
 
     /**
-     * Gets all keys as a <code>String[]</code>.
-     * @return <code>String[]</code> containing all the keys in the form
-     * <code>{ clientKey, secretKey, telegramId }</code>
+     * @return {@code String[]} with elements {@code { clientKey, secretKey, telegramId }}.
      */
     public String[] toArray() {
         return new String[] {clientKey, secretKey, telegramId};
     }
 
+    /**
+     * @return true if any key is empty or null
+     */
+    //noinspection RedundantIfStatement
     public boolean anyEmpty() {
         if (Objects.isNull(clientKey) || clientKey.isEmpty()) return true;
         if (Objects.isNull(secretKey) || secretKey.isEmpty()) return true;
-
-        //noinspection RedundantIfStatement
         if (Objects.isNull(telegramId) || telegramId.isEmpty()) return true;
-        // ^ IntelliJ says 'simplify!', this is more clear
-
         return false;
     }
 

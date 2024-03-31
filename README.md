@@ -2,16 +2,14 @@
 
 ## Summary ##
 
-Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API. It is directly based
-on top of
-[JavaTelegram](https://github.com/iFlyCode/NationStates-JavaTelegram) a library of mine designed to interface
-with NationStates itself.
+Communiqué is a free, open-source, and platform-independent client for NationStates's Telegram API.
 
 If you want to run headless on a Linux box or just broadly from the command line, you should download the Marconi
 executable.
 
 It is *your* responsibility to know how the telegram API works. Use of this program is agreement that you understand
-those limitations and requirements. It also agrees that you cannot claim losses, damages, or other negative effects
+those limitations and requirements. Use implies agreement that you cannot claim losses, damages, or other negative
+effects
 from the author if action is taken against your NationStates account or from other activity.
 
 ## Documentation ##
@@ -64,12 +62,12 @@ from the author if action is taken against your NationStates account or from oth
 6. You can save all the keys and all your recipients to a file. The file (if your calls completed without any errors)
    will include your client, secret, and telegram keys; as well as the recipients of the file, and the people to which
    the
-   file was already sent. Do not share this file. You can load these files from disc to restore a previous configuration
-   (or, create them by hand and skip manual configuration).
+   file was already sent. Do not share this file. You can load these files from disc to restore a previous
+   configuration.
 
 ### Technical Information ####
 
-This program reports its UserAgent to the NationStates API as follows:
+This program reports its `UserAgent` to the NationStates API as follows:
 
 * `NationStates JavaTelegram (maintained by Imperium Anglorum, used by <client key>)` when sending telegrams and
 * `NS API request; maintained by Imperium Anglorum, email: cyrilparsons.london@gmail.com; see IP.` when requesting
@@ -140,13 +138,11 @@ The following are the various changelogs from various version of Communique:
    `randomSort` meant that you could only sort things randomly. Now, Communiqué supports randomisation of the recipients
    list, prioritisation of the Delegates in the recipients, and reversing the order of the recipients. Due to changes in
    the way this is implemented, this requires a new file version; it also means that it can easily be extended. Please
-   make
-   any requests for new post-processing options via GitHub.
+   make any requests for new post-processing options via GitHub.
 
 9. Version 9 adds the ability to scan nations mentioned in the NS API Happenings for activity and
    return their names for possible telegram despatch. Implementation of this new command requires a new version number
-   as
-   it is not backwards compatible with older versions.
+   as it is not backwards compatible with older versions.
 
 10. Version 10 allows names to be filtered using `+regex:PATTERN` and `-regex:PATTERN` flags that require and omit regex
     matches, respectively. Obviously, these flags break compatibility with previous versions. If there are further kinds
@@ -170,9 +166,11 @@ The following are the various changelogs from various version of Communique:
 12. Version 12 allows typing of telegrams to specify default delay times and also introduces overriding the default
     times with wait time input. Both changes affect configuration file format.
 
-13. Version 13 reflects substantial changes to the Communiqué GUI, especially in allowing multiple files to be opened, a
-    clearly-visible sending log in tabular format, etc. Due to reliance on `java.awt.Taskbar` this requires Java 11+.
-    Also adopted `FlatLAF` the Swing theme; Windows' system LAF is awful.
+13. Version 13 reflects substantial changes to the Communiqué GUI and parsing structure.
+    - A new editor allows multiple files to be opened along with clearly-visible sending log in tabular format. Due to reliance on `java.awt.Taskbar` this requires Java 11+.
+      Also adopted `FlatLAF` the Swing theme; Windows' system LAF is awful.
+    - Caching for data is now ported from the abortive Communique 3 branch.
+    - A plethora of new data flags is now available from the abortive Communique 3 branch.
 
 ## Road ahead
 

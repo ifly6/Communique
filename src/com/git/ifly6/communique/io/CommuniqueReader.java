@@ -31,7 +31,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -41,9 +43,9 @@ import java.util.stream.Collectors;
  * version of the pre-JSON configuration files. The handling for this logic is done primarily in the
  * {@link CommuniqueReader#read()} file.
  * @see CommuniqueFileReader
+ * @since version 2.0 (build 7)
  */
 @SuppressWarnings("deprecation")
-        // Suppress deprecation as we use dep. classes
 class CommuniqueReader {
 
     private static final Logger LOGGER = Logger.getLogger(CommuniqueReader.class.getName());
@@ -179,5 +181,4 @@ class CommuniqueReader {
             config.setcRecipients(list);
         }
     }
-
 }

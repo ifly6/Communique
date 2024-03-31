@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
  * pages in line with the script rules.
  * @author ifly6
  */
+@Deprecated
 public class CommuniqueScraper {
 
     public static final String GA = "https://www.nationstates.net/page=UN_delegate_votes/council=1";

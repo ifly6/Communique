@@ -57,8 +57,8 @@ public class NSNationQueryBuilder {
     }
 
     /**
-     * Returns the relevant NS API <code>String</code> that can be used to create the relevant URL which can then call
-     * the document desired.
+     * Returns the relevant NS API {@code String} that can be used to get the relevant URL which can then call the
+     * document desired.
      * @see java.lang.Object#toString()
      */
     @Override
@@ -71,9 +71,7 @@ public class NSNationQueryBuilder {
         if (censusShards.size() > 0) {
             output.append("census;mode=score;scale=");
             // For each census element, append to builder
-            censusShards.stream()
-                    .map(Entry::getValue)
-                    .forEach(i -> output.append(i.toString()).append("+"));
+            censusShards.stream().map(Entry::getValue).forEach(i -> output.append(i.toString()).append("+"));
         }
 
         String outString = output.toString();

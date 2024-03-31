@@ -15,6 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// todo update
 /**
  * This package manages parsing for the Communique system. Each recipient is contained in a
  * {@link com.git.ifly6.communique.data.CommuniqueRecipient CommuniqueRecipient} object, which can then be applied via
@@ -24,5 +25,6 @@
  * {@link com.git.ifly6.nsapi.telegram.util.JInfoFetcher} and other classes like {@link com.git.ifly6.nsapi.NSNation}
  * and {@link com.git.ifly6.nsapi.NSRegion}.</p>
  * @see com.git.ifly6.nsapi
+ * @since version version 7
  */
 package com.git.ifly6.communique.data;

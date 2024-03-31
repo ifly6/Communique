@@ -20,6 +20,7 @@ package com.git.ifly6.communique.data;
 /**
  * Contains utility methods to make it less verbose to create a {@link CommuniqueRecipient}. Also provides functionality
  * to help with the fact that {@link CommuniqueRecipient}s are immutable.
+ * @since version 7
  */
 public class CommuniqueRecipients {
 
@@ -27,21 +28,10 @@ public class CommuniqueRecipients {
     private CommuniqueRecipients() {
     }
 
-    /**
-     * Creates recipient of type {@link CommuniqueRecipientType#NATION} from given string and with the given {@link CommuniqueFilterType}
-     * @param filter     to apply to construction
-     * @param nationName to target
-     * @return new recipient
-     */
     public static CommuniqueRecipient createNation(CommuniqueFilterType filter, String nationName) {
         return new CommuniqueRecipient(filter, CommuniqueRecipientType.NATION, nationName);
     }
 
-    /**
-     * Creates a nation recipient with the given name with a normal filter type
-     * @param nationName to target
-     * @return new recipient
-     */
     public static CommuniqueRecipient createNation(String nationName) {
         return createNation(CommuniqueFilterType.NORMAL, nationName);
     }
@@ -56,10 +46,6 @@ public class CommuniqueRecipients {
 
     public static CommuniqueRecipient createTag(CommuniqueFilterType filterType, String tag) {
         return new CommuniqueRecipient(filterType, CommuniqueRecipientType.TAG, tag);
-    }
-
-    public static CommuniqueRecipient createFlag(String flag) {
-        return new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.FLAG, flag);
     }
 
     /**

@@ -16,19 +16,21 @@
  */
 package com.git.ifly6.communique.io;
 
-import com.git.ifly6.nsapi.telegram.util.JInfoFetcher;
+import com.git.ifly6.nsapi.ApiUtils;
+import com.git.ifly6.nsapi.ctelegram.io.cache.CommDelegatesCache;
+import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * This implements post-processing actions on the recipient list as a whole for Communique and Marconi clients. It has
  * various functions, like randomisation, reversing the order of recipients, and prioritisation of delegates.
  */
-public enum CommuniqueProcessingAction {
+public enum CommuniqueProcessingAction implements Function<List<String>, List<String>> {
 
     /**
      * Randomises the order of recipients
@@ -74,19 +76,21 @@ public enum CommuniqueProcessingAction {
     DELEGATE_PRIORITISE {
         @Override
         public List<String> apply(List<String> input) {
-            Set<String> delegates = new HashSet<>(JInfoFetcher.instance().getDelegates());
+            Set<String> delegates = new HashSet<>(CommDelegatesCache.getInstance().getDelegates());
 
             List<String> listDelegates = new ArrayList<>(); // delegates we have
             List<String> nonDelegate = new ArrayList<>(); // the rest
             for (String s : input)
-                if (delegates.contains(s)) listDelegates.add(s);
+                if (delegates.contains(s)) listDelegates.add(s); // see docs on this algorithm
                 else nonDelegate.add(s);
 
-            Collections.shuffle(listDelegates);
-            Collections.shuffle(nonDelegate);
+            ApiUtils.shuffle(listDelegates);
+            ApiUtils.shuffle(nonDelegate);
 
-            listDelegates.addAll(nonDelegate);
-            return listDelegates;
+            List<String> newList = new ArrayList<>(listDelegates.size() + nonDelegate.size());
+            newList.addAll(listDelegates);
+            newList.addAll(nonDelegate);
+            return newList;
         }
 
         @Override

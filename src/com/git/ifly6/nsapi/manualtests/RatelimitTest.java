@@ -31,20 +31,20 @@ public class RatelimitTest {
          * or it doesn't actually connect. I guess that's Java trying to save you network calls without explicit
          * instructions.
          * */
-//		for (int i = 0; i < 51; i++) {
-//			URL url = new URL(NSConnection.API_PREFIX + "q=newnations");
-//			HttpURLConnection apiConnection = (HttpURLConnection) url.openConnection();
-//			apiConnection.connect();
+//        for (int i = 0; i < 51; i++) {
+//            URL url = new URL(NSConnection.API_PREFIX + "q=newnations");
+//            HttpURLConnection apiConnection = (HttpURLConnection) url.openConnection();
+//            apiConnection.connect();
 //
-//			BufferedReader reader = new BufferedReader(new InputStreamReader(apiConnection.getInputStream()));
-//			String xml_raw = reader.lines().collect(Collectors.joining("\n"));
-//			reader.close();
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(apiConnection.getInputStream()));
+//            String xml_raw = reader.lines().collect(Collectors.joining("\n"));
+//            reader.close();
 //
-//			System.out.println(xml_raw);
-//			System.out.println("Called API " + i + " of 51.");
-//		}
+//            System.out.println(xml_raw);
+//            System.out.println("Called API " + i + " of 51.");
+//        }
 //
-//		System.out.println(NSConnection.API_PREFIX + "q=newnations");
+//        System.out.println(NSConnection.API_PREFIX + "q=newnations");
 
         /*
          * This section logs the start time and the time delta between connections. For the JInfoFetcher equivalent

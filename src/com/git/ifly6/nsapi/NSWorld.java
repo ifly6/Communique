@@ -17,12 +17,12 @@
 
 package com.git.ifly6.nsapi;
 
+import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.jcabi.xml.XMLDocument;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /* There is only one World, so this is going to be static. */
 public class NSWorld {
@@ -31,59 +31,87 @@ public class NSWorld {
     }
 
     /**
+     * Queries the NationStates API for a listing of 50 new nations.
+     * @return {@code List<String>} with the recipients inside, in {@code ref} form
+     * @throws JTelegramException in case the NationStates API is unreachable for some reason
+     */
+    public static List<String> getNew() throws JTelegramException {
+        try {
+            final NSConnection connection = new NSConnection(NSConnection.API_PREFIX + "q=newnations");
+            final String response = connection.connect().getResponse();
+            final String newNations = new XMLDocument(response).xpath("/WORLD/NEWNATIONS/text()").get(0);
+            return arrayRef(newNations.split(","));
+        } catch (IOException e) {
+            throw new JTelegramException("Failed to get new nations", e);
+        }
+    }
+
+    /**
      * Queries the NationStates API for a listing of all nations in the game.
-     * @return <code>List&lt;String&gt;</code> with the reference name of every NS nation
+     * @return {@code List<String>} of every NS nation in {@code ref} form
      * @throws IOException from {@link java.net.URLConnection}
      */
     public static List<String> getAllNations() throws IOException {
         String x = new NSConnection(NSConnection.API_PREFIX + "q=nations").getResponse();
-        return processArray(new XMLDocument(x).xpath("/WORLD/NATIONS/text()").get(0).split(","));
+        return arrayRef(new XMLDocument(x).xpath("/WORLD/NATIONS/text()").get(0).split(","));
     }
 
     /**
      * Queries the NationStates API for a listing of every single World Assembly member.
-     * @return <code>List&lt;String&gt;</code> with the reference name of every World Assembly member
+     * @return {@code List<String>} with the reference name of every World Assembly member
      * @throws IOException from {@link java.net.URLConnection}
      */
     public static List<String> getWAMembers() throws IOException {
         String x = new NSConnection(NSConnection.API_PREFIX + "wa=1&q=members").getResponse();
-        return processArray(new XMLDocument(x).xpath("/WA/MEMBERS/text()").get(0).split(","));
+        return arrayRef(new XMLDocument(x).xpath("/WA/MEMBERS/text()").get(0).split(","));
     }
 
     /**
      * Queries the NationStates API for a listing of all World Assembly delegates.
-     * @return <code>List&lt;String&gt;</code> with the reference name of every delegate
+     * @return {@code List<String>} with the reference name of every delegate
      * @throws IOException from {@link java.net.URLConnection}
      */
     public static List<String> getDelegates() throws IOException {
         String x = new NSConnection(NSConnection.API_PREFIX + "wa=1&q=delegates").getResponse();
-        return processArray(new XMLDocument(x).xpath("/WA/DELEGATES/text()").get(0).split(","));
+        return arrayRef(new XMLDocument(x).xpath("/WA/DELEGATES/text()").get(0).split(","));
     }
 
     /**
-     * Queries the NS API for list of regions which declare the parameter tag.
-     * @param regionTag to declare
-     * @return list of regions with names by string
-     * @throws IOException from {@link java.net.URLConnection}
+     * Queries the NS API for list of regions declaring the provided tag.
+     * @param regionTag to query
+     * @return {@code List<String>} of regions by names
+     * @throws IOException from {@link java.net.URLConnection}* @throws NSNoSuchTagException if tag specified does not
+     *                     exist
      */
-    public static List<String> getRegionTag(String regionTag) throws IOException {
+    public static List<String> getRegionTag(String regionTag) throws IOException, NSNoSuchTagException {
         // https://www.nationstates.net/cgi-bin/api.cgi?q=regionsbytag;tags=-medium,class,-minuscule
-        String content = new NSConnection(NSConnection.API_PREFIX + "q=regionsbytag;tags=" + regionTag)
-                .getResponse();
-        return processArray(new XMLDocument(content).xpath("/WORLD/REGIONS/text()").get(0).split(","));
+        try {
+            String content = new NSConnection(
+                    NSConnection.API_PREFIX
+                            + "q=regionsbytag;tags="
+                            + regionTag.trim()
+            ).getResponse();
+            return arrayRef(new XMLDocument(content).xpath("/WORLD/REGIONS/text()").get(0).split(","));
+        } catch (IndexOutOfBoundsException e) {
+            throw new NSNoSuchTagException(String.format("tag <%s> does not exist", regionTag), e);
+        }
     }
 
     /**
-     * Processes input array by trimming all elements, removing empty elements, forcing lower-case, replacing spaces
-     * with an underscore, and then collecting to a list.
-     * @param input array to be processed
-     * @return list of strings in NationStates reference name form
+     * Wraps {@link ApiUtils#ref} for {@code String[]}.
      */
-    private static List<String> processArray(String[] input) {
-        return Stream.of(input)
-                .filter(ApiUtils::isNotEmpty)
-                .map(ApiUtils::ref)
-                .collect(Collectors.toList());
+    private static List<String> arrayRef(String[] input) {
+        return ApiUtils.ref(Arrays.asList(input));
+    }
+
+    /**
+     * Thrown if the specified region tag does not exist.
+     * @since version 3.0 (build 13)
+     */
+    public static class NSNoSuchTagException extends NSException {
+        public NSNoSuchTagException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
 }

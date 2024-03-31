@@ -19,7 +19,6 @@ package com.git.ifly6.communique.data;
 
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +34,7 @@ import java.util.stream.Collectors;
  * immediately. This class is meant to be used fluently, e.g.
  * <code>new Communique7Parser().apply(tokens).listRecipients()</code>.</p>
  * @author ifly6
+ * @since version 7
  */
 public class Communique7Parser {
 
@@ -47,7 +47,7 @@ public class Communique7Parser {
     /**
      * List of recipients changed by various actions and applications called by the parser.
      */
-    private Set<CommuniqueRecipient> recipients;
+    private Set<CommuniqueRecipient> recipients = new LinkedHashSet<>();
 
     /**
      * Creates a new empty parser without any applied tokens. To actually use the parser, apply tokens using the apply
@@ -55,7 +55,6 @@ public class Communique7Parser {
      * <code>CommuniqueRecipient</code>.
      */
     public Communique7Parser() {
-        recipients = new LinkedHashSet<>();
     }
 
     /**
@@ -75,21 +74,11 @@ public class Communique7Parser {
 
     /**
      * Applies the tokens to the recipients list with a specified list of tokens.
-     * @param list of <code>CommuniqueRecipient</code>s
+     * @param list of {@link CommuniqueRecipient}
      * @return this parser
      */
     public Communique7Parser apply(List<CommuniqueRecipient> list) throws JTelegramException {
         list.forEach(this::apply);
-        return this;
-    }
-
-    /**
-     * Applies tokens based on a variable number of <code>CommuniqueRecipient</code>s.
-     * @param tokens to apply
-     * @return this parser
-     */
-    public Communique7Parser apply(CommuniqueRecipient... tokens) {
-        Arrays.stream(tokens).forEach(this::apply);
         return this;
     }
 

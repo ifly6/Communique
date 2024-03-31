@@ -23,6 +23,10 @@ import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
+import javax.annotation.Nonnull;
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,9 +37,9 @@ import java.util.stream.Collectors;
  * <code>CommuniqueConfig</code> creates a unified object for the storage and retrieval of configuration information
  * necessary to have persistent states between Communiqué or Marconi instances.
  */
-public class CommuniqueConfig implements java.io.Serializable {
+public class CommuniqueConfig implements Serializable {
 
-    // For backwards compatibility, almost all field names cannot be changed
+    // NOTE! For backwards compatibility, do not change field names!
     private static final long serialVersionUID = Communique7Parser.version;
 
     public String HEADER;
@@ -124,8 +128,8 @@ public class CommuniqueConfig implements java.io.Serializable {
     }
 
     /**
-     * Sets <code>cRecipients</code> with <code>List&lt;CommuniqueRecipient&gt;</code>, translates to
-     * <code>String</code> on the fly.
+     * Sets {@link #cRecipients} with {@link List} of {@link CommuniqueRecipient}, automatically translates to {@link
+     * String} on the fly.
      * @param crs {@link CommuniqueRecipient}s to set
      */
     public void setcRecipients(List<CommuniqueRecipient> crs) {

@@ -24,14 +24,15 @@ import com.jcabi.xml.XMLDocument;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class NSRegion {
+public class NSRegion implements NSTimeStamped {
 
     // So we don't need to fetch it again over different regions
     private static Set<String> worldWAMembers;
@@ -40,6 +41,8 @@ public class NSRegion {
     private String regionOfficialName;
     private String founderName;
     private String delegateName;
+
+    private Instant updateTime;
 
     private List<String> regionMembers = new ArrayList<>();
     private List<String> waMembers = new ArrayList<>();
@@ -69,13 +72,13 @@ public class NSRegion {
             NSConnection apiConnect = new NSConnection(builder.toString());
 
             // check existence
-            String retInfo = apiConnect.connect().getResponse();
+            String response = apiConnect.connect().getResponse();
 
             // populate relevant fields
-            XML xml = new XMLDocument(retInfo);
+            XML xml = new XMLDocument(response);
             regionOfficialName = xml.xpath("/REGION/NAME/text()").get(0);
-            founderName = xml.xpath("/REGION/FOUNDER/text()").get(0);
-            delegateName = xml.xpath("/REGION/DELEGATE/text()").get(0);
+            founderName = ApiUtils.ref(xml.xpath("/REGION/FOUNDER/text()").get(0));
+            delegateName = ApiUtils.ref(xml.xpath("/REGION/DELEGATE/text()").get(0));
 
             // get populace
             String regionMemberString = "";
@@ -91,12 +94,14 @@ public class NSRegion {
                     .collect(Collectors.toList());
 
         } catch (FileNotFoundException e) {
-            throw new NSException("Region '" + this.regionName + "' does not exist.");    // no region -> 404
+            throw new NoSuchRegionException(
+                    String.format("Region <%s> does not exist.", this.regionName), e); // no region -> 404
 
         } catch (IOException e) {
-            throw new NSException("Check your Internet connection.");    // otherwise, internet
+            throw new NSException("Check your Internet connection."); // otherwise, internet
         }
 
+        updateTime = Instant.now();
         return this;
     }
 
@@ -128,16 +133,16 @@ public class NSRegion {
 
     /**
      * Queries the NationStates API for a the reference name of the Delegate.
-     * @return a <code>String</code> with the name of the Delegate
+     * @return {@code String} with delegate nation
      */
     public String getDelegateName() {
         return delegateName;
     }
 
     /**
-     * Queries the NationStates API for the Delegate, loads that into a <code>NSNation</code> and populates the data for
-     * that nation.
-     * @return a <code>NSNation</code> with the name of the Delegate and populated data.
+     * Queries the NationStates API for the Delegate, loads that into a {@link NSNation} and populates the data for that
+     * nation.
+     * @return a {@code NSNation} with the name of the Delegate and populated data.
      */
     public NSNation getDelegate() {
         return new NSNation(delegateName).populateData();
@@ -175,4 +180,24 @@ public class NSRegion {
     public String getName() {
         return regionOfficialName;
     }
+
+    /**
+     * Returns time when data was acquired.
+     * @return {@link Instant} of data acqisition
+     */
+    @Override
+    public Instant timestamp() {
+        return updateTime;
+    }
+
+    /**
+     * Thrown if no such region exists.
+     * @since version 3.0 (build 13)
+     */
+    public static class NoSuchRegionException extends NSException {
+        public NoSuchRegionException(String message, Throwable throwable) {
+            super(message, throwable);
+        }
+    }
+
 }

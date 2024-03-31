@@ -17,39 +17,66 @@
 
 package com.git.ifly6.marconi;
 
-import com.git.ifly6.communique.CommuniqueUtilities;
+import com.git.ifly6.commons.CommuniqueApplication;
+import com.git.ifly6.commons.CommuniqueUtilities;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
+/**
+ * Utilities associated with Marconi.
+ * @since version 1.6 (build 6) (file initially created in build 1)
+ */
 public class MarconiUtilities {
 
     private static final Logger LOGGER = Logger.getLogger(MarconiUtilities.class.getName());
+    private static final Path lockFile = CommuniqueApplication.APP_SUPPORT.resolve("marconi.lock");
 
-    static Path lockFile = Paths.get(System.getProperty("user.dir"), "marconi.lock");
-    private static Scanner scan = new Scanner(System.in);
+    /**
+     * Creates two column string, each column is 30 characters wide.
+     * @returns string with lines
+     * @since version 3.0 (build 13)
+     */
+    protected static String twoColumn(List<String> items) {
+        List<String> lines = new ArrayList<>();
+        for (int x = 0; x < items.size(); x = x + 2) // iterate two-by-two
+            try {
+                lines.add(String.format("%-30.30s  %-30.30s", items.get(x), items.get(x + 1)));
+            } catch (IndexOutOfBoundsException e) {
+                lines.add(items.get(x)); // odd number of entries
+            }
+        return String.join("\n", lines);
+    }
+
+    /**
+     * Creates Marconi lock file.
+     * @since version 3.0 (build 13)
+     */
+    static void createFileLock() {
+        try {
+            if (!Files.exists(lockFile)) {
+                Files.write(lockFile, Collections.singletonList(
+                        String.format("marconi. started %s.", CommuniqueUtilities.getDate())));
+                lockFile.toFile().deleteOnExit(); // delete lock file when marconi closes!
+            }
+        } catch (IOException e) {
+            LOGGER.severe("Cannot get or create lock file!");
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Determines whether there is another instance of Marconi which is already sending.
-     * @return boolean, whether program is already running
+     * @return boolean, whether lock file already exists
      */
     static boolean isFileLocked() {
-        try {
-            if (!Files.exists(lockFile)) {
-                Files.write(lockFile, List.of(CommuniqueUtilities.getDate()));
-                return false;
-            } else return true;
-        } catch (IOException exc) {
-            LOGGER.log(Level.INFO, "Cannot determine if program is already running from lock file.", exc);
-            return false;
-        }
+        return Files.exists(lockFile);
     }
 
     /**

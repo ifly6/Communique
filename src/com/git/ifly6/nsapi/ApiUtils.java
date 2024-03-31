@@ -16,16 +16,31 @@
  */
 package com.git.ifly6.nsapi;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.regex.Pattern;
 
+/**
+ * Utility functions for handling or parsing information from the NationStates API. See also <a
+ * href="https://www.nationstates.net/pages/api.html">API documentation</a>.
+ */
 public class ApiUtils {
+
+    /**
+     * Stable randomisation seed.
+     * @since version 3.0 (build 13)
+     */
+    public static final Random RANDOM = new Random(81141418);
 
     private static final Pattern WHITESPACE = Pattern.compile("\\s");
 
     private ApiUtils() {
     }
+
 
     /**
      * Changes some name into a reference name.
@@ -40,14 +55,27 @@ public class ApiUtils {
     }
 
     /**
-     * Applies the {@link ApiUtils#ref(String)} to all elements in a <code>List</code>
-     * @param list of strings to convert to reference format
-     * @return a <code>List</code> with all elements having ref applied
+     * Applies {@link ApiUtils#ref(String)} to elements; removes empty (or all-white-space) elements.
+     * @param list to convert to reference format
+     * @return elements in reference form
      */
     public static List<String> ref(List<String> list) {
         List<String> refs = new ArrayList<>(list.size());
-        for (String s : list) refs.add(ApiUtils.ref(s));
+        for (String s : list)
+            if (ApiUtils.isNotEmpty(s))
+                refs.add(ApiUtils.ref(s));
+
         return refs;
+    }
+
+    /**
+     * Tests whether first string starts with the latter string; case insensitive.
+     * @param s      to test
+     * @param prefix to look for prefix
+     * @return true if prefix (case-insensitive) present; false otherwise
+     */
+    public static boolean startsWithLowerCase(String s, String prefix) {
+        return s.toLowerCase().startsWith(prefix.toLowerCase());
     }
 
     /**
@@ -68,19 +96,29 @@ public class ApiUtils {
     }
 
     /**
-     * Determines whether an array contains some value, utilising the standard <code>Object</code> equals method. This
-     * method does not do type-checking.
-     * @param array  to check in
+     * Determines whether an array contains some value. Method does not check type.
+     * @param hay    to check in
      * @param needle to check for
      * @return whether array contains needle
      */
-    public static boolean contains(Object[] array, Object needle) {
-        if (isEmpty(array)) return false;
+    public static boolean contains(Object[] hay, Object needle) {
+        if (isEmpty(hay)) return false;
         if (needle == null) return false;
-        for (Object element : array)
+        for (Object element : hay)
             if (element.equals(needle))
                 return true;
         return false;
+    }
+
+    /**
+     * Shuffles array and returns it. Always shuffles with the same {@link Random} source: {@link #RANDOM}.
+     * @param list to shuffle
+     * @returns shuffled list; can be ignored because {@link Collections#shuffle(List, Random)} acts in-place
+     * @since version 3.0 (build 13)
+     */
+    public static <T> List<T> shuffle(List<T> list) {
+        Collections.shuffle(list, RANDOM);
+        return list;
     }
 
 }

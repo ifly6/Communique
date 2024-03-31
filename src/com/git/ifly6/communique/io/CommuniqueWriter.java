@@ -20,10 +20,15 @@ package com.git.ifly6.communique.io;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Writes Communique configuration files.
+ * @since version 1.5 (build 5)
+ */
 class CommuniqueWriter {
 
     private Path path;
@@ -44,8 +49,7 @@ class CommuniqueWriter {
      * @throws IOException if there is an error in writing the file
      */
     void write() throws IOException {
-        // Have configuration clean itself
-        config.clean();
+        config.clean(); // Have configuration clean itself
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         Files.writeString(path, gson.toJson(config));
     }

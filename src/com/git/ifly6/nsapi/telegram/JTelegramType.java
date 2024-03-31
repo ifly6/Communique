@@ -17,103 +17,105 @@
 
 package com.git.ifly6.nsapi.telegram;
 
+import org.apache.commons.text.WordUtils;
+
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.git.ifly6.nsapi.telegram.JTelegramConstants.DEFAULT_DURATION;
+import static com.git.ifly6.nsapi.telegram.JTelegramConstants.RECRUIT_DURATION;
+
 /**
  * Specifies different types of telegrams to be sending and their default timings and names.
  */
 public enum JTelegramType {
 
-    /**
-     * Timing for campaign telegrams with {@link #DEFAULT_TIMING} delay.
-     */
-    CAMPAIGN {
-        @Override
-        public int getWaitTime() {
-            return DEFAULT_TIMING;
-        }
-
-        @Override
-        public void setDefaultTime(int i) {
-            throw new UnsupportedOperationException("Cannot set time on immutable setting");
-        }
-
-        @Override
-        public String toString() {
-            return "Campaign";
-        }
-
-    },
 
     /**
-     * Timing for recruitment telegrams with wait timing at 180.05 seconds.
+     * Timing for recruitment telegrams with {@link JTelegramConstants#RECRUIT_DURATION} delay.
      */
-    RECRUIT {
-        @Override
-        public int getWaitTime() {
-            return (int) (180.05 * 1000);
-        }
-
-        @Override
-        public void setDefaultTime(int i) {
-            throw new UnsupportedOperationException("Cannot set time on immutable setting");
-        }
-
-        @Override
-        public String toString() {
-            return "Recruitment";
-        }
-
-    },
+    RECRUIT(RECRUIT_DURATION),
 
     /**
-     * Custom telegram type with custom timing. Default timing is still {@link #DEFAULT_TIMING} but can be set to any
-     * desired value.
+     * Timing for campaign telegrams with {@link JTelegramConstants#DEFAULT_DURATION} delay.
      */
-    CUSTOM {
-        private int time = DEFAULT_TIMING;
-
-        @Override
-        public int getWaitTime() {
-            return time;
-        }
-
-        @Override
-        public void setDefaultTime(int i) {
-            time = i;
-        }
-
-        @Override
-        public String toString() {
-            return "Custom timing";
-        }
-    },
+    CAMPAIGN(DEFAULT_DURATION),
 
     /**
-     * Timing for unmarked telegrams with {@link #DEFAULT_TIMING} delay.
+     * Custom telegram type with custom timing. Default timing is still {@link JTelegramConstants#DEFAULT_DURATION} but
+     * can be set to any desired value. Note that when the internal value is changed, it is changed for all references
+     * to it because there is only one instance of the enum value.
      */
-    NONE {
-        @Override
-        public int getWaitTime() {
-            return DEFAULT_TIMING;
+    CUSTOM(DEFAULT_DURATION),
+
+    /**
+     * Timing for unmarked telegrams with {@link JTelegramConstants#DEFAULT_DURATION} delay.
+     */
+    NONE(DEFAULT_DURATION);
+
+    protected Duration waitDuration;
+
+    JTelegramType(Duration waitDuration) {
+        this.waitDuration = waitDuration;
+    }
+
+    public Duration getWaitDuration() {
+        return waitDuration;
+    }
+
+    /**
+     * Sets a custom wait duration; the internal enum value is mutable. However, throws error unless the object type is
+     * {@link JTelegramType#CUSTOM}.
+     * @param waitDuration to set
+     * @throws UnsupportedOperationException if called on anything other than {@link JTelegramType#CUSTOM}
+     */
+    public void setWaitDuration(Duration waitDuration) {
+        if (this != CUSTOM) throw new UnsupportedOperationException(
+                String.format("Cannot change internals of constant %s", this.toString()));
+        this.waitDuration = waitDuration;
+    }
+
+    /**
+     * Wait time defined by the telegram type; in milliseconds.
+     * @return wait time in milliseconds
+     */
+    public int getWaitTime() {
+        return (int) waitDuration.toMillis();
+    }
+
+    @Override
+    public String toString() {
+        return WordUtils.capitalize(super.toString().toLowerCase());
+    }
+
+    /** Returns presets */
+    public static JTelegramType[] getPresets() {
+        return Arrays.stream(JTelegramType.values())
+                .filter(t -> t != JTelegramType.CUSTOM)
+                .toArray(JTelegramType[]::new);
+    }
+
+    /**
+     * Parses telegram type.
+     * @return telegram type
+     * @see JTelegramType#CUSTOM
+     */
+    public static JTelegramType parseType(String input) {
+        try {
+            return JTelegramType.valueOf(input);
+        } catch (IllegalArgumentException ignored) { }
+
+        Matcher m = Pattern.compile("(?<=Custom \\()\\d+(?= ms\\))").matcher(input);
+        if (m.find()) { // if it matches this pattern
+            int ms = Integer.parseInt(m.group());
+            JTelegramType type = JTelegramType.CUSTOM;
+            type.setWaitDuration(Duration.ofMillis(ms));
+            return type;
         }
 
-        @Override
-        public void setDefaultTime(int i) {
-            throw new UnsupportedOperationException("Cannot set time on immutable setting");
-        }
-
-        @Override
-        public String toString() {
-            return "No type";
-        }
-
-    };
-
-    public static final int DEFAULT_TIMING = (int) (30.05 * 1000);
-
-    public abstract int getWaitTime();
-
-    public abstract void setDefaultTime(int i);
-
-    public abstract String toString();
+        throw new IllegalArgumentException(String.format("Cannot parse input %s", input));
+    }
 
 }
