@@ -19,24 +19,38 @@ package com.git.ifly6.nsapi.telegram;
 
 public enum JTelegramResponseCode {
 
-    QUEUED("Telegram queued"),
+    QUEUED("queued", "Telegram queued"),
 
-    UNKNOWN_ERROR("Unidentified error!"),
+    REGION_MISMATCH(
+            "region mismatch between telegram and client api key",
+            "Client key is associated with a region; telegram is not recruiting for that region"),
 
-    REGION_MISMATCH("Client key is associated with a region; telegram is not recruiting for that region"),
+    CLIENT_NOT_REGISTERED(
+            "client not registered for api",
+            "Client key is invalid"),
 
-    CLIENT_NOT_REGISTERED("Client key is invalid"),
+    RATE_LIMIT_EXCEEDED(
+            "api recruitment tg rate-limit exceeded",
+            "Too many telegrams sent within the rate limit"),
 
-    RATE_LIMIT_EXCEEDED("Too many telegrams sent within the rate limit"),
+    SECRET_KEY_MISMATCH("incorrect secret key", "Cannot send a telegram with the wrong secret key"),
 
-    SECRET_KEY_MISMATCH("Cannot send a telegram with the wrong secret key"),
+    NO_SUCH_TELEGRAM(
+            "no such api telegram template",
+            "Cannot send a telegram that does not exist"),
 
-    NO_SUCH_TELEGRAM("Cannot send a telegram that does not exist");
+    UNKNOWN_ERROR("", "Unidentified error!");
 
+    private final String matchString;
     private final String explanation;
 
-    JTelegramResponseCode(String explanation) {
+    JTelegramResponseCode(String matchString, String explanation) {
+        this.matchString = matchString.toLowerCase();
         this.explanation = explanation;
+    }
+
+    public String getMatchString() {
+        return matchString;
     }
 
     public String getExplanation() {

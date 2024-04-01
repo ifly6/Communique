@@ -31,12 +31,6 @@ import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.CLIENT_NOT_REGISTERED;
-import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.NO_SUCH_TELEGRAM;
-import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.QUEUED;
-import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.RATE_LIMIT_EXCEEDED;
-import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.REGION_MISMATCH;
-import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.SECRET_KEY_MISMATCH;
 import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.UNKNOWN_ERROR;
 
 /**
@@ -111,13 +105,8 @@ public class JTelegramConnection {
     public JTelegramResponseCode verify() throws IOException {
         String response = httpResponse.body().trim().toLowerCase();
 
-        if (response.startsWith("queued")) return QUEUED;
-        if (httpResponse.statusCode() == 429 || response.contains("api recruitment tg rate-limit exceeded"))
-            return RATE_LIMIT_EXCEEDED;
-        if (response.contains("region mismatch between telegram and client api key")) return REGION_MISMATCH;
-        if (response.contains("client not registered for api")) return CLIENT_NOT_REGISTERED;
-        if (response.contains("incorrect secret key")) return SECRET_KEY_MISMATCH;
-        if (response.contains("no such api telegram template")) return NO_SUCH_TELEGRAM;
+        for (JTelegramResponseCode r : JTelegramResponseCode.values())
+            if (response.contains(r.getMatchString())) return r;
 
         // else, print and return
         LOGGER.severe(String.format("Unknown error with code %d: %s",
