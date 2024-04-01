@@ -14,10 +14,9 @@
  * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.git.ifly6.communique.ngui;
+package com.git.ifly6.communique.ngui.components.dialogs;
 
 import com.git.ifly6.CommuniqueUtilities;
-import com.git.ifly6.communique.ngui.components.CommuniqueKeyListener;
 import com.git.ifly6.communique.ngui.components.CommuniqueSwingUtilities;
 
 import javax.swing.BorderFactory;
@@ -35,7 +34,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.KeyEvent;
 import java.time.Duration;
 import java.util.List;
 import java.util.logging.Logger;
@@ -52,9 +50,7 @@ public class CommuniqueSendDialog extends JDialog {
     public static final int SEND = 1;
     public static final int CANCEL = 0;
 
-    private int returnValue = 0;
-
-    private JButton sendButton;
+    private int value = 0;
 
     public CommuniqueSendDialog(JFrame parent, List<String> parsedRecipients, Duration delay) {
         super(parent, true);
@@ -87,10 +83,10 @@ public class CommuniqueSendDialog extends JDialog {
         buttonPane.setBorder(new EmptyBorder(0, 5, 5, 5));
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
         GridBagLayout gbl_buttonPane = new GridBagLayout();
-        gbl_buttonPane.columnWidths = new int[] {229, 75, 86, 0};
-        gbl_buttonPane.rowHeights = new int[] {29, 0};
-        gbl_buttonPane.columnWeights = new double[] {1.0, 0.0, 0.0, Double.MIN_VALUE};
-        gbl_buttonPane.rowWeights = new double[] {0.0, Double.MIN_VALUE};
+        gbl_buttonPane.columnWidths = new int[] { 229, 75, 86, 0 };
+        gbl_buttonPane.rowHeights = new int[] { 29, 0 };
+        gbl_buttonPane.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
+        gbl_buttonPane.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
         buttonPane.setLayout(gbl_buttonPane);
         JLabel lblThisWillTake = new JLabel(String.format("Estimated sending time: %s",
                 estimateTime(parsedRecipients.size(), delay.toMillis())));
@@ -106,14 +102,13 @@ public class CommuniqueSendDialog extends JDialog {
         cancelButton.addActionListener((ae) -> {
             // no need to set, default is cancel
             LOGGER.info("User cancelled send request");
-            closeDialog();
+            closeWith(CANCEL);
         });
 
-        sendButton = new JButton("Send");
+        JButton sendButton = new JButton("Send");
         sendButton.addActionListener((ae) -> {
             LOGGER.info("User called send request");
-            returnValue = CommuniqueSendDialog.SEND;
-            closeDialog();
+            closeWith(SEND);
         });
         getRootPane().setDefaultButton(sendButton);
 
@@ -129,21 +124,18 @@ public class CommuniqueSendDialog extends JDialog {
         gbc_cancelButton.gridy = 0;
         buttonPane.add(cancelButton, gbc_cancelButton);
 
-        contentPanel.addKeyListener(new CommuniqueKeyListener(ke -> {
-            if (ke.getKeyCode() == KeyEvent.VK_ENTER)
-                sendButton.doClick();
-        }));
+        this.getRootPane().setDefaultButton(sendButton);
         this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         this.setVisible(true);
     }
 
-    private void closeDialog() {
+    private void closeWith(int i) {
+        value = i;
         this.setVisible(false);
+        this.dispose();
     }
 
-    public int getValue() {
-        return returnValue;
-    }
+    public int getValue() { return value; }
 
     private String estimateTime(int count, long delayMillis) {
         int seconds = Math.round(count * (int) (delayMillis / 1000));

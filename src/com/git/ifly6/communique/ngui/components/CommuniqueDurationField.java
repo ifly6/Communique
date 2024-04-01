@@ -17,6 +17,9 @@
 
 package com.git.ifly6.communique.ngui.components;
 
+import com.git.ifly6.communique.ngui.components.subcomponents.CommuniqueDigitFilter;
+import com.git.ifly6.communique.ngui.components.subcomponents.CommuniqueMouseListener;
+
 import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
@@ -48,16 +51,18 @@ public class CommuniqueDurationField extends JTextField {
      * @return duration specified + 5 ms
      */
     public Duration getDuration() {
-        if (this.getText().isBlank()) return Duration.ZERO;
+        if (this.getText().isBlank()) return ChronoUnit.FOREVER.getDuration();
         return Duration.of(Integer.parseInt(this.getText()), TIME_UNIT)
                 .plus(Duration.ofMillis(5));
     }
 
     /**
      * Sets the text as the value of the given duration, rounded (always down) to the established {@link #TIME_UNIT}.
-     * @param interval to set as text
+     * If the duration is {@link ChronoUnit#FOREVER}, it clears the box.
+     * @param interval to set as digits
      */
     public void setDuration(Duration interval) {
-        this.setText(String.valueOf(interval.dividedBy(TIME_UNIT.getDuration())));
+        if (ChronoUnit.FOREVER.getDuration().equals(interval)) this.setText("");
+        else this.setText(String.valueOf(interval.dividedBy(TIME_UNIT.getDuration())));
     }
 }

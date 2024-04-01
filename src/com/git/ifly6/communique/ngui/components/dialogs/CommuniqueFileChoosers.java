@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.ngui.components;
+package com.git.ifly6.communique.ngui.components.dialogs;
 
 import com.git.ifly6.CommuniqueUtilities;
 
@@ -60,7 +60,7 @@ public class CommuniqueFileChoosers {
 
             String fileName = fDialog.getFile();
             if (fileName == null) {
-                LOGGER.info("User cancelled file file dialog");
+                LOGGER.info("User cancelled file file dialogs");
                 return null;
 
             } else savePath = Paths.get(

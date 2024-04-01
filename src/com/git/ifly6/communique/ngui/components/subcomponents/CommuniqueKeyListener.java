@@ -15,32 +15,29 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.ngui.components;
+package com.git.ifly6.communique.ngui.components.subcomponents;
 
-import java.awt.EventQueue;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.function.Consumer;
 
-public class CommuniqueLogHandler extends Handler {
+public class CommuniqueKeyListener implements KeyListener {
+    private final Consumer<KeyEvent> consumer;
 
-    private CommuniqueLogViewer viewer;
-
-    public CommuniqueLogHandler(CommuniqueLogViewer viewer) {
-        this.viewer = viewer;
+    public CommuniqueKeyListener(Consumer<KeyEvent> consumer) {
+        this.consumer = consumer;
     }
 
     @Override
-    public void publish(LogRecord record) {
-        if (record == null) return; // ignore
-        EventQueue.invokeLater(() -> viewer.getModel().appendRecord(record));
+    public void keyTyped(KeyEvent e) {
     }
 
     @Override
-    public void flush() { // ignored
+    public void keyReleased(KeyEvent e) {
     }
 
     @Override
-    public void close() throws SecurityException { // ignored
+    public void keyPressed(KeyEvent e) {
+        consumer.accept(e);
     }
-
 }

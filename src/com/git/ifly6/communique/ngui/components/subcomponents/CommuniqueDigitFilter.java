@@ -15,27 +15,23 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.ngui.components;
+package com.git.ifly6.communique.ngui.components.subcomponents;
 
-import javax.swing.Timer;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.function.Consumer;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class CommuniqueDelayedActionListener implements ActionListener {
-
-    Timer timer;
-    private ActionEvent lastEvent;
-
-    public CommuniqueDelayedActionListener(Consumer<ActionEvent> eventConsumer) {
-        timer = new Timer(1000, event -> eventConsumer.accept(lastEvent));
-        timer.setRepeats(false);
-        timer.start();
-    }
+public class CommuniqueDigitFilter extends DocumentFilter {
+    Pattern regex = Pattern.compile("\\d*");
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        lastEvent = e;
-        timer.restart();
+    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+            throws BadLocationException {
+        Matcher matcher = regex.matcher(text);
+        if (!matcher.matches()) return;
+        super.replace(fb, offset, length, text, attrs);
     }
+
 }

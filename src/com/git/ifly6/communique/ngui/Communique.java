@@ -18,6 +18,7 @@
 package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.CommuniqueApplication;
+import com.git.ifly6.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipientType;
@@ -31,6 +32,8 @@ import com.git.ifly6.communique.ngui.components.CommuniqueLogHandler;
 import com.git.ifly6.communique.ngui.components.CommuniqueLogViewer;
 import com.git.ifly6.communique.ngui.components.CommuniqueSwingUtilities;
 import com.git.ifly6.communique.ngui.components.CommuniqueTimerBar;
+import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueSendDialog;
+import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueTextDialog;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
@@ -46,11 +49,14 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
@@ -77,7 +83,6 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
     private JavaTelegram client; // Sending client
     private Thread sendingThread = new Thread(); // The one sending thread
 
-    private JFrame frame;
     private JButton btnParse;
     private CommuniqueLogViewer logViewer;
     private CommuniqueEditor focusedEditor;
@@ -105,6 +110,11 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
                 LOGGER.log(Level.SEVERE, "Encountered error on Communique window instantiation!", e);
             }
         });
+
+        // set up shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> CommuniqueEditorManager.getInstance().saveAll()));
+        LOGGER.info("Shutdown hook added");
+        LOGGER.info("Communiqué loaded");
     }
 
     /**
@@ -133,7 +143,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
         frame = new JFrame();
         frame.setTitle("Communiqué " + Communique7Parser.VERSION);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        initialiseClosingActions();
         CommuniqueSwingUtilities.setupDimensions(
                 frame,
                 new Dimension(400, 600), // minimum size
@@ -238,10 +249,27 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         Logger.getLogger("").addHandler(new CommuniqueLogHandler(logViewer));
 
         // post initialisation
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> CommuniqueEditorManager.getInstance().saveAll()));
-        LOGGER.info("Shutdown hook added");
-        LOGGER.info("Communiqué loaded");
         CommuniqueEditorManager.getInstance().initialiseEditors();
+    }
+
+    private void initialiseClosingActions() {
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent we) { doQuit(); }
+        });
+        Desktop d = Desktop.getDesktop();
+        if (CommuniqueUtilities.IS_OS_MAC)
+            if (d.isSupported(Desktop.Action.APP_QUIT_HANDLER))
+                d.setQuitHandler((e, r) -> doQuit());
+    }
+
+    private void doQuit() {
+        CommuniqueEditorManager cem = CommuniqueEditorManager.getInstance();
+        cem.getActiveEditors().forEach(
+                e -> e.frame.dispatchEvent(new WindowEvent(e.frame, WindowEvent.WINDOW_CLOSING))
+        );
+        if (cem.getActiveEditors().isEmpty())
+            System.exit(0);
     }
 
     /**
@@ -290,7 +318,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
                     String.format("<html>Regex pattern syntax error. <br /><pre>%s</pre></html>",
                             pse.getMessage().replace("\n", "<br />"))
             );
-            // pass to message dialog
+            // pass to message dialogs
             LOGGER.log(Level.SEVERE, "Exception in parsing recipients. Displaying to user", pse);
             this.showErrorDialog(label);
             return;
@@ -331,7 +359,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
             Runnable runner = () -> {
 
                 // save the configuration
-                focusedEditor.save();
+                focusedEditor.saveReal();
 
                 // pass information to client
                 client.setRecipients(parsedRecipients);

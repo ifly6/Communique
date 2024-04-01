@@ -15,23 +15,41 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.ngui.components;
+package com.git.ifly6.communique.ngui.components.subcomponents;
 
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.function.Consumer;
 
-public class CommuniqueDigitFilter extends DocumentFilter {
-    Pattern regex = Pattern.compile("\\d*");
+/**
+ * {@link MouseListener} implementation only for clicks.
+ * @since version 13
+ */
+public class CommuniqueMouseListener implements MouseListener {
+    private final Consumer<MouseEvent> meConsumer;
 
-    @Override
-    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
-            throws BadLocationException {
-        Matcher matcher = regex.matcher(text);
-        if (!matcher.matches()) return;
-        super.replace(fb, offset, length, text, attrs);
+    public CommuniqueMouseListener(Consumer<MouseEvent> meConsumer) {
+        this.meConsumer = meConsumer;
     }
 
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        meConsumer.accept(e);
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+    }
 }

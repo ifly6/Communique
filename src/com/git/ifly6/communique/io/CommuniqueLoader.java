@@ -39,7 +39,7 @@ public class CommuniqueLoader {
     /**
      * Creates the {@link CommuniqueLoader} and sets the path at which the program will do its file operations. The
      * Communique program attempts to default this to the relevant application support folder, resolved to the
-     * Communique folder, by specifying such in the program's myriad file dialog prompts.
+     * Communique folder, by specifying such in the program's myriad file dialogs prompts.
      * @param path to examine
      */
     public CommuniqueLoader(Path path) {

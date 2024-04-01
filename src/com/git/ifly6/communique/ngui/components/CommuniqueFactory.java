@@ -17,6 +17,8 @@
 
 package com.git.ifly6.communique.ngui.components;
 
+import com.git.ifly6.communique.ngui.components.subcomponents.CommuniqueMouseListener;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -54,7 +56,7 @@ public class CommuniqueFactory {
         field.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         field.setText(text);
 
-        // listeners
+        // subcomponents
         field.getDocument().addDocumentListener(listener);
         field.addMouseListener(new CommuniqueMouseListener(me -> field.selectAll()));
 

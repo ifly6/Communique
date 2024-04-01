@@ -21,7 +21,8 @@ import com.git.ifly6.CommuniqueUtilities;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditorManager;
 import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
-import com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers;
+import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueFileChoosers;
+import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueTextDialog;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,6 +38,7 @@ import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -87,8 +89,8 @@ public abstract class AbstractCommunique {
 
         mnFile.addSeparator();
         mnFile.add(createMenuItem("Close", KeyEvent.VK_W, ae -> {
-            frame.setVisible(false);
-            frame.dispose();
+            // https://stackoverflow.com/a/1235994/
+            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
         }));
 
         mnFile.addSeparator();
@@ -110,7 +112,7 @@ public abstract class AbstractCommunique {
             mnFile.addSeparator();
             mnFile.add(CommuniqueFactory.createMenuItem(
                     "Quit",
-                    KeyEvent.VK_Q, ae -> System.exit(0)
+                    e -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING))
             ));
         }
 

@@ -15,41 +15,30 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.ngui.components;
+package com.git.ifly6.communique.ngui.components.subcomponents;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.util.function.Consumer;
 
-/**
- * {@link MouseListener} implementation only for clicks.
- * @since version 13
- */
-public class CommuniqueMouseListener implements MouseListener {
-    private final Consumer<MouseEvent> meConsumer;
+public class CommuniqueDelayedDocumentListener implements DocumentListener {
 
-    public CommuniqueMouseListener(Consumer<MouseEvent> meConsumer) {
-        this.meConsumer = meConsumer;
+    // initially tried https://stackoverflow.com/a/31955279
+    // that didn't work though
+
+    private final CommuniqueDelayedExecutor<DocumentEvent> delayedExecutor;
+
+    public CommuniqueDelayedDocumentListener(Consumer<DocumentEvent> consumer) {
+        delayedExecutor = new CommuniqueDelayedExecutor<>(5, consumer);
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-        meConsumer.accept(e);
-    }
+    public void changedUpdate(DocumentEvent e) { delayedExecutor.reschedule(e); }
 
     @Override
-    public void mousePressed(MouseEvent e) {
-    }
+    public void insertUpdate(DocumentEvent e) { delayedExecutor.reschedule(e); }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
-    }
+    public void removeUpdate(DocumentEvent e) { delayedExecutor.reschedule(e); }
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
 }

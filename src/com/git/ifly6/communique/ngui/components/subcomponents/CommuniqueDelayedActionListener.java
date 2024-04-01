@@ -15,36 +15,20 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.ngui.components;
+package com.git.ifly6.communique.ngui.components.subcomponents;
 
-import javax.swing.Timer;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
-public class CommuniqueDelayedDocumentListener implements DocumentListener {
+public class CommuniqueDelayedActionListener implements ActionListener {
 
-    private Timer timer; // https://stackoverflow.com/a/31955279
+    private final CommuniqueDelayedExecutor<ActionEvent> delayedExecutor;
 
-    public CommuniqueDelayedDocumentListener(Consumer<DocumentEvent> consumer) {
-        this.timer = new Timer(1000, ae -> consumer.accept(null));
-        timer.setRepeats(false);
-        timer.start();
+    public CommuniqueDelayedActionListener(Consumer<ActionEvent> eventConsumer) {
+        delayedExecutor = new CommuniqueDelayedExecutor<>(5, eventConsumer);
     }
 
     @Override
-    public void changedUpdate(DocumentEvent event) {
-        timer.restart();
-    }
-
-    @Override
-    public void insertUpdate(DocumentEvent event) {
-        timer.restart();
-    }
-
-    @Override
-    public void removeUpdate(DocumentEvent event) {
-        timer.restart();
-    }
-
+    public void actionPerformed(ActionEvent e) { delayedExecutor.reschedule(e); }
 }

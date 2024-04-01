@@ -15,10 +15,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.ngui;
+package com.git.ifly6.communique.ngui.components.dialogs;
 
 import com.git.ifly6.communique.data.Communique7Parser;
-import com.git.ifly6.communique.ngui.components.CommuniqueKeyListener;
 import com.git.ifly6.communique.ngui.components.CommuniqueSwingUtilities;
 
 import javax.swing.BorderFactory;
@@ -33,7 +32,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
 
 /**
@@ -102,13 +100,9 @@ public class CommuniqueTextDialog extends JDialog {
         buttonPanel.add(closeButton);
 
         // Make pressing the enter key the same as hitting the button.
-        this.addKeyListener(new CommuniqueKeyListener((e) -> {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                closeButton.doClick();
-        }));
+        this.getRootPane().setDefaultButton(closeButton);
 
         this.setVisible(true);
         log.finer("Showing CTextDialog with: " + message);
-
     }
 }

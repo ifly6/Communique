@@ -15,29 +15,40 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.ngui.components;
+package com.git.ifly6.communique.ngui.components.subcomponents;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class CommuniqueKeyListener implements KeyListener {
-    private final Consumer<KeyEvent> consumer;
+public class CommuniqueDelayedExecutor<T> {
 
-    public CommuniqueKeyListener(Consumer<KeyEvent> consumer) {
+    // initially tried https://stackoverflow.com/a/31955279
+    // that didn't work though
+
+    private final Consumer<T> consumer;
+    private final int DELAY;
+    private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private List<ScheduledFuture<?>> futureList = new ArrayList<>();
+
+    public CommuniqueDelayedExecutor(int secondsDelayed, Consumer<T> consumer) {
         this.consumer = consumer;
+        this.DELAY = secondsDelayed;
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
+    public void reschedule(T event) {
+        // cancel all futures
+        futureList.removeIf(Future::isDone);
+        futureList.forEach(f -> f.cancel(false));
+
+        // create a new future
+        ScheduledFuture<?> future = executor.schedule(() -> consumer.accept(event), DELAY, TimeUnit.SECONDS);
+        futureList.add(future);
     }
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        consumer.accept(e);
-    }
 }

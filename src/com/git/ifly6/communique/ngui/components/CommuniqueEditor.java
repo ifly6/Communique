@@ -26,11 +26,14 @@ import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.AbstractCommunique;
+import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueFileChoosers;
+import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueSaveDialog;
+import com.git.ifly6.communique.ngui.components.subcomponents.CommuniqueDelayedActionListener;
+import com.git.ifly6.communique.ngui.components.subcomponents.CommuniqueDelayedDocumentListener;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -48,9 +51,12 @@ import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -67,7 +73,7 @@ import java.util.stream.Stream;
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.CODE_HEADER;
 import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMAND_KEY;
 import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
-import static com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers.show;
+import static com.git.ifly6.communique.ngui.components.dialogs.CommuniqueFileChoosers.show;
 
 public class CommuniqueEditor extends AbstractCommunique {
 
@@ -75,7 +81,6 @@ public class CommuniqueEditor extends AbstractCommunique {
     private static final Logger LOGGER = Logger.getLogger(CommuniqueEditor.class.getName());
 
     private Path path;
-    private JFrame frame;
 
     private CommuniqueScrollableTextArea area;
     private JTextField tfClientKey; // tf = text field
@@ -86,7 +91,7 @@ public class CommuniqueEditor extends AbstractCommunique {
     private CommuniqueDurationField tfTelegramInterval;
     private JComboBox<CommuniqueProcessingAction> chooserAction;
 
-    private JCheckBox checkboxRepeat;
+    private CommuniqueCheckBox checkboxRepeat;
     private CommuniqueDurationField tfRepeatInterval;
 
     private CommuniqueConfig config; // initialise a new configuration on nothing
@@ -94,7 +99,7 @@ public class CommuniqueEditor extends AbstractCommunique {
     CommuniqueEditor(Path path) {
         this.path = path;
         frame = new JFrame(constructTitle());
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setMinimumSize(new Dimension(725, 400));
 
         // if there is a file try to load it
@@ -121,6 +126,9 @@ public class CommuniqueEditor extends AbstractCommunique {
 
         // initialise menu bar
         initialiseMenuBar();
+
+        // initialise closing actions
+        initialiseClosingActions();
 
         // finalise
         synchronise(config);
@@ -157,16 +165,17 @@ public class CommuniqueEditor extends AbstractCommunique {
         chooserTelegramType.setSelectedItem(JTelegramType.RECRUIT); // default to recruitment
         chooserTelegramType.setToolTipText("Telegram types are declared site-side in the telegram sent to \"tag:api\"");
         chooserTelegramType.addActionListener(delayedSave);
-        chooserTelegramType.addActionListener(ae -> { // force default delays when not selecting custom
+        chooserTelegramType.addActionListener(ae -> {
+            // force default delays when not selecting custom
             JTelegramType telegramType = CommuniqueSwingUtilities.getSelected(chooserTelegramType);
             if (!telegramType.equals(JTelegramType.CUSTOM)) {
-                tfTelegramInterval.setText(String.valueOf(telegramType.getWaitDuration().toSeconds()));
+                tfTelegramInterval.setDuration(telegramType.getWaitDuration());
                 tfTelegramInterval.setEnabled(false);
 
             } else tfTelegramInterval.setEnabled(true);
         });
 
-        tfTelegramInterval = new CommuniqueDurationField(ChronoUnit.MILLIS, "Time between telegrams in seconds",
+        tfTelegramInterval = new CommuniqueDurationField(ChronoUnit.SECONDS, "Time between telegrams in seconds",
                 saveListener);
         tfTelegramInterval.addActionListener(
                 ae -> JTelegramType.CUSTOM.setWaitDuration(getTelegramInterval())); // must have this to sync
@@ -177,8 +186,12 @@ public class CommuniqueEditor extends AbstractCommunique {
         southComponents.put("Telegram delay (s)", tfTelegramInterval);
 
         // create components for the repeat panel
-        checkboxRepeat = new JCheckBox("", false);
+        checkboxRepeat = new CommuniqueCheckBox("", false);
         checkboxRepeat.addActionListener(delayedSave);
+        checkboxRepeat.addActionListener(ie -> EventQueue.invokeLater(() -> {
+            tfRepeatInterval.setEnabled(checkboxRepeat.isSelected());
+            if (!checkboxRepeat.isSelected()) tfRepeatInterval.setDuration(ChronoUnit.FOREVER.getDuration());
+        }));
         tfRepeatInterval = new CommuniqueDurationField(ChronoUnit.SECONDS,
                 "Time between client initiation repeat", saveListener);
 
@@ -196,6 +209,7 @@ public class CommuniqueEditor extends AbstractCommunique {
         // content pane layout
         JPanel sidebarFrame = new JPanel();
         sidebarFrame.setLayout(new BorderLayout(5, 5));
+        sidebarFrame.setSize(new Dimension(200, 200));
 
         JPanel northFrame = new JPanel();
         northFrame.setBorder(CommuniqueFactory.createTitledBorder("Telegram keys"));
@@ -205,7 +219,8 @@ public class CommuniqueEditor extends AbstractCommunique {
                         .collect(Collectors.toMap(
                                 JTextField::getToolTipText,
                                 Function.identity(),
-                                (x, y) -> { throw new IllegalStateException(); }, LinkedHashMap::new
+                                (x, y) -> { throw new IllegalStateException(); },
+                                LinkedHashMap::new
                         ))
         );
         sidebarFrame.add(northFrame, BorderLayout.NORTH);
@@ -233,15 +248,19 @@ public class CommuniqueEditor extends AbstractCommunique {
         frame.setJMenuBar(menuBar);
 
         // file
-        this.addFileMenu(List.of(createMenuItem("Save", KeyEvent.VK_S, ae -> this.save()), createMenuItem("Save as",
-                KeyStroke.getKeyStroke(KeyEvent.VK_S, COMMAND_KEY | InputEvent.SHIFT_DOWN_MASK), ae -> {
-                    Path newPath = CommuniqueFileChoosers.show(this.frame, FileDialog.SAVE);
-                    if (newPath == null) {
-                        LOGGER.info("\"Save as\" cancelled");
-                        return;
-                    }
-                    saveAs(path);
-                })));
+        this.addFileMenu(List.of(
+                createMenuItem("Save", KeyEvent.VK_S, ae -> this.saveReal()),
+                createMenuItem("Save as",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, COMMAND_KEY | InputEvent.SHIFT_DOWN_MASK), ae -> {
+                            Path newPath = CommuniqueFileChoosers.show(this.frame, FileDialog.SAVE);
+                            if (newPath == null) {
+                                LOGGER.info("\"Save as\" cancelled");
+                                return;
+                            }
+                            saveAs(path);
+                        }
+                ))
+        );
 
         // edit
         JMenu mnEdit = this.addEditMenu();
@@ -330,6 +349,20 @@ public class CommuniqueEditor extends AbstractCommunique {
         this.addHelpMenu();
     }
 
+    private void initialiseClosingActions() {
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                int i = new CommuniqueSaveDialog(frame, getPath()).getValue();
+                if (i == CommuniqueSaveDialog.CANCEL) return;
+                if (i == CommuniqueSaveDialog.SAVE)
+                    saveReal();
+
+                frame.dispose(); // case CommuniqueSaveDialog.DISCARD
+            }
+        });
+    }
+
     public CommuniqueConfig getConfig() {
         config = new CommuniqueConfig(
                 new JTelegramKeys(tfClientKey.getText(), tfSecretKey.getText(), tfTelegramID.getText()),
@@ -346,11 +379,25 @@ public class CommuniqueEditor extends AbstractCommunique {
         return config;
     }
 
-    public void save() {
+    public Path save() {
+        Path tempSave = path.resolveSibling(path.getFileName().toString() + ".tmp");
+        try {
+            CommuniqueLoader loader = new CommuniqueLoader(tempSave);
+            loader.save(getConfig());
+
+        } catch (IOException e) {
+            showWarning("Failed to save configuration temporary configuration file", e);
+        }
+        return tempSave;
+    }
+
+    public void saveReal() {
+        LOGGER.info(String.format("Moving temporary file to final location at %s", this.getPath()));
         Runnable r = () -> {
             try {
-                CommuniqueLoader loader = new CommuniqueLoader(path);
-                loader.save(getConfig());
+                Path tempLocation = save(); // latest
+                Files.move(tempLocation, path, StandardCopyOption.REPLACE_EXISTING);
+
             } catch (IOException e) {
                 showWarning(String.format("Failed to save configuration to file at %s", path), e);
             }
@@ -380,7 +427,7 @@ public class CommuniqueEditor extends AbstractCommunique {
     private void saveAs(Path newPath) {
         LOGGER.info(String.format("Saving file %s as %s", this.path.getFileName(), newPath));
         this.path = newPath;
-        save();
+        saveReal();
         frame.setTitle(constructTitle());
     }
 
@@ -421,6 +468,7 @@ public class CommuniqueEditor extends AbstractCommunique {
         return frame.getLocation();
     }
 
+    /** @return the short name of the path to which the editor is pointed to work properly with {@link JComboBox} */
     @Override
     public String toString() {
         String fileName = path.getFileName().toString().replaceFirst("\\..+$", "");

@@ -17,30 +17,29 @@
 
 package com.git.ifly6.communique.ngui.components;
 
-import java.awt.EventQueue;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
+import javax.swing.JCheckBox;
+import java.awt.event.ActionEvent;
 
-public class CommuniqueLogHandler extends Handler {
+public class CommuniqueCheckBox extends JCheckBox {
 
-    private CommuniqueLogViewer viewer;
-
-    public CommuniqueLogHandler(CommuniqueLogViewer viewer) {
-        this.viewer = viewer;
+    public CommuniqueCheckBox(String text, boolean selected) {
+        super(text, selected);
     }
 
+    /**
+     * There are no {@link ActionEvent} fired from
+     * {@link javax.swing.JToggleButton.ToggleButtonModel#setSelected(boolean)}. This method instead always fires.
+     * @param b true if the button is selected, otherwise false
+     * @see JCheckBox#setSelected(boolean)
+     */
     @Override
-    public void publish(LogRecord record) {
-        if (record == null) return; // ignore
-        EventQueue.invokeLater(() -> viewer.getModel().appendRecord(record));
-    }
-
-    @Override
-    public void flush() { // ignored
-    }
-
-    @Override
-    public void close() throws SecurityException { // ignored
+    public void setSelected(boolean b) {
+        super.setSelected(b);
+        fireActionPerformed(new ActionEvent(
+                this,
+                ActionEvent.ACTION_PERFORMED,
+                this.getActionCommand()
+        ));
     }
 
 }

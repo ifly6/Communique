@@ -26,7 +26,7 @@ import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditor;
-import com.git.ifly6.communique.ngui.components.CommuniqueFileChoosers;
+import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueFileChoosers;
 import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
@@ -411,7 +411,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
         // * Importing that configuration into Communique
         // * Have Communique save that file
         sync();
-        recruitEditor.save();
+        recruitEditor.saveReal();
     }
 
     private void sync() {
