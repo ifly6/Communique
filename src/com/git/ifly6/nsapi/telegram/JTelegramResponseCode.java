@@ -19,48 +19,27 @@ package com.git.ifly6.nsapi.telegram;
 
 public enum JTelegramResponseCode {
 
-    QUEUED {
-        @Override
-        public String getExplanation() {
-            return "Telegram queued";
-        }
-    },
-    UNKNOWN_ERROR {
-        @Override
-        public String getExplanation() {
-            return "Unidentified error!";
-        }
-    },
-    REGION_MISMATCH {
-        @Override
-        public String getExplanation() {
-            return "Client key is associated with a region; telegram is not recruiting for that region";
-        }
-    },
-    CLIENT_NOT_REGISTERED {
-        @Override
-        public String getExplanation() {
-            return "Client key is invalid";
-        }
-    },
-    RATE_LIMIT_EXCEEDED {
-        @Override
-        public String getExplanation() {
-            return "Too many telegrams sent within the rate limit";
-        }
-    },
-    SECRET_KEY_MISMATCH {
-        @Override
-        public String getExplanation() {
-            return "Cannot send a telegram with the wrong secret key";
-        }
-    },
-    NO_SUCH_TELEGRAM {
-        @Override
-        public String getExplanation() {
-            return "Cannot send a telegram that does not exist";
-        }
-    };
+    QUEUED("Telegram queued"),
 
-    public abstract String getExplanation();
+    UNKNOWN_ERROR("Unidentified error!"),
+
+    REGION_MISMATCH("Client key is associated with a region; telegram is not recruiting for that region"),
+
+    CLIENT_NOT_REGISTERED("Client key is invalid"),
+
+    RATE_LIMIT_EXCEEDED("Too many telegrams sent within the rate limit"),
+
+    SECRET_KEY_MISMATCH("Cannot send a telegram with the wrong secret key"),
+
+    NO_SUCH_TELEGRAM("Cannot send a telegram that does not exist");
+
+    private final String explanation;
+
+    JTelegramResponseCode(String explanation) {
+        this.explanation = explanation;
+    }
+
+    public String getExplanation() {
+        return explanation;
+    }
 }
