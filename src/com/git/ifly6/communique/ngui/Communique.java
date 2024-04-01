@@ -35,6 +35,7 @@ import com.git.ifly6.communique.ngui.components.CommuniqueTimerBar;
 import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueSendDialog;
 import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueTextDialog;
 import com.git.ifly6.nsapi.ApiUtils;
+import com.git.ifly6.nsapi.NSConnection;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 import com.git.ifly6.nsapi.telegram.JavaTelegram;
@@ -58,7 +59,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -128,7 +128,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
 
         // Make sure user is connected to the Internet
         try {
-            new URL("https://www.nationstates.net").openConnection().connect();
+            new NSConnection("https://www.nationstates.net/").connect();
         } catch (IOException e) {
             this.showErrorDialog(CommuniqueConstants.INTERNET_ERROR);
             LOGGER.log(Level.SEVERE, "No connection to NationStates!", e);
