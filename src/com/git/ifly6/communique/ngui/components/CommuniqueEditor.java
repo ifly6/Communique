@@ -392,7 +392,7 @@ public class CommuniqueEditor extends AbstractCommunique {
     }
 
     public void saveReal() {
-        LOGGER.info(String.format("Moving temporary file to final location at %s", this.getPath()));
+        LOGGER.info(String.format("Executing save at %s", this.getPath()));
         Runnable r = () -> {
             try {
                 Path tempLocation = save(); // latest
@@ -403,6 +403,13 @@ public class CommuniqueEditor extends AbstractCommunique {
             }
         };
         r.run();
+    }
+
+    private void saveAs(Path newPath) {
+        LOGGER.info(String.format("Saving file %s as %s", this.path.getFileName(), newPath));
+        this.path = newPath;
+        saveReal();
+        frame.setTitle(constructTitle());
     }
 
     private CommuniqueConfig load() throws IOException {
@@ -422,13 +429,6 @@ public class CommuniqueEditor extends AbstractCommunique {
         }
 
         return new CommuniqueConfig();
-    }
-
-    private void saveAs(Path newPath) {
-        LOGGER.info(String.format("Saving file %s as %s", this.path.getFileName(), newPath));
-        this.path = newPath;
-        saveReal();
-        frame.setTitle(constructTitle());
     }
 
     public void synchronise(CommuniqueConfig theConfig) {

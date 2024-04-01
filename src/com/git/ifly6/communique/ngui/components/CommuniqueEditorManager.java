@@ -114,7 +114,7 @@ public class CommuniqueEditorManager {
         savePaths();
         List<CommuniqueEditor> l = getActiveEditors();
         for (CommuniqueEditor e : l)
-            e.save();
+            e.saveReal();
     }
 
     private Set<Point> getLocations() {

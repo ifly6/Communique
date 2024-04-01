@@ -112,7 +112,6 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         });
 
         // set up shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> CommuniqueEditorManager.getInstance().saveAll()));
         LOGGER.info("Shutdown hook added");
         LOGGER.info("Communiqué loaded");
     }
