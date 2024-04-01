@@ -20,16 +20,17 @@ package com.git.ifly6.nsapi;
 import com.git.ifly6.CommuniqueUtilities;
 import com.google.common.util.concurrent.RateLimiter;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Map;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * This class regulates how the program connects to the NationStates API.
@@ -42,25 +43,18 @@ import java.util.stream.Collectors;
 @SuppressWarnings("UnstableApiUsage")
 public class NSConnection {
 
-    private static final Logger LOGGER = Logger.getLogger(NSConnection.class.getName());
-    private static final double PERMITS_PER_SECOND = 40 / (double) 30; // 50 requests per 30 seconds
-
-    private static final RateLimiter limiter = RateLimiter.create(PERMITS_PER_SECOND);
-
-    /** API delay in milliseconds. Should be equal to 750 milliseconds. */
-    public final static long WAIT_TIME = 1000 * Math.round(Math.pow(PERMITS_PER_SECOND, -1));
-
-    /** NationStates API call prefix, {@code https://www.nationstates.net/cgi-bin/api.cgi?}. */
     public static final String API_PREFIX = "https://www.nationstates.net/cgi-bin/api.cgi?";
-
-    /** NationStates API query prefix, {@code &q=}. */
     public static final String QUERY_PREFIX = "&q=";
 
-    private URL url;
-    private String xml_raw;
-    private boolean hasConnected;
+    private static final Logger LOGGER = Logger.getLogger(NSConnection.class.getName());
+    private static final double PERMITS_PER_SECOND = 40 / (double) 30; // 50 requests per 30 seconds is max
+    public final static long WAIT_TIME = 1000 * Math.round(Math.pow(PERMITS_PER_SECOND, -1)); // 750 ms
 
-    private Map<String, String> entries;
+    private static final RateLimiter limiter = RateLimiter.create(PERMITS_PER_SECOND);
+    private static final HttpClient CLIENT = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+
+    private HttpResponse<String> response;
+    private URL url;
 
     /**
      * Creates an unconnected {@code NSConnection} to query the specified URL.
@@ -89,52 +83,59 @@ public class NSConnection {
         LOGGER.finest(String.format("NSConnection rate limit -> waited %.3f seconds", secondsWaited));
 
         // todo rewrite with HttpClient
-        // Create connection, add request properties
-        HttpURLConnection apiConnection = (HttpURLConnection) url.openConnection();
-        apiConnection.addRequestProperty("User-Agent",
-                "NS API request; maintained by Imperium Anglorum, email: cyrilparsons.london@gmail.com; see IP");
-        if (entries != null && !entries.isEmpty()) for (Map.Entry<String, String> entry : entries.entrySet())
-            apiConnection.addRequestProperty(entry.getKey(), entry.getValue());
-
-        apiConnection.connect(); // do connection
-        hasConnected = true; // update API
-
-        if (apiConnection.getResponseCode() == 200) { // if normal
-            BufferedReader reader = new BufferedReader(new InputStreamReader(apiConnection.getInputStream()));
-            xml_raw = reader.lines().collect(Collectors.joining("\n"));
-            reader.close();
-
-        } else { // otherwise, read error stream
-            BufferedReader reader = new BufferedReader(new InputStreamReader(apiConnection.getErrorStream()));
-            xml_raw = reader.lines().collect(Collectors.joining("\n"));
-            reader.close();
-
-            if (apiConnection.getResponseCode() == 429) {
-                String retryAfter = apiConnection.getHeaderField("X-Retry-After");
-                throw new NSIOException(String.format("API rate limit exceeded! Retry after %s.",
-                        CommuniqueUtilities.time(Integer.parseInt(retryAfter))));
-            }
-
-            if (xml_raw.contains("Unknown nation") || apiConnection.getResponseCode() == 404)
-                throw new FileNotFoundException(String.format("No result for url %s", url.toString()));
-
-
-            throw new NSException(
-                    String.format("Cannot get data from the API at url %s" + "\nHTTP response code %d", url.toString(),
-                            apiConnection.getResponseCode()));
+        HttpRequest request;
+        try {
+            request = HttpRequest.newBuilder(url.toURI())
+                    .header(
+                            "User-Agent",
+                            "NS API request; maintained by Imperium Anglorum (cyrilparsons.london@gmail.com); "
+                                    + "see IP")
+                    .GET()
+                    .build();
+        } catch (URISyntaxException e) {
+            LOGGER.log(Level.SEVERE,
+                    String.format(
+                            "Unable to convert URL [%s] to URI. This should never happen! Cannot query NationStates!",
+                            url),
+                    e);
+            throw new RuntimeException("Unable to convert URL to URI", e);
         }
+
+        try {
+            response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+
+        } catch (InterruptedException e) {
+            LOGGER.log(Level.SEVERE, "Interrupted when sending NS API request", e);
+            throw new RuntimeException("Interrupted when sending NS API request", e);
+        }
+
+        if (response.statusCode() == 429)
+            throw new NSIOException(String.format("API rate limit exceeded! Retry after %s",
+                    CommuniqueUtilities.time(Long.parseLong(
+                                    response.headers().firstValue("X-Retry-After").orElse("-1")
+                            )
+                    )
+            ));
+
+        if (response.statusCode() == 404)
+            throw new NSIOException(String.format("No result for URL %s", url.toString()));
+
+        if (response.statusCode() != 200)
+            throw new NSIOException(String.format("Received non-200 response code %d from API at URL %s",
+                    response.statusCode(), url.toString()
+            ));
 
         return this;
     }
 
     /**
-     * Delivers response as {@code String}. If {@code NSConnection} has already connected, ie is spent, returns result
+     * Delivers response as {@link String}. If {@link NSConnection} has already connected, ie is spent, returns result
      * thereof. If not yet connected, invokes {@link #connect()} automatically.
      * @return response
      * @throws IOException if connection fails
      */
     public String getResponse() throws IOException {
-        // if it has connected, get response. otherwise, connect and return response
-        return hasConnected ? xml_raw : connect().xml_raw;
+        if (response == null) { connect(); }
+        return response.body();
     }
 }
