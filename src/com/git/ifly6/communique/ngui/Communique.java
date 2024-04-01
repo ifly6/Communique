@@ -48,7 +48,6 @@ import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -103,7 +102,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
                 Communique window = new Communique();
                 window.frame.setVisible(true);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Encountered error on Communique window instantiation!", e);
             }
         });
     }
@@ -133,15 +132,14 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
     private void initialise() {
 
         frame = new JFrame();
-
-        Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
-        double sWidth = screenDimensions.getWidth();
-        double sHeight = screenDimensions.getHeight();
-
         frame.setTitle("Communiqué " + Communique7Parser.VERSION);
-        frame.setBounds(50, 50, 600, 600);
-        frame.setMinimumSize(new Dimension(400, 600));
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        CommuniqueSwingUtilities.setupDimensions(
+                frame,
+                new Dimension(400, 600), // minimum size
+                new Dimension(600, 600), // default size
+                false
+        );
 
         // set up content pane
         JPanel contentPane = new JPanel();

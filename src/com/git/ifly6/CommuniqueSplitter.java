@@ -17,30 +17,41 @@
 
 package com.git.ifly6;
 
+import java.util.List;
+
 /**
  * Splits strings and produces error if count is incorrect.
  * @since version 13
  */
 public class CommuniqueSplitter {
 
-    public static final String SPLIT_PATTERN = ";\\s*";
+    public final String SPLIT_PATTERN;
 
     private final String name;
     private final int requiredArguments;
 
     /**
-     * Constructs splitter. Splitters are immutable.
+     * Constructs splitter. Splitters are immutable. The default split pattern is the regular expression {@code ;\s*}.
      * @param name              of parsing application (eg 'Communique')
      * @param requiredArguments number thereof, from the split
      */
-    public CommuniqueSplitter(String name, int requiredArguments) {
+    public CommuniqueSplitter(String name, int requiredArguments) { this(";\\s*", name, requiredArguments); }
+
+    /**
+     * Constructs splitter with custom split pattern. Splitters are immutable.
+     * @param regex      to split on
+     * @param name              of parsing application (eg 'Communique')
+     * @param requiredArguments number thereof, from the split
+     */
+    public CommuniqueSplitter(final String regex, String name, int requiredArguments) {
+        SPLIT_PATTERN = regex;
         this.name = (name == null) ? "UNKNOWN" : name;
         this.requiredArguments = requiredArguments;
     }
 
     /**
      * Splits the given input on {@link #SPLIT_PATTERN}. If the resulting elements do not have the required number of
-     * arguments, throws error.
+     * arguments, throws error. This should not be wrapped with a {@link List}.
      * @param input to split
      * @return input, after split; or thrown exception
      * @throws IllegalArgumentException if argument count incorrect

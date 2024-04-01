@@ -83,9 +83,10 @@ public class CommuniqueSwingUtilities {
                     (int) initialSize.getWidth(),
                     (int) initialSize.getHeight());
         else
-            window.setBounds(100, 100,
-                    (int) Math.round(SCREEN_DIMENSIONS.getWidth() / 2),
-                    (int) Math.round(SCREEN_DIMENSIONS.getHeight() / 2));
+            // traditional communique window start location
+            window.setBounds(50, 50,
+                    (int) initialSize.getWidth(),
+                    (int) initialSize.getHeight());
     }
 
     /**

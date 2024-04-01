@@ -18,16 +18,17 @@
 package com.git.ifly6.communique.io;
 
 import com.git.ifly6.communique.data.CommuniqueRecipient;
-import com.git.ifly6.communique.data.CommuniqueFilterType;
-import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.git.ifly6.communique.data.CommuniqueFilterType.INCLUDE;
+import static com.git.ifly6.communique.data.CommuniqueFilterType.NORMAL;
+import static com.git.ifly6.communique.data.CommuniqueRecipientType.NATION;
+import static com.git.ifly6.communique.data.CommuniqueRecipientType.REGION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CommuniqueConfigTest {
@@ -36,10 +37,10 @@ class CommuniqueConfigTest {
 
     static {
         config = new CommuniqueConfig();
-        crs = Arrays.asList(
-                new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "imperium anglorum"),
-                new CommuniqueRecipient(CommuniqueFilterType.INCLUDE, CommuniqueRecipientType.REGION, "europe"),
-                new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "transilia")
+        crs = List.of(
+                new CommuniqueRecipient(NORMAL, NATION, "imperium anglorum"),
+                new CommuniqueRecipient(INCLUDE, REGION, "europe"),
+                new CommuniqueRecipient(NORMAL, NATION, "transilia")
         );
 
         for (CommuniqueRecipient cr : crs)
@@ -74,15 +75,13 @@ class CommuniqueConfigTest {
         // nation:nation:nation removal test
         CommuniqueConfig config = new CommuniqueConfig();
         CommuniqueRecipient bonkered =
-                new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.NATION, "transilia");
+                new CommuniqueRecipient(NORMAL, NATION, "transilia");
 
         try {
             Field nameField = CommuniqueRecipient.class.getDeclaredField("name");
             nameField.setAccessible(true);
             nameField.set(bonkered, "nation:imperium_anglorum");
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
+        } catch (IllegalAccessException | NoSuchFieldException e) { }
         assertEquals(bonkered.toString(), "nation:nation:imperium_anglorum");
 
         config.addcRecipient(bonkered);

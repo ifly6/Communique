@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
  * @author ifly6
  * @since version 7
  */
+@Deprecated
 public abstract class AbstractCommuniqueRecruiter implements JTelegramLogger {
 
     private static final JInfoFetcher fetcher = JInfoFetcher.instance();

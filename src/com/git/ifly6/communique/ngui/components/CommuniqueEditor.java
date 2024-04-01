@@ -17,6 +17,7 @@
 
 package com.git.ifly6.communique.ngui.components;
 
+import com.git.ifly6.CommuniqueSplitter;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
@@ -24,10 +25,8 @@ import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
-import com.git.ifly6.communique.io.CommuniqueScraper;
 import com.git.ifly6.communique.ngui.AbstractCommunique;
 import com.git.ifly6.nsapi.ApiUtils;
-import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
@@ -52,6 +51,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -78,16 +78,16 @@ public class CommuniqueEditor extends AbstractCommunique {
     private JFrame frame;
 
     private CommuniqueScrollableTextArea area;
-    private JTextField fieldClientKey;
-    private JTextField fieldSecretKey;
-    private JTextField fieldTelegramID;
+    private JTextField tfClientKey; // tf = text field
+    private JTextField tfSecretKey;
+    private JTextField tfTelegramID;
 
-    private CommuniqueDurationField textTelegramDelay;
-    private JComboBox<CommuniqueProcessingAction> fieldAction;
-    private JComboBox<JTelegramType> fieldType;
+    private JComboBox<JTelegramType> chooserTelegramType;
+    private CommuniqueDurationField tfTelegramInterval;
+    private JComboBox<CommuniqueProcessingAction> chooserAction;
 
     private JCheckBox checkboxRepeat;
-    private CommuniqueDurationField textRepeatDelay;
+    private CommuniqueDurationField tfRepeatInterval;
 
     private CommuniqueConfig config; // initialise a new configuration on nothing
 
@@ -140,47 +140,51 @@ public class CommuniqueEditor extends AbstractCommunique {
         // fields
         CommuniqueDelayedDocumentListener saveListener = new CommuniqueDelayedDocumentListener(i -> this.save());
         area = new CommuniqueScrollableTextArea(CommuniqueFactory.createArea("", saveListener));
-        fieldClientKey = CommuniqueFactory.createField("CLIENT_KEY", "Client key", saveListener);
-        fieldSecretKey = CommuniqueFactory.createField("SECRET_KEY", "Secret key", saveListener);
-        fieldTelegramID = CommuniqueFactory.createField("TELEGRAM_ID", "Telegram ID", saveListener);
+        tfClientKey = CommuniqueFactory.createField("CLIENT_KEY", "Client key", saveListener);
+        tfSecretKey = CommuniqueFactory.createField("SECRET_KEY", "Secret key", saveListener);
+        tfTelegramID = CommuniqueFactory.createField("TELEGRAM_ID", "Telegram ID", saveListener);
 
         // create components for the action type, telegram type, etc
         CommuniqueDelayedActionListener delayedSave = new CommuniqueDelayedActionListener(e -> this.save());
-        fieldAction = new JComboBox<>(CommuniqueProcessingAction.values());
-        fieldAction.setSelectedItem(CommuniqueProcessingAction.NONE);
-        fieldAction.setToolTipText(
+        chooserAction = new JComboBox<>(CommuniqueProcessingAction.values());
+        chooserAction.setSelectedItem(CommuniqueProcessingAction.NONE);
+        chooserAction.setToolTipText(
                 "Processing actions can be applied to the list of recipients after they " + "are " + "parsed. Select "
                         + "a processing action here");
-        fieldAction.addActionListener(delayedSave);
+        chooserAction.addActionListener(delayedSave);
 
-        fieldType = new JComboBox<>(JTelegramType.values());
-        fieldType.setSelectedItem(JTelegramType.RECRUIT); // default to recruitment
-        fieldType.setToolTipText("Telegram types are declared site-side in the telegram sent to \"tag:api\"");
-        fieldType.addActionListener(delayedSave);
-        fieldType.addActionListener(ae -> { // force default delays when not selecting custom
-            JTelegramType telegramType = CommuniqueSwingUtilities.getSelected(fieldType);
-            if (!telegramType.equals(JTelegramType.CUSTOM)) textTelegramDelay.setText("");
+        chooserTelegramType = new JComboBox<>(JTelegramType.values());
+        chooserTelegramType.setSelectedItem(JTelegramType.RECRUIT); // default to recruitment
+        chooserTelegramType.setToolTipText("Telegram types are declared site-side in the telegram sent to \"tag:api\"");
+        chooserTelegramType.addActionListener(delayedSave);
+        chooserTelegramType.addActionListener(ae -> { // force default delays when not selecting custom
+            JTelegramType telegramType = CommuniqueSwingUtilities.getSelected(chooserTelegramType);
+            if (!telegramType.equals(JTelegramType.CUSTOM)) {
+                tfTelegramInterval.setText(String.valueOf(telegramType.getWaitDuration().toSeconds()));
+                tfTelegramInterval.setEnabled(false);
+
+            } else tfTelegramInterval.setEnabled(true);
         });
 
-        textTelegramDelay = new CommuniqueDurationField(ChronoUnit.MILLIS, "Time between telegrams in seconds",
+        tfTelegramInterval = new CommuniqueDurationField(ChronoUnit.MILLIS, "Time between telegrams in seconds",
                 saveListener);
-        textTelegramDelay.addActionListener(
+        tfTelegramInterval.addActionListener(
                 ae -> JTelegramType.CUSTOM.setWaitDuration(getTelegramInterval())); // must have this to sync
 
         LinkedHashMap<String, Component> southComponents = new LinkedHashMap<>();
-        southComponents.put("Post-processing action", fieldAction);
-        southComponents.put("Telegram type", fieldType);
-        southComponents.put("Telegram delay (s)", textTelegramDelay);
+        southComponents.put("Post-processing action", chooserAction);
+        southComponents.put("Telegram type", chooserTelegramType);
+        southComponents.put("Telegram delay (s)", tfTelegramInterval);
 
         // create components for the repeat panel
         checkboxRepeat = new JCheckBox("", false);
         checkboxRepeat.addActionListener(delayedSave);
-        textRepeatDelay = new CommuniqueDurationField(ChronoUnit.SECONDS,
+        tfRepeatInterval = new CommuniqueDurationField(ChronoUnit.SECONDS,
                 "Time between client initiation repeat", saveListener);
 
         LinkedHashMap<String, Component> repeatComponents = new LinkedHashMap<>();
         repeatComponents.put("Repeat", checkboxRepeat);
-        repeatComponents.put("Repeat delay (s)", textRepeatDelay);
+        repeatComponents.put("Repeat delay (s)", tfRepeatInterval);
 
         // frame layout
         JPanel contentPane = new JPanel();
@@ -197,7 +201,7 @@ public class CommuniqueEditor extends AbstractCommunique {
         northFrame.setBorder(CommuniqueFactory.createTitledBorder("Telegram keys"));
         CommuniqueSwingUtilities.addComponents(
                 northFrame,
-                Stream.of(fieldClientKey, fieldSecretKey, fieldTelegramID)
+                Stream.of(tfClientKey, tfSecretKey, tfTelegramID)
                         .collect(Collectors.toMap(
                                 JTextField::getToolTipText,
                                 Function.identity(),
@@ -290,23 +294,11 @@ public class CommuniqueEditor extends AbstractCommunique {
             String selection = (String) JOptionPane.showInputDialog(frame,
                     "Select which chamber and side you want " + "to" + " address:", "Select Chamber and Side",
                     JOptionPane.PLAIN_MESSAGE, null, possibilities, "GA For");
-
             if (!selection.isBlank()) {
-                LOGGER.info("Starting scrape of NS WA voting page, " + selection);
-                String[] elements = selection.toLowerCase().split("\\s+?");
-                String chamber = elements[0].equals("ga") ? CommuniqueScraper.GA : CommuniqueScraper.SC;
-                String side = elements[1].equals("for") ? CommuniqueScraper.FOR : CommuniqueScraper.AGAINST;
-                try {
-                    CommuniqueScraper.importAtVoteDelegates(chamber, side).stream().map(CommuniqueRecipient::toString)
-                            .forEach(this::appendLine);
-
-                } catch (NSException nre) {
-                    this.showErrorDialog("No resolution is at vote in that chamber");
-
-                } catch (RuntimeException exc) {
-                    LOGGER.log(Level.WARNING, "Cannot import data.", exc);
-                    this.showErrorDialog("Cannot import data from NationStates website");
-                }
+                CommuniqueSplitter sp = new CommuniqueSplitter("\\s+?", "delegates scraper", 2);
+                String[] elements = sp.split(selection);
+                appendLine(MessageFormat.format("_voting:{0},{1}", elements[0], elements[1]));
+                appendLine("+tag:delegates");
             }
         }));
         mnImportRecipients.add(createMenuItem("From text file", event -> {
@@ -340,10 +332,12 @@ public class CommuniqueEditor extends AbstractCommunique {
 
     public CommuniqueConfig getConfig() {
         config = new CommuniqueConfig(
-                new JTelegramKeys(fieldClientKey.getText(), fieldSecretKey.getText(), fieldTelegramID.getText()),
-                CommuniqueSwingUtilities.getSelected(fieldType), textTelegramDelay.getDuration(),
-                CommuniqueSwingUtilities.getSelected(fieldAction),
-                checkboxRepeat.isSelected(), textRepeatDelay.getDuration());
+                new JTelegramKeys(tfClientKey.getText(), tfSecretKey.getText(), tfTelegramID.getText()),
+                CommuniqueSwingUtilities.getSelected(chooserTelegramType),
+                tfTelegramInterval.getDuration(),
+                CommuniqueSwingUtilities.getSelected(chooserAction),
+                checkboxRepeat.isSelected(),
+                tfRepeatInterval.getDuration());
         config.setcRecipients(area.getLines().stream()
                 .filter(ApiUtils::isNotEmpty)
                 .filter(s -> !s.startsWith("#"))
@@ -395,9 +389,14 @@ public class CommuniqueEditor extends AbstractCommunique {
         this.setClientKey(config.keys.getClientKey());
         this.setSecretKey(config.keys.getSecretKey());
         this.setTelegramID(config.keys.getTelegramID());
-        fieldType.setSelectedItem(config.getTelegramType());
-        fieldAction.setSelectedItem(config.getProcessingAction());
-        textTelegramDelay.setText(String.valueOf(config.getTelegramInterval().getSeconds()));
+
+        chooserTelegramType.setSelectedItem(config.getTelegramType()); // action event disables tfTelegramInterval
+        tfTelegramInterval.setDuration(config.getTelegramInterval());
+        chooserAction.setSelectedItem(config.getProcessingAction());
+
+        checkboxRepeat.setSelected(config.repeats);
+        tfRepeatInterval.setDuration(config.getRepeatInterval());
+
         area.setText(CODE_HEADER + String.join("\n", config.getcRecipientsString()));
     }
 
@@ -442,15 +441,15 @@ public class CommuniqueEditor extends AbstractCommunique {
     }
 
     public void setClientKey(String s) {
-        fieldClientKey.setText(s);
+        tfClientKey.setText(s);
     }
 
     public void setSecretKey(String s) {
-        fieldSecretKey.setText(s);
+        tfSecretKey.setText(s);
     }
 
     public void setTelegramID(String s) {
-        fieldTelegramID.setText(s);
+        tfTelegramID.setText(s);
     }
 
     public void toFront() {

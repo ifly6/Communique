@@ -81,6 +81,7 @@ import java.util.stream.Collectors;
  * interface. The class is designed around the manipulation of {@link CommuniqueConfig} objects which are then returned
  * to {@link Communique} for possible saving.
  */
+@Deprecated
 public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements JTelegramLogger {
 
     private static final String[] protectedRegions = new String[] {"the Pacific", "the North Pacific",
@@ -176,7 +177,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 
                 // Cancel saving if null
                 if (savePath == null) return;
-                save(savePath);
+                save();
 
                 // Dispose the components
                 frame.setVisible(false);
@@ -404,11 +405,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
-    /**
-     * @param savePath is the path on which to save
-     */
-    private void save(Path savePath) {
-
+    private void save() {
         // Prepare to save by:
         // * Creating a configuration file up to specifications
         // * Importing that configuration into Communique

@@ -29,10 +29,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class NSRegion implements NSTimeStamped {
+
+    private static final Logger LOGGER = Logger.getLogger(NSRegion.class.getName());
 
     // So we don't need to fetch it again over different regions
     private static Set<String> worldWAMembers;
@@ -53,7 +57,8 @@ public class NSRegion implements NSTimeStamped {
             try {
                 worldWAMembers = new HashSet<>(NSWorld.getWAMembers());
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE,
+                        "Unable to load WA members from NationStates. Is the internet down?", e);
             }
     }
 
