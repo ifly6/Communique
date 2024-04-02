@@ -171,7 +171,6 @@ The following are the various changelogs from various version of Commnuniqué:
       is awful.
     - Caching for data is now ported from the abortive Communiqué 3 branch.
     - A plethora of new data flags is now available from the abortive Communiqué 3 branch.
-        - `_new:5` gives the five newest nations from the API's new nations shard (I would use `_new:1`).
         - `_happenings:active` returns nations noted as active in the happenings API; on repeat, it does not provide
           nations that have not appeared in the last 10 minutes.
         - `_movement:[out_of|into]; REGION` creates an updating list of nations that have left the region since start;
