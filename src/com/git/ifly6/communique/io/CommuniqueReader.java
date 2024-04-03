@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -102,8 +103,8 @@ class CommuniqueReader {
                     if (config.isRecruitment)
                         config.setTelegramType(JTelegramType.RECRUIT);
 
-                // correct for replacement of wait string with durations
-                if (config.version <= 13)
+                if (config.version <= 13) {
+                    // correct for replacement of wait string with durations
                     if (config.waitString != null && !config.waitString.isBlank())
                         try {
                             config.setTelegramInterval(Duration.ofMillis(Long.parseLong(config.waitString)));
@@ -115,6 +116,15 @@ class CommuniqueReader {
                             ;
                         }
 
+                    // correct flag:recruit -> tag:new, repeat = True, repeatInterval = 3 minutes
+                    List<String> rawRecipients = config.getcRecipientsString();
+                    if (rawRecipients.contains("flag:recruit")) {
+                        rawRecipients.replaceAll(s -> s.equals("flag:recruit") ? "tag:new" : s);
+                        config.setcRecipients(CommuniqueRecipient.parseRecipients(rawRecipients));
+                        config.repeats = true;
+                        config.repeatInterval = Duration.of(3, ChronoUnit.MINUTES);
+                    }
+                }
                 // defaults for wait string are not necessary: blank accepts hard-coded defaults already. A+
 
             } catch (JsonSyntaxException | JsonIOException e) {

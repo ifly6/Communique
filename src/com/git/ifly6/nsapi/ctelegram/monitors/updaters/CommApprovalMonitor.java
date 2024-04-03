@@ -19,23 +19,24 @@ package com.git.ifly6.nsapi.ctelegram.monitors.updaters;
 
 import com.git.ifly6.nsapi.ctelegram.io.CommParseException;
 import com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly;
-import com.git.ifly6.nsapi.ctelegram.io.cache.CommDelegatesCache;
-import com.git.ifly6.nsapi.ctelegram.io.permcache.CommPermanentCache;
+import com.git.ifly6.nsapi.ctelegram.io.cache.CommPermanentCache;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatingMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatableMonitor;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.git.ifly6.nsapi.ctelegram.io.permcache.CommPermanentCache.createKey;
+import static com.git.ifly6.nsapi.ctelegram.io.cache.CommPermanentCache.createKey;
 
 /**
  * Monitors approval actions related to a World Assembly proposal.
  * @since version 13
  */
-public class CommApprovalMonitor extends CommUpdatingMonitor implements CommMonitor {
+public class CommApprovalMonitor extends CommUpdatableMonitor implements CommMonitor {
 
     private static final CommPermanentCache<CommApprovalMonitor> cache = new CommPermanentCache<>();
 
@@ -59,37 +60,38 @@ public class CommApprovalMonitor extends CommUpdatingMonitor implements CommMoni
      * @param actionString {@link Action}
      * @return existing cached instance or, if no such instance, new monitor
      */
-    public static CommApprovalMonitor getOrCreate(String actionString, String proposalID) {
-        Action action;
+    public static CommApprovalMonitor getInstance(String actionString, String proposalID) {
         try {
-            action = Action.valueOf(actionString.toUpperCase());
+            Action action = Action.valueOf(actionString.toUpperCase());
+            return cache.get(
+                    createKey(proposalID, actionString),
+                    () -> new CommApprovalMonitor(proposalID, action));
         } catch (IllegalArgumentException e) { throw CommParseException.make(actionString, Action.values(), e); }
-
-        return cache.getOrCreate(
-                createKey(proposalID, actionString),
-                () -> new CommApprovalMonitor(proposalID, action));
     }
 
     /**
-     * {@inheritDoc} Only returns approvers which undertook the specified {@link Action} at any time and which are
-     * (according to cached data, see {@link CommDelegatesCache},) currently delegates.
+     * {@inheritDoc} Only returns approvers which undertook the specified {@link Action} at any time.
      * @return list of delegates that took specified action.
      */
     @Override
-    public List<String> getRecipients() {
+    public List<String> getAction() {
         if (exhausted)
-            throw new ExhaustedException("Proposal no longer exists; approval change stream exhausted.");
+            throw new ExhaustedException(
+                    String.format("Proposal %s no longer exists; approval stream exhausted.",
+                            proposalID));
 
-        Set<String> delegateSet = new HashSet<>(CommDelegatesCache.getInstance().getDelegates());
         Set<String> changedApprovers = action.find(currentApprovers, allApproversEver);
-        return changedApprovers.stream()
-                .filter(delegateSet::contains)
-                .collect(Collectors.toList());
+        return new ArrayList<>(changedApprovers);
     }
 
     @Override
     public boolean recipientsExhausted() {
         return exhausted;
+    }
+
+    @Override
+    public OptionalLong recipientsCount() {
+        return OptionalLong.of(this.getRecipients().size());
     }
 
     @Override

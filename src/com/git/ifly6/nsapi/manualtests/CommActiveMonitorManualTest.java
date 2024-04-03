@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,23 +17,13 @@
 
 package com.git.ifly6.nsapi.manualtests;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommActiveMonitor;
 
-public class TimeSortTest {
+public class CommActiveMonitorManualTest {
+
     public static void main(String[] args) {
-        Instant i = Instant.now();
-
-        List<Instant> list = new ArrayList<>();
-        for (int j = 0; j < 10; j++) {
-            Instant newInstant = i.minus(Duration.ofSeconds(j * 100));
-            list.add(newInstant);
-        }
-
-        list.sort(Comparator.reverseOrder());
-        System.out.println(list);
+        CommActiveMonitor m = CommActiveMonitor.getInstance();
+        System.out.println(m.getRecipients());
     }
+
 }

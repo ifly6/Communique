@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -20,29 +20,39 @@ package com.git.ifly6.nsapi.ctelegram.io;
 import com.git.ifly6.nsapi.NSConnection;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
+import com.jcabi.xml.XML;
+import com.jcabi.xml.XMLDocument;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Matcher;
+import java.util.Map;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 public class CommHappenings {
 
     private static final String HAPPENINGS_URL = NSConnection.API_PREFIX
             + "q=happenings;filter=law+change+dispatch+rmb+embassy+admin+vote+resolution+member";
+    private static final Pattern PATTERN = Pattern.compile("(?<=@@).*?(?=@@)");
 
     /** Gets list of nations appearing in happenings right now. */
-    public static List<String> getActiveNations() throws JTelegramException {
+    public static Map<String, Instant> getActiveNations() throws JTelegramException {
         try {
             NSConnection connection = new NSConnection(HAPPENINGS_URL).connect();
-            Matcher matcher = Pattern.compile("(?<=@@).*?(?=@@)").matcher(connection.getResponse());
+            XMLDocument xml = new XMLDocument(connection.getResponse());
+            List<XML> nodes = xml.nodes("/WORLD/HAPPENINGS/EVENT");
 
-            List<String> matches = new ArrayList<>();
-            while (matcher.find())
-                matches.add(matcher.group());
-
-            return matches;
+            Map<String, Instant> map = new HashMap<>();
+            for (XML node : nodes) {
+                Instant theInstant = Instant.ofEpochSecond(Long.parseLong(node.xpath("TIMESTAMP/text()").get(0)));
+                PATTERN.matcher(node.xpath("TEXT/text()").get(0))
+                        .results()
+                        .map(MatchResult::group)
+                        .forEach(s -> map.put(s, theInstant));
+            }
+            return map;
 
         } catch (IOException e) {
             throw new NSIOException("Encountered IO exception when getting active nations", e);

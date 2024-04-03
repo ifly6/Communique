@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,32 +17,19 @@
 
 package com.git.ifly6.nsapi.manualtests;
 
-import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor;
+import com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+public class CommWorldAssemblyManualTest {
+    public static void main(String[] args) {
 
-public class MovementMonitorTest {
+//        System.out.println(CommWorldAssembly.getApprovers("free_azell_1607726516"));
+//        System.out.println(CommWorldAssembly.getApprovers("gorundu_1607928980"));
 
-    public static void main(String[] args) throws InterruptedException {
-        List<String> regions = Arrays.asList("Europe");
-        CommMovementMonitor movementMonitor = new CommMovementMonitor(
-                regions, CommMovementMonitor.Direction.OUT_OF);
-
-        List<String> totalRecipients = new ArrayList<>();
-        while (totalRecipients.size() < 10) {
-            System.out.println("Waiting for data to come in...");
-            Thread.sleep((long) (movementMonitor.getUpdateInterval().toMillis() * 1.2));
-
-            System.out.println("Recipients:");
-            List<String> recipients = movementMonitor.getRecipients();
-            totalRecipients.addAll(recipients);
-
-            System.out.println(recipients);
-        }
-
-        movementMonitor.stop();
-        System.out.println("Stopped");
+        CommWorldAssembly.BothChamberVoters voters = CommWorldAssembly.getVoters(CommWorldAssembly.Chamber.GA);
+        System.out.println(voters.timestamp());
+        System.out.println(String.format("Votes on resolution %s: %d for; %d against",
+                voters.proposalID,
+                voters.votersFor.size(), voters.votersAgainst.size()
+        ));
     }
 }

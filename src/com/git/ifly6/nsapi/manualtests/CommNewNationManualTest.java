@@ -14,29 +14,21 @@
  * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.git.ifly6.nsapi.ctelegram.io.cache;
 
-import com.git.ifly6.nsapi.NSRegion;
+package com.git.ifly6.nsapi.manualtests;
 
-/**
- * Caches {@link NSRegion}. Upon expiration of cache data, see {@link CommCache#DEFAULT_EXPIRATION_DURATION} updates
- * data.
- * @since version 13
- */
-public class CommRegionCache extends CommCache<NSRegion> {
+import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommNewNation;
 
-    private static CommRegionCache instance;
+import java.io.IOException;
+import java.util.List;
 
-    private CommRegionCache() { }
+public class CommNewNationManualTest {
 
-    public static CommRegionCache getInstance() {
-        if (instance == null) instance = new CommRegionCache();
-        return instance;
+    public static void main(String[] args) {
+        try {
+            List<CommNewNation> n = CommNewNation.getNewNations();
+            System.out.println(n);
+
+        } catch (IOException e) { throw new RuntimeException(e); }
     }
-
-    @Override
-    protected NSRegion createNewObject(String s) {
-        return new NSRegion(s).populateData();
-    }
-
 }

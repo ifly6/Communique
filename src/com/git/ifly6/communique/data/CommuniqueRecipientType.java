@@ -18,25 +18,22 @@
 package com.git.ifly6.communique.data;
 
 import com.git.ifly6.CommuniqueSplitter;
-import com.git.ifly6.communique.io.HappeningsParser;
-import com.git.ifly6.nsapi.NSIOException;
+import com.git.ifly6.nsapi.NSNation;
 import com.git.ifly6.nsapi.NSRegion;
 import com.git.ifly6.nsapi.NSWorld;
 import com.git.ifly6.nsapi.ctelegram.io.cache.CommDelegatesCache;
-import com.git.ifly6.nsapi.ctelegram.io.cache.CommMembersCache;
-import com.git.ifly6.nsapi.ctelegram.io.cache.CommRegionCache;
-import com.git.ifly6.nsapi.ctelegram.io.cache.CommRegionTagCache;
+import com.git.ifly6.nsapi.ctelegram.io.cache.CommNationCache;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommDelayedMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommActiveMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalRaidMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommRecruitMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommNewNationMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommVoteMonitor;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 
+import java.io.IOException;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +43,11 @@ import java.util.stream.Collectors;
 /**
  * Defines a number of recipient types and provides methods to decompose those types {@link CommuniqueRecipient}s. The
  * <b>order</b> of the {@code enum}s matters because the code is parsed in their "natural" order.
+ * <p>
+ * Tags prefixed with {@code _} (such as {@code _movement} are stateful. They create caches. The <i>changes</i> in those
+ * caches are then what defines the recipient lists that are created. When a tag with that prefix is used, it is only
+ * meaningful, though it may work, when Communiqué has {@code repeat} as true.
+ * </p>
  * @author ifly6
  * @since version 7
  */
@@ -71,13 +73,17 @@ public enum CommuniqueRecipientType {
     REGION_TAG {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) throws JTelegramException {
-            List<String> regions = CommRegionTagCache.getInstance().getRegionsWithTag(cr.getName());
-//            LOGGER.info(String.format("Tag %s: %d regions", cr.getName(), regions.size()));
-            return regions.stream()
-                    .map(s -> new CommuniqueRecipient(cr.getFilterType(), CommuniqueRecipientType.REGION, s))
-                    .map(CommuniqueRecipient::decompose)
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList());
+            try {
+                List<String> regions = NSWorld.getRegionTag(cr.getName());
+                return regions.stream()
+                        .map(s -> new CommuniqueRecipient(cr.getFilterType(), CommuniqueRecipientType.REGION, s))
+                        .map(CommuniqueRecipient::decompose)
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList());
+
+            } catch (IOException e) {
+                throw new JTelegramException("Could not get nations by tag!", e);
+            }
         }
     },
 
@@ -89,17 +95,15 @@ public enum CommuniqueRecipientType {
     REGION {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) throws JTelegramException {
-            NSRegion region = CommRegionCache.getInstance().lookupObject(cr.getName());
-            List<String> regionMembers = region.getRegionMembers();
-
-//            LOGGER.info(String.format("Region %s: %d nations", cr.getName(), regionMembers.size()));
-            return newRecipients(regionMembers, cr.getFilterType());
+            NSRegion region = new NSRegion(cr.getName());
+            return newRecipients(region.getRegionMembers(), cr.getFilterType());
         }
     },
 
     /**
-     * Declares the recipient is one of various tags, which can be used to get the members of the World Assembly,
-     * delegates thereof, or new nations. These tags should be consistent with the standard NationStates telegram tags:
+     * Declares the recipient is one of various tags, which can be used to get the members of the World
+     * Assembly, delegates thereof, or new nations. These tags should be consistent with the standard NationStates
+     * telegram tags:
      * <ul>
      *     <li><strike>{@code tag:all}: all nations</strike> NOT SUPPORTED</li>
      *     <li>{@code tag:wa}: all WA nations</li>
@@ -116,58 +120,57 @@ public enum CommuniqueRecipientType {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) throws JTelegramException {
             String tag = cr.getName();
-            if (tag.equals("wa"))
-                return newRecipients(CommMembersCache.getInstance().getWAMembers(), cr.getFilterType());
-            if (tag.equals("delegates"))
-                return newRecipients(CommDelegatesCache.getInstance().getDelegates(), cr.getFilterType());
-            if (tag.equals("new"))
-                try {
-                    return newRecipients(NSWorld.getNew(), cr.getFilterType());
-                } catch (NSIOException e) { // in this case, we want it to ignore all errors
-                    LOGGER.info("failed to get new recipients from tag:new");
-                    return Collections.emptyList();
-                }
+            try {
+                if (tag.equals("wa"))
+                    return newRecipients(NSWorld.getWAMembers(), cr.getFilterType());
+                if (tag.equals("delegates"))
+                    return newRecipients(
+                            CommDelegatesCache.getInstance().getDelegatesNow(),
+                            cr.getFilterType());
+                if (tag.equals("new"))
+                    return newRecipients(CommNewNationMonitor.getInstance().getRecipients(),
+                            cr.getFilterType());
 
-            throw newException(cr);
+                throw newException(cr);
+            } catch (IOException e) {
+
+                throw new JTelegramException(String.format("Failed to decompose tag %s!", cr), e);
+            }
         }
     },
 
     /**
-     * Declares that the recipient is an internal Communiqué flag.
-     * @since version 7 (2016-12-16)
+     * Lists endorsers of a given nation. {@code endorsers_of:imperium_anglorum}, eg, lists all nations which have
+     * endorsed the nation {@code imperium_anglorum}. The contrary list, WA members not endorsing
+     * {@code imperium_anglorum}, is more complex. It would instead be something like
+     * {@code region :europe // -endorses_of:imperium_anglorum // +tag:wa}
+     * @since version 13
      */
+    ENDORSERS_OF {
+        @Override
+        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
+            NSNation nation = CommNationCache.getInstance()
+                    .lookupObject(cr.getName(), Duration.of(70, ChronoUnit.SECONDS));
+            return newRecipients(nation.getEndoList(), cr.getFilterType());
+        }
+    },
+
+//    /**
+//     * Declares that the recipient is an internal Communiqué flag.
+//     * @since version 7 (2016-12-16)
+//     */
+    /*
     FLAG {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             String tag = cr.getName();
             if (tag.equals("recruit"))
                 return Collections.emptyList(); // recruit is handled by Communiqué logic, not here
-            if (tag.equals("repeat")) return Collections.emptyList(); // repeat last pull and continue
             if (tag.equals("active")) return HappeningsParser.getActiveNations();  // active
             return Collections.emptyList();
         }
     },
-
-    /**
-     * Provides from {@link CommRecruitMonitor} new nations up to a certain limit. The number of nations returned should
-     * be specified as in {@code _new:5}. This monitor never returns the same nation twice; it does not exhaust.
-     * @see CommRecruitMonitor#setUpdateInterval(Duration)
-     * @since version 13
-     */
-    _NEW {
-        @Override
-        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
-            String tag = cr.getName();
-            try {
-                int limit = Integer.parseInt(tag);
-                CommMonitor nnm = new CommDelayedMonitor(CommRecruitMonitor.getInstance().setBatchLimit(limit));
-                return newRecipients(nnm.getRecipients(), cr.getFilterType());
-
-            } catch (NumberFormatException e) {
-                throw newException(cr);
-            }
-        }
-    },
+    */
 
     /**
      * Yields filters related to the NationStates Happenings. Valid input includes the following.
@@ -175,17 +178,18 @@ public enum CommuniqueRecipientType {
      *     <li>{@code _happenings:active} (see {@link CommActiveMonitor}) returning nations active in the last
      *     10 minutes.</li>
      * </ul>
+     * @see #stateful()
      * @since version 13 (2020-12-24 in "Communique 3"), replacing {@code flag:active} in version 9
      */
     _HAPPENINGS {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             String tag = cr.getName();
-            if (tag.equals("active")) // active nations
-                return newRecipients(
-                        CommActiveMonitor.getInstance().getRecipients(),
+            if (tag.equals("active")) {// active nations
+                CommMonitor activeMonitor = CommActiveMonitor.getInstance();
+                return newRecipients(activeMonitor.getRecipients(),
                         cr.getFilterType());
-
+            }
             throw newException(cr);
         }
     },
@@ -193,6 +197,7 @@ public enum CommuniqueRecipientType {
     /**
      * Nations moving into or out of a list of regions. Eg, {@code _movement:into;europe,the_north_pacific} or
      * {@code _movement:out_of;europe}.
+     * @see #stateful()
      * @see CommMovementMonitor.Direction
      * @since version 13 (2020-12-24 in "Communique 3")
      */
@@ -204,38 +209,34 @@ public enum CommuniqueRecipientType {
             String[] tags = splitter.split(cr.getName());
             String direction = tags[0];
             String region = tags[1];
-            CommMonitor monitor = new CommDelayedMonitor(CommMovementMonitor.getOrCreate(direction, region));
+            CommMonitor monitor = CommMovementMonitor.getInstance(direction, region);
             return newRecipients(monitor.getRecipients(), cr.getFilterType());
         }
     },
 
     /**
-     * Delegates approving a proposal. Eg, {@code _approval:__raids__} for all approval raids,
-     * {@code _approval:given_to; PROPOSAL_ID}, or {@code _approval:removed_from; PROPOSAL_ID}.
+     * Delegates approving a proposal. Eg {@code _approvals:given_to; PROPOSAL_ID} or
+     * {@code _approvals:removed_from; PROPOSAL_ID}.
      * @see CommApprovalMonitor.Action
+     * @see #stateful()
      * @since version 13 (2020-12-24 in "Communique 3")
      */
-    _APPROVAL {
+    _APPROVALS {
         private final CommuniqueSplitter splitter = new CommuniqueSplitter(this.toString(), 2);
 
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
-            if (cr.getName().equalsIgnoreCase("__raids__"))
-                return newRecipients(
-                        new CommDelayedMonitor(
-                                CommApprovalRaidMonitor.getInstance()).getRecipients(),
-                        cr.getFilterType());
-
             String[] tags = splitter.split(cr.getName());
             String givenOrRemoved = tags[0];
             String proposal = tags[1];
-            CommMonitor monitor = new CommDelayedMonitor(CommApprovalMonitor.getOrCreate(givenOrRemoved, proposal));
+            CommMonitor monitor = CommApprovalMonitor.getInstance(givenOrRemoved, proposal);
             return newRecipients(monitor.getRecipients(), cr.getFilterType());
         }
     },
 
     /**
      * Persons voting on a proposal. Eg {@code _voting:ga; for}.
+     * @see #stateful()
      * @since version 13 (2020-12-24 in "Communique 3")
      */
     _VOTING {
@@ -246,13 +247,13 @@ public enum CommuniqueRecipientType {
             String[] split = splitter.split(cr.getName());
             String chamber = split[0];
             String voting = split[1];
-            CommMonitor monitor = new CommDelayedMonitor(CommVoteMonitor.getOrCreate(chamber, voting));
+            CommMonitor monitor = CommVoteMonitor.getInstance(chamber, voting);
             return newRecipients(monitor.getRecipients(), cr.getFilterType());
         }
     },
 
     /**
-     * Declares that the recipient has no recipient type. This element is parsed last.
+     * Declares that the recipient has no recipient type. This element must be parsed last.
      * @since version 7
      */
     NONE {
@@ -276,6 +277,22 @@ public enum CommuniqueRecipientType {
     @Override
     public String toString() {
         return this.name().toLowerCase();
+    }
+
+    /**
+     * Returns true if the recipient type is stateful: ie it generates <i>meaningful</i> recipients only over time or
+     * when the recipients of previous calls become obsolete. This includes tags such as {@code _movement}. All stateful
+     * tags begin with an underscore.
+     * <ul>
+     *     <li>{@code _happenings}</li> generates recipients that become irrelevant rapidly
+     *     <li>{@code _movement}</li> cannot generate recipients without waiting
+     *     <li>{@code _approval}</li> exhausts when the proposal expires
+     *     <li>{@code _voting}</li> exhausts when the resolution at vote expires
+     * </ul>
+     * @return true if tag begins with {@code _}.
+     */
+    public boolean stateful() {
+        return toString().startsWith("_");
     }
 
     /**

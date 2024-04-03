@@ -18,73 +18,61 @@
 package com.git.ifly6.nsapi.ctelegram.monitors.updaters;
 
 import com.git.ifly6.nsapi.ctelegram.io.CommHappenings;
-import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatingMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.rules.CommExhaustiveMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatableMonitor;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.OptionalLong;
+import java.util.stream.Collectors;
 
 /**
  * Creates an updating monitor for the NationStates Happenings API. Delivers, non-exhaustively, any nation which
  * appeared in the happenings in the last {@value MINUTES} minutes.
  */
-public class CommActiveMonitor extends CommUpdatingMonitor {
+public class CommActiveMonitor extends CommUpdatableMonitor {
 
     private static final long MINUTES = 10; // must be separate to allow for @value
     private static final Duration ACTIVE_MIN = Duration.ofMinutes(MINUTES);
     private static CommActiveMonitor instance;
-    private static CommMonitor exhaustiveInstance;
 
-    private Set<Entry<Instant, String>> cache;
+    private Map<String, Instant> cache;
 
-    public CommActiveMonitor() {
-        this.cache = new HashSet<>();
-    }
+    private CommActiveMonitor() { this.cache = new HashMap<>(); }
 
-    /** @returns instance; there is only one happenings to be monitoring */
     public static CommActiveMonitor getInstance() {
-        if (instance == null)
-            instance = new CommActiveMonitor();
+        if (instance == null) instance = new CommActiveMonitor();
         return instance;
     }
 
-    /** @return exhaustive instance, decorated such that it never gives the same nation twice */
-    public static CommMonitor getExhaustiveInstance() {
-        if (exhaustiveInstance == null)
-            exhaustiveInstance = new CommExhaustiveMonitor(CommActiveMonitor.getInstance());
-        return exhaustiveInstance;
-    }
-
     @Override
-    public List<String> getRecipients() {
-        Instant now = Instant.now();
-        List<String> toReturn = new ArrayList<>();
-        for (Entry<Instant, String> entry : cache)
-            if (entry.getKey().isAfter(now.minus(ACTIVE_MIN)))
-                toReturn.add(entry.getValue());
-
-        return toReturn;
+    public List<String> getAction() {
+        Instant cutoff = Instant.now().minus(ACTIVE_MIN);
+        return cache.entrySet().stream()
+                .filter(entry -> entry.getValue().isAfter(cutoff))
+                .map(Entry::getKey)
+                .collect(Collectors.toList());
     }
 
     /** Does not exhaust. */
     @Override
-    public boolean recipientsExhausted() {
-        return false;
-    }
+    public boolean recipientsExhausted() { return false; }
+
+    @Override
+    public OptionalLong recipientsCount() { return OptionalLong.of(getRecipients().size()); }
 
     @Override
     protected void updateAction() {
-        Instant now = Instant.now();
-        List<String> newActiveNations = CommHappenings.getActiveNations();
-        for (String s : newActiveNations)
-            cache.add(new SimpleEntry<>(now, s));
+        Map<String, Instant> newActiveNations = CommHappenings.getActiveNations();
+        if (newActiveNations.isEmpty()) return;
+
+        Instant THIRTY_MINUTES_AGO = Instant.now().minus(30, ChronoUnit.MINUTES);
+        cache.putAll(newActiveNations);
+        cache.entrySet().removeIf(entry -> entry.getValue().isBefore(THIRTY_MINUTES_AGO));
     }
 
 }

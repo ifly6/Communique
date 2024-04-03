@@ -19,25 +19,27 @@ package com.git.ifly6.nsapi.ctelegram.monitors.updaters;
 
 import com.git.ifly6.nsapi.NSRegion;
 import com.git.ifly6.nsapi.ctelegram.io.CommParseException;
-import com.git.ifly6.nsapi.ctelegram.io.permcache.CommPermanentCache;
+import com.git.ifly6.nsapi.ctelegram.io.cache.CommPermanentCache;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
-import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatingMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatableMonitor;
 import com.google.common.collect.EvictingQueue;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalLong;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * Monitors movement in or out, see {@link Direction}, of a specified region.
  * @since version 13
  */
-public class CommMovementMonitor extends CommUpdatingMonitor implements CommMonitor {
+public class CommMovementMonitor extends CommUpdatableMonitor implements CommMonitor {
 
+    private static final Logger LOGGER = Logger.getLogger(CommMovementMonitor.class.getName());
     private static final CommPermanentCache<CommMovementMonitor> cache = new CommPermanentCache<>();
     private static final int EVICT_QUEUE_SIZE = 100;
 
@@ -64,22 +66,24 @@ public class CommMovementMonitor extends CommUpdatingMonitor implements CommMoni
      * @param regionList list of regions, separated by commas
      * @return new monitor or existing instance if already exists
      */
-    public static CommMovementMonitor getOrCreate(String dirString, String regionList) {
+    public static CommMovementMonitor getInstance(String dirString, String regionList) {
         List<String> regions = parseList(regionList);
-        Direction direction;
-
         try {
-            direction = Direction.valueOf(dirString);
+            Direction direction = Direction.valueOf(dirString);
+            return cache.get(CommPermanentCache.createKey(regionList, dirString),
+                    () -> new CommMovementMonitor(regions, direction));
         } catch (IllegalArgumentException e) { throw CommParseException.make(dirString, Direction.values(), e); }
-
-        return cache.getOrCreate(CommPermanentCache.createKey(regionList, dirString),
-                () -> new CommMovementMonitor(regions, direction));
     }
 
     /** Recipients generate slowly, but never exhaust. */
     @Override
     public boolean recipientsExhausted() {
         return false;
+    }
+
+    @Override
+    public OptionalLong recipientsCount() {
+        return OptionalLong.empty();
     }
 
     @Override
@@ -98,16 +102,15 @@ public class CommMovementMonitor extends CommUpdatingMonitor implements CommMoni
     }
 
     /**
-     * {@inheritDoc} Recipients can only be found after {@link #DEFAULT_UPDATE_INTERVAL} or update interval established
-     * by {@link #setUpdateInterval(Duration)} If not enough time has elapsed, returns an empty list; otherwise, returns
-     * nations depending on {@link Direction}.
+     * {@inheritDoc} Recipients can only be found after some amount of time. If not enough time has elapsed, returns an
+     * empty list; otherwise, returns nations depending on {@link Direction}.
      * <p>Note that recipients returned for multiple regions are movements in and out of those regions taken together.
      * If monitoring Europe and the North Pacific, someone who moves from the North Pacific <b>to</b> Europe will not be
      * marked.</p>
      * @returns list of last {@value EVICT_QUEUE_SIZE} moved recipients
      */
     @Override
-    public List<String> getRecipients() {
+    public List<String> getAction() {
         if (inhabitantsNow == null || inhabitantsBefore == null) {
             LOGGER.info("Not enough information to find any changes.");
             return new ArrayList<>();

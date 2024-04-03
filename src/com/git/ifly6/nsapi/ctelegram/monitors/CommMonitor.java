@@ -46,7 +46,7 @@ public interface CommMonitor {
      * Counts remaining recipients, if known.
      * @return count of remaining recipients if known
      */
-    OptionalLong recipientsCountIfKnown();
+    OptionalLong recipientsCount();
 
     /** Thrown if calling an exhausted monitor. */
     class ExhaustedException extends NSException {

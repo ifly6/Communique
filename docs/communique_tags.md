@@ -104,12 +104,14 @@ _approvals:removed_from;PROPOSAL_ID
 ```
 
 Combination of tags can also be used to get a list of WA nations who have not endorsed someone in a region (a topic not
-directly supported by the `endorser_of` tag) by chaining:
+directly supported by the `endorser_of` tag) by chaining the following commands (remember that `SOME_NATION` cannot
+endorse _itself_):
 
 ```
 region:REGION
 +tag:wa
 -endorsers_of:SOME_NATION
+-nation:SOME_NATION
 ```
 
 ## Tag naming conventions ##

@@ -20,8 +20,6 @@ package com.git.ifly6.communique.ngui;
 import com.git.ifly6.CommuniqueApplication;
 import com.git.ifly6.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Parser;
-import com.git.ifly6.communique.data.CommuniqueRecipient;
-import com.git.ifly6.communique.data.CommuniqueRecipientType;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueProcessingAction;
 import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
@@ -285,22 +283,11 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
             return;
         }
 
-        List<CommuniqueRecipient> tokens = focusedEditor.getConfig().getcRecipients();
-
-        // Check if a recruit-flag has been used.
-        boolean rfPresent = tokens.stream()
-                .filter(t -> t.getRecipientType() == CommuniqueRecipientType.FLAG)
-                .anyMatch(t -> t.getName().equals("recruit"));
-        if (rfPresent) {
-            showRecruiter();
-            return;
-        }
-
         // Call and do the parsing
         LOGGER.info("Called parser");
         Communique7Parser parser = new Communique7Parser();
         try {
-            parsedRecipients = parser.apply(tokens).listRecipients();
+            parsedRecipients = parser.apply(focusedEditor.getConfig().getcRecipients()).listRecipients();
             if (!ApiUtils.contains(CommuniqueProcessingAction.values(),
                     focusedEditor.getConfig().processingAction)) {
                 // if config.processingAction not in CommuniqueProcessingAction.values

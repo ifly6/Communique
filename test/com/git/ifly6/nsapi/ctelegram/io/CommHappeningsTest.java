@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -21,23 +21,23 @@ import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.nsapi.NSIOException;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.time.Instant;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CommHappeningsTest {
 
     @Test
     void getActiveNations() {
         try {
-            List<String> activeNations = CommHappenings.getActiveNations();
-            assertTrue(activeNations.size() > 0);
-            assertFalse(activeNations.get(0).contains("@@"));
+            Map<String, Instant> activeNations = CommHappenings.getActiveNations();
+            assertFalse(activeNations.isEmpty());
+            assertFalse(activeNations.keySet().stream().findFirst().orElseThrow(RuntimeException::new).contains("@@"));
             assertDoesNotThrow(
                     () -> {
-                        for (String s : activeNations)
+                        for (String s : activeNations.keySet())
                             CommuniqueRecipients.createNation(s);
                     }
             );

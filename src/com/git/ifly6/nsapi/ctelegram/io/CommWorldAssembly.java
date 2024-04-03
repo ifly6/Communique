@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -50,7 +51,7 @@ public class CommWorldAssembly {
     }
 
     /** Formats URL for NS chamber vote; nation. */
-    private static String formatNationsURL(Chamber c, Vote v) {
+    private static String formatNationsURL(Chamber c) {
         return NSConnection.API_PREFIX
                 + MessageFormat.format("wa={0}&q=resolution+voters", c.getCouncilCode());
     }
@@ -73,7 +74,7 @@ public class CommWorldAssembly {
      * Gets resolution ID for proposal in chamber.
      * @throws NoSuchProposalException if no proposal at vote in chamber
      */
-    public static String getProposalID(Chamber chamber) {
+    public static String getResolutionID(Chamber chamber) {
         try {
             NSConnection apiConnect = new NSConnection(formatResolutionURL(chamber));
             XML xml = new XMLDocument(apiConnect.getResponse());
@@ -91,18 +92,19 @@ public class CommWorldAssembly {
      * Gets voters in a chamber who are voting a certain way. The API returns <b>all</b> voters; including delegates.
      * Delegates are included <b>without</b> their voting weights.
      * @param chamber to look in
-     * @param voting  direction to look for
      * @return voters who are voting in specified chamber with specified vote
      * @throws NoSuchProposalException if chamber is empty
      */
-    public static List<String> getVoters(Chamber chamber, Vote voting) {
+    public static BothChamberVoters getVoters(Chamber chamber) {
         try {
-            NSConnection apiConnect = new NSConnection(formatNationsURL(chamber, voting));
+            NSConnection apiConnect = new NSConnection(formatNationsURL(chamber));
             XML xml = new XMLDocument(apiConnect.getResponse());
-            List<String> voters = xml.xpath(
-                    MessageFormat.format("/WA/RESOLUTION/{0}/N/text()", // load all these values
-                            voting.getNationXMLTag())); // get elements voting this direction
-            return ApiUtils.ref(voters); // ref
+            return new BothChamberVoters(
+                    xml.xpath("/WA/RESOLUTION/ID/text()").get(0),
+                    xml.xpath(MessageFormat.format("/WA/RESOLUTION/{0}/N/text()", Vote.FOR.getNationXMLTag())),
+                    xml.xpath(MessageFormat.format("/WA/RESOLUTION/{0}/N/text()",
+                            Vote.AGAINST.getNationXMLTag()))
+            );
 
         } catch (IOException e) {
             throw new NSIOException("Could not connect to NationStates API", e);
@@ -152,8 +154,8 @@ public class CommWorldAssembly {
 
     /**
      * Gets people who approved the specified proposal. It first enumerates all proposals in both chambers. Then it
-     * yields the proposal specified. The API does not permit querying only one proposal; and to get any possible
-     * proposal we need to check both chambers.
+     * yields the proposal specified. The API does not permit querying only one proposal; and to get any
+     * possible proposal we need to check both chambers.
      * @return list of delegate approvers
      * @throws NoSuchProposalException if proposal does not exist
      */
@@ -167,7 +169,8 @@ public class CommWorldAssembly {
     }
 
     /**
-     * Queries for current approvals on all proposals.
+     * Queries for current approvals on all proposals. This must make two calls for both chambers because
+     * {@code _approvals} is agnostic as to chamber and could be in either.
      * @returns list of {@link Proposal}s
      */
     public static List<Proposal> getAllProposals() {
@@ -260,6 +263,7 @@ public class CommWorldAssembly {
 
     /** Holds information on a proposal. */
     public static class Proposal implements NSTimeStamped {
+
         public final String id;
         public final List<String> approvers;
         public final Instant timeStamp;
@@ -271,8 +275,60 @@ public class CommWorldAssembly {
         }
 
         @Override
-        public Instant timestamp() {
-            return timeStamp;
+        public Instant timestamp() { return timeStamp; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Proposal)) return false;
+            Proposal proposal = (Proposal) o;
+            return Objects.equals(id, proposal.id) && Objects.equals(timeStamp, proposal.timeStamp);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, timeStamp);
         }
     }
+
+    public static class BothChamberVoters implements NSTimeStamped {
+
+        private Instant timestamp;
+
+        public final String proposalID;
+        public final List<String> votersFor;
+        public final List<String> votersAgainst;
+
+        public BothChamberVoters(String proposalID, List<String> votersFor, List<String> votersAgainst) {
+            this.proposalID = proposalID;
+            this.votersFor = votersFor;
+            this.votersAgainst = votersAgainst;
+            this.timestamp = Instant.now();
+        }
+
+        public List<String> getVoters(Vote vote) {
+            if (vote == Vote.FOR) return votersFor;
+            if (vote == Vote.AGAINST) return votersAgainst;
+            throw new UnsupportedOperationException(
+                    String.format("Asked to get voters of unsupported position %s", vote));
+        }
+
+        @Override
+        public Instant timestamp() { return timestamp; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof BothChamberVoters)) return false;
+            BothChamberVoters voters = (BothChamberVoters) o;
+            return Objects.equals(timestamp, voters.timestamp) && Objects.equals(proposalID,
+                    voters.proposalID);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(timestamp, proposalID);
+        }
+    }
+
 }

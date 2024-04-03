@@ -17,20 +17,18 @@
 
 package com.git.ifly6.nsapi.manualtests;
 
-import com.git.ifly6.nsapi.NSRegion;
+import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatableMonitor;
+import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommNewNationMonitor;
 
-import java.io.IOException;
+public class CommNewNationMonitorManualTest {
+    public static void main(String[] args) throws InterruptedException {
+        // create monitor
+        CommUpdatableMonitor m = CommNewNationMonitor.getInstance();
+        System.out.println(m.getRecipients().toString());
 
-public class UrlTests {
-
-    public static void main(String[] args) throws IOException {
-
-//        NSNation nation = new NSNation("imperium anglorum");
-//        nation.populateData();
-
-        NSRegion region = new NSRegion("europe");
-        region.populateData();
-
+        // sleep and see next
+        Thread.sleep((long) 60 * 3 * 1000);
+        System.out.println(m.getRecipients().toString());
+        System.out.println();
     }
-
 }

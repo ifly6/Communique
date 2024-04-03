@@ -30,9 +30,15 @@ import java.time.temporal.ChronoUnit;
 public class CommuniqueDurationField extends JTextField {
 
     private final ChronoUnit TIME_UNIT;
+    private final Duration MINIMUM_DURATION;
 
     public CommuniqueDurationField(ChronoUnit unit, String tooltip, DocumentListener listener) {
+        this(unit, Duration.ofSeconds(30), tooltip, listener);
+    }
+
+    public CommuniqueDurationField(ChronoUnit unit, Duration minimum, String tooltip, DocumentListener listener) {
         this.TIME_UNIT = unit;
+        this.MINIMUM_DURATION = minimum;
 
         // visuals
         this.setToolTipText(tooltip);
@@ -52,13 +58,15 @@ public class CommuniqueDurationField extends JTextField {
      */
     public Duration getDuration() {
         if (this.getText().isBlank()) return ChronoUnit.FOREVER.getDuration();
-        return Duration.of(Integer.parseInt(this.getText()), TIME_UNIT)
+        Duration rawDuration = Duration
+                .of(Integer.parseInt(this.getText()), TIME_UNIT)
                 .plus(Duration.ofMillis(5));
+        return (rawDuration.compareTo(MINIMUM_DURATION) < 0) ? MINIMUM_DURATION : rawDuration;
     }
 
     /**
-     * Sets the text as the value of the given duration, rounded (always down) to the established {@link #TIME_UNIT}.
-     * If the duration is {@link ChronoUnit#FOREVER}, it clears the box.
+     * Sets the text as the value of the given duration, rounded (always down) to the established {@link #TIME_UNIT}. If
+     * the duration is {@link ChronoUnit#FOREVER}, it clears the box.
      * @param interval to set as digits
      */
     public void setDuration(Duration interval) {

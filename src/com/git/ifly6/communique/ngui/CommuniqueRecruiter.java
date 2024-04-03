@@ -428,7 +428,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
 
         // Create and set recipients and sent-lists
         List<CommuniqueRecipient> rList = new ArrayList<>();
-        rList.add(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.FLAG, "recruit"));
+//        rList.add(new CommuniqueRecipient(CommuniqueFilterType.NORMAL, CommuniqueRecipientType.FLAG, "recruit"));
         rList.addAll(filterList); // add filtered list
         rList.addAll(listProscribedRegions()); // add proscribed regions
         rList.addAll(sentList); // add sent list

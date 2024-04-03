@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.nsapi.ctelegram.io.permcache;
+package com.git.ifly6.nsapi.ctelegram.io.cache;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class CommPermanentCache<T> {
      * @param supplier to create with
      * @return instance if present; supplied object otherwise
      */
-    public T getOrCreate(Object[] key, Supplier<T> supplier) {
+    public T get(Object[] key, Supplier<T> supplier) {
         int hashCode = Objects.hash(key);
         if (cache.containsKey(hashCode))
             return cache.get(hashCode);

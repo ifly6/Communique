@@ -34,10 +34,10 @@ import java.util.logging.Logger;
 public abstract class CommCache<T extends NSTimeStamped> {
 
     private static final Logger LOGGER = Logger.getLogger(CommCache.class.getName());
-    public static final Duration DEFAULT_EXPIRATION_DURATION = Duration.ofMinutes(10);
+    public static final Duration DEFAULT_EXPIRATION_DURATION = Duration.ofMinutes(30);
 
     private final Map<String, T> cache = new ConcurrentHashMap<>();
-    private final Duration expirationIn;
+    private final Duration maximumAge;
 
     /**
      * Runnable to be executed at the end of every {@link #lookupObject(String)}. This is a transient variable and is
@@ -47,15 +47,15 @@ public abstract class CommCache<T extends NSTimeStamped> {
 
     /** Creates empty cache with cache expiration in 10 minutes. */
     public CommCache() {
-        this.expirationIn = DEFAULT_EXPIRATION_DURATION;
+        this.maximumAge = DEFAULT_EXPIRATION_DURATION;
     }
 
     /**
      * Creates empty cache with custom cache expiration duration.
-     * @param expirationIn duration
+     * @param maximumAge duration
      */
-    public CommCache(Duration expirationIn) {
-        this.expirationIn = expirationIn;
+    public CommCache(Duration maximumAge) {
+        this.maximumAge = maximumAge;
     }
 
     /**
@@ -101,20 +101,33 @@ public abstract class CommCache<T extends NSTimeStamped> {
 
     /**
      * Gets information for an object. If it does not exist, adds that object to the cache. If the cached information is
-     * older than {@link #expirationIn}, it updates the cache.
+     * older than {@link #maximumAge}, it updates the cache.
      * @param s is the ref name of the object to get data for
-     * @return {@link NSTimeStamped} with reasonably up-to-date cached data
+     * @return {@link NSTimeStamped} with data no older than {@link #maximumAge}
      */
     public T lookupObject(String s) {
-        s = ApiUtils.ref(s); // normalise input
-        T n = getOrCacheObject(s);
+        return lookupObject(s, maximumAge);
+    }
 
-        /* If the duration between data acquisition and present is greater than ten minutes, mark expired. */
-        boolean expired = Duration.between(n.timestamp(), Instant.now()).compareTo(expirationIn) > 0;
-        if (expired)
+    /**
+     * Gets information for an object. If it does not exist, adds that object to the cache. If the cached information is
+     * older than requested, it updates the cache.
+     * @param s         is the ref name of the object to get data for
+     * @param orElseAge calls for a new object if the cached version is older than this age; capped by
+     *                  {@link #maximumAge}
+     * @return {@link NSTimeStamped} with cached data as up-to-date as requested
+     */
+    public T lookupObject(String s, Duration orElseAge) {
+        s = ApiUtils.ref(s); // normalise inputs
+        orElseAge = (orElseAge.compareTo(maximumAge)) > 0 ? maximumAge : orElseAge;
+
+        T n = getOrCacheObject(s);
+        Instant cutoff = Instant.now().minus(orElseAge);
+        if (n.timestamp().isAfter(cutoff))
             cacheObject(s); // update cache
 
         if (hasFinaliser()) finaliser.run();
         return getOrCacheObject(s);
     }
+
 }

@@ -175,8 +175,9 @@ public class CommuniqueEditor extends AbstractCommunique {
             } else tfTelegramInterval.setEnabled(true);
         });
 
-        tfTelegramInterval = new CommuniqueDurationField(ChronoUnit.SECONDS, "Time between telegrams in seconds",
-                saveListener);
+        tfTelegramInterval = new CommuniqueDurationField(
+                ChronoUnit.SECONDS, Duration.ofSeconds(1),
+                "Time between telegrams in seconds. Minimum is 1 second.", saveListener);
         tfTelegramInterval.addActionListener(
                 ae -> JTelegramType.CUSTOM.setWaitDuration(getTelegramInterval())); // must have this to sync
 
@@ -193,7 +194,7 @@ public class CommuniqueEditor extends AbstractCommunique {
             if (!checkboxRepeat.isSelected()) tfRepeatInterval.setDuration(ChronoUnit.FOREVER.getDuration());
         }));
         tfRepeatInterval = new CommuniqueDurationField(ChronoUnit.SECONDS,
-                "Time between client initiation repeat", saveListener);
+                "Time between client initiation repeat. Minimum is 30 seconds.", saveListener);
 
         LinkedHashMap<String, Component> repeatComponents = new LinkedHashMap<>();
         repeatComponents.put("Repeat", checkboxRepeat);

@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,7 +47,7 @@ public class NSRegion implements NSTimeStamped {
     private String founderName;
     private String delegateName;
 
-    private Instant updateTime;
+    private Instant timestamp;
 
     private List<String> regionMembers = new ArrayList<>();
     private List<String> waMembers = new ArrayList<>();
@@ -106,7 +107,7 @@ public class NSRegion implements NSTimeStamped {
             throw new NSException("Check your Internet connection."); // otherwise, internet
         }
 
-        updateTime = Instant.now();
+        timestamp = Instant.now();
         return this;
     }
 
@@ -192,7 +193,21 @@ public class NSRegion implements NSTimeStamped {
      */
     @Override
     public Instant timestamp() {
-        return updateTime;
+        return timestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NSRegion)) return false;
+        NSRegion region = (NSRegion) o;
+        return Objects.equals(regionName, region.regionName) && Objects.equals(timestamp,
+                region.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(regionName, timestamp);
     }
 
     /**

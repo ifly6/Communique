@@ -62,7 +62,7 @@ public class CommuniqueConfig implements Serializable {
 
     public boolean repeats;
     @Nullable
-    private Duration repeatInterval;
+    public Duration repeatInterval;
 
     /**
      * Holds the Communique recipients in <code>String</code>s so that it can be edited by hand and not as

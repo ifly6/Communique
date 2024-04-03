@@ -21,9 +21,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -38,16 +39,16 @@ import static com.git.ifly6.CommuniqueApplication.APP_SUPPORT;
  */
 public class CommNationCache extends CommCache<NSNation> {
 
-    private static final Path LOCATION = APP_SUPPORT.resolve("nation_cache.json");
     private static final Logger LOGGER = Logger.getLogger(CommNationCache.class.getName());
-    private static final Duration CACHE_DURATION = Duration.of(10, ChronoUnit.DAYS);
+    private static final Path LOCATION = APP_SUPPORT.resolve("nation_cache.json");
+    private static final Duration CACHE_DURATION = Duration.of(1, ChronoUnit.DAYS);
 
     private static CommNationCache instance;
 
     private CommNationCache() {
         super(CACHE_DURATION);
         this.setFinaliser(() -> {
-            try (BufferedWriter bw = Files.newBufferedWriter(LOCATION);) {
+            try (BufferedWriter bw = Files.newBufferedWriter(LOCATION)) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
                 gson.toJson(this, bw);
             } catch (IOException e) {
@@ -57,15 +58,11 @@ public class CommNationCache extends CommCache<NSNation> {
     }
 
     private static CommNationCache makeInstance() {
-        if (!Files.exists(LOCATION))
-            return new CommNationCache();
-
         try {
-            Reader reader = Files.newBufferedReader(LOCATION);
-            // should be irrelevant... the finaliser is a transient runnable and should never be serialised
-//            if (!cache.hasFinaliser())
-//                LOGGER.log(Level.SEVERE, "Serialised version of CommNationCache lacks save finaliser!");
-            return new Gson().fromJson(reader, CommNationCache.class);
+            return new Gson().fromJson(Files.newBufferedReader(LOCATION), CommNationCache.class);
+
+        } catch (NoSuchFileException | FileNotFoundException e) {
+            return new CommNationCache();
 
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Unable to load persist version of nation cache!", e);
@@ -78,20 +75,8 @@ public class CommNationCache extends CommCache<NSNation> {
         return instance;
     }
 
-    /**
-     * {@inheritDoc} Here applies to {@link NSNation}s.
-     * @param s name of nation
-     * @return cached data-populated corresponding {@link NSNation}
-     * @throws NSNation.NSNoSuchNationException if attempting to load non-existent nation
-     */
-    @Override
-    public NSNation lookupObject(String s) {
-        return super.lookupObject(s);
-    }
-
     /** @throws NSNation.NSNoSuchNationException from {@link NSNation#populateData()} */
     @Override
-    protected NSNation createNewObject(String s) {
-        return new NSNation(s).populateData();
-    }
+    protected NSNation createNewObject(String s) { return new NSNation(s).populateData(); }
+
 }

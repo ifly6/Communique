@@ -19,12 +19,25 @@ package com.git.ifly6.nsapi.ctelegram.io.cache;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.NSTimeStamped;
 import com.git.ifly6.nsapi.NSWorld;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.git.ifly6.CommuniqueApplication.APP_SUPPORT;
 
 /**
  * Caches NationStates delegates for later access. <b>Only invoke with {@link #DELEGATE_KEY}!</b> Cache expiration time
@@ -33,40 +46,69 @@ import java.util.List;
  */
 public class CommDelegatesCache extends CommCache<CommDelegatesCache.Delegates> {
 
+    private static final Logger LOGGER = Logger.getLogger(CommDelegatesCache.class.getName());
     public static final String DELEGATE_KEY = "__delegates__";
+    private static final Path LOCATION = APP_SUPPORT.resolve("nation_cache.json");
+    public static final Duration CACHE_DURATION = Duration.ofMinutes(30);
+
     private static CommDelegatesCache instance;
 
-    private CommDelegatesCache(Duration minutes) {
-        super(minutes);
+    private CommDelegatesCache() {
+        super(CACHE_DURATION);
+        this.setFinaliser(() -> {
+            try (BufferedWriter bw = Files.newBufferedWriter(LOCATION)) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+                gson.toJson(this, bw);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Unable to save nation cache!", e);
+            }
+        });
+    }
+
+    private static CommDelegatesCache makeInstance() {
+        try {
+            return new Gson().fromJson(Files.newBufferedReader(LOCATION), CommDelegatesCache.class);
+
+        } catch (NoSuchFileException | FileNotFoundException e) {
+            return new CommDelegatesCache();
+
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Unable to load persist version of delegates cache!", e);
+            return new CommDelegatesCache();
+        }
     }
 
     /** Gets the one cache. */
     public static CommDelegatesCache getInstance() {
-        if (instance == null) instance = new CommDelegatesCache(Duration.ofMinutes(30));
+        if (instance == null) instance = makeInstance();
         return instance;
     }
 
     @Override
-    protected Delegates createNewObject(String s) {
-        return new Delegates();
-    }
+    protected Delegates createNewObject(String s) { return new Delegates(); }
 
     /** Prefer {@link #getDelegates()}. */
     @Override
     public Delegates lookupObject(String s) {
-        if (s.equals(DELEGATE_KEY))
-            return super.lookupObject(s);
-        throw new UnsupportedOperationException(
-                "Delegates cache only supports looking up with " + DELEGATE_KEY);
+        if (s.equals(DELEGATE_KEY)) return super.lookupObject(s);
+        throw new UnsupportedOperationException("Delegates cache only supports looking up with " + DELEGATE_KEY);
     }
 
     /**
-     * Gets cached delegates list.
-     * @return cached delegates list.
-     * @see Delegates
+     * Gets cached delegates list
+     * @return cached delegates list
+     * @see #CACHE_DURATION
      */
     public List<String> getDelegates() {
         return lookupObject(DELEGATE_KEY).getDelegates();
+    }
+
+    /**
+     * Gets delegates with a maximum age of 70 seconds.
+     * @return list of delegates no older than 70 seconds ago
+     */
+    public List<String> getDelegatesNow() {
+        return lookupObject(DELEGATE_KEY, Duration.of(60 + 10, ChronoUnit.SECONDS)).getDelegates();
     }
 
     /** Holds a time-stamped version of NationStates delegates. */
@@ -87,13 +129,23 @@ public class CommDelegatesCache extends CommCache<CommDelegatesCache.Delegates> 
             }
         }
 
-        public List<String> getDelegates() {
-            return delegates;
+        public List<String> getDelegates() { return delegates; }
+
+        @Override
+        public Instant timestamp() { return timestamp; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Delegates)) return false;
+            Delegates delegates1 = (Delegates) o;
+            return Objects.equals(timestamp, delegates1.timestamp) && Objects.equals(delegates,
+                    delegates1.delegates);
         }
 
         @Override
-        public Instant timestamp() {
-            return timestamp;
+        public int hashCode() {
+            return Objects.hash(timestamp, delegates);
         }
     }
 }

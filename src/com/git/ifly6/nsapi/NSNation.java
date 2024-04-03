@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class is an object to hold information on a NS nation. It also provides methods to retrieve relevant information
@@ -64,7 +65,7 @@ public class NSNation implements NSTimeStamped {
     // Nation identifiers
     private String nationName;
     private boolean isPopulated;
-    private Instant updateTime;
+    private Instant timestamp;
 
     // State of nation
     private String properName;
@@ -135,7 +136,7 @@ public class NSNation implements NSTimeStamped {
             canCampaign = xml.xpath("/NATION/TGCANCAMPAIGN/text()").get(0).equals("1");
 
             // Get the populated date
-            updateTime = Instant.now();
+            timestamp = Instant.now();
             isPopulated = true;
 
         } catch (FileNotFoundException e) {
@@ -162,7 +163,7 @@ public class NSNation implements NSTimeStamped {
      */
     @Override
     public Instant timestamp() {
-        return updateTime;
+        return timestamp;
     }
 
     /**
@@ -261,7 +262,21 @@ public class NSNation implements NSTimeStamped {
      * @return a boolean flag returning whether endorsement list data has been loaded for the nation at hand.
      */
     public boolean hasEndoList() {
-        return endorsingNations.size() > 0;
+        return !endorsingNations.isEmpty();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NSNation)) return false;
+        NSNation nation = (NSNation) o;
+        return Objects.equals(nationName, nation.nationName) && Objects.equals(timestamp,
+                nation.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nationName, timestamp);
     }
 
     /**

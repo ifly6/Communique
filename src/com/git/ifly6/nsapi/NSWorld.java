@@ -40,6 +40,7 @@ public class NSWorld {
      * @return {@code List<String>} with the recipients inside, in {@code ref} form
      * @throws JTelegramException in case the NationStates API is unreachable for some reason
      */
+    @Deprecated
     public static List<String> getNew() throws JTelegramException {
         try {
             final NSConnection connection = new NSConnection(NSConnection.API_PREFIX + "q=newnations");

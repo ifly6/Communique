@@ -23,7 +23,6 @@ import com.git.ifly6.nsapi.ctelegram.io.CommFormatter;
 import com.git.ifly6.nsapi.ctelegram.io.NSTGSettingsException;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor.ExhaustedException;
-import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatingMonitor;
 import com.git.ifly6.nsapi.telegram.JTelegramConnection;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramResponseCode;
@@ -241,8 +240,8 @@ public class CommSender {
         if (isRunning())
             throw new UnsupportedOperationException("Cannot start sending after it already started");
 
-        if (monitor instanceof CommUpdatingMonitor)
-            ((CommUpdatingMonitor) monitor).start();
+//        if (monitor instanceof CommUpdatableMonitor)
+//            ((CommUpdatableMonitor) monitor).start();
 
         if (scheduler.isShutdown() || scheduler.isTerminated()) {
             LOGGER.info("Initialising new scheduler, old schedule facility is closed");
@@ -275,11 +274,8 @@ public class CommSender {
 
     public void stopSend() {
         LOGGER.info("Stopping CommuniqueSender sending thread");
-        if (isRunning()) {
+        if (isRunning())
             job.cancel(true);
-            if (monitor instanceof CommUpdatingMonitor)
-                ((CommUpdatingMonitor) monitor).stop();
-        }
 
         if (!scheduler.isShutdown())
             LOGGER.info(String.format("Shutdown left %d incomplete tasks",

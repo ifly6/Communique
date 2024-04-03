@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,15 +17,20 @@
 
 package com.git.ifly6.nsapi.manualtests;
 
-import com.git.ifly6.nsapi.ctelegram.io.CommWorldAssembly;
+import com.git.ifly6.nsapi.NSRegion;
 
-import java.util.List;
+import java.io.IOException;
 
-public class WorldAssemblyTest {
-    public static void main(String[] args) {
-        List<String> l = CommWorldAssembly.getVoters(
-                CommWorldAssembly.Chamber.GA,
-                CommWorldAssembly.Vote.AGAINST);
-        System.out.println(l);
+public class NSRegionManualTest {
+
+    public static void main(String[] args) throws IOException {
+
+//        NSNation nation = new NSNation("imperium anglorum");
+//        nation.populateData();
+
+        NSRegion region = new NSRegion("europe");
+        region.populateData();
+
     }
+
 }
