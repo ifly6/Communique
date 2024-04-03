@@ -13,16 +13,16 @@ basically:
 ## State ##
 
 Tags prefixed with `_` are stateful. That means that either they cannot be generated without waiting or the results
-thereof are themselves self-invalidating. This therefore includes tags such as `_movement`, and `_approval`. Recipients
-_cannot_ be given except over time by `_movement`. For `_approval`, `_approval:given_to; PROPOSAL_ID` lists all
+thereof are themselves self-invalidating. This therefore includes tags such as `_movement`, and `_approvals`. Recipients
+_cannot_ be given except over time by `_movement`. For `_approvals`, `_approvals:given_to; PROPOSAL_ID` lists all
 approvals currently given which can exhaust if the proposal stops existing (going to vote or expiring); on the other
-hand, `_approval:removed_from; PROPOSAL_ID` gives the list of all persons who ever approved it and are not approving any
+hand, `_approvals:removed_from; PROPOSAL_ID` gives the list of all persons who ever approved it and are not approving any
 more.
 
 All of these tags still work with the non-stateful tags. Thus, one can set up a counter-counter-campaign by writing:
 
 ```
-_approval:removed_from; MY_FRIENDS_PROPOSAL
+_approvals:removed_from; MY_FRIENDS_PROPOSAL
 +tag:delegates
 ```
 
