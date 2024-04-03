@@ -19,12 +19,12 @@ package com.git.ifly6.communique.ngui.components;
 
 import net.java.balloontip.BalloonTip;
 import net.java.balloontip.styles.RoundedBalloonStyle;
+import net.java.balloontip.utils.TimingUtils;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -33,14 +33,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Graphical utilities for Communique 3.
@@ -49,7 +47,6 @@ import java.util.concurrent.TimeUnit;
 public class CommuniqueSwingUtilities {
 
     private static final Dimension SCREEN_DIMENSIONS = Toolkit.getDefaultToolkit().getScreenSize();
-    private static final ScheduledExecutorService BALLOON_SCHEDULER = Executors.newScheduledThreadPool(2);
 
     /**
      * Gets selected element from {@link JComboBox}. This honestly should be in the standard library as an instance
@@ -98,16 +95,14 @@ public class CommuniqueSwingUtilities {
     public static void createBalloonTip(JComponent component, String message) {
         EventQueue.invokeLater(() -> {
             // create
-            BalloonTip t = new BalloonTip(component, message,
-                    new RoundedBalloonStyle(5, 5,
-                            UIManager.getColor("Label.background"),
-                            Color.DARK_GRAY),
+//            BalloonTip t = new BalloonTip(component, String.format("<html>%s</html>", message),
+//                    // alternatively Label.background ?
+//                    new MinimalBalloonStyle(new Color(252, 250, 238), 5),
+//                    false);
+            BalloonTip t = new BalloonTip(component, String.format("<html>%s</html>", message),
+                    new RoundedBalloonStyle(5, 5, Color.WHITE, Color.LIGHT_GRAY),
                     false);
-
-            // schedule its doing away after 2 seconds
-            BALLOON_SCHEDULER.schedule(() ->
-                            EventQueue.invokeLater(t::closeBalloon),
-                    2, TimeUnit.SECONDS);
+            TimingUtils.showTimedBalloon(t, (int) Duration.ofSeconds(2).toMillis());
         });
     }
 

@@ -34,6 +34,7 @@ import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -91,8 +92,7 @@ public class CommuniqueEditor extends AbstractCommunique {
     private CommuniqueDurationField tfTelegramInterval;
     private JComboBox<CommuniqueProcessingAction> chooserAction;
 
-    private CommuniqueCheckBox checkboxRepeat;
-    private CommuniqueDurationField tfRepeatInterval;
+    private JCheckBox checkboxRepeat;
 
     private CommuniqueConfig config; // initialise a new configuration on nothing
 
@@ -145,22 +145,17 @@ public class CommuniqueEditor extends AbstractCommunique {
     }
 
     private void initialise() {
-        // fields
+        // shared listeners
         CommuniqueDelayedDocumentListener saveListener = new CommuniqueDelayedDocumentListener(i -> this.save());
+        CommuniqueDelayedActionListener delayedSave = new CommuniqueDelayedActionListener(e -> this.save());
+
+        // fields
         area = new CommuniqueScrollableTextArea(CommuniqueFactory.createArea("", saveListener));
         tfClientKey = CommuniqueFactory.createField("CLIENT_KEY", "Client key", saveListener);
         tfSecretKey = CommuniqueFactory.createField("SECRET_KEY", "Secret key", saveListener);
         tfTelegramID = CommuniqueFactory.createField("TELEGRAM_ID", "Telegram ID", saveListener);
 
-        // create components for the action type, telegram type, etc
-        CommuniqueDelayedActionListener delayedSave = new CommuniqueDelayedActionListener(e -> this.save());
-        chooserAction = new JComboBox<>(CommuniqueProcessingAction.values());
-        chooserAction.setSelectedItem(CommuniqueProcessingAction.NONE);
-        chooserAction.setToolTipText(
-                "Processing actions can be applied to the list of recipients after they " + "are " + "parsed. Select "
-                        + "a processing action here");
-        chooserAction.addActionListener(delayedSave);
-
+        // create telegram type and delay chooser
         chooserTelegramType = new JComboBox<>(JTelegramType.values());
         chooserTelegramType.setSelectedItem(JTelegramType.RECRUIT); // default to recruitment
         chooserTelegramType.setToolTipText("Telegram types are declared site-side in the telegram sent to \"tag:api\"");
@@ -182,23 +177,31 @@ public class CommuniqueEditor extends AbstractCommunique {
                 ae -> JTelegramType.CUSTOM.setWaitDuration(getTelegramInterval())); // must have this to sync
 
         LinkedHashMap<String, Component> southComponents = new LinkedHashMap<>();
-        southComponents.put("Post-processing action", chooserAction);
         southComponents.put("Telegram type", chooserTelegramType);
         southComponents.put("Telegram delay (s)", tfTelegramInterval);
 
-        // create components for the repeat panel
-        checkboxRepeat = new CommuniqueCheckBox("", false);
-        checkboxRepeat.addActionListener(delayedSave);
-        checkboxRepeat.addActionListener(ie -> EventQueue.invokeLater(() -> {
-            tfRepeatInterval.setEnabled(checkboxRepeat.isSelected());
-            if (!checkboxRepeat.isSelected()) tfRepeatInterval.setDuration(ChronoUnit.FOREVER.getDuration());
-        }));
-        tfRepeatInterval = new CommuniqueDurationField(ChronoUnit.SECONDS,
-                "Time between client initiation repeat. Minimum is 30 seconds.", saveListener);
+        // create components for repeat and post-processing types
+        chooserAction = new JComboBox<>(CommuniqueProcessingAction.values());
+        chooserAction.setSelectedItem(CommuniqueProcessingAction.NONE);
+        chooserAction.setToolTipText(
+                "Processing actions can be applied to the list of recipients after they are parsed. Select a "
+                        + "processing action here");
+        chooserAction.addActionListener(delayedSave);
 
-        LinkedHashMap<String, Component> repeatComponents = new LinkedHashMap<>();
-        repeatComponents.put("Repeat", checkboxRepeat);
-        repeatComponents.put("Repeat delay (s)", tfRepeatInterval);
+        checkboxRepeat = new JCheckBox("", false);
+        checkboxRepeat.addActionListener(delayedSave);
+//        checkboxRepeat.addActionListener(ae -> {
+//            if (CommuniqueSwingUtilities.getSelected(this.chooserAction) == CommuniqueProcessingAction.NONE
+//                    && checkboxRepeat.isSelected())
+//                CommuniqueSwingUtilities.createBalloonTip(
+//                        checkboxRepeat,
+//                        "For a repeating telegram, it is recommended to<br/>prioritise "
+//                                + "delegates or randomise the send order.");
+//        });
+
+        LinkedHashMap<String, Component> postprocessingComponents = new LinkedHashMap<>();
+        postprocessingComponents.put("Repeat", checkboxRepeat);
+        postprocessingComponents.put("Post-processing", chooserAction);
 
         // frame layout
         JPanel contentPane = new JPanel();
@@ -227,8 +230,8 @@ public class CommuniqueEditor extends AbstractCommunique {
         sidebarFrame.add(northFrame, BorderLayout.NORTH);
 
         JPanel panelRepeat = new JPanel();
-        panelRepeat.setBorder(CommuniqueFactory.createTitledBorder("Repeat settings"));
-        CommuniqueSwingUtilities.addComponents(panelRepeat, repeatComponents);
+        panelRepeat.setBorder(CommuniqueFactory.createTitledBorder("Post-processing"));
+        CommuniqueSwingUtilities.addComponents(panelRepeat, postprocessingComponents);
 
         JPanel panelHandling = new JPanel();
         panelHandling.setBorder(CommuniqueFactory.createTitledBorder("Message handling"));
@@ -370,8 +373,7 @@ public class CommuniqueEditor extends AbstractCommunique {
                 CommuniqueSwingUtilities.getSelected(chooserTelegramType),
                 tfTelegramInterval.getDuration(),
                 CommuniqueSwingUtilities.getSelected(chooserAction),
-                checkboxRepeat.isSelected(),
-                tfRepeatInterval.getDuration());
+                checkboxRepeat.isSelected());
         config.setcRecipients(area.getLines().stream()
                 .filter(ApiUtils::isNotEmpty)
                 .filter(s -> !s.startsWith("#"))
@@ -443,7 +445,6 @@ public class CommuniqueEditor extends AbstractCommunique {
         chooserAction.setSelectedItem(config.getProcessingAction());
 
         checkboxRepeat.setSelected(config.repeats);
-        tfRepeatInterval.setDuration(config.getRepeatInterval());
 
         area.setText(CODE_HEADER + String.join("\n", config.getcRecipientsString()));
     }

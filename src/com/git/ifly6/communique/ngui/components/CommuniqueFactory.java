@@ -89,7 +89,7 @@ public class CommuniqueFactory {
         TitledBorder tb = new TitledBorder(text);
         tb.setTitlePosition(TitledBorder.ABOVE_TOP);
         tb.setTitleFont(tb.getTitleFont().deriveFont(Font.BOLD));
-        tb.setBorder(BorderFactory.createEmptyBorder(2, 4, 0, 0));
+        tb.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 0));
         return tb;
     }
 

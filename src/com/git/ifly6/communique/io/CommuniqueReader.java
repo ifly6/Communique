@@ -116,13 +116,13 @@ class CommuniqueReader {
                             ;
                         }
 
-                    // correct flag:recruit -> tag:new, repeat = True, repeatInterval = 3 minutes
+                    // correct flag:recruit -> tag:new, set recruit telegram type; repeat = True
                     List<String> rawRecipients = config.getcRecipientsString();
                     if (rawRecipients.contains("flag:recruit")) {
                         rawRecipients.replaceAll(s -> s.equals("flag:recruit") ? "tag:new" : s);
                         config.setcRecipients(CommuniqueRecipient.parseRecipients(rawRecipients));
+                        config.setTelegramType(JTelegramType.RECRUIT);
                         config.repeats = true;
-                        config.repeatInterval = Duration.of(3, ChronoUnit.MINUTES);
                     }
                 }
                 // defaults for wait string are not necessary: blank accepts hard-coded defaults already. A+

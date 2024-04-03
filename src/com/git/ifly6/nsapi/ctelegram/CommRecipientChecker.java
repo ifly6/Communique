@@ -27,19 +27,29 @@ import com.git.ifly6.nsapi.telegram.JTelegramType;
  */
 public class CommRecipientChecker {
 
+    private final String name;
+    private final JTelegramType type;
+
     /**
-     * Does the recipient accept our telegram? If we are recruiting and nation is not recruitable, return {@code false}.
-     * If campaigning and nation is not campaign-able, return {@code false}. Otherwise, return true. Values are cached
-     * in {@link CommNationCache}.
-     * @param r recipient to check
-     * @param t {@link JTelegramType} to check
-     * @return true if recipient accepts telegram
-     * @throws NSNation.NSNoSuchNationException if recipient does not exist
+     * Constructs new checker based on the name and the telegram type. Executes on {@link #check()}.
+     * @param name recipient to check
+     * @param type {@link JTelegramType type} of telegram
      */
-    public static boolean doesRecipientAccept(String r, JTelegramType t) {
-        NSNation n = CommNationCache.getInstance().lookupObject(r); // always load, helps to deal with CTE nations
-        if (t == JTelegramType.RECRUIT) return n.isRecruitable();
-        if (t == JTelegramType.CAMPAIGN) return n.isCampaignable();
-        return true; // default
+    public CommRecipientChecker(String name, JTelegramType type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    /** @return true if recipient accepts telegram */
+    public boolean check() {
+        try {
+            NSNation n = CommNationCache.getInstance().lookupObject(name);
+            if (type == JTelegramType.RECRUIT) return n.isRecruitable();
+            if (type == JTelegramType.CAMPAIGN) return n.isCampaignable();
+            return true; // default
+
+        } catch (NSNation.NSNoSuchNationException e) {
+            return false;
+        }
     }
 }

@@ -27,7 +27,6 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,8 +60,6 @@ public class CommuniqueConfig implements Serializable {
     public CommuniqueProcessingAction processingAction;
 
     public boolean repeats;
-    @Nullable
-    public Duration repeatInterval;
 
     /**
      * Holds the Communique recipients in <code>String</code>s so that it can be edited by hand and not as
@@ -93,7 +90,6 @@ public class CommuniqueConfig implements Serializable {
         this.telegramInterval = null;
         this.processingAction = CommuniqueProcessingAction.NONE;
         this.repeats = false;
-        this.repeatInterval = null;
     }
 
     /**
@@ -110,7 +106,7 @@ public class CommuniqueConfig implements Serializable {
     public CommuniqueConfig(
             JTelegramKeys keys, JTelegramType telegramType, Duration telegramInterval,
             CommuniqueProcessingAction processingAction,
-            boolean repeats, Duration repeatInterval
+            boolean repeats
     ) {
         this();
         this.keys = keys;
@@ -118,9 +114,6 @@ public class CommuniqueConfig implements Serializable {
         this.telegramInterval = (this.telegramType == JTelegramType.CUSTOM) ? telegramInterval : null;
         this.processingAction = processingAction;
         this.repeats = repeats;
-        this.repeatInterval = (this.repeats)
-                ? (repeatInterval.compareTo(Duration.ofMinutes(3)) > 0 ? repeatInterval : Duration.ofMinutes(3))
-                : null;
     }
 
     /**
@@ -200,12 +193,6 @@ public class CommuniqueConfig implements Serializable {
 
     public void setTelegramInterval(Duration interval) {
         this.telegramInterval = Objects.requireNonNull(interval);
-    }
-
-    @NotNull
-    public Duration getRepeatInterval() {
-        if (!repeats || repeatInterval == null) return ChronoUnit.FOREVER.getDuration();
-        return repeatInterval;
     }
 
     /**

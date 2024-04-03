@@ -18,8 +18,6 @@
 package com.git.ifly6.nsapi.ctelegram;
 
 import com.git.ifly6.nsapi.NSIOException;
-import com.git.ifly6.nsapi.NSNation;
-import com.git.ifly6.nsapi.ctelegram.io.CommFormatter;
 import com.git.ifly6.nsapi.ctelegram.io.NSTGSettingsException;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor.ExhaustedException;
@@ -33,7 +31,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -41,11 +38,10 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.git.ifly6.nsapi.ctelegram.io.CommFormatter.entry;
 
 /**
  * Sends telegrams on the NationStates API. Instantiation is not restricted; regardless, there should never be more than
@@ -56,6 +52,7 @@ import static com.git.ifly6.nsapi.ctelegram.io.CommFormatter.entry;
 public class CommSender {
 
     public static final Logger LOGGER = Logger.getLogger(CommSender.class.getName());
+    private static final String NO_RECIPIENT = "__NO_RECIPIENT__";
 
     /**
      * One thread for many clients.
@@ -74,10 +71,9 @@ public class CommSender {
      */
     private boolean dryRun = false;
 
-    /**
-     * First-in-first-out send queue.
-     */
-    private final Queue<String> sendQueue = new LinkedList<>();
+    /** First-in-first-out send queue. */
+    private final Queue<String> sendQueue = new SynchronousQueue<>(true);
+    private Instant lastTGAttempt;
 
     /**
      * Recipients to which the telegram has already been sent are put in the sent list.
@@ -102,37 +98,38 @@ public class CommSender {
     }
 
     /**
+     * If true, no telegrams are actually sent. Should be used for debugging purposes only. Default is false.
+     * @param dryRun if true
+     */
+    public void setDryRun(boolean dryRun) {
+        this.dryRun = dryRun;
+    }
+
+    /**
      * @return {@link CommMonitor} instantiating
      */
     public CommMonitor getMonitor() {
         return monitor;
     }
 
-    /**
-     * Feeds the queue until the feed limit is exceeded. Queue is fed whenever the queue is empty.
-     */
-    private void feedQueue() {
-        LOGGER.fine("Feeding queue");
+    /** Finds the <i>single</i> next valid recipient from the monitor and places it into the queue. */
+    private void findNext() {
         List<String> recipients = monitor.getRecipients();
+        for (String i : recipients)
+            if (!processListsContain(i) && new CommRecipientChecker(i, this.telegramType).check()) {
+                // log that it was got, then return
+                if (Duration.between(initAt, Instant.now()).compareTo(Duration.ofSeconds(20)) < 0)
+                    LOGGER.info(String.format("Got recipient %s on initialisation", i));
+                else
+                    LOGGER.info(String.format("Got recipient %s at NEXT-%.2f seconds", i,
+                            (double) Duration.between(Instant.now(), this.nextAt()).toMillis() / 1000
+                    ));
 
-        int recipientsAdded = 0;
-        for (String s : recipients) {
-            if (!sendQueue.contains(s) && !sentList.contains(s)) {  // prevent double-queueing
-                sendQueue.add(s);
-                recipientsAdded++;
-                LOGGER.finest(String.format("Fed queue element %s", s));
+                // add to queue and stop
+                sendQueue.add(i);
+                return;
             }
-        }
-
-        LOGGER.fine(String.format("Fed queue with %d recipients", recipientsAdded));
-    }
-
-    /**
-     * If true, no telegrams are actually sent. Should be used for debugging purposes only. Default is false.
-     * @param dryRun if true
-     */
-    public void setDryRun(boolean dryRun) {
-        this.dryRun = dryRun;
+        // if there is nothing, do nothing
     }
 
     /**
@@ -147,57 +144,31 @@ public class CommSender {
             return;
         }
 
-        // if no recipient in queue, try to get some
-        // if monitor is exhausted, it will automatically throw an exhausted exception
         if (sendQueue.peek() == null) {
-            LOGGER.finer("Attempting to feed queue");
-            feedQueue();
+            // try once to get a recipient
+            findNext();
+            if (sendQueue.peek() == null) {
+                lastTGAttempt = Instant.now();
+                return; // do nothing but throw no error; this is possible when the event monitored hasn't happened yet
+            }
         }
 
+        // if we have a valid recipient, get it
         String recipient = sendQueue.poll();
-        if (recipient == null)
-            return; // do nothing but throw no error; this is possible when the event monitored hasn't happened yet
-
-        // if we have a recipient...
         LOGGER.info(String.format("Got recipient %s from queue", recipient));
-        boolean acceptsType;
-        try {
-            acceptsType = CommRecipientChecker.doesRecipientAccept(recipient, telegramType);
-            boolean alreadyProcessed = processListsContain(recipient);
-            if (!acceptsType || alreadyProcessed)
-                try {
-                    LOGGER.info(String.format("Recipient '%s' invalid (%s); trying next in queue",
-                            recipient,
-                            new CommFormatter(
-                                    entry(!acceptsType,
-                                            String.format("%s_refused", telegramType.toString().toLowerCase())),
-                                    entry(alreadyProcessed, "duplicate")).format()
-                    ));
-                    this.reportProcessed(recipient, SendingAction.SKIPPED);
-                    executeSend(); // try again
-                    return; // end
 
-                } catch (StackOverflowError error) {
-                    // might happen if cannot get recipients over and over again?
-                    throw new NSIOException("Encountered stack overflow error");
-                }
-
-        } catch (NSNation.NSNoSuchNationException e) {
-            LOGGER.info(String.format("Recipient '%s' does not exist; trying next in queue",
-                    recipient));
-            this.reportProcessed(recipient, SendingAction.SKIPPED);
-            return;
-        }
-
-        // if the recipient will accept our telegram...
+        // do the actual send
         JTelegramConnection connection;
         try {
             LOGGER.finer("Creating telegram connection ");
             connection = new JTelegramConnection(keys, recipient, dryRun);
+            lastTGAttempt = Instant.now();
+
         } catch (IOException e) { // rethrow
             throw new NSIOException("Cannot initialise connection to telegram API", e);
         }
 
+        // parse the response
         try {
             // get response code
             JTelegramResponseCode responseCode = connection.verify();
@@ -218,6 +189,12 @@ public class CommSender {
         } catch (IOException e) {
             throw new NSIOException("Cannot get response code from telegram API", e);
         }
+
+        // schedule for getting the next recipient
+        long MILLIS_UNTIL_10_SECONDS_BEFORE_NEXT = Duration
+                .between(Instant.now(), this.nextAt().minus(10, ChronoUnit.SECONDS))
+                .toMillis();
+        scheduler.schedule(this::findNext, MILLIS_UNTIL_10_SECONDS_BEFORE_NEXT, TimeUnit.MILLISECONDS);
     }
 
     private void reportProcessed(String recipient, SendingAction action) {
@@ -236,6 +213,7 @@ public class CommSender {
             scheduler = Executors.newSingleThreadScheduledExecutor();
         }
 
+        // schedule with fixed delay automatically repeats
         job = scheduler.scheduleWithFixedDelay(() -> {
             if (Thread.currentThread().isInterrupted()) return;
             try {
@@ -319,8 +297,13 @@ public class CommSender {
      * @throws UnsupportedOperationException if client is not running, does not attempt to stop
      */
     public Instant nextAt() {
-        if (isRunning())
-            return Instant.now().plus(job.getDelay(TimeUnit.MILLISECONDS), ChronoUnit.MILLIS);
+        if (isRunning()) {
+            if (lastTGAttempt == null) {
+                LOGGER.warning("Asked for next telegram time but last telegram time is null?");
+                return Instant.now();
+            }
+            return lastTGAttempt.plus(job.getDelay(TimeUnit.MILLISECONDS), ChronoUnit.MILLIS);
+        }
         throw new UnsupportedOperationException("No duration to next telegram; no telegrams are being sent");
     }
 

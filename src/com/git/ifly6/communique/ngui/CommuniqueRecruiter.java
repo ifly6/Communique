@@ -64,7 +64,6 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -423,7 +422,7 @@ public class CommuniqueRecruiter extends AbstractCommuniqueRecruiter implements 
         );
         CommuniqueConfig config = new CommuniqueConfig(
                 keys, JTelegramType.RECRUIT, null,
-                CommuniqueProcessingAction.NONE, true, Duration.ofSeconds(181)
+                CommuniqueProcessingAction.NONE, true
         );
 
         // Create and set recipients and sent-lists
