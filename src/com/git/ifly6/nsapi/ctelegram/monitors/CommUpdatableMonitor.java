@@ -44,8 +44,9 @@ public abstract class CommUpdatableMonitor implements CommMonitor {
     protected abstract List<String> getAction();
 
     /**
-     * Gets recipients from the monitor. When called, it forces the monitor to update unless it last updated within the
-     * last 20 seconds.
+     * Gets recipients from the monitor. When called, it checks whether the monitor was updated within the last 20
+     * seconds (or ever). If it was never updated or if it was updated more than 20 seconds ago, it calls
+     * {@link #update()}. Then it calls the {@link #getAction()} which implements recipient generation.
      * @return recipients in the monitor
      * @see #getAction()
      */

@@ -27,7 +27,6 @@ import com.git.ifly6.nsapi.telegram.JTelegramConnection;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramResponseCode;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
-import com.google.common.base.Throwables;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -93,8 +92,9 @@ public class CommSender {
      * @param monitor      to provide recipients
      * @param telegramType to provide delay timings
      */
-    public CommSender(JTelegramKeys keys, CommMonitor monitor, JTelegramType telegramType,
-                      CommSenderInterface anInterface) {
+    public CommSender(
+            JTelegramKeys keys, CommMonitor monitor, JTelegramType telegramType,
+            CommSenderInterface anInterface) {
         this.keys = keys;
         this.monitor = monitor;
         this.telegramType = telegramType;
@@ -151,28 +151,15 @@ public class CommSender {
         // if monitor is exhausted, it will automatically throw an exhausted exception
         if (sendQueue.peek() == null) {
             LOGGER.finer("Attempting to feed queue");
-            if (monitor.recipientsExhausted()) {
-                LOGGER.info("No recipients in queue; cannot feed as monitor is exhausted");
-                this.stopSend();
-                return; // end
-
-            } else {
-                feedQueue();
-
-                // if still there are no recipients to queue
-                if (sendQueue.peek() == null) {
-                    LOGGER.info("Mission to feed failed; we'll get recipients next time");
-                    return;
-                }
-            }
+            feedQueue();
         }
 
         String recipient = sendQueue.poll();
         if (recipient == null)
-            throw new EmptyQueueException();
+            return; // do nothing but throw no error; this is possible when the event monitored hasn't happened yet
 
         // if we have a recipient...
-        LOGGER.info(String.format("Got recipient '%s' from queue", recipient));
+        LOGGER.info(String.format("Got recipient %s from queue", recipient));
         boolean acceptsType;
         try {
             acceptsType = CommRecipientChecker.doesRecipientAccept(recipient, telegramType);
@@ -240,9 +227,6 @@ public class CommSender {
         if (isRunning())
             throw new UnsupportedOperationException("Cannot start sending after it already started");
 
-//        if (monitor instanceof CommUpdatableMonitor)
-//            ((CommUpdatableMonitor) monitor).start();
-
         if (scheduler.isShutdown() || scheduler.isTerminated()) {
             LOGGER.info("Initialising new scheduler, old schedule facility is closed");
             scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -259,11 +243,11 @@ public class CommSender {
                 // graceful stop required
 
             } catch (Throwable e) {
-                final String m = "Client sending thread encountered error! Shutting down sending thread.";
-                LOGGER.log(Level.SEVERE, m + "\n" + Throwables.getStackTraceAsString(e), e);
-                this.outputInterface.onError(m, e);
-                this.stopSend();
                 // loud stop
+                final String message = "Encountered error in sending thread!";
+                LOGGER.log(Level.SEVERE, message, e);
+                this.outputInterface.onError(message, e);
+                this.stopSend();
             }
         }, 0, telegramType.getWaitDuration().toMillis(), TimeUnit.MILLISECONDS);
 

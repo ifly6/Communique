@@ -19,10 +19,9 @@ package com.git.ifly6.communique.ngui;
 
 import com.git.ifly6.CommuniqueApplication;
 import com.git.ifly6.CommuniqueUtilities;
+import com.git.ifly6.communique.data.Communique7Monitor;
 import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
-import com.git.ifly6.communique.io.CommuniqueProcessingAction;
-import com.git.ifly6.communique.ngui.components.CommuniqueConstants;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditor;
 import com.git.ifly6.communique.ngui.components.CommuniqueEditorManager;
 import com.git.ifly6.communique.ngui.components.CommuniqueFactory;
@@ -32,18 +31,17 @@ import com.git.ifly6.communique.ngui.components.CommuniqueSwingUtilities;
 import com.git.ifly6.communique.ngui.components.CommuniqueTimerBar;
 import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueSendDialog;
 import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueTextDialog;
-import com.git.ifly6.nsapi.ApiUtils;
 import com.git.ifly6.nsapi.NSConnection;
+import com.git.ifly6.nsapi.ctelegram.CommSender;
+import com.git.ifly6.nsapi.ctelegram.CommSenderInterface;
 import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
-import com.git.ifly6.nsapi.telegram.JavaTelegram;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
@@ -60,7 +58,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -74,20 +71,19 @@ import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createM
  * <code>Communiqué</code> is the main class of the Communiqué system. It handles the GUI aspect of the entire program
  * and other actions.
  */
-public class Communique extends AbstractCommunique implements JTelegramLogger {
+public class Communique extends AbstractCommunique implements JTelegramLogger, CommSenderInterface {
 
     private static final Logger LOGGER = Logger.getLogger(Communique.class.getName());
 
-    private JavaTelegram client; // Sending client
-    private Thread sendingThread = new Thread(); // The one sending thread
+    private Communique7Monitor monitor;
+    private CommSender sender;
+    private Map<String, Boolean> rSuccessTracker;
 
     private JButton btnParse;
     private CommuniqueLogViewer logViewer;
     private CommuniqueEditor focusedEditor;
 
-    private List<String> parsedRecipients;
-    private Map<String, Boolean> rSuccessTracker;
-    private CommuniqueRecruiter recruiter;
+    private JComboBox<CommuniqueEditor> editorSelector;
     private CommuniqueTimerBar progressBar;
     private JLabel progressLabel;
 
@@ -102,8 +98,12 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         // start the gui
         EventQueue.invokeLater(() -> {
             try {
+                // initialise main window
                 Communique window = new Communique();
                 window.frame.setVisible(true);
+
+                // initialise the editors
+                CommuniqueEditorManager.getInstance().initialiseEditors();
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Encountered error on Communique window instantiation!", e);
             }
@@ -114,14 +114,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         LOGGER.info("Communiqué loaded");
     }
 
-    /**
-     * Create the application.
-     * @wbp.parser.entryPoint
-     */
     public Communique() {
-        super();
-
-        client = new JavaTelegram(this);
+        // initialise components and subparts
         initialise();
 
         // Make sure user is connected to the Internet
@@ -133,9 +127,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         }
     }
 
-    /**
-     * Initialise the contents of the frame.
-     */
+    /** Initialise frame contents. */
     private void initialise() {
 
         frame = new JFrame();
@@ -164,7 +156,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         contentPane.add(logViewer, BorderLayout.CENTER);
 
         // top
-        JComboBox<CommuniqueEditor> editorSelector = new JComboBox<>();
+        editorSelector = new JComboBox<>();
         editorSelector.addActionListener(ae -> {
             CommuniqueEditor newFocusedEditor = CommuniqueSwingUtilities.getSelected(editorSelector);
             if (newFocusedEditor == null)
@@ -224,29 +216,20 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         frame.setJMenuBar(menuBar);
 
         // create file menu
-        JMenu fileMenu = this.addFileMenu(
+        this.addFileMenu(
                 List.of(createMenuItem(  // save action
                         "Save All", KeyEvent.VK_S,
                         ae -> CommuniqueEditorManager.getInstance().saveAll()
                 ))
         );
 
-        // default edit menu
+        // add default menus
         this.addEditMenu();
-
-        // window menu
-        JMenu mnWindow = this.addWindowMenu();
-        mnWindow.addSeparator();
-        mnWindow.add(createMenuItem("Recruiter...", KeyEvent.VK_R, ae -> showRecruiter()));
-
-        // help menu
+        this.addWindowMenu();
         this.addHelpMenu();
 
-        // log initialisation
+        // log view initialisation
         Logger.getLogger("").addHandler(new CommuniqueLogHandler(logViewer));
-
-        // post initialisation
-        CommuniqueEditorManager.getInstance().initialiseEditors();
     }
 
     private void initialiseClosingActions() {
@@ -276,27 +259,33 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
     private void setupSend() {
 
         // Process in the case that the button currently says stop
-        if (sendingThread.isAlive() && btnParse.getText().equalsIgnoreCase("Stop")) {
-            // kill the thread
-            sendingThread.interrupt();
-            client.kill();
+        if (sender != null && sender.isRunning()
+                && btnParse.getText().equalsIgnoreCase("Stop")) {
+            sender.stopSend();
             return;
         }
 
         // Call and do the parsing
-        LOGGER.info("Called parser");
-        Communique7Parser parser = new Communique7Parser();
+        LOGGER.info("Initialising sender");
         try {
-            parsedRecipients = parser.apply(focusedEditor.getConfig().getcRecipients()).listRecipients();
-            if (!ApiUtils.contains(CommuniqueProcessingAction.values(),
-                    focusedEditor.getConfig().processingAction)) {
-                // if config.processingAction not in CommuniqueProcessingAction.values
-                // deal with invalid processing action
-                this.showErrorDialog("Invalid processing action.\n"
-                        + "Select a valid processing action");
-                return;
-            }
-            parsedRecipients = focusedEditor.getConfig().processingAction.apply(parsedRecipients);
+            monitor = new Communique7Monitor(focusedEditor.getConfig());
+            sender = monitor.constructSender(this);
+
+            List<String> initialRecipients = monitor.preview();
+            LOGGER.info(String.format("Found %d initial recipients", initialRecipients.size()));
+
+            // Change GUI elements
+            EventQueue.invokeLater(() -> {
+                progressLabel.setText("0 / " + initialRecipients.size());
+                editorSelector.setEditable(false);
+            });
+
+            // Ask for confirmation
+            CommuniqueSendDialog sendDialog = new CommuniqueSendDialog(frame, initialRecipients, currentWaitTime());
+            LOGGER.info("CommuniqueSendDialog " + (sendDialog.getValue() == 0
+                    ? "cancelled"
+                    : "accepted with " + sendDialog.getValue()));
+            if (sendDialog.getValue() == CommuniqueSendDialog.SEND) send();
 
         } catch (PatternSyntaxException pse) {
             // note 2020-01-27: better that regex errors are shown in monospaced font
@@ -307,73 +296,16 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
             // pass to message dialogs
             LOGGER.log(Level.SEVERE, "Exception in parsing recipients. Displaying to user", pse);
             this.showErrorDialog(label);
-            return;
 
         } catch (JTelegramException | IllegalArgumentException jte) {
             LOGGER.log(Level.SEVERE, "Exception in parsing recipients. Displaying to user", jte);
             this.showErrorDialog(jte.getMessage());
-            return;
         }
-        LOGGER.info(String.format("Recipients parsed. Found %d recipients", parsedRecipients.size()));
-
-        // Change GUI elements
-        progressLabel.setText("0 / " + parsedRecipients.size());
-
-        // Check that there are in fact recipients
-        if (parsedRecipients.size() == 0) {
-            Communique.this.showErrorDialog("No recipients specified.");
-            return;
-        }
-
-        // Ask for confirmation
-        CommuniqueSendDialog sendDialog = new CommuniqueSendDialog(frame, parsedRecipients, currentWaitTime());
-        LOGGER.info("CommuniqueSendDialog " + (sendDialog.getValue() == 0
-                ? "cancelled"
-                : "accepted with " + sendDialog.getValue()));
-        if (sendDialog.getValue() == CommuniqueSendDialog.SEND) send();
     }
 
-    /**
-     * Sending thread. It executes all of these commands in the {@link Runnable} thread and then calls the completion
-     * method.
-     */
     private void send() {
-
-        // sending logic
-        if (!sendingThread.isAlive()) {
-            client.resetKill();
-            Runnable runner = () -> {
-
-                // save the configuration
-                focusedEditor.saveReal();
-
-                // pass information to client
-                client.setRecipients(parsedRecipients);
-                client.setKeys(focusedEditor.getConfig().keys);
-                client.setTelegramType(focusedEditor.getTelegramType());
-                client.setWaitTime((int) this.currentWaitTime().toMillis());
-
-                // Create tracker, initialise success tracking HashMap
-                rSuccessTracker = new LinkedHashMap<>();
-                parsedRecipients.forEach(r -> rSuccessTracker.put(r, false));
-                if (rSuccessTracker == null) LOGGER.severe("Success tracker is null");
-
-                try {
-                    client.connect();
-                } catch (JTelegramException jte) {  // JTE occurring during send?
-                    LOGGER.log(Level.SEVERE, "JTelegramException in send", jte);
-                    Communique.this.showErrorDialog(jte.getMessage());
-                    return;
-                }
-
-                cleanupSend();
-            };
-
-            sendingThread = new Thread(runner);
-            sendingThread.start();
-
-            btnParse.setText("Stop");
-        }
+        sender.startSend(); // do start
+        btnParse.setText("Stop"); // set it to run
     }
 
     /**
@@ -385,7 +317,8 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         List<String> messages = new ArrayList<>();
         messages.add(String.format("Successful queries to %d of %d nations.\n",
                 rSuccessTracker.entrySet().stream().filter(e -> e.getValue() == Boolean.TRUE).count(),  // # successes
-                parsedRecipients.size()));
+                rSuccessTracker.entrySet().size()
+        ));
 
         if (rSuccessTracker.containsValue(Boolean.FALSE)) { // if there was a failure to connect,
             messages.add("Failure to dispatch to the following nations, not auto-excluded:\n");  // add formatting,
@@ -405,6 +338,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         EventQueue.invokeLater(() -> {
             progressBar.reset();
             progressLabel.setText("? / ?"); // reset progress label
+            editorSelector.setEditable(true);
             btnParse.setText("Parse"); // reset parse button
         });
     }
@@ -414,17 +348,6 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
      */
     private Duration currentWaitTime() {
         return focusedEditor.getTelegramInterval();
-    }
-
-    /**
-     * Shows and initialises the Communique Recruiter.
-     * @see com.git.ifly6.communique.ngui.CommuniqueRecruiter
-     * @since 6
-     */
-    private void showRecruiter() {
-        if (recruiter == null || !recruiter.isDisplayable()) {
-            recruiter = new CommuniqueRecruiter(focusedEditor);
-        } else recruiter.toFront();
     }
 
     /**
@@ -447,8 +370,26 @@ public class Communique extends AbstractCommunique implements JTelegramLogger {
         progressBar.start(System.currentTimeMillis(), System.currentTimeMillis() + currentWaitTime().toMillis());
 
         // Update the label and log successes as relevant
-        progressLabel.setText(String.format("%d / %d", x + 1, length));
-        rSuccessTracker.put(recipientName, true);
+        progressLabel.setText(String.format("%d / %s",
+                x + 1,
+                length > 0 ? String.valueOf(length) : "?"
+        ));
     }
 
+    @Override
+    public void processed(String recipient, int numberSent, CommSender.SendingAction action) {
+        sentTo(recipient, numberSent, (int) monitor.recipientsCount().orElse(-1));
+        rSuccessTracker.put(recipient, action == CommSender.SendingAction.SENT);
+    }
+
+    @Override
+    public void onTerminate() {
+        cleanupSend();
+    }
+
+    @Override
+    public void onError(String m, Throwable e) {
+        LOGGER.log(Level.SEVERE, "Exception in parsing recipients. Displaying to user", e);
+        this.showErrorDialog(m);
+    }
 }

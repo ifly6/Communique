@@ -18,6 +18,8 @@
 package com.git.ifly6.communique.data;
 
 import com.git.ifly6.communique.io.CommuniqueConfig;
+import com.git.ifly6.nsapi.ctelegram.CommSender;
+import com.git.ifly6.nsapi.ctelegram.CommSenderInterface;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatableMonitor;
 
 import java.util.List;
@@ -52,6 +54,7 @@ public class Communique7Monitor extends CommUpdatableMonitor {
 
     @Override
     protected List<String> getAction() {
+        if (state == State.INIT) state = State.RUNNING;
         return lastParse;
     }
 
@@ -78,10 +81,20 @@ public class Communique7Monitor extends CommUpdatableMonitor {
      * @return {@link #lastParse} after updating it from {@link Communique7Parser}
      */
     private List<String> parseRecipients() {
-        this.lastParse = theConfig.processingAction.apply(
-                new Communique7Parser().apply(theConfig.getcRecipients()).listRecipients());
+        if (lastParse != null && this.state == State.INIT)
+            /*
+            When the monitor initialises, Communique will first call for a preview. This will populate lastParse.
+            After that, it passes the monitor to CommSender, which calls getRecipients(). That will first call update,
+            which then will call updateAction(), calling this method. At that time, lastParse will be non-null and the
+            state will still be INIT because only AFTER parseRecipients() returns its payload will the state be tripped
+            to RUNNING by getAction().
+            */
+            return this.lastParse;
 
-        LOGGER.finer(String.format("Monitor parsed %d recipients", lastParse.size()));
+        List<String> parseResults = new Communique7Parser().apply(theConfig.getcRecipients()).listRecipients();
+        this.lastParse = theConfig.processingAction.apply(parseResults);
+
+        LOGGER.info(String.format("Monitor parsed %d recipients", lastParse.size()));
         return this.lastParse;
     }
 
@@ -101,6 +114,14 @@ public class Communique7Monitor extends CommUpdatableMonitor {
     public OptionalLong recipientsCount() {
         if (theConfig.repeats) return OptionalLong.empty();
         return OptionalLong.of(lastParse.size());
+    }
+
+    /**
+     * Convenience method for constructing {@link CommSender}.
+     * @param withInterface interface to export data from sender with
+     */
+    public CommSender constructSender(CommSenderInterface withInterface) {
+        return new CommSender(theConfig.keys, this, theConfig.getTelegramType(), withInterface);
     }
 
     /** Expresses the state – {@link #INIT} or {@link #RUNNING} – of the monitor. */

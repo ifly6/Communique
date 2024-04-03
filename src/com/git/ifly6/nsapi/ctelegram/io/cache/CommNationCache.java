@@ -75,6 +75,15 @@ public class CommNationCache extends CommCache<NSNation> {
         return instance;
     }
 
+    /**
+     * @param s is the ref name of the object to get data for
+     * @return new object if cached object is older than one day otherwise cached version
+     */
+    @Override
+    public NSNation lookupObject(String s) {
+        return super.lookupObject(s);
+    }
+
     /** @throws NSNation.NSNoSuchNationException from {@link NSNation#populateData()} */
     @Override
     protected NSNation createNewObject(String s) { return new NSNation(s).populateData(); }
