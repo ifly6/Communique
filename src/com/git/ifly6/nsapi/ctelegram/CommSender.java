@@ -211,6 +211,10 @@ public class CommSender {
             reportProcessed(recipient, SendingAction.SENT);
             sentList.add(recipient);
 
+            // check for exhaustion
+            if (monitor.recipientsExhausted())
+                throw new ExhaustedException("Monitor politely reports exhaustion");
+
         } catch (IOException e) {
             throw new NSIOException("Cannot get response code from telegram API", e);
         }

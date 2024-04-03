@@ -67,7 +67,10 @@ public class CommDelegatesCache extends CommCache<CommDelegatesCache.Delegates> 
 
     private static CommDelegatesCache makeInstance() {
         try {
-            return new Gson().fromJson(Files.newBufferedReader(LOCATION), CommDelegatesCache.class);
+            CommDelegatesCache c = new Gson().fromJson(
+                    Files.newBufferedReader(LOCATION), CommDelegatesCache.class);
+            c.purge();
+            return c;
 
         } catch (NoSuchFileException | FileNotFoundException e) {
             return new CommDelegatesCache();

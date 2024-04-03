@@ -57,6 +57,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -265,6 +266,9 @@ public class Communique extends AbstractCommunique implements JTelegramLogger, C
             return;
         }
 
+        // initialise the tracker
+        rSuccessTracker = new HashMap<>();
+
         // Call and do the parsing
         LOGGER.info("Initialising sender");
         try {
@@ -371,15 +375,15 @@ public class Communique extends AbstractCommunique implements JTelegramLogger, C
 
         // Update the label and log successes as relevant
         progressLabel.setText(String.format("%d / %s",
-                x + 1,
-                length > 0 ? String.valueOf(length) : "?"
+                x, length > 0 ? String.valueOf(length) : "?"
         ));
     }
 
     @Override
     public void processed(String recipient, int numberSent, CommSender.SendingAction action) {
-        sentTo(recipient, numberSent, (int) monitor.recipientsCount().orElse(-1));
         rSuccessTracker.put(recipient, action == CommSender.SendingAction.SENT);
+        if (action == CommSender.SendingAction.SENT)
+            sentTo(recipient, numberSent, (int) monitor.recipientsCount().orElse(-1));
     }
 
     @Override

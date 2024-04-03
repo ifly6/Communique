@@ -46,9 +46,7 @@ public abstract class CommCache<T extends NSTimeStamped> {
     private transient Runnable finaliser = null;
 
     /** Creates empty cache with cache expiration in 10 minutes. */
-    public CommCache() {
-        this.maximumAge = DEFAULT_EXPIRATION_DURATION;
-    }
+    public CommCache() { this(DEFAULT_EXPIRATION_DURATION); }
 
     /**
      * Creates empty cache with custom cache expiration duration.
@@ -56,6 +54,20 @@ public abstract class CommCache<T extends NSTimeStamped> {
      */
     public CommCache(Duration maximumAge) {
         this.maximumAge = maximumAge;
+        purge(); // not called when instantiated by Gson!
+    }
+
+    /** Purges items older than a certain age. This is not called when instantiated by Gson. */
+    public void purge() { purge(this.maximumAge); }
+
+    /**
+     * Purges items older than a certain age
+     * @param age required for purge
+     */
+    public void purge(Duration age) {
+        Instant cutoff = Instant.now().minus(age);
+        cache.entrySet().removeIf(entry -> entry.getValue().timestamp() == null
+                || entry.getValue().timestamp().isBefore(cutoff));
     }
 
     /**

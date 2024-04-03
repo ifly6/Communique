@@ -59,7 +59,9 @@ public class CommNationCache extends CommCache<NSNation> {
 
     private static CommNationCache makeInstance() {
         try {
-            return new Gson().fromJson(Files.newBufferedReader(LOCATION), CommNationCache.class);
+            CommNationCache c = new Gson().fromJson(Files.newBufferedReader(LOCATION), CommNationCache.class);
+            c.purge();
+            return c;
 
         } catch (NoSuchFileException | FileNotFoundException e) {
             return new CommNationCache();
