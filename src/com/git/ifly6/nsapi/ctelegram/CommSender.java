@@ -112,7 +112,10 @@ public class CommSender {
         return monitor;
     }
 
-    /** Finds the <i>single</i> next valid recipient from the monitor and places it into the queue. */
+    /**
+     * Finds the <i>single</i> next valid recipient from the monitor and places it into the queue. If this takes longer
+     * than 10 seconds, the single threaded {@link ScheduledExecutorService} will block until it is available.
+     */
     private void findNext() {
         List<String> recipients = monitor.getRecipients();
         for (String i : recipients)
@@ -128,7 +131,9 @@ public class CommSender {
                 // add to queue and stop
                 sendQueue.add(i);
                 return;
-            }
+
+            } else this.reportProcessed(i, SendingAction.SKIPPED); // report skipped when skipping
+
         // if there is nothing, do nothing
     }
 
@@ -136,13 +141,11 @@ public class CommSender {
      * Sends telegram to recipient, with recipient determined as first thing in the queue.
      */
     private void executeSend() {
-        LOGGER.finer("Send starting");
         if (dryRun) LOGGER.warning("SENDING AS DRY RUN!");
-
-        if (Thread.currentThread().isInterrupted()) {
-            LOGGER.info("Send thread received cancellation request; complying.");
-            return;
-        }
+        if (Instant.now().isAfter(this.nextAt().plus(250, ChronoUnit.MILLIS)))
+            LOGGER.info(String.format("Expected to send telegram at time %s but delayed by %s ms",
+                    this.nextAt().toString(), Duration.between(this.nextAt(), Instant.now()).toMillis()
+            ));
 
         if (sendQueue.peek() == null) {
             // try once to get a recipient
