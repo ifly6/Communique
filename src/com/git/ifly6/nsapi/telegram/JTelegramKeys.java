@@ -32,7 +32,7 @@ import java.util.Objects;
  * <p>
  * All <code>setX</code> methods trim their inputs.
  * </p>
- * @since pre-Communique (2015-07-16)
+ * @since JavaTelegram (2015-07-16)
  */
 public class JTelegramKeys {
 

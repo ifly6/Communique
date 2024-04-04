@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
  * not operate much differently if overridden, since the output of information is nearly entirely in the purview of
  * <code>JTelegramLogger</code> and the raw connection system is in <code>JTelegramConnection</code>.
  * </p>
- * @since pre-Communique (2015-07-10)
+ * @since JavaTelegram (2015-07-10)
  */
 @Deprecated
 public class JavaTelegram {

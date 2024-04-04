@@ -16,6 +16,7 @@
  */
 
 /**
- * Everything related to the direct interface with the API.
+ * Everything related to the direct interface with the API. Much of this package was imported on 2020-04-05 from the
+ * now-defunct and archived library {@code JavaTelegram}, which is now – as of 2024-04-04 – mostly deprecated.
  */
 package com.git.ifly6.nsapi;

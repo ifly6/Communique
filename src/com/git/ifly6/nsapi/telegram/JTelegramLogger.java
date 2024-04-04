@@ -19,7 +19,7 @@ package com.git.ifly6.nsapi.telegram;
 
 /**
  * Interface allows for reporting information directly from {@link JavaTelegram} back to the calling method.
- * @since pre-Communique (15 July 2015)
+ * @since JavaTelegram (2015-07-15)
  */
 @Deprecated
 public interface JTelegramLogger {

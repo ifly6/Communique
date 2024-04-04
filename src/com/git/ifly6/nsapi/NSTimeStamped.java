@@ -17,11 +17,13 @@
 
 package com.git.ifly6.nsapi;
 
+import com.git.ifly6.nsapi.ctelegram.io.cache.CommCache;
+
 import java.time.Instant;
 
 /**
- * Marks time-stamped objects.
- * @since version 13
+ * Marks time-stamped NationStates objects so that they can be expired in a {@link CommCache}.
+ * @since version 13 (2020-12-15)
  */
 public interface NSTimeStamped {
 

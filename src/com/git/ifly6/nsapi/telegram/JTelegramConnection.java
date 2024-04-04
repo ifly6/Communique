@@ -37,7 +37,7 @@ import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.UNKNOWN_ERROR;
  * {@code JTelegramConnection} connects to NationStates telegram API. There are no rate limits built in to this class
  * unlike with {@link NSConnection} and its {@link NSConnection#WAIT_TIME}! Rate limits for this class must be
  * implemented externally.
- * @since pre-Communique (2015-08-04)
+ * @since JavaTelegram (2015-08-04)
  */
 @Deprecated
 public class JTelegramConnection {

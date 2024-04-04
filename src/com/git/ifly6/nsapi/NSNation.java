@@ -40,6 +40,7 @@ import java.util.Objects;
  * implementation was attempted before. However, due to the network delays and the API's slow speed, you will be locked
  * out if you attempt mass information gathering of every single census score.
  * </p>
+ * @since JavaTelegram (2016-07-05)
  */
 public class NSNation implements NSTimeStamped {
 

@@ -39,6 +39,7 @@ import java.util.logging.Logger;
  * will result in your computer getting locked out from the API for 15 minutes. The program uses a
  * <code>synchronized</code> block to force that only one connection exists at one time.
  * </p>
+ * @since JavaTelegram (2016-07-26)
  */
 @SuppressWarnings("UnstableApiUsage")
 public class NSConnection {

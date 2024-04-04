@@ -26,21 +26,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Represents a NationStates region, holding information on its vital statistics and other matters.
+ * @see NSNation
+ * @since JavaTelegram (2016-07-05)
+ */
 public class NSRegion implements NSTimeStamped {
 
     private static final Logger LOGGER = Logger.getLogger(NSRegion.class.getName());
-
-    // So we don't need to fetch it again over different regions
-    private static Set<String> worldWAMembers;
 
     private String regionName;
     private String regionOfficialName;
@@ -50,17 +49,9 @@ public class NSRegion implements NSTimeStamped {
     private Instant timestamp;
 
     private List<String> regionMembers = new ArrayList<>();
-    private List<String> waMembers = new ArrayList<>();
 
     public NSRegion(String name) {
         regionName = ApiUtils.ref(name);
-        if (worldWAMembers == null || worldWAMembers.isEmpty()) // populate world data
-            try {
-                worldWAMembers = new HashSet<>(NSWorld.getWAMembers());
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE,
-                        "Unable to load WA members from NationStates. Is the internet down?", e);
-            }
     }
 
     /**
@@ -109,20 +100,6 @@ public class NSRegion implements NSTimeStamped {
 
         timestamp = Instant.now();
         return this;
-    }
-
-    /**
-     * Uses the NSWorld object to get the list of World Assembly members. Should a nation appear on both the list of
-     * World Assembly members and the region list, it will be put on the WA members list.
-     * @return the list of WA members in a region
-     */
-    public List<String> getWAMembers() {
-        if (waMembers.isEmpty()) {
-            waMembers = regionMembers.stream()
-                    .filter(n -> worldWAMembers.contains(n))
-                    .collect(Collectors.toList());
-        }
-        return waMembers;
     }
 
     /**

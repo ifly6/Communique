@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * Methods to query the NS API about occurrences in the world generally.
- * @since version 10
+ * @since JavaTelegram (2016-07-05)
  */
 public class NSWorld {
 
