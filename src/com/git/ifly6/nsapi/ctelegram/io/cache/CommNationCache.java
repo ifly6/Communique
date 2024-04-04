@@ -83,6 +83,9 @@ public class CommNationCache extends CommCache<NSNation> {
      */
     @Override
     public NSNation lookupObject(String s) {
+        // I don't think it's possible to filter on a nation existing before looking up via a CommNationsCache
+        // (emphasis on the plural) since doing that will necessarily remove not-yet-found new nations. We may have
+        // to simply accept that DELETED nations will persist in cache for up to ONE day.
         return super.lookupObject(s);
     }
 

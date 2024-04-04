@@ -48,7 +48,7 @@ public class CommDelegatesCache extends CommCache<CommDelegatesCache.Delegates> 
 
     private static final Logger LOGGER = Logger.getLogger(CommDelegatesCache.class.getName());
     public static final String DELEGATE_KEY = "__delegates__";
-    private static final Path LOCATION = APP_SUPPORT.resolve("nation_cache.json");
+    private static final Path LOCATION = APP_SUPPORT.resolve("delegate_cache.json");
     public static final Duration CACHE_DURATION = Duration.ofMinutes(30);
 
     private static CommDelegatesCache instance;
