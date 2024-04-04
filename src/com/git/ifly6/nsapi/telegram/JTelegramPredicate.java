@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 
 /**
  * Holds a {@link Predicate} for an {@link NSNation} for {@link JavaTelegram}.
- * @since 13
+ * @since version 13 (2024-03-29)
  * @deprecated CommRecipientChecker
  */
 @Deprecated

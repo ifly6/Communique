@@ -20,7 +20,7 @@ package com.git.ifly6.nsapi.telegram;
 /**
  * Enumerates known telegram response codes, the match strings to determine whether they are applicable from the
  * response, and an explanation for the user.
- * @since version 13
+ * @since version 13 (2024-03-31)
  */
 public enum JTelegramResponseCode {
 

@@ -19,6 +19,10 @@ package com.git.ifly6.nsapi.telegram;
 
 import java.time.Duration;
 
+/**
+ * Names constant durations for telegrams.
+ * @since version 13 (2020-12-15)
+ */
 public class JTelegramConstants {
 
     public static final Duration DEFAULT_DURATION = Duration.ofMillis(Math.round(30 * 1000L));

@@ -43,6 +43,7 @@ import java.util.stream.Stream;
  * Note that all of these functions require file-system and Internet access to download and parse the files provided by
  * the NationStates API.
  * </p>
+ * @since pre-Communique (2015-07-15)
  */
 @Deprecated
 public class JInfoFetcher {

@@ -29,9 +29,9 @@ import static com.git.ifly6.nsapi.telegram.JTelegramConstants.RECRUIT_DURATION;
 
 /**
  * Specifies different types of telegrams to be sending and their default timings and names.
+ * @since version 13 (2020-08-27)
  */
 public enum JTelegramType {
-
 
     /**
      * Timing for recruitment telegrams with {@link JTelegramConstants#RECRUIT_DURATION} delay.

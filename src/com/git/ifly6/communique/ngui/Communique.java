@@ -36,7 +36,6 @@ import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.ctelegram.CommSender;
 import com.git.ifly6.nsapi.ctelegram.CommSenderInterface;
-import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -73,7 +72,7 @@ import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createM
  * <code>Communiqué</code> is the main class of the Communiqué system. It handles the GUI aspect of the entire program
  * and other actions.
  */
-public class Communique extends AbstractCommunique implements JTelegramLogger, CommSenderInterface {
+public class Communique extends AbstractCommunique implements CommSenderInterface {
 
     private static final Logger LOGGER = Logger.getLogger(Communique.class.getName());
 
@@ -355,36 +354,24 @@ public class Communique extends AbstractCommunique implements JTelegramLogger, C
         return focusedEditor.getTelegramInterval();
     }
 
-    /**
-     * @see com.git.ifly6.nsapi.telegram.JTelegramLogger#log(java.lang.String)
-     */
-    @Override
-    public void log(String input) {
-        LOGGER.info(input);
-    }
-
-    /**
-     * @see com.git.ifly6.nsapi.telegram.JTelegramLogger#sentTo(java.lang.String, int, int)
-     */
-    @Override
-    public void sentTo(String recipientName, int x, int length) {
-        String recipient = CommuniqueRecipients.createExcludedNation(recipientName).toString();
-        focusedEditor.appendLine(x == 0 ? "\n" + recipient : recipient); // scrolls to the bottom automatically
-
-        progressBar.reset();
-        progressBar.start(System.currentTimeMillis(), System.currentTimeMillis() + currentWaitTime().toMillis());
-
-        // Update the label and log successes as relevant
-        progressLabel.setText(String.format("%d / %s",
-                x, length > 0 ? String.valueOf(length) : "?"
-        ));
-    }
-
     @Override
     public void processed(String recipient, int numberSent, CommSender.SendingAction action) {
-        rSuccessTracker.put(recipient, action == CommSender.SendingAction.SENT);
-        if (action == CommSender.SendingAction.SENT)
-            sentTo(recipient, numberSent, (int) monitor.recipientsCount().orElse(-1));
+        rSuccessTracker.put(recipient, action == CommSender.SendingAction.SENT); // handles both sent and skipped
+        if (action == CommSender.SendingAction.SENT) {
+            // add the excluded nation to the focused editor
+            String toAdd = CommuniqueRecipients.createExcludedNation(recipient).toString();
+            focusedEditor.appendLine(numberSent == 0 ? "\n" + toAdd : toAdd); // scrolls to the bottom automatically
+
+            // reset the timing progress bar
+            progressBar.reset();
+            progressBar.start(System.currentTimeMillis(), System.currentTimeMillis() + currentWaitTime().toMillis());
+
+            // Update the label and log successes as relevant
+            String denominator = (monitor.recipientsCount().isEmpty())
+                    ? "?"
+                    : String.valueOf(monitor.recipientsCount().getAsLong());
+            progressLabel.setText(String.format("%d / %s", numberSent, denominator));
+        }
     }
 
     @Override
