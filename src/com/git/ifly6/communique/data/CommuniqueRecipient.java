@@ -18,7 +18,8 @@
 package com.git.ifly6.communique.data;
 
 import com.git.ifly6.nsapi.ApiUtils;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
+import com.git.ifly6.nsapi.NSException;
+import com.git.ifly6.nsapi.NSIOException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -95,8 +96,10 @@ public class CommuniqueRecipient {
      * Decomposes a tag to its constituent nations. All decompositions are done in {@link CommuniqueRecipientType}
      * class.
      * @return a list of <code>CommuniqueRecipient</code>s
+     * @throws NSException when conceptually unmappable to NationStates (eg no such nation)
+     * @throws NSIOException when cannot connect to NationStates
      */
-    public List<CommuniqueRecipient> decompose() throws JTelegramException {
+    public List<CommuniqueRecipient> decompose() throws NSException, NSIOException {
         return getRecipientType().decompose(this);
     }
 

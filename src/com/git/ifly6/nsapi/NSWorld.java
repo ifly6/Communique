@@ -17,7 +17,6 @@
 
 package com.git.ifly6.nsapi;
 
-import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.jcabi.xml.XMLDocument;
 
 import java.io.IOException;
@@ -38,18 +37,14 @@ public class NSWorld {
     /**
      * Queries the NationStates API for a listing of 50 new nations.
      * @return {@code List<String>} with the recipients inside, in {@code ref} form
-     * @throws JTelegramException in case the NationStates API is unreachable for some reason
+     * @throws NSIOException in case the NationStates API is unreachable for some reason
      */
     @Deprecated
-    public static List<String> getNew() throws JTelegramException {
-        try {
-            final NSConnection connection = new NSConnection(NSConnection.API_PREFIX + "q=newnations");
-            final String response = connection.connect().getResponse();
-            final String newNations = new XMLDocument(response).xpath("/WORLD/NEWNATIONS/text()").get(0);
-            return arrayRef(newNations.split(","));
-        } catch (IOException e) {
-            throw new JTelegramException("Failed to get new nations", e);
-        }
+    public static List<String> getNew() throws IOException {
+        final NSConnection connection = new NSConnection(NSConnection.API_PREFIX + "q=newnations");
+        final String response = connection.connect().getResponse();
+        final String newNations = new XMLDocument(response).xpath("/WORLD/NEWNATIONS/text()").get(0);
+        return arrayRef(newNations.split(","));
     }
 
     /**

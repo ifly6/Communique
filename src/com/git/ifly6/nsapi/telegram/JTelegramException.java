@@ -25,6 +25,7 @@ package com.git.ifly6.nsapi.telegram;
  * to handle data correctly. The purpose of this class is to replace the use of <code>catch (Exception e)</code> in code
  * for the purpose of being more accurate in cases where an <code>IOException</code> could also occur.
  */
+@Deprecated
 public class JTelegramException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;

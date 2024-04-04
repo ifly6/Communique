@@ -15,11 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.nsapi.ctelegram.io;
+package com.git.ifly6.nsapi;
 
-import com.git.ifly6.nsapi.NSConnection;
-import com.git.ifly6.nsapi.NSIOException;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.jcabi.xml.XML;
 import com.jcabi.xml.XMLDocument;
 
@@ -31,14 +28,14 @@ import java.util.Map;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
-public class CommHappenings {
+public class NSHappenings {
 
     private static final String HAPPENINGS_URL = NSConnection.API_PREFIX
             + "q=happenings;filter=law+change+dispatch+rmb+embassy+admin+vote+resolution+member";
     private static final Pattern PATTERN = Pattern.compile("(?<=@@).*?(?=@@)");
 
     /** Gets list of nations appearing in happenings right now. */
-    public static Map<String, Instant> getActiveNations() throws JTelegramException {
+    public static Map<String, Instant> getActiveNations() throws NSIOException {
         try {
             NSConnection connection = new NSConnection(HAPPENINGS_URL).connect();
             XMLDocument xml = new XMLDocument(connection.getResponse());

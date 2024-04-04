@@ -18,10 +18,9 @@
 package com.git.ifly6.nsapi.ctelegram;
 
 import com.git.ifly6.nsapi.NSIOException;
-import com.git.ifly6.nsapi.ctelegram.io.NSTGSettingsException;
+import com.git.ifly6.nsapi.ctelegram.io.CommTelegramException;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommMonitor.ExhaustedException;
-import com.git.ifly6.nsapi.telegram.JTelegramConnection;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramResponseCode;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
@@ -52,7 +51,6 @@ import java.util.logging.Logger;
 public class CommSender {
 
     public static final Logger LOGGER = Logger.getLogger(CommSender.class.getName());
-    private static final String NO_RECIPIENT = "__NO_RECIPIENT__";
 
     /**
      * One thread for many clients.
@@ -161,15 +159,8 @@ public class CommSender {
         LOGGER.info(String.format("Got recipient %s from queue", recipient));
 
         // do the actual send
-        JTelegramConnection connection;
-        try {
-            LOGGER.finer("Creating telegram connection ");
-            connection = new JTelegramConnection(keys, recipient, dryRun);
-            lastTGAttempt = Instant.now();
-
-        } catch (IOException e) { // rethrow
-            throw new NSIOException("Cannot initialise connection to telegram API", e);
-        }
+        CommTelegramConnection connection = CommTelegramConnection.create(keys, recipient, dryRun);
+        lastTGAttempt = Instant.now();
 
         // parse the response
         try {
@@ -179,7 +170,7 @@ public class CommSender {
 
             // if there is an error
             if (responseCode != JTelegramResponseCode.QUEUED)
-                throw NSTGSettingsException.createException(keys, responseCode);
+                throw CommTelegramException.createException(keys, responseCode);
 
             // we sent to this recipient
             reportProcessed(recipient, SendingAction.SENT);

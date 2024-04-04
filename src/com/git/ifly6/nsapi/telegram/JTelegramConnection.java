@@ -38,6 +38,7 @@ import static com.git.ifly6.nsapi.telegram.JTelegramResponseCode.UNKNOWN_ERROR;
  * unlike with {@link NSConnection} and its {@link NSConnection#WAIT_TIME}! Rate limits for this class must be
  * implemented externally.
  */
+@Deprecated
 public class JTelegramConnection {
 
     private static final Logger LOGGER = Logger.getLogger(JTelegramConnection.class.getName());

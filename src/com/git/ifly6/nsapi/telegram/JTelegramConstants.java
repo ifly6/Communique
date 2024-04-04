@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ifly6
+ * Copyright (c) 2024 ifly6
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this class file and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -21,8 +21,8 @@ import java.time.Duration;
 
 public class JTelegramConstants {
 
-    public static final Duration DEFAULT_DURATION = Duration.ofMillis(Math.round(30.05 * 1000L));
-    public static final Duration RECRUIT_DURATION = Duration.ofMillis(Math.round(180.05 * 1000L));
+    public static final Duration DEFAULT_DURATION = Duration.ofMillis(Math.round(30 * 1000L));
+    public static final Duration RECRUIT_DURATION = Duration.ofMillis(Math.round(180 * 1000L));
 
     private JTelegramConstants() {
     }

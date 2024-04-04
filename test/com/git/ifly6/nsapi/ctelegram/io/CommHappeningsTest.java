@@ -18,6 +18,7 @@
 package com.git.ifly6.nsapi.ctelegram.io;
 
 import com.git.ifly6.communique.data.CommuniqueRecipients;
+import com.git.ifly6.nsapi.NSHappenings;
 import com.git.ifly6.nsapi.NSIOException;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,7 @@ class CommHappeningsTest {
     @Test
     void getActiveNations() {
         try {
-            Map<String, Instant> activeNations = CommHappenings.getActiveNations();
+            Map<String, Instant> activeNations = NSHappenings.getActiveNations();
             assertFalse(activeNations.isEmpty());
             assertFalse(activeNations.keySet().stream().findFirst().orElseThrow(RuntimeException::new).contains("@@"));
             assertDoesNotThrow(

@@ -25,13 +25,15 @@ import com.git.ifly6.nsapi.telegram.JTelegramResponseCode;
  * Thrown for explicit mismatches or errors from NationStates telegrams API.
  * @since version 13
  */
-public class NSTGSettingsException extends NSIOException {
-    public NSTGSettingsException(String message) {
+public class CommTelegramException extends NSIOException {
+
+    public CommTelegramException(String message) {
         super(message);
     }
 
-    public static NSTGSettingsException createException(JTelegramKeys keys, JTelegramResponseCode errorCode) {
-        return new NSTGSettingsException(String.format("Error with keys %s; got error %s",
-                keys.toString(), errorCode.toString()));
+    public static CommTelegramException createException(JTelegramKeys keys, JTelegramResponseCode errorCode) {
+        return new CommTelegramException(String.format("Error with keys %s: %s",
+                keys.toString(), errorCode.getExplanation()
+        ));
     }
 }

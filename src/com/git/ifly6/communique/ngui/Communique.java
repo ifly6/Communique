@@ -32,9 +32,10 @@ import com.git.ifly6.communique.ngui.components.CommuniqueTimerBar;
 import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueSendDialog;
 import com.git.ifly6.communique.ngui.components.dialogs.CommuniqueTextDialog;
 import com.git.ifly6.nsapi.NSConnection;
+import com.git.ifly6.nsapi.NSException;
+import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.ctelegram.CommSender;
 import com.git.ifly6.nsapi.ctelegram.CommSenderInterface;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
 import com.git.ifly6.nsapi.telegram.JTelegramLogger;
 
 import javax.swing.BorderFactory;
@@ -301,7 +302,7 @@ public class Communique extends AbstractCommunique implements JTelegramLogger, C
             LOGGER.log(Level.SEVERE, "Exception in parsing recipients. Displaying to user", pse);
             this.showErrorDialog(label);
 
-        } catch (JTelegramException | IllegalArgumentException jte) {
+        } catch (NSException | NSIOException | IllegalArgumentException jte) {
             LOGGER.log(Level.SEVERE, "Exception in parsing recipients. Displaying to user", jte);
             this.showErrorDialog(jte.getMessage());
         }

@@ -80,16 +80,19 @@ public class JTelegramKeys {
         return (telegramId != null) ? telegramId : "TELEGRAM_ID";
     }
 
+    @Deprecated
     public void setClientKey(String input) {
         Objects.requireNonNull(input);
         clientKey = input.trim();
     }
 
+    @Deprecated
     public void setSecretKey(String input) {
         Objects.requireNonNull(input);
         secretKey = input.trim();
     }
 
+    @Deprecated
     public void setTelegramID(String input) {
         Objects.requireNonNull(input);
         telegramId = input.trim();
@@ -98,6 +101,7 @@ public class JTelegramKeys {
     /**
      * @return {@code String[]} with elements {@code { clientKey, secretKey, telegramId }}.
      */
+    @Deprecated
     public String[] toArray() {
         return new String[] {clientKey, secretKey, telegramId};
     }

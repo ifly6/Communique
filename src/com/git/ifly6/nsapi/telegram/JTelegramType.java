@@ -55,7 +55,7 @@ public enum JTelegramType {
      */
     NONE(DEFAULT_DURATION);
 
-    protected Duration waitDuration;
+    private Duration waitDuration;
 
     JTelegramType(Duration waitDuration) {
         this.waitDuration = waitDuration;

@@ -18,6 +18,7 @@
 package com.git.ifly6.communique.data;
 
 import com.git.ifly6.CommuniqueSplitter;
+import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.NSNation;
 import com.git.ifly6.nsapi.NSRegion;
 import com.git.ifly6.nsapi.NSWorld;
@@ -29,7 +30,6 @@ import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommApprovalMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommMovementMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommNewNationMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommVoteMonitor;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -72,7 +72,7 @@ public enum CommuniqueRecipientType {
      */
     REGION_TAG {
         @Override
-        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) throws JTelegramException {
+        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             try {
                 List<String> regions = NSWorld.getRegionTag(cr.getName());
                 return regions.stream()
@@ -82,7 +82,7 @@ public enum CommuniqueRecipientType {
                         .collect(Collectors.toList());
 
             } catch (IOException e) {
-                throw new JTelegramException("Could not get nations by tag!", e);
+                throw new NSIOException("Could not get nations by tag!", e);
             }
         }
     },
@@ -94,7 +94,7 @@ public enum CommuniqueRecipientType {
      */
     REGION {
         @Override
-        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) throws JTelegramException {
+        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             NSRegion region = new NSRegion(cr.getName());
             return newRecipients(region.getRegionMembers(), cr.getFilterType());
         }
@@ -118,7 +118,7 @@ public enum CommuniqueRecipientType {
      */
     TAG {
         @Override
-        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) throws JTelegramException {
+        public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
             String tag = cr.getName();
             try {
                 if (tag.equals("wa"))
@@ -133,8 +133,7 @@ public enum CommuniqueRecipientType {
 
                 throw newException(cr);
             } catch (IOException e) {
-
-                throw new JTelegramException(String.format("Failed to decompose tag %s!", cr), e);
+                throw new NSIOException(String.format("Failed to decompose tag %s!", cr), e);
             }
         }
     },

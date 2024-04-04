@@ -25,6 +25,12 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+/**
+ * Holds a {@link Predicate} for an {@link NSNation} for {@link JavaTelegram}.
+ * @since 13
+ * @deprecated CommRecipientChecker
+ */
+@Deprecated
 public class JTelegramPredicate implements Predicate<NSNation> {
 
     private final String name;

@@ -20,7 +20,7 @@ package com.git.ifly6.communique.io;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.nsapi.NSConnection;
-import com.git.ifly6.nsapi.telegram.JTelegramException;
+import com.git.ifly6.nsapi.NSIOException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class HappeningsParser {
     private static final String HAPPENINGS_URL = "https://www.nationstates.net/cgi-bin/api.cgi?q=happenings;"
             + "filter=law+change+dispatch+rmb+embassy+admin+vote+resolution+member";
 
-    public static List<CommuniqueRecipient> getActiveNations() throws JTelegramException {
+    public static List<CommuniqueRecipient> getActiveNations() throws NSIOException {
         try {
             NSConnection connection = new NSConnection(HAPPENINGS_URL).connect();
 
@@ -57,7 +57,7 @@ public class HappeningsParser {
             return matches.stream().map(CommuniqueRecipients::createNation).collect(Collectors.toList());
 
         } catch (IOException e) {
-            throw new JTelegramException("Encountered IO exception when getting active nations", e);
+            throw new NSIOException("Encountered IO exception when getting active nations", e);
         }
     }
 

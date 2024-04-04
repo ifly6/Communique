@@ -17,7 +17,8 @@
 
 package com.git.ifly6.communique.data;
 
-import com.git.ifly6.nsapi.telegram.JTelegramException;
+import com.git.ifly6.nsapi.NSException;
+import com.git.ifly6.nsapi.NSIOException;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -61,7 +62,7 @@ public class Communique7Parser {
      * @param token a <code>CommuniqueRecipient</code>
      * @return this parser
      */
-    public Communique7Parser apply(CommuniqueRecipient token) throws JTelegramException {
+    public Communique7Parser apply(CommuniqueRecipient token) throws NSException, NSIOException {
         recipients = token.getFilterType().apply(recipients, token);
         /* This is the beautiful part, because I've chained everything to a filter, this means that I don't have to
          * write any code whatsoever to sort things into what they have to do, unlike the old parser. Now, everything is
@@ -75,12 +76,12 @@ public class Communique7Parser {
      * @param list of {@link CommuniqueRecipient}
      * @return this parser
      */
-    public Communique7Parser apply(List<CommuniqueRecipient> list) throws JTelegramException {
+    public Communique7Parser apply(List<CommuniqueRecipient> list) throws NSException, NSIOException {
         list.forEach(this::apply);
         return this;
     }
 
-    public Communique7Parser apply(CommuniqueRecipient... crs) throws JTelegramException {
+    public Communique7Parser apply(CommuniqueRecipient... crs) throws NSException, NSIOException {
         return apply(List.of(crs));
     }
 

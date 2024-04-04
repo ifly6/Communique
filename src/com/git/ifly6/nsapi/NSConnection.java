@@ -53,12 +53,13 @@ public class NSConnection {
     private static final RateLimiter limiter = RateLimiter.create(PERMITS_PER_SECOND);
     private static final HttpClient CLIENT = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
-    private HttpResponse<String> response;
-    private URL url;
+    protected URL url;
+    protected HttpResponse<String> httpResponse;
 
     /**
      * Creates an unconnected {@code NSConnection} to query the specified URL.
-     * @param urlString to query* @throws NSIOException if {@code urlString} is invalid URL
+     * @param urlString to query
+     * @throws NSIOException if {@code urlString} is invalid URL
      */
     public NSConnection(String urlString) {
         try {
@@ -102,27 +103,27 @@ public class NSConnection {
         }
 
         try {
-            response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            httpResponse = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
 
         } catch (InterruptedException e) {
             LOGGER.log(Level.SEVERE, "Interrupted when sending NS API request", e);
             throw new RuntimeException("Interrupted when sending NS API request", e);
         }
 
-        if (response.statusCode() == 429)
+        if (httpResponse.statusCode() == 429)
             throw new NSIOException(String.format("API rate limit exceeded! Retry after %s",
                     CommuniqueUtilities.time(Long.parseLong(
-                                    response.headers().firstValue("X-Retry-After").orElse("-1")
+                                    httpResponse.headers().firstValue("X-Retry-After").orElse("-1")
                             )
                     )
             ));
 
-        if (response.statusCode() == 404)
+        if (httpResponse.statusCode() == 404)
             throw new NSIOException(String.format("No result for URL %s", url.toString()));
 
-        if (response.statusCode() != 200)
+        if (httpResponse.statusCode() != 200)
             throw new NSIOException(String.format("Received non-200 response code %d from API at URL %s",
-                    response.statusCode(), url.toString()
+                    httpResponse.statusCode(), url.toString()
             ));
 
         return this;
@@ -135,7 +136,7 @@ public class NSConnection {
      * @throws IOException if connection fails
      */
     public String getResponse() throws IOException {
-        if (response == null) { connect(); }
-        return response.body();
+        if (httpResponse == null) { connect(); }
+        return httpResponse.body();
     }
 }

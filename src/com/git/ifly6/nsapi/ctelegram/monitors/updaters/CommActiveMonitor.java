@@ -17,7 +17,7 @@
 
 package com.git.ifly6.nsapi.ctelegram.monitors.updaters;
 
-import com.git.ifly6.nsapi.ctelegram.io.CommHappenings;
+import com.git.ifly6.nsapi.NSHappenings;
 import com.git.ifly6.nsapi.ctelegram.monitors.CommUpdatableMonitor;
 
 import java.time.Duration;
@@ -67,7 +67,7 @@ public class CommActiveMonitor extends CommUpdatableMonitor {
 
     @Override
     protected void updateAction() {
-        Map<String, Instant> newActiveNations = CommHappenings.getActiveNations();
+        Map<String, Instant> newActiveNations = NSHappenings.getActiveNations();
         if (newActiveNations.isEmpty()) return;
 
         Instant THIRTY_MINUTES_AGO = Instant.now().minus(30, ChronoUnit.MINUTES);
