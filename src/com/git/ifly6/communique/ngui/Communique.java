@@ -105,6 +105,8 @@ public class Communique extends AbstractCommunique implements CommSenderInterfac
 
                 // initialise the editors
                 CommuniqueEditorManager.getInstance().initialiseEditors();
+                window.frame.toFront();
+
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Encountered error on Communique window instantiation!", e);
             }

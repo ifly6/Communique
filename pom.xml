@@ -34,6 +34,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
                     <source>11</source>
                     <target>11</target>
@@ -58,7 +59,7 @@
                                     <mainClass>com.git.ifly6.communique.ngui.Communique</mainClass>
                                 </transformer>
                             </transformers>
-                            <finalName>Communique_${project.version}</finalName>
+                            <finalName>Communique-${project.version}</finalName>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>
@@ -76,11 +77,21 @@
                                     <mainClass>com.git.ifly6.marconi.Marconi</mainClass>
                                 </transformer>
                             </transformers>
-                            <finalName>Marconi_${project.version}</finalName>
+                            <finalName>Marconi-${project.version}</finalName>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <filters>
+                        <filter>
+                            <artifact>com.formdev:flatlaf</artifact>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </filter>
+                    </filters>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -142,4 +153,8 @@
             <version>1.2.4.1</version>
         </dependency>
     </dependencies>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 </project>

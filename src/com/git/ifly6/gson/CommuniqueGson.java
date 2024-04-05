@@ -15,42 +15,27 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.io;
+package com.git.ifly6.gson;
 
-import com.git.ifly6.gson.CommuniqueGson;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
- * Writes Communique configuration files.
- * @since version 5
+ * Factory class for {@link Gson} with registered type adapters.
+ * @since version 13 (2024-04-05)
  */
-class CommuniqueWriter {
+public class CommuniqueGson {
 
-    private Path path;
-    private CommuniqueConfig config;
+    private CommuniqueGson() { }
 
-    /**
-     * Creates <code>CommuniqueWriter</code> pointing to some path with some loaded configuration data.
-     * @param path   on which to write
-     * @param config data
-     */
-    CommuniqueWriter(Path path, CommuniqueConfig config) {
-        this.path = path;
-        this.config = config;
-    }
-
-    /**
-     * Writes the configuration data to the path specified in the constructor.
-     * @throws IOException if there is an error in writing the file
-     */
-    void write() throws IOException {
-        config.clean(); // Have configuration clean itself
-        Gson gson = CommuniqueGson.createNew();
-        Files.writeString(path, gson.toJson(config));
+    public static Gson createNew() {
+        return new GsonBuilder().setPrettyPrinting().serializeNulls()
+                .registerTypeAdapter(Duration.class, new CommuniqueDurationAdapter().nullSafe())
+                .registerTypeAdapter(Instant.class, new CommuniqueInstantAdapter().nullSafe())
+                .create();
     }
 
 }

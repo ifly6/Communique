@@ -22,6 +22,7 @@ import com.git.ifly6.communique.data.Communique7Parser;
 import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
+import com.git.ifly6.gson.CommuniqueGson;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -73,7 +73,7 @@ class CommuniqueReader {
 
         try {
             try { // note, this will handle future version of the class by ignoring the now-irrelevant fields
-                Gson gson = new Gson();
+                Gson gson = CommuniqueGson.createNew();
                 config = gson.fromJson(Files.newBufferedReader(path), CommuniqueConfig.class);
 
                 // check if the header is null and fill it in with "dunno mate" if not present

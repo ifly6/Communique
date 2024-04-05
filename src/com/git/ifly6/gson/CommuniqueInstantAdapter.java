@@ -15,42 +15,25 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.git.ifly6.communique.io;
+package com.git.ifly6.gson;
 
-import com.git.ifly6.gson.CommuniqueGson;
-import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.time.Instant;
 
-/**
- * Writes Communique configuration files.
- * @since version 5
- */
-class CommuniqueWriter {
+public class CommuniqueInstantAdapter extends TypeAdapter<Instant> {
 
-    private Path path;
-    private CommuniqueConfig config;
-
-    /**
-     * Creates <code>CommuniqueWriter</code> pointing to some path with some loaded configuration data.
-     * @param path   on which to write
-     * @param config data
-     */
-    CommuniqueWriter(Path path, CommuniqueConfig config) {
-        this.path = path;
-        this.config = config;
+    @Override
+    public void write(final JsonWriter jsonWriter, final Instant instant) throws IOException {
+        jsonWriter.value(instant.toString());
     }
 
-    /**
-     * Writes the configuration data to the path specified in the constructor.
-     * @throws IOException if there is an error in writing the file
-     */
-    void write() throws IOException {
-        config.clean(); // Have configuration clean itself
-        Gson gson = CommuniqueGson.createNew();
-        Files.writeString(path, gson.toJson(config));
+    @Override
+    public Instant read(final JsonReader jsonReader) throws IOException {
+        return Instant.parse(jsonReader.nextString());
     }
 
 }

@@ -16,11 +16,11 @@
  */
 package com.git.ifly6.nsapi.ctelegram.io.cache;
 
+import com.git.ifly6.gson.CommuniqueGson;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.NSTimeStamped;
 import com.git.ifly6.nsapi.NSWorld;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -57,7 +57,7 @@ public class CommDelegatesCache extends CommCache<CommDelegatesCache.Delegates> 
         super(CACHE_DURATION);
         this.setFinaliser(() -> {
             try (BufferedWriter bw = Files.newBufferedWriter(LOCATION)) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+                Gson gson = CommuniqueGson.createNew();
                 gson.toJson(this, bw);
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Unable to save nation cache!", e);
@@ -67,7 +67,7 @@ public class CommDelegatesCache extends CommCache<CommDelegatesCache.Delegates> 
 
     private static CommDelegatesCache makeInstance() {
         try {
-            CommDelegatesCache c = new Gson().fromJson(
+            CommDelegatesCache c = CommuniqueGson.createNew().fromJson(
                     Files.newBufferedReader(LOCATION), CommDelegatesCache.class);
             c.purge();
             return c;
