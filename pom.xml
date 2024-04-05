@@ -55,7 +55,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.git.ifly6.communique.gui3.Communique3</mainClass>
+                                    <mainClass>com.git.ifly6.communique.ngui.Communique</mainClass>
                                 </transformer>
                             </transformers>
                             <finalName>Communique_${project.version}</finalName>
