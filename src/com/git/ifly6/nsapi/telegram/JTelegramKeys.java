@@ -53,16 +53,13 @@ public class JTelegramKeys {
         telegramId = teleID.trim();
     }
 
-    /**
-     * Creates a purposely invalid "empty" <code>JTelegramKeys</code>.
-     */
+    /** Creates a purposely invalid "empty" <code>JTelegramKeys</code>. */
     public JTelegramKeys() {
         // cannot be removed; IO code relies on this 'empty' constructorclientKey = "CLIENT_KEY";
         clientKey = "CLIENT_KEY";
         secretKey = "SECRET_KEY";
         telegramId = "TELEGRAM_ID";
     }
-
 
     @Override
     public String toString() {
@@ -99,17 +96,13 @@ public class JTelegramKeys {
         telegramId = input.trim();
     }
 
-    /**
-     * @return {@code String[]} with elements {@code { clientKey, secretKey, telegramId }}.
-     */
+    /** @return {@code String[]} with elements {@code { clientKey, secretKey, telegramId }}. */
     @Deprecated
     public String[] toArray() {
         return new String[] {clientKey, secretKey, telegramId};
     }
 
-    /**
-     * @return true if any key is empty or null
-     */
+    /** @return true if any key is empty or null. */
     @SuppressWarnings("RedundantIfStatement")
     public boolean anyEmpty() {
         if (Objects.isNull(clientKey) || clientKey.isEmpty()) return true;

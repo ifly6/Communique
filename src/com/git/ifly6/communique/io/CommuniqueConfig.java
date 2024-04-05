@@ -81,15 +81,14 @@ public class CommuniqueConfig implements Serializable {
     @Deprecated
     public String waitString;
 
-    /**
-     * Constructs with default parameters
-     */
+    /** Constructs with default parameters. */
     public CommuniqueConfig() {
         this.keys = new JTelegramKeys();
         this.telegramType = JTelegramType.NONE;
         this.telegramInterval = null;
         this.processingAction = CommuniqueProcessingAction.NONE;
         this.repeats = false;
+        this.cRecipients = new ArrayList<>();
     }
 
     /**
@@ -101,7 +100,6 @@ public class CommuniqueConfig implements Serializable {
      *                         {@link JTelegramType#CUSTOM}
      * @param processingAction to apply after parsing
      * @param repeats          flag whether the client should interrupt and repeat
-     * @param repeatInterval   over which to interrupt and repeat (only set when {@code repeats} is true)
      */
     public CommuniqueConfig(
             JTelegramKeys keys, JTelegramType telegramType, Duration telegramInterval,

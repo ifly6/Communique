@@ -33,11 +33,9 @@ import java.util.logging.Logger;
 public class Communique7Monitor extends CommUpdatableMonitor {
 
     private static final Logger LOGGER = Logger.getLogger(Communique7Monitor.class.getName());
-    private static final int TRUNCATION_LIMIT = 6; // every 3 minutes
 
     private State state;
-
-    private CommuniqueConfig theConfig;
+    private CommuniqueConfig theConfig; // this wraps the cRecipient list and should therefore mutate!
 
     private int updateCalls = 0;
     private List<String> lastParse;
@@ -45,11 +43,6 @@ public class Communique7Monitor extends CommUpdatableMonitor {
     public Communique7Monitor(CommuniqueConfig communiqueConfig) {
         this.theConfig = communiqueConfig;
         this.state = State.INIT;
-    }
-
-    public Communique7Monitor setConfig(CommuniqueConfig theConfig) {
-        this.theConfig = theConfig;
-        return this;
     }
 
     @Override
@@ -78,9 +71,9 @@ public class Communique7Monitor extends CommUpdatableMonitor {
 
     /**
      * Parses recipients based on the current configuration setting. Caches this information in {@link #lastParse}.
-     * @return {@link #lastParse} after updating it from {@link Communique7Parser}
+     * Operates in place.
      */
-    private List<String> parseRecipients() {
+    private void parseRecipients() {
         if (lastParse != null && this.state == State.INIT)
             /*
             When the monitor initialises, Communique will first call for a preview. This will populate lastParse.
@@ -89,19 +82,24 @@ public class Communique7Monitor extends CommUpdatableMonitor {
             state will still be INIT because only AFTER parseRecipients() returns its payload will the state be tripped
             to RUNNING by getAction().
             */
-            return this.lastParse;
+            return;
 
         List<String> parseResults = new Communique7Parser().apply(theConfig.getcRecipients()).listRecipients();
         this.lastParse = theConfig.processingAction.apply(parseResults);
 
         LOGGER.info(String.format("Monitor parsed %d recipients", lastParse.size()));
-        return this.lastParse;
     }
 
+    /**
+     * If the monitor is initialising, this will never exhaust. Once it initialises, if the configuration says it
+     * repeats, it will never exhaust. If the configuration is <b>not</b> repeating, it has been parsed more than once,
+     * and the last parsing attempt returned empty, it will exhaust.
+     * @return whether the parse recipients are exhausted
+     */
     @Override
     public boolean recipientsExhausted() {
-        if (this.state == State.INIT) return false;
-        if (!theConfig.repeats && updateCalls >= 1) return true;
+        if (this.state == State.INIT || theConfig.repeats) return false;
+        if (updateCalls >= 1 && lastParse.isEmpty()) return true;
         return false;
     }
 

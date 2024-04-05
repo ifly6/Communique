@@ -38,7 +38,8 @@ public abstract class CommUpdatableMonitor implements CommMonitor {
     public CommUpdatableMonitor() { }
 
     /**
-     * Actual implementation of {@link #getRecipients}.
+     * Actual implementation of {@link #getRecipients}. See documentation of that method for details on how
+     * {@link #update()} is called.
      * @return a list of recipients to pass on
      */
     protected abstract List<String> getAction();
@@ -57,8 +58,8 @@ public abstract class CommUpdatableMonitor implements CommMonitor {
     }
 
     /**
-     * Actual implementation of {@link #update()}. Prior to calling this method, the monitor makes sure that it is
-     * not exhausted. It then calls the update action. After updating, it saves the time of completion as
+     * Actual implementation of {@link #update()}. Prior to calling this method, the monitor makes sure that it is not
+     * exhausted. It then calls the update action. After updating, it saves the time of completion as
      * {@link #lastUpdate}.
      * @see #update()
      */

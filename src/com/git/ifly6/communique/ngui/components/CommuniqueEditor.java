@@ -374,12 +374,16 @@ public class CommuniqueEditor extends AbstractCommunique {
                 tfTelegramInterval.getDuration(),
                 CommuniqueSwingUtilities.getSelected(chooserAction),
                 checkboxRepeat.isSelected());
+        updateConfigRecipients();
+        return config;
+    }
+
+    private void updateConfigRecipients() {
         config.setcRecipients(area.getLines().stream()
                 .filter(ApiUtils::isNotEmpty)
                 .filter(s -> !s.startsWith("#"))
                 .map(CommuniqueRecipient::parseRecipient)
                 .collect(Collectors.toList()));
-        return config;
     }
 
     public Path save() {
@@ -479,15 +483,11 @@ public class CommuniqueEditor extends AbstractCommunique {
 
     public void appendLine(Object obj) {
         area.appendLine(obj.toString());
+        updateConfigRecipients(); // otherwise it won't synchronise the sentList on reparse when sending
     }
 
     public Duration getTelegramInterval() {
         return getConfig().getTelegramInterval();
-    }
-
-    public JTelegramType getTelegramType() {
-        getConfig();
-        return config.getTelegramType();
     }
 
     public void setClientKey(String s) {

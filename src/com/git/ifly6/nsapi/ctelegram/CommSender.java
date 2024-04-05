@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -37,7 +38,6 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,7 +70,7 @@ public class CommSender {
     private boolean dryRun = false;
 
     /** First-in-first-out send queue. */
-    private final Queue<String> sendQueue = new SynchronousQueue<>(true);
+    private final Queue<String> sendQueue = new LinkedList<>();
     private Instant lastTGAttempt;
 
     /**
