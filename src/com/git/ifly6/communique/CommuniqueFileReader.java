@@ -111,20 +111,22 @@ public class CommuniqueFileReader {
      */
     private Map.Entry<JTelegramKeys, List<String>> parseConfig() {
         // ignores # implicitly in last element of switch
-        JTelegramKeys keys = new JTelegramKeys();
         List<String> recipientsList = new ArrayList<>(0);
 
+        String cl = "CLIENT_KEY";
+        String sc = "SECRET_KEY";
+        String td = "TELEGRAM_ID";
         for (String element : fileContents) {
             element = element.trim();
 
             if (element.startsWith("client_key=")) {
-                keys.setClientKey(element.replace("client_key=", ""));
+                cl = element.replace("client_key=", "");
 
             } else if (element.startsWith("secret_key=")) {
-                keys.setSecretKey(element.replace("secret_key=", ""));
+                sc = element.replace("secret_key=", "");
 
             } else if (element.startsWith("telegram_id=")) {
-                keys.setTelegramID(element.replace("telegram_id=", ""));
+                td = element.replace("telegram_id=", "");
 
             } else if (element.startsWith("isRecruitment=")) {
                 recruitment = Boolean.parseBoolean(element.replace("isRecruitment=", ""));
@@ -137,6 +139,7 @@ public class CommuniqueFileReader {
             }
         }
 
+        JTelegramKeys keys = new JTelegramKeys(cl, sc, td);
         return new AbstractMap.SimpleEntry<>(keys, recipientsList);
     }
 

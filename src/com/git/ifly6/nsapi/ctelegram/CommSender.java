@@ -32,7 +32,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -90,6 +89,9 @@ public class CommSender {
             JTelegramKeys keys, CommMonitor monitor, JTelegramType telegramType,
             CommSenderInterface anInterface) {
         this.keys = keys;
+        if (this.keys.anyEmpty()) throw new CommTelegramException(
+                String.format("keys [%s] have default or empty values!", this.keys));
+
         this.monitor = monitor;
         this.telegramType = telegramType;
         outputInterface = anInterface;
@@ -299,12 +301,6 @@ public class CommSender {
             return lastTGAttempt.plus(job.getDelay(TimeUnit.MILLISECONDS), ChronoUnit.MILLIS);
         }
         throw new UnsupportedOperationException("No duration to next telegram; no telegrams are being sent");
-    }
-
-    /**
-     * Thrown if no recipient is found in the queue
-     */
-    public static class EmptyQueueException extends NoSuchElementException {
     }
 
     /**

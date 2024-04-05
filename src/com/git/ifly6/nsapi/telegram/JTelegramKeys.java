@@ -22,23 +22,15 @@ import java.util.Objects;
 
 /**
  * <code>JTelegramKeys</code> creates a unified object for the storage and retrieval of the client, secret, and
- * telegram keys.
- * <p>
- * Due to the problems of hardcoding a direct <code>String[]</code> as the system for holding the keys as well as not
- * being modular in any way, this system was created to organise them and simplify usage. It gives multiple methods
- * which are able to access and get the keys. It also gives ways to translate those keys into a <code>String[]</code>
- * and a <code>String</code>.
- * </p>
- * <p>
- * All <code>setX</code> methods trim their inputs.
- * </p>
+ * telegram keys. This replaced the original method of holding this in a {@link String[]}. Since 2024-04-05, this is
+ * immutable.
  * @since JavaTelegram (2015-07-16)
  */
-public class JTelegramKeys {
+public final class JTelegramKeys {
 
-    private String clientKey;
-    private String secretKey;
-    private String telegramId; // cannot be renamed
+    private final String clientKey;
+    private final String secretKey;
+    private final String telegramId; // cannot be renamed
 
     /**
      * Creates a <code>JTelegramKeys</code> which holds the client, secret, and telegram keys provided in the
@@ -78,24 +70,6 @@ public class JTelegramKeys {
         return (telegramId != null) ? telegramId : "TELEGRAM_ID";
     }
 
-    @Deprecated
-    public void setClientKey(String input) {
-        Objects.requireNonNull(input);
-        clientKey = input.trim();
-    }
-
-    @Deprecated
-    public void setSecretKey(String input) {
-        Objects.requireNonNull(input);
-        secretKey = input.trim();
-    }
-
-    @Deprecated
-    public void setTelegramID(String input) {
-        Objects.requireNonNull(input);
-        telegramId = input.trim();
-    }
-
     /** @return {@code String[]} with elements {@code { clientKey, secretKey, telegramId }}. */
     @Deprecated
     public String[] toArray() {
@@ -105,9 +79,9 @@ public class JTelegramKeys {
     /** @return true if any key is empty or null. */
     @SuppressWarnings("RedundantIfStatement")
     public boolean anyEmpty() {
-        if (Objects.isNull(clientKey) || clientKey.isEmpty()) return true;
-        if (Objects.isNull(secretKey) || secretKey.isEmpty()) return true;
-        if (Objects.isNull(telegramId) || telegramId.isEmpty()) return true;
+        if (Objects.isNull(clientKey) || clientKey.isEmpty() || clientKey.equals("CLIENT_KEY")) return true;
+        if (Objects.isNull(secretKey) || secretKey.isEmpty()|| secretKey.equals("SECRET_KEY")) return true;
+        if (Objects.isNull(telegramId) || telegramId.isEmpty()|| telegramId.equals("TELEGRAM_ID")) return true;
         return false;
     }
 
