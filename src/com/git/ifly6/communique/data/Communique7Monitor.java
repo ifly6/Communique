@@ -83,6 +83,9 @@ public class Communique7Monitor extends CommUpdatableMonitor {
             to RUNNING by getAction().
             */
             return;
+        if (lastParse != null && !this.configSupplier.getConfig().repeats)
+            /* If not repeating, always return the preview parse result. */
+            return;
 
         List<String> parseResults = new Communique7Parser()
                 .apply(configSupplier.getConfig().getcRecipients())

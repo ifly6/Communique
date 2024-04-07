@@ -118,21 +118,25 @@ public class CommSender {
      */
     private String findNext() {
         List<String> recipients = monitor.getRecipients();
-        for (String i : recipients)
-            if (!processListsContain(i) && new CommRecipientChecker(i, this.telegramType).check()) {
+
+        for (int i = 0; i < recipients.size(); i++) {
+            String s = recipients.get(i);
+            if (!processListsContain(s) && new CommRecipientChecker(s, this.telegramType).check()) {
                 // log that it was got, then return
                 if (Duration.between(initAt, Instant.now()).compareTo(Duration.ofSeconds(20)) < 0)
-                    LOGGER.info(String.format("Got recipient %s on initialisation", i));
+                    LOGGER.info(String.format("Got recipient %s on initialisation after %d attempts", s, i));
                 else
-                    LOGGER.info(String.format("Got recipient %s at %.2f seconds before next", i,
-                            (double) Duration.between(Instant.now(), this.nextAt()).toMillis() / 1000
+                    LOGGER.info(String.format("Got recipient %s at %.2f seconds before next after %d attempts", s,
+                            (double) Duration.between(Instant.now(), this.nextAt()).toMillis() / 1000,
+                            i
                     ));
 
                 // add to queue and stop
-                sendQueue.add(i);
-                return i;
+                sendQueue.add(s);
+                return s;
 
-            } else this.reportProcessed(i, SendingAction.SKIPPED); // report skipped when skipping
+            } else this.reportProcessed(s, SendingAction.SKIPPED); // report skipped when skipping
+        }
 
         // if there is nothing, do nothing
         LOGGER.info("Found no valid recipients; waiting for next parse");
