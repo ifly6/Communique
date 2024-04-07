@@ -40,7 +40,7 @@ class Communique7MonitorTest {
         testConfig.addcRecipient(CommuniqueRecipients.createNation("imperium_anglorum"));
         testConfig.addcRecipient(CommuniqueRecipients.createNation("transilia"));
 
-        Communique7Monitor m = new Communique7Monitor(testConfig);
+        Communique7Monitor m = new Communique7Monitor(() -> testConfig);
         CommSender sender = m.constructSender(new CommSenderInterface() {
             @Override
             public void processed(String recipient, int numberSent, CommSender.SendingAction action) {
