@@ -91,8 +91,27 @@ public class CommNationCache extends CommCache<NSNation> {
         return super.lookupObject(s);
     }
 
+    /**
+     * Gets cached {@link NSNation} if cached version is younger than 1 day. Otherwise, queries for newest version.
+     * @param name of nation to look up
+     * @return cached nation object or, if expired, newly-constructed nation object
+     */
+    public NSNation lookupNation(String name) {
+        return lookupObject(name);
+    }
+
+    /**
+     * @param s to look up
+     * @return cached {@link NSNation} by that name if newer than 70 seconds
+     * @see #lookupNation(String)
+     */
+    public NSNation lookupNationNow(String s) {
+        return super.lookupObject(s, Duration.of(70, ChronoUnit.SECONDS));
+    }
+
     /** @throws NSNation.NSNoSuchNationException from {@link NSNation#populateData()} */
     @Override
     protected NSNation createNewObject(String s) { return new NSNation(s).populateData(); }
+
 
 }

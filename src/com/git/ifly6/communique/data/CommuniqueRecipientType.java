@@ -32,8 +32,6 @@ import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommNewNationMonitor;
 import com.git.ifly6.nsapi.ctelegram.monitors.updaters.CommVoteMonitor;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -148,8 +146,7 @@ public enum CommuniqueRecipientType {
     ENDORSERS_OF {
         @Override
         public List<CommuniqueRecipient> decompose(CommuniqueRecipient cr) {
-            NSNation nation = CommNationCache.getInstance()
-                    .lookupObject(cr.getName(), Duration.of(70, ChronoUnit.SECONDS));
+            NSNation nation = CommNationCache.getInstance().lookupNationNow(cr.getName());
             return newRecipients(nation.getEndoList(), cr.getFilterType());
         }
     },

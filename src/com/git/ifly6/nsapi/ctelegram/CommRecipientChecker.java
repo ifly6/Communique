@@ -43,7 +43,7 @@ public class CommRecipientChecker {
     /** @return true if recipient accepts telegram */
     public boolean check() {
         try {
-            NSNation n = CommNationCache.getInstance().lookupObject(name);
+            NSNation n = CommNationCache.getInstance().lookupNation(name);
             if (type == JTelegramType.RECRUIT) return n.isRecruitable();
             if (type == JTelegramType.CAMPAIGN) return n.isCampaignable();
             return true; // default
