@@ -33,7 +33,7 @@ import static com.git.ifly6.nsapi.ApiUtils.ref;
 
 public class CommNewNation implements NSTimeStamped {
 
-    public static final Set<String> sinkers = Set.of("lazarus", "balder", "osiris");
+    public static final Set<String> SINKERS = Set.of("lazarus", "balder", "osiris");
 
     public final String name;
     public final String foundingRegion;
@@ -52,7 +52,7 @@ public class CommNewNation implements NSTimeStamped {
 
     /** @return true if the refounding region is a sinker */
     public boolean isRefound() {
-        return sinkers.contains(ref(foundingRegion));
+        return SINKERS.contains(ref(foundingRegion));
     }
 
     @Override
