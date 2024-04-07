@@ -42,7 +42,7 @@ import java.util.Objects;
  * </p>
  * @since JavaTelegram (2016-07-05)
  */
-public class NSNation implements NSTimeStamped {
+public class NSNation implements NSTimeStamped, NSPopulatable<NSNation> {
 
     public static final HashMap<String, List<String>> CATEGORIES_MAP = new HashMap<>();
 
@@ -89,6 +89,9 @@ public class NSNation implements NSTimeStamped {
         nationName = ApiUtils.ref(name);
     }
 
+    @Override
+    public NSNation newInstance(String name) { return new NSNation(name); }
+
     /**
      * Queries and fetches information for {@link NSNation}.
      * <p>Note that {@link #getInfluenceCount()} and {@link #getEndoCount()} etc only provide information already
@@ -96,6 +99,7 @@ public class NSNation implements NSTimeStamped {
      * @return self, with populated data
      * @throws NSNoSuchNationException if nation does not exist
      */
+    @Override
     public NSNation populateData() {
         try {
             NSNationQueryBuilder queryBuilder = new NSNationQueryBuilder(nationName)

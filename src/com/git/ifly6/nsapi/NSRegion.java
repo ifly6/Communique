@@ -37,7 +37,7 @@ import java.util.stream.Stream;
  * @see NSNation
  * @since JavaTelegram (2016-07-05)
  */
-public class NSRegion implements NSTimeStamped {
+public class NSRegion implements NSTimeStamped, NSPopulatable<NSRegion> {
 
     private static final Logger LOGGER = Logger.getLogger(NSRegion.class.getName());
 
@@ -54,10 +54,14 @@ public class NSRegion implements NSTimeStamped {
         regionName = ApiUtils.ref(name);
     }
 
+    @Override
+    public NSRegion newInstance(String name) { return new NSRegion(name); }
+
     /**
      * Populates data for all variables
      * @return the regions which was populated
      */
+    @Override
     public NSRegion populateData() {
         try {
             // build the query
