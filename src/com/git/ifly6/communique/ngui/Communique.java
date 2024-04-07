@@ -36,7 +36,6 @@ import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.ctelegram.CommSender;
 import com.git.ifly6.nsapi.ctelegram.CommSenderInterface;
-import org.apache.commons.text.WordUtils;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -350,7 +349,7 @@ public class Communique extends AbstractCommunique implements CommSenderInterfac
     }
 
     /**
-     * @return currently selected wait time if present, otherwise, defualt wait time (in milliseconds)
+     * @return currently selected wait time if present, otherwise, default wait time (in milliseconds)
      */
     private Duration currentWaitTime() {
         return focusedEditor.getTelegramInterval();
@@ -358,9 +357,9 @@ public class Communique extends AbstractCommunique implements CommSenderInterfac
 
     @Override
     public void processed(String recipient, int numberSent, CommSender.SendingAction action) {
-        LOGGER.info(String.format("%s recipient \"%s\"",
-                WordUtils.capitalize(action.toString().toLowerCase()),
-                recipient));
+//        LOGGER.info(String.format("%s recipient \"%s\"", // too chatty when skipping hundreds of recipients
+//                WordUtils.capitalize(action.toString().toLowerCase()),
+//                recipient));
         rSuccessTracker.put(recipient, action == CommSender.SendingAction.SENT); // handles both sent and skipped
         if (action == CommSender.SendingAction.SENT) {
             // add the excluded nation to the focused editor
