@@ -124,7 +124,7 @@ public class CommSender {
                 if (Duration.between(initAt, Instant.now()).compareTo(Duration.ofSeconds(20)) < 0)
                     LOGGER.info(String.format("Got recipient %s on initialisation", i));
                 else
-                    LOGGER.info(String.format("Got recipient %s at NEXT-%.2f seconds", i,
+                    LOGGER.info(String.format("Got recipient %s at %.2f seconds before next", i,
                             (double) Duration.between(Instant.now(), this.nextAt()).toMillis() / 1000
                     ));
 

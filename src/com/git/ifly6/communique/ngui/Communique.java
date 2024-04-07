@@ -274,7 +274,7 @@ public class Communique extends AbstractCommunique implements CommSenderInterfac
         // Call and do the parsing
         LOGGER.info("Initialising sender");
         try {
-            monitor = new Communique7Monitor(focusedEditor.getConfig());
+            monitor = new Communique7Monitor(focusedEditor);
             sender = monitor.constructSender(this);
 
             List<String> initialRecipients = monitor.preview();

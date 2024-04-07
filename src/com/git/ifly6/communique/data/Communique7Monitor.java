@@ -35,13 +35,13 @@ public class Communique7Monitor extends CommUpdatableMonitor {
     private static final Logger LOGGER = Logger.getLogger(Communique7Monitor.class.getName());
 
     private State state;
-    private CommuniqueConfig theConfig; // this wraps the cRecipient list and should therefore mutate!
+    private CommuniqueConfigSupplier configSupplier; // this wraps the cRecipient list and should therefore mutate!
 
     private int updateCalls = 0;
     private List<String> lastParse;
 
-    public Communique7Monitor(CommuniqueConfig communiqueConfig) {
-        this.theConfig = communiqueConfig;
+    public Communique7Monitor(CommuniqueConfigSupplier communiqueConfig) {
+        this.configSupplier = communiqueConfig;
         this.state = State.INIT;
     }
 
@@ -84,8 +84,10 @@ public class Communique7Monitor extends CommUpdatableMonitor {
             */
             return;
 
-        List<String> parseResults = new Communique7Parser().apply(theConfig.getcRecipients()).listRecipients();
-        this.lastParse = theConfig.processingAction.apply(parseResults);
+        List<String> parseResults = new Communique7Parser()
+                .apply(configSupplier.getConfig().getcRecipients())
+                .listRecipients();
+        this.lastParse = configSupplier.getConfig().processingAction.apply(parseResults);
 
         LOGGER.info(String.format("Monitor parsed %d recipients", lastParse.size()));
     }
@@ -98,7 +100,7 @@ public class Communique7Monitor extends CommUpdatableMonitor {
      */
     @Override
     public boolean recipientsExhausted() {
-        if (this.state == State.INIT || theConfig.repeats) return false;
+        if (this.state == State.INIT || configSupplier.getConfig().repeats) return false;
         if (updateCalls >= 1 && lastParse.isEmpty()) return true;
         return false;
     }
@@ -110,7 +112,7 @@ public class Communique7Monitor extends CommUpdatableMonitor {
      */
     @Override
     public OptionalLong recipientsCount() {
-        if (theConfig.repeats) return OptionalLong.empty();
+        if (configSupplier.getConfig().repeats) return OptionalLong.empty();
         return OptionalLong.of(lastParse.size());
     }
 
@@ -119,7 +121,8 @@ public class Communique7Monitor extends CommUpdatableMonitor {
      * @param withInterface interface to export data from sender with
      */
     public CommSender constructSender(CommSenderInterface withInterface) {
-        return new CommSender(theConfig.keys, this, theConfig.getTelegramType(), withInterface);
+        CommuniqueConfig config = configSupplier.getConfig();
+        return new CommSender(config.keys, this, config.getTelegramType(), withInterface);
     }
 
     /** Expresses the state – {@link #INIT} or {@link #RUNNING} – of the monitor. */

@@ -21,6 +21,7 @@ import com.git.ifly6.CommuniqueApplication;
 import com.git.ifly6.CommuniqueUtilities;
 import com.git.ifly6.communique.data.Communique7Monitor;
 import com.git.ifly6.communique.data.Communique7Parser;
+import com.git.ifly6.communique.data.CommuniqueConfigSupplier;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
 import com.git.ifly6.communique.io.CommuniqueConfig;
 import com.git.ifly6.communique.io.CommuniqueLoader;
@@ -51,7 +52,7 @@ import java.util.logging.Logger;
  * Command line program executing {@link Communique} configuration files.
  * @since version 1
  */
-public class Marconi implements CommSenderInterface {
+public class Marconi implements CommSenderInterface, CommuniqueConfigSupplier {
 
     private static final Logger LOGGER = Logger.getLogger(Marconi.class.getName());
     private static final Options COMMAND_LINE_OPTIONS;
@@ -145,7 +146,7 @@ public class Marconi implements CommSenderInterface {
     private void send() {
         // set up monitor
         // preview recipients
-        Communique7Monitor communique7Monitor = new Communique7Monitor(config);
+        Communique7Monitor communique7Monitor = new Communique7Monitor(this);
         List<String> expandedRecipients = communique7Monitor.preview();
 
         // Show the recipients in the order we are to send the telegrams.
@@ -179,6 +180,11 @@ public class Marconi implements CommSenderInterface {
             client.startSend();
         } else throw new RuntimeException("Cannot send! Another instance of Marconi is already sending.");
 
+    }
+
+    @Override
+    public CommuniqueConfig getConfig() {
+        return config;
     }
 
     @Override

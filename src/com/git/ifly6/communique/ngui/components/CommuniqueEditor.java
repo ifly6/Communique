@@ -19,6 +19,7 @@ package com.git.ifly6.communique.ngui.components;
 
 import com.git.ifly6.CommuniqueSplitter;
 import com.git.ifly6.communique.data.Communique7Parser;
+import com.git.ifly6.communique.data.CommuniqueConfigSupplier;
 import com.git.ifly6.communique.data.CommuniqueFilterType;
 import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.communique.data.CommuniqueRecipients;
@@ -76,7 +77,7 @@ import static com.git.ifly6.communique.ngui.components.CommuniqueConstants.COMMA
 import static com.git.ifly6.communique.ngui.components.CommuniqueFactory.createMenuItem;
 import static com.git.ifly6.communique.ngui.components.dialogs.CommuniqueFileChoosers.show;
 
-public class CommuniqueEditor extends AbstractCommunique {
+public class CommuniqueEditor extends AbstractCommunique implements CommuniqueConfigSupplier {
 
     public static final ArrayList<CommuniqueEditor> INSTANCES = new ArrayList<>();
     private static final Logger LOGGER = Logger.getLogger(CommuniqueEditor.class.getName());
@@ -374,16 +375,12 @@ public class CommuniqueEditor extends AbstractCommunique {
                 tfTelegramInterval.getDuration(),
                 CommuniqueSwingUtilities.getSelected(chooserAction),
                 checkboxRepeat.isSelected());
-        updateConfigRecipients();
-        return config;
-    }
-
-    private void updateConfigRecipients() {
         config.setcRecipients(area.getLines().stream()
                 .filter(ApiUtils::isNotEmpty)
                 .filter(s -> !s.startsWith("#"))
                 .map(CommuniqueRecipient::parseRecipient)
                 .collect(Collectors.toList()));
+        return config;
     }
 
     public Path save() {
@@ -483,11 +480,10 @@ public class CommuniqueEditor extends AbstractCommunique {
 
     public void appendLine(Object obj) {
         area.appendLine(obj.toString());
-        updateConfigRecipients(); // otherwise it won't synchronise the sentList on reparse when sending
     }
 
     public Duration getTelegramInterval() {
-        return getConfig().getTelegramInterval();
+        return config.getTelegramInterval();
     }
 
     public void setClientKey(String s) {
