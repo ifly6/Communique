@@ -101,19 +101,18 @@ class CommuniqueReader {
                 // correct for introduction of recruitment enum instead of boolean flag
                 if (config.version <= 11)
                     if (config.isRecruitment)
-                        config.setTelegramType(JTelegramType.RECRUIT);
+                        config.telegramType = JTelegramType.RECRUIT;
 
                 if (config.version <= 13) {
                     // correct for replacement of wait string with durations
                     if (config.waitString != null && !config.waitString.isBlank())
                         try {
-                            config.setTelegramInterval(Duration.ofMillis(Long.parseLong(config.waitString)));
+                            config.telegramInterval = Duration.ofMillis(Long.parseLong(config.waitString));
                         } catch (NumberFormatException e) {
-                            config.setTelegramInterval(
+                            config.telegramInterval =
                                     config.getTelegramType() == JTelegramType.RECRUIT
                                             ? JTelegramType.RECRUIT.getWaitDuration()
-                                            : JTelegramType.NONE.getWaitDuration())
-                            ;
+                                            : JTelegramType.NONE.getWaitDuration();
                         }
 
                     // correct flag:recruit -> tag:new, set recruit telegram type; repeat = True
@@ -121,7 +120,7 @@ class CommuniqueReader {
                     if (rawRecipients.contains("flag:recruit")) {
                         rawRecipients.replaceAll(s -> s.equals("flag:recruit") ? "tag:new" : s);
                         config.setcRecipients(CommuniqueRecipient.parseRecipients(rawRecipients));
-                        config.setTelegramType(JTelegramType.RECRUIT);
+                        config.telegramType = JTelegramType.RECRUIT;
                         config.repeats = true;
                     }
                 }
