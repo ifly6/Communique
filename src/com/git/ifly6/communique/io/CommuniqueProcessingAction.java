@@ -37,16 +37,11 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
      * Randomises the order of recipients
      * @since version 8 (2018-01-07)
      */
-    RANDOMISE {
+    RANDOMISE("Randomise order") {
         @Override
         public List<String> apply(List<String> input) {
             Collections.shuffle(input);
-            return input; // do nothing
-        }
-
-        @Override
-        public String toString() {
-            return "Randomise order";
+            return input; // in place
         }
     },
 
@@ -54,7 +49,7 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
      * Reverses the initial order of recipients
      * @since version 8 (2018-01-07)
      */
-    REVERSE {
+    REVERSE("Reverse order") {
         @Override
         public List<String> apply(List<String> input) {
             for (int i = 0; i < input.size() / 2; i++) { // algorithm to quickly reverse a list
@@ -65,11 +60,6 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
             }
             return input; // it happened in place
         }
-
-        @Override
-        public String toString() {
-            return "Reverse order";
-        }
     },
 
     /**
@@ -77,7 +67,7 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
      * in a random order after those delegates.
      * @since version 8 (2018-01-07)
      */
-    DELEGATE_PRIORITISE {
+    DELEGATE_PRIORITISE("Prioritise delegates") {
         @Override
         public List<String> apply(List<String> input) {
             Set<String> delegates = new HashSet<>(CommDelegatesCache.getInstance().getDelegates());
@@ -96,24 +86,18 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
             newList.addAll(nonDelegate);
             return newList;
         }
-
-        @Override
-        public String toString() {
-            return "Prioritise delegates";
-        }
     },
 
-    NONE {
+    NONE("None") {
         @Override
         public List<String> apply(List<String> input) {
             return input;
         }
-
-        @Override
-        public String toString() {
-            return "None";
-        }
     };
+
+    private final String DISPLAY_STRING;
+
+    CommuniqueProcessingAction(String displayString) { DISPLAY_STRING = displayString; }
 
     /**
      * Applies the processing action to the provided list, which should be of raw NationStates reference names
@@ -124,5 +108,5 @@ public enum CommuniqueProcessingAction implements Function<List<String>, List<St
      * Should always return the name of the <code>CommuiniqueProcessingAction</code> in the code
      */
     @Override
-    public abstract String toString();
+    public String toString() { return DISPLAY_STRING; }
 }
