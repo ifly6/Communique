@@ -23,7 +23,6 @@ import com.git.ifly6.communique.data.CommuniqueRecipient;
 import com.git.ifly6.nsapi.telegram.JTelegramKeys;
 import com.git.ifly6.nsapi.telegram.JTelegramType;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.Duration;
@@ -51,14 +50,10 @@ public class CommuniqueConfig implements Serializable {
     public int version = Communique7Parser.VERSION;
 
     public JTelegramKeys keys;
-
-    private JTelegramType telegramType;
-
-    @Nullable
-    private Duration telegramInterval;
+    public JTelegramType telegramType;
+    public Duration telegramInterval;
 
     public CommuniqueProcessingAction processingAction;
-
     public boolean repeats;
 
     /**
@@ -171,10 +166,6 @@ public class CommuniqueConfig implements Serializable {
         return telegramType == null ? JTelegramType.NONE : telegramType;
     }
 
-    public void setTelegramType(JTelegramType type) {
-        this.telegramType = Objects.requireNonNull(type);
-    }
-
     /**
      * Gets processing action
      * @return processing action, {@link CommuniqueProcessingAction#NONE} if null
@@ -187,10 +178,6 @@ public class CommuniqueConfig implements Serializable {
     public Duration getTelegramInterval() {
         if (telegramInterval == null) return this.getTelegramType().getWaitDuration();
         return telegramInterval;
-    }
-
-    public void setTelegramInterval(Duration interval) {
-        this.telegramInterval = Objects.requireNonNull(interval);
     }
 
     /**

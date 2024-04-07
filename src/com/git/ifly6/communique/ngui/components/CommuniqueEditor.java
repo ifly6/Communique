@@ -369,12 +369,11 @@ public class CommuniqueEditor extends AbstractCommunique implements CommuniqueCo
     }
 
     public CommuniqueConfig getConfig() {
-        config = new CommuniqueConfig(
-                new JTelegramKeys(tfClientKey.getText(), tfSecretKey.getText(), tfTelegramID.getText()),
-                CommuniqueSwingUtilities.getSelected(chooserTelegramType),
-                tfTelegramInterval.getDuration(),
-                CommuniqueSwingUtilities.getSelected(chooserAction),
-                checkboxRepeat.isSelected());
+        config.keys = new JTelegramKeys(tfClientKey.getText(), tfSecretKey.getText(), tfTelegramID.getText());
+        config.telegramType = CommuniqueSwingUtilities.getSelected(chooserTelegramType);
+        config.telegramInterval = tfTelegramInterval.getDuration();
+        config.processingAction = CommuniqueSwingUtilities.getSelected(chooserAction);
+        config.repeats = checkboxRepeat.isSelected();
         config.setcRecipients(area.getLines().stream()
                 .filter(ApiUtils::isNotEmpty)
                 .filter(s -> !s.startsWith("#"))
