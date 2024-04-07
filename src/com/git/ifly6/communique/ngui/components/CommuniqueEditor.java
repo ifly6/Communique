@@ -261,7 +261,7 @@ public class CommuniqueEditor extends AbstractCommunique {
                                 LOGGER.info("\"Save as\" cancelled");
                                 return;
                             }
-                            saveAs(path);
+                            saveAs(newPath);
                         }
                 ))
         );

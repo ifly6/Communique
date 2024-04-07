@@ -19,6 +19,7 @@ package com.git.ifly6.nsapi.ctelegram.io.cache;
 import com.git.ifly6.gson.CommuniqueGson;
 import com.git.ifly6.nsapi.NSNation;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -67,7 +68,7 @@ public class CommNationCache extends CommCache<NSNation> {
         } catch (NoSuchFileException | FileNotFoundException e) {
             return new CommNationCache();
 
-        } catch (IOException e) {
+        } catch (IOException | JsonSyntaxException e) {
             LOGGER.log(Level.SEVERE, "Unable to load persist version of nation cache!", e);
             return new CommNationCache();
         }

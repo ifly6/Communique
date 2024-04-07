@@ -36,6 +36,7 @@ import com.git.ifly6.nsapi.NSException;
 import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.ctelegram.CommSender;
 import com.git.ifly6.nsapi.ctelegram.CommSenderInterface;
+import org.apache.commons.text.WordUtils;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -248,9 +249,9 @@ public class Communique extends AbstractCommunique implements CommSenderInterfac
 
     private void doQuit() {
         CommuniqueEditorManager cem = CommuniqueEditorManager.getInstance();
+        cem.savePaths(); // must save before the editor frames are closed
         cem.getActiveEditors().forEach(
-                e -> e.frame.dispatchEvent(new WindowEvent(e.frame, WindowEvent.WINDOW_CLOSING))
-        );
+                e -> e.frame.dispatchEvent(new WindowEvent(e.frame, WindowEvent.WINDOW_CLOSING)));
         if (cem.getActiveEditors().isEmpty())
             System.exit(0);
     }
@@ -262,9 +263,8 @@ public class Communique extends AbstractCommunique implements CommSenderInterfac
     private void setupSend() {
 
         // Process in the case that the button currently says stop
-        if (sender != null && sender.isRunning()
-                && btnParse.getText().equalsIgnoreCase("Stop")) {
-            sender.stopSend();
+        if (btnParse.getText().equalsIgnoreCase("Stop")) {
+            if (sender != null) sender.stopSend();
             return;
         }
 
@@ -358,6 +358,9 @@ public class Communique extends AbstractCommunique implements CommSenderInterfac
 
     @Override
     public void processed(String recipient, int numberSent, CommSender.SendingAction action) {
+        LOGGER.info(String.format("%s recipient \"%s\"",
+                WordUtils.capitalize(action.toString().toLowerCase()),
+                recipient));
         rSuccessTracker.put(recipient, action == CommSender.SendingAction.SENT); // handles both sent and skipped
         if (action == CommSender.SendingAction.SENT) {
             // add the excluded nation to the focused editor

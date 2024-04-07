@@ -19,6 +19,7 @@ package com.git.ifly6.nsapi;
 
 import com.git.ifly6.CommuniqueUtilities;
 import com.google.common.util.concurrent.RateLimiter;
+import org.jsoup.Jsoup;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -79,12 +81,11 @@ public class NSConnection {
      * @throws NSIOException         if rate limit exceeded
      * @throws NSException           if other error
      */
-    public NSConnection connect() throws IOException {
+    public synchronized NSConnection connect() throws IOException {
         // Implement the rate limit
         double secondsWaited = limiter.acquire();
         LOGGER.finest(String.format("NSConnection rate limit -> waited %.3f seconds", secondsWaited));
 
-        // todo rewrite with HttpClient
         HttpRequest request;
         try {
             request = HttpRequest.newBuilder(url.toURI())
@@ -111,13 +112,14 @@ public class NSConnection {
             throw new RuntimeException("Interrupted when sending NS API request", e);
         }
 
-        if (httpResponse.statusCode() == 429)
-            throw new NSIOException(String.format("API rate limit exceeded! Retry after %s",
-                    CommuniqueUtilities.time(Long.parseLong(
-                                    httpResponse.headers().firstValue("X-Retry-After").orElse("-1")
-                            )
-                    )
+        if (httpResponse.statusCode() == 429) {
+            HttpHeaders headers = httpResponse.headers();
+            throw new NSIOException(String.format("API rate limit exceeded! Retry after %s seconds. See message %s",
+                    CommuniqueUtilities.time(
+                            Long.parseLong(headers.firstValue("Retry-After").orElse("-1"))),
+                    Jsoup.parse(httpResponse.body()).text()
             ));
+        }
 
         if (httpResponse.statusCode() == 404)
             throw new NSIOException(String.format("No result for URL %s", url.toString()));

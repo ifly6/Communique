@@ -116,7 +116,7 @@ public class CommSender {
      * Finds the <i>single</i> next valid recipient from the monitor and places it into the queue. If this takes longer
      * than 10 seconds, the single threaded {@link ScheduledExecutorService} will block until it is available.
      */
-    private void findNext() {
+    private String findNext() {
         List<String> recipients = monitor.getRecipients();
         for (String i : recipients)
             if (!processListsContain(i) && new CommRecipientChecker(i, this.telegramType).check()) {
@@ -130,11 +130,13 @@ public class CommSender {
 
                 // add to queue and stop
                 sendQueue.add(i);
-                return;
+                return i;
 
             } else this.reportProcessed(i, SendingAction.SKIPPED); // report skipped when skipping
 
         // if there is nothing, do nothing
+        LOGGER.info("Found no valid recipients; waiting for next parse");
+        return null;
     }
 
     /**
@@ -149,8 +151,8 @@ public class CommSender {
 
         if (sendQueue.peek() == null) {
             // try once to get a recipient
-            findNext();
-            if (sendQueue.peek() == null) {
+            String theNext = findNext();
+            if (sendQueue.peek() == null || theNext == null) {
                 lastTGAttempt = Instant.now();
                 return; // do nothing but throw no error; this is possible when the event monitored hasn't happened yet
             }
@@ -186,7 +188,7 @@ public class CommSender {
             throw new NSIOException("Cannot get response code from telegram API", e);
         }
 
-        // schedule for getting the next recipient
+        // schedule getting the next recipient
         long MILLIS_UNTIL_10_SECONDS_BEFORE_NEXT = Duration
                 .between(Instant.now(), this.nextAt().minus(10, ChronoUnit.SECONDS))
                 .toMillis();
@@ -294,11 +296,9 @@ public class CommSender {
      */
     public Instant nextAt() {
         if (isRunning()) {
-            if (lastTGAttempt == null) {
-                LOGGER.warning("Asked for next telegram time but last telegram time is null?");
-                return Instant.now();
-            }
-            return lastTGAttempt.plus(job.getDelay(TimeUnit.MILLISECONDS), ChronoUnit.MILLIS);
+            if (lastTGAttempt == null) return Instant.now();  // we must be initialising
+            return lastTGAttempt.plus(telegramType.getWaitDuration());
+            // don't use job.getDelay() ; that returns the wrong kind of delay
         }
         throw new UnsupportedOperationException("No duration to next telegram; no telegrams are being sent");
     }

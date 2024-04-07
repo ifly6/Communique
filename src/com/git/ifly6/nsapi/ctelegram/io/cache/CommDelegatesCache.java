@@ -21,6 +21,7 @@ import com.git.ifly6.nsapi.NSIOException;
 import com.git.ifly6.nsapi.NSTimeStamped;
 import com.git.ifly6.nsapi.NSWorld;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -75,7 +76,7 @@ public class CommDelegatesCache extends CommCache<CommDelegatesCache.Delegates> 
         } catch (NoSuchFileException | FileNotFoundException e) {
             return new CommDelegatesCache();
 
-        } catch (IOException e) {
+        } catch (JsonSyntaxException | IOException e) {
             LOGGER.log(Level.SEVERE, "Unable to load persist version of delegates cache!", e);
             return new CommDelegatesCache();
         }
