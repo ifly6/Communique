@@ -36,7 +36,7 @@ public enum JTelegramResponseCode {
             "Client key is invalid"),
 
     RATE_LIMIT_EXCEEDED(
-            "api recruitment tg rate-limit exceeded",
+            "tg rate-limit exceeded",
             "Too many telegrams sent within the rate limit"),
 
     SECRET_KEY_MISMATCH("incorrect secret key", "Cannot send a telegram with the wrong secret key"),
