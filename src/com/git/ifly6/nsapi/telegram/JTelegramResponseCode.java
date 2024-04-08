@@ -27,10 +27,6 @@ public enum JTelegramResponseCode {
 
     QUEUED("queued", "Telegram queued"),
 
-    REGION_MISMATCH(
-            "region mismatch between telegram and client api key",
-            "Client key is associated with a region; telegram is not recruiting for that region"),
-
     CLIENT_NOT_REGISTERED(
             "client not registered for api",
             "Client key is invalid"),
@@ -47,24 +43,24 @@ public enum JTelegramResponseCode {
 
     SENDER_CTE(
             "sender nation ceased to exist",
-            "The telegram sender no longer exists"
-    ),
+            "The telegram sender no longer exists"),
 
     REGION_CTE(
             "sender region ceased to exist",
-            "Telegram is sent on behalf of a region which has ceased to exist"
-    ),
+            "Telegram is sent on behalf of a region which has ceased to exist"),
+
+    REGION_MISMATCH(
+            "region mismatch between telegram and client api key",
+            "Client key is associated with a region; telegram is not recruiting for that region"),
 
     SENDER_NOT_IN_REGION(
             "author not resident in region",
-            "Telegram is sent on behalf of a region but the author thereof is not a regional resident"
-    ),
+            "Telegram is sent on behalf of a region but the author thereof is not a regional resident"),
 
     SENDER_NOT_AUTHORISED(
             "sender nation not authorized to recruit in region",
             "Telegram is sent on behalf of a region but the author thereof is not authorised to send telegrams on "
-                    + "behalf of that region"
-    ),
+                    + "behalf of that region"),
 
     UNKNOWN_ERROR("", "Unidentified error!");
 
