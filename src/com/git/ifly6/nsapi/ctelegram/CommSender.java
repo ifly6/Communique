@@ -118,6 +118,7 @@ public class CommSender {
      */
     private String findNext() {
         List<String> recipients = monitor.getRecipients();
+        Instant findStart = Instant.now();
 
         for (int i = 0; i < recipients.size(); i++) {
             String s = recipients.get(i);
@@ -126,9 +127,8 @@ public class CommSender {
                 if (Duration.between(initAt, Instant.now()).compareTo(Duration.ofSeconds(20)) < 0)
                     LOGGER.info(String.format("Got recipient %s on initialisation after %d attempts", s, i));
                 else
-                    LOGGER.info(String.format("Got recipient %s at %.2f seconds before next after %d attempts", s,
-                            (double) Duration.between(Instant.now(), this.nextAt()).toMillis() / 1000,
-                            i
+                    LOGGER.info(String.format("Got recipient %s at %.2f seconds before next after %d attempts",
+                            s, (double) Duration.between(Instant.now(), this.nextAt()).toMillis() / 1000, i
                     ));
 
                 // add to queue and stop
@@ -136,10 +136,17 @@ public class CommSender {
                 return s;
 
             } else this.reportProcessed(s, SendingAction.SKIPPED); // report skipped when skipping
+            if (List.of(10, 25, 50, 100, 250, 500, 1000).contains(i))
+                LOGGER.info(String.format("Skipped %d recipients after elapsed %.2f seconds. Continuing search",
+                        i, (double) Duration.between(findStart, Instant.now()).toMillis() / 1000
+                ));
         }
 
         // if there is nothing, do nothing
-        LOGGER.info("Found no valid recipients; waiting for next parse");
+        LOGGER.info(String.format("Found no valid recipients after %d attempts and elapsed %.2f seconds; "
+                        + "waiting for next parse",
+                recipients.size(), (double) Duration.between(findStart, Instant.now()).toMillis() / 1000
+        ));
         return null;
     }
 

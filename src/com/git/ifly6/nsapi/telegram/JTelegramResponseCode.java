@@ -19,7 +19,8 @@ package com.git.ifly6.nsapi.telegram;
 
 /**
  * Enumerates known telegram response codes, the match strings to determine whether they are applicable from the
- * response, and an explanation for the user.
+ * response, and an explanation for the user. For further information see this forum
+ * <a href="https://forum.nationstates.net/viewtopic.php?p=41497878#p41497878">post</a>.
  * @since version 13 (2024-03-31)
  */
 public enum JTelegramResponseCode {
@@ -43,6 +44,27 @@ public enum JTelegramResponseCode {
     NO_SUCH_TELEGRAM(
             "no such api telegram template",
             "Cannot send a telegram that does not exist"),
+
+    SENDER_CTE(
+            "sender nation ceased to exist",
+            "The telegram sender no longer exists"
+    ),
+
+    REGION_CTE(
+            "sender region ceased to exist",
+            "Telegram is sent on behalf of a region which has ceased to exist"
+    ),
+
+    SENDER_NOT_IN_REGION(
+            "author not resident in region",
+            "Telegram is sent on behalf of a region but the author thereof is not a regional resident"
+    ),
+
+    SENDER_NOT_AUTHORISED(
+            "sender nation not authorized to recruit in region",
+            "Telegram is sent on behalf of a region but the author thereof is not authorised to send telegrams on "
+                    + "behalf of that region"
+    ),
 
     UNKNOWN_ERROR("", "Unidentified error!");
 
