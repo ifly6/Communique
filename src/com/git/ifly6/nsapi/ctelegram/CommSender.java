@@ -125,10 +125,10 @@ public class CommSender {
             if (!processListsContain(s) && new CommRecipientChecker(s, this.telegramType).check()) {
                 // log that it was got, then return
                 if (Duration.between(initAt, Instant.now()).compareTo(Duration.ofSeconds(20)) < 0)
-                    LOGGER.info(String.format("Got recipient %s on initialisation after %d attempts", s, i));
+                    LOGGER.info(String.format("Got recipient %s on initialisation after %d attempts", s, i + 1));
                 else
                     LOGGER.info(String.format("Got recipient %s at %.2f seconds before next after %d attempts",
-                            s, (double) Duration.between(Instant.now(), this.nextAt()).toMillis() / 1000, i
+                            s, (double) Duration.between(Instant.now(), this.nextAt()).toMillis() / 1000, i + 1
                     ));
 
                 // add to queue and stop

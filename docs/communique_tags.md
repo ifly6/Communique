@@ -72,13 +72,13 @@ Thus, if you want to telegram the newest 50 nations which have names that do not
 Pacifics:
 
 ```
-tag:new
-+region:the_pacific
-+region:the_north_pacific
-+region:the_south_pacific
-+region:the_east_pacific
-+region:the_west_pacific
--regex:.*[0-9]$
+tag:new                    # new nations
++region:the_pacific        # who are in the pacific
++region:the_north_pacific  # who are in TNP
++region:the_south_pacific  # who are in TSP
++region:the_east_pacific   # who are in TEP
++region:the_west_pacific   # who are in TWP
+-regex:.*[0-9]$            # with names that do not end with a number
 ```
 
 This can also be used with stateful tags as well. Something such as all nations who moved out of Lazarus, Balder, and
@@ -86,12 +86,12 @@ Osiris, who voted in favour of the Security Council resolution, are not delegate
 with `a` can be expressed as:
 
 ```
-_movement:out_of;lazarus
-_movement:out_of;balder
-_movement:out_of;osiris
-+_voting:sc;for
--tag:delegates
-+regex:^a.*
+_movement:out_of;lazarus  # people who left lazarus
+_movement:out_of;balder   # people who left balder
+_movement:out_of;osiris   # people who left osiris
++_voting:sc;for           # who are voting for the SC resolution
+-tag:delegates            # are not delegates
++regex:^a.*               # and have names that begin with an A
 ```
 
 A perhaps more useful use of this would be in a proposal counter-countercampaigns. The following would send telegrams to
@@ -99,8 +99,17 @@ every nation that once approved a proposal and stopped doing so that is also, at
 excluding players who gave approvals and withdrew them because they lost their delegate offices).
 
 ```
-_approvals:removed_from;PROPOSAL_ID
-+tag:delegates
+_approvals:removed_from;PROPOSAL_ID  # people who removed their approval
++tag:delegates                       # who are delegates
+```
+
+Another useful syntax is a supplementary telegram campaign to active delegates seeking approvals to stave off a
+proposal expiry in the queue:
+
+```
+_happenings:active                # active players
++tag:delegates                    # who are delegates
+-_approvals:given_to;PROPOSAL_ID  # who have not approved this proposal
 ```
 
 Combination of tags can also be used to get a list of WA nations who have not endorsed someone in a region (a topic not
@@ -108,10 +117,10 @@ directly supported by the `endorser_of` tag) by chaining the following commands 
 endorse _itself_):
 
 ```
-region:REGION
-+tag:wa
--endorsers_of:SOME_NATION
--nation:SOME_NATION
+region:REGION              # residents of REGION
++tag:wa                    # who are WA members
+-endorsers_of:SOME_NATION  # who did not endorse SOME_NATION
+-nation:SOME_NATION        # who are not SOME_NATION
 ```
 
 ## Tag naming conventions ##

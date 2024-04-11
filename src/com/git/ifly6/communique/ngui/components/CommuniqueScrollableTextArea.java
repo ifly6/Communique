@@ -36,8 +36,10 @@ public class CommuniqueScrollableTextArea extends JScrollPane {
     }
 
     public void scrollBottom() {
-        JScrollBar vs = this.getVerticalScrollBar();
-        EventQueue.invokeLater(() -> vs.setValue(vs.getMaximum() - 1));
+        EventQueue.invokeLater(() -> {
+            JScrollBar vs = this.getVerticalScrollBar();
+            vs.setValue(vs.getMaximum());
+        });
     }
 
     public String getText() {

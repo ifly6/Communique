@@ -79,8 +79,15 @@ class CommuniqueRecipientTest {
                     entry.getValue(),
                     CommuniqueRecipient.parseRecipient(entry.getKey().toUpperCase()));
 
+        // test the double prefix undo-er
         assertEquals(
                 CommuniqueRecipient.parseRecipient("nation:nation:Imperium Anglorum"),
+                new CommuniqueRecipient(NORMAL, NATION, "imperium anglorum")
+        );
+
+        // test the comment
+        assertEquals(
+                CommuniqueRecipient.parseRecipient("nation:imperium anglorum  # program author"),
                 new CommuniqueRecipient(NORMAL, NATION, "imperium anglorum")
         );
 

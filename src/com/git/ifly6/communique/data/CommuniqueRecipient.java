@@ -116,7 +116,7 @@ public class CommuniqueRecipient {
      */
     public static CommuniqueRecipient parseRecipient(final String raw) {
         // 2020-12-24 do not put a toLowerCase here: it breaks case-sensitive regex raw!
-        String s = raw.trim();
+        String s = raw.strip().replaceAll("#.+$", "").strip();
 
         CommuniqueFilterType fType = CommuniqueFilterType.NORMAL; // default
         for (CommuniqueFilterType type : CommuniqueFilterType.values())
